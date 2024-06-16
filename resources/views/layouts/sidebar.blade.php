@@ -20,22 +20,19 @@
                 </li>
             --}}
             <li>
-                <x-sidebar-link :href="route('monitors.index')" :active="request()->routeIs('monitors.*')">
+                <x-sidebar-link>
                     <x-heroicon-o-computer-desktop class="h-6 w-6" />
                     <span class="ms-3">Monitors</span>
                 </x-sidebar-link>
             </li>
             <li>
-                <x-sidebar-link :href="route('pages.index')" :active="request()->routeIs('pages.*')">
+                <x-sidebar-link>
                     <x-heroicon-o-globe-alt class="h-6 w-6" />
                     <span class="ms-3">Pages</span>
                 </x-sidebar-link>
             </li>
             <li>
-                <x-sidebar-link
-                    :href="route('notification-channels.index')"
-                    :active="request()->routeIs('notification-channels.*')"
-                >
+                <x-sidebar-link>
                     <x-heroicon-o-bell class="h-6 w-6" />
                     <span class="ms-3">Notifications</span>
                 </x-sidebar-link>
@@ -43,19 +40,13 @@
         </ul>
         <ul class="mt-4 space-y-2 border-t border-gray-200 pt-4 font-medium dark:border-gray-700">
             <li>
-                <x-sidebar-link
-                    :href="route('profile')"
-                    :active="request()->routeIs('profile') || request()->routeIs('profile.*')"
-                >
+                <x-sidebar-link>
                     <x-heroicon-o-user-circle class="h-6 w-6" />
                     <span class="ms-3">Profile</span>
                 </x-sidebar-link>
             </li>
             <li>
-                <x-sidebar-link
-                    :href="route('projects')"
-                    :active="request()->routeIs('projects') || request()->routeIs('projects.*')"
-                >
+                <x-sidebar-link>
                     <x-heroicon-o-inbox-stack class="h-6 w-6" />
                     <span class="ms-3">Projects</span>
                 </x-sidebar-link>

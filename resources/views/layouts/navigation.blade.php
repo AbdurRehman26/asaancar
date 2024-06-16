@@ -14,9 +14,7 @@
                     <span class="sr-only">Open sidebar</span>
                     <x-heroicon-o-bars-3-center-left class="h-6 w-6" />
                 </button>
-                <a href="{{ route("monitors.index") }}" class="ms-2 flex md:me-24">
-                    <x-application-logo class="h-8 rounded-sm" />
-                </a>
+                <x-application-logo class="h-8 rounded-sm" />
             </div>
             <div class="flex items-center">
                 <div class="mr-3">
@@ -40,14 +38,6 @@
                                 {{ auth()->user()->email }}
                             </p>
                         </div>
-
-                        <x-dropdown-link :href="route('profile')">
-                            {{ __("Profile") }}
-                        </x-dropdown-link>
-
-                        <x-dropdown-link :href="route('projects')">
-                            {{ __("Projects") }}
-                        </x-dropdown-link>
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route("logout") }}">
