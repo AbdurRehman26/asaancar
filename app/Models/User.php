@@ -14,7 +14,6 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $name
  * @property string $email
  * @property string $password
- * @property ?int $current_project_id
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property string $timezone
@@ -27,7 +26,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'current_project_id',
         'timezone',
     ];
 
