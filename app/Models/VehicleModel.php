@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedInclude;
 
 class VehicleModel extends Model
 {
@@ -16,9 +18,11 @@ class VehicleModel extends Model
         'vehicle_type_id'
     ];
 
-    public function scopeVehicleMake(Builder $builder, VehicleMake $vehicleMake): Builder
+    public static function getAllowedFilters(): array
     {
-        return $builder->where('vehicle_make_id', $vehicleMake->id);
+        return [
+            AllowedFilter::exact('vehicle_make_id'),
+            AllowedFilter::exact('vehicle_type_id'),
+        ];
     }
-
 }

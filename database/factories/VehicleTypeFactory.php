@@ -16,8 +16,13 @@ class VehicleTypeFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            //
+        $vehicleTypes = [
+            [
+                'name' => 'Car',
+                'code' => 'car'
+            ]
         ];
+
+        return collect($vehicleTypes)->first();
     }
 }

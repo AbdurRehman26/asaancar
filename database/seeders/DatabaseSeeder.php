@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'User',
             'email' => 'user@example.com',
+            'phone' => random_int(20000, 50000),
+            'verification_code' => random_int(0, 20000)
         ]);
     }
 }

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('vehicle_types', function (Blueprint $table) {
             $table->id();
+            $table->string('code');
             $table->string('name');
             $table->boolean('is_enabled')->default(true);
             $table->timestamps();

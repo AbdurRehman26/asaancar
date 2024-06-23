@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\VehicleType;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\VehicleMake>
@@ -16,8 +18,12 @@ class VehicleMakeFactory extends Factory
      */
     public function definition(): array
     {
+        $name = $this->faker->name();
+
         return [
-            //
+            'name' => $name,
+            'slug' => Str::of($name)->slug(),
+            'vehicle_type_id' => VehicleType::factory()->create()
         ];
     }
 }

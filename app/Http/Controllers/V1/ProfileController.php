@@ -5,11 +5,14 @@ namespace App\Http\Controllers\V1;
 use App\Facades\Toast;
 use App\Helpers\HtmxResponse;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Resources\V1\UserResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProfileController extends Controller
 {
@@ -23,39 +26,43 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request): JsonResponse|UserResource
     {
-        $request->user()->fill($request->validated());
+        try {
+            $request->user()->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+            if ($request->user()->isDirty('email')) {
+                $request->user()->email_verified_at = null;
+            }
+
+            $request->user()->save();
+
+            return new UserResource($request->user()->refresh());
+        }catch (\Exception $e){
+            return new JsonResponse(
+                [
+                    'error' => $e->getMessage(),
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+
         }
-
-        $request->user()->save();
-
-        Toast::success('Profile updated!');
-
-        return back();
     }
 
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): HtmxResponse
+    public function destroy(Request $request): JsonResponse
     {
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
         ]);
 
         $user = $request->user();
-
-        Auth::logout();
-
         $user->delete();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return htmx()->redirect('/');
+        return response()->json([
+            'success' => true
+        ]);
     }
 }

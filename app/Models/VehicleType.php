@@ -9,8 +9,12 @@ class VehicleType extends Model
 {
     use HasFactory;
 
+    const TYPE_CAR = 1;
+
+
     protected $fillable = [
         'name',
+        'code',
         'is_enabled'
     ];
 }

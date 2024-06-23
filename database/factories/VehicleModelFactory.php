@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\VehicleMake;
+use App\Models\VehicleType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +19,9 @@ class VehicleModelFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->name(),
+            'vehicle_make_id' => VehicleMake::factory()->create(),
+            'vehicle_type_id' => VehicleType::factory()->create()
         ];
     }
 }

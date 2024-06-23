@@ -12,15 +12,14 @@ return new class extends Migration
     {
         $carTypes = [
             [
-                'name' => 'Car'
+                'name' => 'Car',
+                'code' => 'car'
             ],
         ];
 
 
         foreach ($carTypes as $carType){
-            VehicleType::query()->firstOrCreate([
-                'name' => $carType['name'],
-            ]);
+            VehicleType::query()->firstOrCreate($carType);
         }
     }
 

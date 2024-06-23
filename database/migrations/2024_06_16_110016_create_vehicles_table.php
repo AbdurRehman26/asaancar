@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(VehicleType::class)->constrained();
             $table->foreignIdFor(VehicleModel::class)->constrained();
             $table->foreignIdFor(User::class)->constrained();
-            $table->text('details');
+            $table->text('details')->nullable();
             $table->string('number_plate');
             $table->string('color');
             $table->date('year_of_manufacture');
