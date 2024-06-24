@@ -28,7 +28,7 @@ class VehicleController extends Controller
     public function store(VehicleStoreRequest $vehicleStoreRequest): VehicleResource|JsonResponse
     {
         try {
-            $vehicle = $this->vehicleService->create(array_merge(
+            $vehicle = $this->vehicleService->store(array_merge(
                 $vehicleStoreRequest->only(
                     'vehicle_type_id',
                     'vehicle_model_id',

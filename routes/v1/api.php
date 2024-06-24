@@ -5,6 +5,7 @@ use App\Http\Controllers\V1\Auth\LoginController;
 use App\Http\Controllers\V1\Auth\NewPasswordController;
 use App\Http\Controllers\V1\Auth\PasswordResetLinkController;
 use App\Http\Controllers\V1\Auth\RegisteredUserController;
+use App\Http\Controllers\V1\BookingController;
 use App\Http\Controllers\V1\DocumentController;
 use App\Http\Controllers\V1\ProfileController;
 use App\Http\Controllers\V1\VehicleAttributeController;
@@ -38,5 +39,6 @@ Route::middleware('auth')->group(function (){
     Route::resource('vehicle', VehicleController::class);
     Route::resource('document', DocumentController::class);
     Route::resource('ride-offer', RideOfferController::class);
+    Route::resource('booking', BookingController::class);
 
 });

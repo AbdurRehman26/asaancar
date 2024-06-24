@@ -15,7 +15,7 @@ class VehicleService
             ->get();
     }
 
-    public function create(array $data): Vehicle
+    public function store(array $data): Vehicle
     {
         return Vehicle::create($data);
     }
