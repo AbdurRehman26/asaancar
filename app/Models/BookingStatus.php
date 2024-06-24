@@ -12,6 +12,8 @@ class BookingStatus extends Model
 
     public const REQUESTED = 'requested';
     public const ACCEPTED = 'accepted';
+    public const STARTED = 'started';
+    public const COMPLETED = 'completed';
     public const DECLINED = 'declined';
     public const CANCELLED = 'cancelled';
     public const ARCHIVED = 'archived';
@@ -19,6 +21,8 @@ class BookingStatus extends Model
     public const STATUSES = [
         self::REQUESTED,
         self::ACCEPTED,
+        self::STARTED,
+        self::COMPLETED,
         self::DECLINED,
         self::CANCELLED,
         self::ARCHIVED
