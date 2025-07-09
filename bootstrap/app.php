@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+        // No tenancy middleware here!
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

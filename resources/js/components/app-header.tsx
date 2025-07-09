@@ -14,6 +14,9 @@ import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import RegisterModal from '@/pages/auth/register-modal';
+import LoginModal from '@/pages/auth/login-modal';
 
 const mainNavItems: NavItem[] = [
     {
@@ -26,12 +29,12 @@ const mainNavItems: NavItem[] = [
 const rightNavItems: NavItem[] = [
     {
         title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
+        href: 'https://github.com/asaancar/platform',
         icon: Folder,
     },
     {
         title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
+        href: 'https://asaancar.com/docs',
         icon: BookOpen,
     },
 ];
@@ -124,7 +127,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </NavigationMenu>
                     </div>
 
-                    <div className="ml-auto flex items-center space-x-2">
+                    <div className="ml-auto flex items-center gap-2">
                         <div className="relative flex items-center space-x-1">
                             <Button variant="ghost" size="icon" className="group h-9 w-9 cursor-pointer">
                                 <Search className="!size-5 opacity-80 group-hover:opacity-100" />
@@ -152,6 +155,32 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 ))}
                             </div>
                         </div>
+                        {!auth.user && (
+                            <>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline">Log in</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Log in</DialogTitle>
+                                        </DialogHeader>
+                                        <LoginModal canResetPassword={true} />
+                                    </DialogContent>
+                                </Dialog>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline">Register</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Create an account</DialogTitle>
+                                        </DialogHeader>
+                                        <RegisterModal />
+                                    </DialogContent>
+                                </Dialog>
+                            </>
+                        )}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="size-10 rounded-full p-1">
