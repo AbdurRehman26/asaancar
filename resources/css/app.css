@@ -84,7 +84,7 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --primary: oklch(0.5 0.2 240);
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -155,5 +155,248 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* Reveal Animation */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-reveal {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Slide Animations */
+.slide-in-right {
+    transform: translateX(100%);
+    opacity: 0;
+    animation: slideInRight 0.5s forwards;
+}
+
+.slide-in-left {
+    transform: translateX(-100%);
+    opacity: 0;
+    animation: slideInLeft 0.5s forwards;
+}
+
+@keyframes slideInRight {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Floating Elements */
+.float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* Progress Bar */
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary);
+    transform-origin: 0%;
+    z-index: 50;
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.scroll-indicator.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stats Counter */
+.stat-number {
+    transition: all 0.3s ease;
+}
+
+/* Feature Comparison */
+.feature-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.feature-table th,
+.feature-table td {
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.feature-table tr:hover td {
+    background-color: var(--accent);
+}
+
+/* Chat Widget */
+.chat-widget {
+    position: fixed;
+    right: 20px;
+    bottom: 80px;
+    z-index: 50;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chat-widget.minimized {
+    transform: translateY(100%);
+}
+
+/* Demo Carousel */
+.carousel {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+}
+
+.carousel-item {
+    scroll-snap-align: start;
+}
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-content {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 1rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.tooltip:hover .tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Smooth Scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom Styles */
+.text-balance {
+    text-wrap: balance;
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Glass Effect */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile menu improvements */
+@media (max-width: 768px) {
+    .mobile-menu-backdrop {
+        backdrop-filter: blur(4px);
+    }
+}
+
+/* Ensure proper z-index stacking */
+.z-50 {
+    z-index: 50;
+}
+
+.z-40 {
+    z-index: 40;
+}
+
+/* Improve button hover states */
+.hover\:bg-primary:hover {
+    background-color: hsl(var(--primary));
+}
+
+.hover\:bg-primary\/90:hover {
+    background-color: hsl(var(--primary) / 0.9);
+}
+
+/* Ensure proper text contrast */
+.text-gray-900 {
+    color: rgb(17 24 39);
+}
+
+.dark .text-gray-900 {
+    color: rgb(243 244 246);
+}
+
+/* Fix potential overflow issues */
+.overflow-hidden {
+    overflow: hidden;
+}
+
+/* Ensure proper spacing for mobile */
+@media (max-width: 640px) {
+    .px-6 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .py-24 {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
     }
 }
