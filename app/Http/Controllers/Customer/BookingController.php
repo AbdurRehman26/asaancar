@@ -2,181 +2,192 @@
 
 namespace App\Http\Controllers\Customer;
 
-use App\Models\Booking;
-use App\Models\Car;
-use App\Models\User;
-use App\Http\Requests\Booking\CreateBookingRequest;
-use App\Http\Requests\Booking\UpdateBookingRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BookingResource;
+use App\Services\BookingService;
+use App\Http\Requests\Booking\CreateBookingRequest;
+use App\Http\Requests\Booking\UpdateBookingRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-/**
- * @OA\Tag(
- *     name="Bookings",
- *     description="API Endpoints for booking management"
- * )
- */
 class BookingController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/customer/bookings",
-     *     operationId="getBookingsList",
-     *     tags={"Bookings"},
-     *     summary="Get list of bookings",
-     *     description="Returns list of bookings with pagination",
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Booking")),
-     *             @OA\Property(property="current_page", type="integer"),
-     *             @OA\Property(property="per_page", type="integer"),
-     *             @OA\Property(property="total", type="integer")
-     *         )
-     *     )
-     * )
-     */
-    public function index()
+    protected $bookingService;
+
+    public function __construct(BookingService $bookingService)
     {
-        $bookings = Booking::with(['car', 'user'])->paginate(10);
-        return BookingResource::collection($bookings);
+        $this->bookingService = $bookingService;
     }
 
     /**
-     * @OA\Post(
-     *     path="/api/customer/bookings",
-     *     operationId="storeBooking",
-     *     tags={"Bookings"},
-     *     summary="Store a new booking",
-     *     description="Creates a new booking record",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/BookingRequest")
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Booking created successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Booking")
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error"
-     *     )
-     * )
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $filters = $request->only(['status', 'date_from', 'date_to']);
+        $bookings = $this->bookingService->getUserBookings(auth()->id(), $filters);
+        return response()->json(['data' => $bookings]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    // Removed: create() method (Inertia only)
+
+    /**
+     * Store a newly created resource in storage.
      */
     public function store(CreateBookingRequest $request)
     {
-        $validated = $request->validated();
-        $booking = Booking::create($validated);
-        return new BookingResource($booking->load(['car', 'user']));
+        $bookingData = $request->validated();
+        $bookingData['user_id'] = auth()->id();
+
+        $result = $this->bookingService->createBooking($bookingData);
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message']
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $result['booking'],
+            'message' => $result['message']
+        ]);
     }
 
     /**
-     * @OA\Get(
-     *     path="/api/customer/bookings/{id}",
-     *     operationId="getBookingById",
-     *     tags={"Bookings"},
-     *     summary="Get booking information",
-     *     description="Returns booking data by ID",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="Booking ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/Booking")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Booking not found"
-     *     )
-     * )
+     * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(int $id)
     {
-        $booking = Booking::with(['car', 'user'])->findOrFail($id);
-        return new BookingResource($booking);
+        $booking = $this->bookingService->getBooking($id);
+        if (!$booking) {
+            return response()->json(['message' => 'Booking not found'], 404);
+        }
+        if ($booking['user_id'] !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        return response()->json(['data' => $booking]);
     }
 
     /**
-     * @OA\Put(
-     *     path="/api/customer/bookings/{id}",
-     *     operationId="updateBooking",
-     *     tags={"Bookings"},
-     *     summary="Update booking information",
-     *     description="Updates booking data by ID",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="Booking ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/BookingRequest")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Booking updated successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Booking")
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Booking not found"
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error"
-     *     )
-     * )
+     * Show the form for editing the specified resource.
      */
-    public function update(UpdateBookingRequest $request, string $id)
+    // Removed: edit() method (Inertia only)
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateBookingRequest $request, int $id)
     {
-        $booking = Booking::findOrFail($id);
-        $validated = $request->validated();
-        $booking->update($validated);
-        return new BookingResource($booking->load(['car', 'user']));
+        $booking = $this->bookingService->getBooking($id);
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        // Check if user owns this booking
+        if ($booking['user_id'] !== auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+
+        $result = $this->bookingService->updateBookingStatus(
+            $id, 
+            $request->validated()['status'],
+            $request->validated()['notes'] ?? null
+        );
+
+        return response()->json($result);
     }
 
     /**
-     * @OA\Delete(
-     *     path="/api/customer/bookings/{id}",
-     *     operationId="deleteBooking",
-     *     tags={"Bookings"},
-     *     summary="Delete booking",
-     *     description="Deletes booking by ID",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         description="Booking ID",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Booking deleted successfully",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="message", type="string", example="Booking deleted successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Booking not found"
-     *     )
-     * )
+     * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(int $id)
     {
-        $booking = Booking::findOrFail($id);
-        $booking->delete();
-        
-        return response()->json(['message' => 'Booking deleted successfully']);
+        $result = $this->bookingService->cancelBooking($id, auth()->id());
+
+        return response()->json($result);
+    }
+
+    /**
+     * Get booking statistics
+     */
+    public function stats()
+    {
+        $stats = $this->bookingService->getBookingStats(auth()->id());
+
+        return response()->json([
+            'success' => true,
+            'data' => $stats
+        ]);
+    }
+
+    /**
+     * Check car availability
+     */
+    public function checkAvailability(Request $request)
+    {
+        $request->validate([
+            'car_id' => 'required|integer|exists:cars,id',
+            'start_date' => 'required|date|after:now',
+            'end_date' => 'required|date|after:start_date',
+        ]);
+
+        $isAvailable = $this->bookingService->isCarAvailable(
+            $request->car_id,
+            $request->start_date,
+            $request->end_date
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'available' => $isAvailable
+            ]
+        ]);
+    }
+
+    /**
+     * Calculate booking price
+     */
+    public function calculatePrice(Request $request)
+    {
+        $request->validate([
+            'car_id' => 'required|integer|exists:cars,id',
+            'start_date' => 'required|date|after:now',
+            'end_date' => 'required|date|after:start_date',
+            'duration_type' => 'required|in:hourly,daily,weekly',
+        ]);
+
+        try {
+            $price = $this->bookingService->calculateBookingPrice(
+                $request->car_id,
+                $request->start_date,
+                $request->end_date,
+                $request->duration_type
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_price' => $price
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 }

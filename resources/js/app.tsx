@@ -1,24 +1,36 @@
 import '../css/app.css';
 
-import { createInertiaApp } from '@inertiajs/react';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { initializeTheme } from './hooks/use-appearance';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from '@/components/AuthContext';
+import CarListing from './pages/car-listing';
+import CarDetail from './pages/car-detail';
+import Bookings from './pages/bookings';
+import Chat from './pages/chat';
+import Dashboard from './pages/dashboard';
+import Welcome from './pages/welcome';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Asaancar';
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Welcome />} />
+          <Route path="/cars" element={<CarListing />} />
+          <Route path="/car-detail/:id" element={<CarDetail />} />
+          <Route path="/bookings" element={<Bookings />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          {/* Add more routes as needed */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
 
-createInertiaApp({
-    title: (title) => title ? `${title} - ${appName}` : appName,
-    resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
-    setup({ el, App, props }) {
-        const root = createRoot(el);
-
-        root.render(<App {...props} />);
-    },
-    progress: {
-        color: '#4B5563',
-    },
-});
-
-// This will set light / dark mode on load...
-initializeTheme();
+const rootElement = document.getElementById('app') || document.getElementById('root');
+if (rootElement) {
+  createRoot(rootElement).render(<App />);
+}

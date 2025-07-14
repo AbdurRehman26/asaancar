@@ -18,4 +18,6 @@ use Illuminate\Database\Eloquent\Model;
 class CarEngine extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['name'];
 }

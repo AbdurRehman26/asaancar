@@ -42,9 +42,8 @@
         @routes
         @viteReactRefresh
         @vite(['resources/js/app.tsx'])
-        @inertiaHead
     </head>
     <body class="font-sans antialiased">
-        @inertia
+        <div id="app"></div>
     </body>
 </html>

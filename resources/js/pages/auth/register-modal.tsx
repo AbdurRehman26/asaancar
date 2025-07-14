@@ -1,4 +1,5 @@
-import { useForm } from '@inertiajs/react';
+import { useState } from 'react';
+import axios from 'axios';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
@@ -24,19 +25,43 @@ interface RegisterModalProps {
 }
 
 export default function RegisterModal({ status }: RegisterModalProps = {}) {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
+    const [data, setData] = useState<RegisterForm>({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
         terms: false,
     });
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const submit: FormEventHandler = (e) => {
+    const submit: FormEventHandler = async (e) => {
         e.preventDefault();
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+        setProcessing(true);
+        setError(null);
+        try {
+            const response = await axios.post('/api/register', {
+                name: data.name,
+                email: data.email,
+                password: data.password,
+                password_confirmation: data.password_confirmation,
+                terms: data.terms,
+            }, {
+                headers: { 'Accept': 'application/json' },
+            });
+            if (response.data.token) {
+                localStorage.setItem('token', response.data.token);
+                window.location.reload();
+            }
+        } catch (err: any) {
+            if (err.response && err.response.data && err.response.data.message) {
+                setError(err.response.data.message);
+            } else {
+                setError('Registration failed');
+            }
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
@@ -52,10 +77,9 @@ export default function RegisterModal({ status }: RegisterModalProps = {}) {
                         tabIndex={1}
                         autoComplete="name"
                         value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
+                        onChange={(e) => setData({ ...data, name: e.target.value })}
                         placeholder="John Doe"
                     />
-                    <InputError message={errors.name} />
                 </div>
 
                 <div className="grid gap-2">
@@ -67,10 +91,9 @@ export default function RegisterModal({ status }: RegisterModalProps = {}) {
                         tabIndex={2}
                         autoComplete="email"
                         value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e) => setData({ ...data, email: e.target.value })}
                         placeholder="email@example.com"
                     />
-                    <InputError message={errors.email} />
                 </div>
 
                 <div className="grid gap-2">
@@ -82,10 +105,9 @@ export default function RegisterModal({ status }: RegisterModalProps = {}) {
                         tabIndex={3}
                         autoComplete="new-password"
                         value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
+                        onChange={(e) => setData({ ...data, password: e.target.value })}
                         placeholder="Password"
                     />
-                    <InputError message={errors.password} />
                 </div>
 
                 <div className="grid gap-2">
@@ -97,10 +119,9 @@ export default function RegisterModal({ status }: RegisterModalProps = {}) {
                         tabIndex={4}
                         autoComplete="new-password"
                         value={data.password_confirmation}
-                        onChange={(e) => setData('password_confirmation', e.target.value)}
+                        onChange={(e) => setData({ ...data, password_confirmation: e.target.value })}
                         placeholder="Confirm password"
                     />
-                    <InputError message={errors.password_confirmation} />
                 </div>
 
                 <div className="flex items-center space-x-3">
@@ -108,12 +129,12 @@ export default function RegisterModal({ status }: RegisterModalProps = {}) {
                         id="terms"
                         name="terms"
                         checked={data.terms}
-                        onClick={() => setData('terms', !data.terms)}
+                        onClick={() => setData({ ...data, terms: !data.terms })}
                         tabIndex={5}
                     />
                     <Label htmlFor="terms">I agree to the terms and conditions</Label>
                 </div>
-
+                {error && <InputError message={error} />}
                 <Button type="submit" className="mt-4 w-full" tabIndex={6} disabled={processing}>
                     {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                     Create account

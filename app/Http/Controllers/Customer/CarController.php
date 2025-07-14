@@ -9,16 +9,11 @@ namespace App\Http\Controllers\Customer;
  * )
  */
 
-use App\Models\Car;
-use App\Models\CarBrand;
-use App\Models\CarType;
-use App\Models\CarEngine;
-use App\Models\Store;
-use App\Http\Requests\Car\CreateCarRequest;
-use App\Http\Requests\Car\UpdateCarRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CarResource;
+use App\Services\CarService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * @OA\Tag(
@@ -28,6 +23,13 @@ use Illuminate\Http\JsonResponse;
  */
 class CarController extends Controller
 {
+    protected $carService;
+
+    public function __construct(CarService $carService)
+    {
+        $this->carService = $carService;
+    }
+
     /**
      * @OA\Get(
      *     path="/api/customer/cars",
@@ -47,10 +49,11 @@ class CarController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $cars = Car::with(['brand', 'type', 'engine', 'store'])->paginate(10);
-        return CarResource::collection($cars);
+        $perPage = $request->input('per_page', 9);
+        $paginated = $this->carService->getPaginatedCarsForListing($perPage);
+        return response()->json($paginated);
     }
 
     /**
@@ -107,10 +110,13 @@ class CarController extends Controller
      *     )
      * )
      */
-    public function show(string $id)
+    public function show(int $id)
     {
-        $car = Car::with(['brand', 'type', 'engine', 'store'])->findOrFail($id);
-        return new CarResource($car);
+        $car = $this->carService->getCarForListing($id);
+        if (!$car) {
+            return response()->json(['message' => 'Car not found'], 404);
+        }
+        return response()->json(['data' => $car]);
     }
 
     /**
@@ -154,6 +160,37 @@ class CarController extends Controller
         return new CarResource($car->load(['brand', 'type', 'engine', 'store']));
     }
 
+    public function search(Request $request)
+    {
+        $filters = $request->only([
+            'brand_id', 'type_id', 'store_id', 'transmission',
+            'fuel_type', 'min_seats', 'max_price'
+        ]);
+
+        $cars = $this->carService->searchCars($filters);
+
+        return response()->json([
+            'success' => true,
+            'data' => $cars
+        ]);
+    }
+
+    public function getFilters()
+    {
+        $brands = $this->carService->getCarBrands();
+        $types = $this->carService->getCarTypes();
+        $stores = $this->carService->getStores();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'brands' => $brands,
+                'types' => $types,
+                'stores' => $stores,
+            ]
+        ]);
+    }
+
     /**
      * @OA\Delete(
      *     path="/api/customer/cars/{id}",
@@ -186,7 +223,7 @@ class CarController extends Controller
     {
         $car = Car::findOrFail($id);
         $car->delete();
-        
+
         return response()->json(['message' => 'Car deleted successfully']);
     }
 }

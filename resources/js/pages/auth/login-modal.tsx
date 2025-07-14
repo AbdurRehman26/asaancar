@@ -1,4 +1,5 @@
-import { useForm } from '@inertiajs/react';
+import { useState } from 'react';
+import { useAuth } from '@/components/AuthContext';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
@@ -20,20 +21,26 @@ type LoginForm = {
 interface LoginModalProps {
     status?: string;
     canResetPassword: boolean;
+    onSuccess?: () => void;
 }
 
-export default function LoginModal({ status, canResetPassword }: LoginModalProps = { canResetPassword: false }) {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
+export default function LoginModal({ status, canResetPassword, onSuccess }: LoginModalProps = { canResetPassword: false }) {
+    const { login, loading: authLoading, error: authError } = useAuth();
+    const [data, setData] = useState<LoginForm>({
         email: '',
         password: '',
         remember: false,
     });
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const submit: FormEventHandler = (e) => {
+    const submit: FormEventHandler = async (e) => {
         e.preventDefault();
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
+        setProcessing(true);
+        setError(null);
+        const success = await login(data.email, data.password);
+        setProcessing(false);
+        if (success && onSuccess) onSuccess();
     };
 
     return (
@@ -49,17 +56,16 @@ export default function LoginModal({ status, canResetPassword }: LoginModalProps
                         tabIndex={1}
                         autoComplete="email"
                         value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e) => setData({ ...data, email: e.target.value })}
                         placeholder="email@example.com"
                     />
-                    <InputError message={errors.email} />
                 </div>
 
                 <div className="grid gap-2">
                     <div className="flex items-center">
                         <Label htmlFor="password">Password</Label>
                         {canResetPassword && (
-                            <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
+                            <TextLink href="/forgot-password" className="ml-auto text-sm" tabIndex={5}>
                                 Forgot password?
                             </TextLink>
                         )}
@@ -71,10 +77,9 @@ export default function LoginModal({ status, canResetPassword }: LoginModalProps
                         tabIndex={2}
                         autoComplete="current-password"
                         value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
+                        onChange={(e) => setData({ ...data, password: e.target.value })}
                         placeholder="Password"
                     />
-                    <InputError message={errors.password} />
                 </div>
 
                 <div className="flex items-center space-x-3">
@@ -82,14 +87,14 @@ export default function LoginModal({ status, canResetPassword }: LoginModalProps
                         id="remember"
                         name="remember"
                         checked={data.remember}
-                        onClick={() => setData('remember', !data.remember)}
+                        onClick={() => setData({ ...data, remember: !data.remember })}
                         tabIndex={3}
                     />
                     <Label htmlFor="remember">Remember me</Label>
                 </div>
-
-                <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                    {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                {(error || authError) && <InputError message={(error || authError) ?? ''} />}
+                <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing || authLoading}>
+                    {(processing || authLoading) && <LoaderCircle className="h-4 w-4 animate-spin" />}
                     Log in
                 </Button>
             </div>

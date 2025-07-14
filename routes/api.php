@@ -9,6 +9,11 @@ use App\Http\Controllers\Customer\CarTypeController;
 use App\Http\Controllers\Customer\CarEngineController;
 use App\Http\Controllers\Customer\BookingController;
 use App\Http\Controllers\Customer\CarOfferController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\ConfirmablePasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +28,49 @@ use App\Http\Controllers\Customer\CarOfferController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Auth API endpoints
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+Route::post('/register', [RegisteredUserController::class, 'store']);
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']);
+Route::post('/reset-password', [NewPasswordController::class, 'store']);
+Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store']);
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+
+// Public car routes (no authentication required)
+Route::prefix('cars')->group(function () {
+    Route::get('/', [CarController::class, 'index']);
+    Route::get('/{id}', [CarController::class, 'show']);
+    Route::get('/search', [CarController::class, 'search']);
+    Route::get('/filters', [CarController::class, 'getFilters']);
+});
+
+// Protected routes (require authentication)
+Route::middleware('auth:sanctum')->group(function () {
+    // Booking routes
+    Route::prefix('bookings')->group(function () {
+        Route::get('/', [BookingController::class, 'index']);
+        Route::post('/', [BookingController::class, 'store']);
+        Route::get('/{id}', [BookingController::class, 'show']);
+        Route::put('/{id}', [BookingController::class, 'update']);
+        Route::delete('/{id}', [BookingController::class, 'destroy']);
+        Route::get('/stats', [BookingController::class, 'stats']);
+        Route::post('/check-availability', [BookingController::class, 'checkAvailability']);
+        Route::post('/calculate-price', [BookingController::class, 'calculatePrice']);
+    });
+});
+
+// WebPush endpoints
+Route::get('/webpush/public-key', [\App\Http\Controllers\WebPushController::class, 'publicKey']);
+Route::middleware('auth:sanctum')->post('/webpush/subscribe', [\App\Http\Controllers\WebPushController::class, 'subscribe']);
+
+// Chat endpoints
+Route::middleware('auth:api')->group(function () {
+    Route::get('/chat/conversations', [\App\Http\Controllers\ChatController::class, 'conversations']);
+    Route::post('/chat/conversations', [\App\Http\Controllers\ChatController::class, 'store']);
+    Route::get('/chat/conversations/{conversation}/messages', [\App\Http\Controllers\ChatController::class, 'messages']);
+    Route::post('/chat/conversations/{conversation}/messages', [\App\Http\Controllers\ChatController::class, 'sendMessage']);
 });
 
 // Customer API Routes

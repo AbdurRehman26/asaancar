@@ -56,4 +56,9 @@ class Store extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    public function conversations()
+    {
+        return $this->hasMany(Conversation::class);
+    }
 } 

@@ -23,9 +23,9 @@ export default defineConfig({
         },
     },
     server: {
-        host: 'asaancar.test',
+        host: 'localhost',
         hmr: {
-            host: 'asaancar.test'
+            host: 'localhost'
         },
     },
 });

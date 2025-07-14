@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use NotificationChannels\WebPush\HasPushSubscriptions;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/{any}', function () {
+    return view('app');
+})->where('any', '.*');
 
 /**
  * @OA\Schema(
@@ -26,7 +33,8 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
+    use \NotificationChannels\WebPush\HasPushSubscriptions;
 
     /**
      * The attributes that are mass assignable.
@@ -71,5 +79,15 @@ class User extends Authenticatable
     public function stores()
     {
         return $this->belongsToMany(Store::class);
+    }
+
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class, 'messages', 'sender_id', 'conversation_id')->distinct();
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
     }
 }

@@ -1,15 +1,15 @@
+import { useState, useRef } from 'react';
 import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler, useRef } from 'react';
-
+import { Head } from '@inertiajs/react';
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { apiFetch } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,97 +21,89 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Password() {
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
-
-    const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
+    const [data, setData] = useState({
         current_password: '',
         password: '',
         password_confirmation: '',
     });
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
 
-    const updatePassword: FormEventHandler = (e) => {
+    const updatePassword = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        put(route('password.update'), {
-            preserveScroll: true,
-            onSuccess: () => reset(),
-            onError: (errors) => {
-                if (errors.password) {
-                    reset('password', 'password_confirmation');
-                    passwordInput.current?.focus();
-                }
-
-                if (errors.current_password) {
-                    reset('current_password');
-                    currentPasswordInput.current?.focus();
-                }
-            },
-        });
+        setProcessing(true);
+        setError(null);
+        setSuccess(false);
+        try {
+            const res = await apiFetch('/api/settings/password', {
+                method: 'PUT',
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                setError(err.message || 'Update failed');
+            } else {
+                setSuccess(true);
+                setData({ current_password: '', password: '', password_confirmation: '' });
+            }
+        } catch (err) {
+            setError('Network error');
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Password settings" />
-
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
-
                     <form onSubmit={updatePassword} className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="current_password">Current password</Label>
-
                             <Input
                                 id="current_password"
                                 ref={currentPasswordInput}
                                 value={data.current_password}
-                                onChange={(e) => setData('current_password', e.target.value)}
+                                onChange={(e) => setData({ ...data, current_password: e.target.value })}
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="current-password"
                                 placeholder="Current password"
                             />
-
-                            <InputError message={errors.current_password} />
                         </div>
-
                         <div className="grid gap-2">
                             <Label htmlFor="password">New password</Label>
-
                             <Input
                                 id="password"
                                 ref={passwordInput}
                                 value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
+                                onChange={(e) => setData({ ...data, password: e.target.value })}
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
                                 placeholder="New password"
                             />
-
-                            <InputError message={errors.password} />
                         </div>
-
                         <div className="grid gap-2">
                             <Label htmlFor="password_confirmation">Confirm password</Label>
-
                             <Input
                                 id="password_confirmation"
                                 value={data.password_confirmation}
-                                onChange={(e) => setData('password_confirmation', e.target.value)}
+                                onChange={(e) => setData({ ...data, password_confirmation: e.target.value })}
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
                                 placeholder="Confirm password"
                             />
-
-                            <InputError message={errors.password_confirmation} />
                         </div>
-
+                        {error && <InputError message={error} />}
                         <div className="flex items-center gap-4">
                             <Button disabled={processing}>Save password</Button>
-
                             <Transition
-                                show={recentlySuccessful}
+                                show={success}
                                 enter="transition ease-in-out"
                                 enterFrom="opacity-0"
                                 leave="transition ease-in-out"

@@ -2,8 +2,9 @@ import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSep
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type User } from '@/types';
-import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/components/AuthContext';
+import { LogOut, Settings, LayoutGrid } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
@@ -11,34 +12,45 @@ interface UserMenuContentProps {
 
 export function UserMenuContent({ user }: UserMenuContentProps) {
     const cleanup = useMobileNavigation();
-
+    const { logout } = useAuth();
     const handleLogout = () => {
         cleanup();
-        router.flushAll();
+        logout();
     };
 
     return (
         <>
-            <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <UserInfo user={user} showEmail={true} />
+            {/* User name and email at the top */}
+            <DropdownMenuLabel className="p-0 font-normal dark:bg-gray-800/80 dark:text-white">
+                <div className="flex flex-col items-start gap-1 px-1 py-2 text-left">
+                    <span className="font-semibold text-base leading-tight">{user.name}</span>
+                    <span className="text-xs text-muted-foreground">{user.email}</span>
                 </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            <DropdownMenuGroup className="dark:bg-gray-800/80 dark:text-white">
+                {/* Dashboard link */}
                 <DropdownMenuItem asChild>
-                    <Link className="block w-full" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
+                    <Link className="block w-full dark:text-white" to="/dashboard" onClick={cleanup}>
+                        <LayoutGrid className="mr-2" />
+                        Dashboard
+                    </Link>
+                </DropdownMenuItem>
+                {/* Profile link */}
+                <DropdownMenuItem asChild className="dark:bg-gray-800/80 dark:text-white">
+                    <Link className="block w-full dark:text-white" to="/settings/profile" onClick={cleanup}>
                         <Settings className="mr-2" />
-                        Settings
+                        Profile
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-                <Link className="block w-full" method="post" href={route('logout')} as="button" onClick={handleLogout}>
+            {/* Logout button */}
+            <DropdownMenuItem asChild className="dark:bg-gray-800/80 dark:text-white">
+                <button className="block w-full dark:text-white" onClick={handleLogout}>
                     <LogOut className="mr-2" />
                     Log out
-                </Link>
+                </button>
             </DropdownMenuItem>
         </>
     );
