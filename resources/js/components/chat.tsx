@@ -57,14 +57,18 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
     };
 
     return (
-        <div className="flex flex-col h-full bg-gray-900 rounded-lg shadow-lg">
+        <div className="flex flex-col h-full min-h-[650px] bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-300 dark:border-gray-800">
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {messages.map((msg) => (
                     <div
                         key={msg.id}
                         className={`flex flex-col ${msg.sender.id === currentUser.id ? 'items-end' : 'items-start'}`}
                     >
-                        <div className={`px-4 py-2 rounded-lg max-w-xs ${msg.sender.id === currentUser.id ? 'bg-primary text-white' : 'bg-gray-800 text-gray-100'}`}>
+                        <div className={`px-4 py-2 rounded-lg max-w-xs 
+                            ${msg.sender.id === currentUser.id 
+                                ? 'bg-primary text-white dark:bg-primary dark:text-white' 
+                                : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'}
+                        `}>
                             <span className="block text-xs font-semibold mb-1">{msg.sender.name}</span>
                             <span>{msg.message}</span>
                         </div>
@@ -73,9 +77,9 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 ))}
                 <div ref={messagesEndRef} />
             </div>
-            <form onSubmit={sendMessage} className="p-4 flex gap-2 border-t border-gray-800">
+            <form onSubmit={sendMessage} className="p-4 flex gap-2 border-t border-gray-300 dark:border-gray-800">
                 <input
-                    className="flex-1 rounded bg-gray-800 text-white px-4 py-2 focus:outline-none"
+                    className="flex-1 rounded bg-white text-gray-900 dark:bg-gray-800 dark:text-white px-4 py-2 focus:outline-none border border-gray-300 dark:border-gray-700"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type a message..."

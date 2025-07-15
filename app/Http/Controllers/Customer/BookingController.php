@@ -132,14 +132,13 @@ class BookingController extends Controller
     /**
      * Get booking statistics
      */
-    public function stats()
+    public function stats(Request $request)
     {
-        $stats = $this->bookingService->getBookingStats(auth()->id());
-
-        return response()->json([
-            'success' => true,
-            'data' => $stats
-        ]);
+        $user = $request->user();
+        // Get all store IDs for this user
+        $storeIds = $user->stores()->pluck('id');
+        $count = \App\Models\Booking::whereIn('store_id', $storeIds)->count();
+        return response()->json(['count' => $count]);
     }
 
     /**

@@ -22,6 +22,8 @@ class CarOfferFactory extends Factory
             'car_id' => null, // to be set in seeder
             'price_with_driver' => $this->faker->randomFloat(2, 50, 200),
             'price_without_driver' => $this->faker->randomFloat(2, 30, 150),
+            'start_date' => $start,
+            'end_date' => $end,
             'available_from' => $start,
             'available_to' => $end,
         ];

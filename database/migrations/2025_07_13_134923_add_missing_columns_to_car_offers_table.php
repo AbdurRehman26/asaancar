@@ -20,10 +20,6 @@ return new class extends Migration
             $table->dateTime('start_date')->nullable()->after('discount_percentage');
             $table->dateTime('end_date')->nullable()->after('start_date');
             $table->boolean('is_active')->default(true)->after('end_date');
-            
-            // Rename existing columns to match the service expectations
-            $table->renameColumn('available_from', 'old_available_from');
-            $table->renameColumn('available_to', 'old_available_to');
         });
     }
 
@@ -44,10 +40,6 @@ return new class extends Migration
                 'end_date',
                 'is_active'
             ]);
-            
-            // Restore original column names
-            $table->renameColumn('old_available_from', 'available_from');
-            $table->renameColumn('old_available_to', 'available_to');
         });
     }
 };

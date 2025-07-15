@@ -61,6 +61,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/calculate-price', [BookingController::class, 'calculatePrice']);
     });
     Route::get('/bookings/user-car/{carId}', [\App\Http\Controllers\Customer\BookingController::class, 'userBookingForCar']);
+    Route::get('/cars/stats', [\App\Http\Controllers\Customer\CarController::class, 'stats']);
+    Route::get('/bookings/stats', [\App\Http\Controllers\Customer\BookingController::class, 'stats']);
 });
 
 // WebPush endpoints

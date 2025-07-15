@@ -191,6 +191,15 @@ class CarController extends Controller
         ]);
     }
 
+    public function stats(Request $request)
+    {
+        $user = $request->user();
+        // Get all store IDs for this user
+        $storeIds = $user->stores()->pluck('id');
+        $count = \App\Models\Car::whereIn('store_id', $storeIds)->count();
+        return response()->json(['count' => $count]);
+    }
+
     /**
      * @OA\Delete(
      *     path="/api/customer/cars/{id}",
