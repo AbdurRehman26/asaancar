@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
+import DarkModeToggle from '../components/ui/dark-mode-toggle';
+import { useAuth } from '@/components/AuthContext';
 
 type NavbarProps = {
   currentPage?: string;
@@ -16,7 +18,8 @@ type NavbarProps = {
   onRegisterClick?: () => void;
 };
 
-const Navbar: React.FC<NavbarProps> = ({ currentPage = '', auth, onLoginClick, onRegisterClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ currentPage = '', onLoginClick, onRegisterClick }) => {
+  const { user } = useAuth();
   const getInitials = useInitials();
 
   return (
@@ -42,7 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '', auth, onLoginClick, o
           <Car className="h-4 w-4" />
           Car Listing
         </Link>
-        {auth?.user && (
+        {user && (
           <Link 
             to="/bookings" 
             className={`flex items-center gap-2 text-sm font-semibold transition ${
@@ -55,9 +58,23 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '', auth, onLoginClick, o
             My Bookings
           </Link>
         )}
-        
+        {user && Array.isArray(user.roles) && user.roles.includes('store_owner') && (
+          <Link 
+            to="/dashboard" 
+            className={`flex items-center gap-2 text-sm font-semibold transition ${
+              currentPage === 'dashboard' 
+                ? 'text-[#7e246c] dark:text-white' 
+                : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+            }`}
+          >
+            <User className="h-4 w-4" />
+            Dashboard
+          </Link>
+        )}
+        {/* Dark Mode Toggle */}
+        <DarkModeToggle />
         {/* Auth Buttons */}
-        {!auth?.user ? (
+        {!user ? (
           <div className="flex items-center space-x-4">
             <button 
               onClick={onLoginClick}
@@ -65,27 +82,27 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '', auth, onLoginClick, o
             >
               Login
             </button>
-            <button 
-              onClick={onRegisterClick}
+            <Link 
+              to="/signup"
               className="bg-[#7e246c] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#6a1f5c] transition"
             >
-              Register
-            </button>
+              Register Now
+            </Link>
           </div>
         ) : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="size-10 rounded-full p-1">
                 <Avatar className="size-8 overflow-hidden rounded-full">
-                  <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                  <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                    {getInitials(auth.user.name)}
+                    {getInitials(user.name)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
-              <UserMenuContent user={auth.user} />
+              <UserMenuContent user={user} />
             </DropdownMenuContent>
           </DropdownMenu>
         )}

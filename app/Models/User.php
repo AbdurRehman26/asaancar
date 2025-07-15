@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Traits\HasRoles;
 
 Route::get('/{any}', function () {
     return view('app');
@@ -33,7 +34,7 @@ Route::get('/{any}', function () {
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, HasRoles;
     use \NotificationChannels\WebPush\HasPushSubscriptions;
 
     /**

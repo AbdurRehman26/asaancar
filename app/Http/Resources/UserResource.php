@@ -15,6 +15,7 @@ class UserResource extends JsonResource
             'store' => new StoreResource($this->whenLoaded('store')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'roles' => $this->getRoleNames(),
         ];
     }
 } 

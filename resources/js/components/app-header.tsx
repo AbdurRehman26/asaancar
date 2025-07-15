@@ -15,10 +15,10 @@ import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import RegisterModal from '@/pages/auth/register-modal';
 import LoginModal from '@/pages/auth/login-modal';
 import { useState, useEffect, useRef } from 'react';
 import { router } from '@inertiajs/react';
+import { useAuth } from '@/components/AuthContext';
 
 const mainNavItems: NavItem[] = [
     // Dashboard moved to profile dropdown
@@ -44,21 +44,20 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
-    const page = usePage<SharedData>();
-    const { auth } = page.props;
+    const { user } = useAuth();
     const getInitials = useInitials();
     const [loginOpen, setLoginOpen] = useState(false);
     const [registerOpen, setRegisterOpen] = useState(false);
     const wasLoginOpen = useRef(false);
 
     useEffect(() => {
-        console.log('Auth user changed:', auth.user, 'Login open:', loginOpen);
-        if (auth.user && loginOpen) {
+        console.log('Auth user changed:', user, 'Login open:', loginOpen);
+        if (user && loginOpen) {
             console.log('Closing login modal');
             setLoginOpen(false);
         }
         wasLoginOpen.current = loginOpen;
-    }, [auth.user, loginOpen]);
+    }, [user, loginOpen]);
 
     return (
         <>
@@ -80,7 +79,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
                                     <div className="flex h-full flex-col justify-between text-sm">
                                         <div className="flex flex-col space-y-4">
-                                            {auth.user && (
+                                            {user && (
                                                 <Link href="/dashboard" className="flex items-center space-x-2 font-medium">
                                                     <LayoutGrid className="h-5 w-5" />
                                                     <span>Dashboard</span>
@@ -140,7 +139,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 ))}
                             </div>
                         </div>
-                        {!auth.user && (
+                        {!user && (
                             <>
                                 <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
                                     <DialogTrigger asChild>
@@ -153,33 +152,22 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         <LoginModal canResetPassword={true} onSuccess={() => setLoginOpen(false)} />
                                     </DialogContent>
                                 </Dialog>
-                                <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button variant="outline">Register</Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Create an account</DialogTitle>
-                                        </DialogHeader>
-                                        <RegisterModal />
-                                    </DialogContent>
-                                </Dialog>
                             </>
                         )}
-                        {auth.user && (
+                        {user && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="size-10 rounded-full p-1">
                                         <Avatar className="size-8 overflow-hidden rounded-full">
-                                            <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                                            <AvatarImage src={user.avatar} alt={user.name} />
                                             <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                                                {getInitials(auth.user.name)}
+                                                {getInitials(user.name)}
                                             </AvatarFallback>
                                         </Avatar>
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-56" align="end">
-                                    <UserMenuContent user={auth.user} />
+                                    <UserMenuContent user={user} />
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}

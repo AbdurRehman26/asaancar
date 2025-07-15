@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Resources\UserResource;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +28,7 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 */
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    return new UserResource($request->user());
 });
 
 // Auth API endpoints
@@ -59,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/check-availability', [BookingController::class, 'checkAvailability']);
         Route::post('/calculate-price', [BookingController::class, 'calculatePrice']);
     });
+    Route::get('/bookings/user-car/{carId}', [\App\Http\Controllers\Customer\BookingController::class, 'userBookingForCar']);
 });
 
 // WebPush endpoints
@@ -66,7 +68,7 @@ Route::get('/webpush/public-key', [\App\Http\Controllers\WebPushController::clas
 Route::middleware('auth:sanctum')->post('/webpush/subscribe', [\App\Http\Controllers\WebPushController::class, 'subscribe']);
 
 // Chat endpoints
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/conversations', [\App\Http\Controllers\ChatController::class, 'conversations']);
     Route::post('/chat/conversations', [\App\Http\Controllers\ChatController::class, 'store']);
     Route::get('/chat/conversations/{conversation}/messages', [\App\Http\Controllers\ChatController::class, 'messages']);

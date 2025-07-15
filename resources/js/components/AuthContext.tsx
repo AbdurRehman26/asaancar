@@ -1,12 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { apiFetch } from '@/lib/utils';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  [key: string]: any;
-}
+import { type User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -30,19 +24,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // On mount, check for token and fetch user
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
+    console.log('🔍 DEBUG: AuthContext - Stored token:', storedToken ? 'exists' : 'missing');
     if (storedToken) {
       setToken(storedToken);
       apiFetch('/api/user')
         .then(async (res) => {
           if (res.ok) {
-            setUser(await res.json());
+            const userData = await res.json();
+            // Unwrap .data if present
+            setUser(userData.data || userData);
           } else {
+            console.log('🔍 DEBUG: AuthContext - User fetch failed, status:', res.status);
             setUser(null);
             localStorage.removeItem('token');
             setToken(null);
           }
         })
-        .catch(() => {
+        .catch((error) => {
+          console.log('🔍 DEBUG: AuthContext - User fetch error:', error);
           setUser(null);
           localStorage.removeItem('token');
           setToken(null);
@@ -68,9 +67,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
       const data = await res.json();
+      console.log('🔍 DEBUG: AuthContext - Login response:', data);
+      console.log('🔍 DEBUG: AuthContext - User from login:', data.user);
       localStorage.setItem('token', data.token);
       setToken(data.token);
-      setUser(data.user);
+      // Unwrap .data if present
+      setUser(data.user && (data.user.data || data.user));
       setLoading(false);
       return true;
     } catch (e) {
@@ -85,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     localStorage.removeItem('token');
     apiFetch('/api/logout', { method: 'POST' });
-    window.location.href = '/';
+    // window.location.href = '/'; // Removed forced redirect
   };
 
   const register = async (data: { name: string; email: string; password: string; password_confirmation: string; terms?: boolean }) => {
@@ -105,7 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const resData = await res.json();
       localStorage.setItem('token', resData.token);
       setToken(resData.token);
-      setUser(resData.user);
+      // Unwrap .data if present
+      setUser(resData.user && (resData.user.data || resData.user));
       setLoading(false);
       return true;
     } catch (e) {

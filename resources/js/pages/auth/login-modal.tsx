@@ -10,7 +10,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import RegisterModal from './register-modal';
 
 type LoginForm = {
     email: string;
@@ -101,19 +100,9 @@ export default function LoginModal({ status, canResetPassword, onSuccess }: Logi
 
             <div className="text-center text-sm text-muted-foreground">
                 Don't have an account?{' '}
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <button className="text-primary hover:underline" tabIndex={5}>
-                            Sign up
-                        </button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Create an account</DialogTitle>
-                        </DialogHeader>
-                        <RegisterModal />
-                    </DialogContent>
-                </Dialog>
+                <a href="/signup" className="text-primary hover:underline" tabIndex={5}>
+                    Register Now
+                </a>
             </div>
         </form>
     );

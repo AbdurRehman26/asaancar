@@ -7,7 +7,6 @@ import { apiFetch } from '@/lib/utils';
 import DarkModeToggle from '../components/ui/dark-mode-toggle';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/pages/auth/login-modal';
-import RegisterModal from '@/pages/auth/register-modal';
 import { useAuth } from '@/components/AuthContext';
 
 // Simple Pagination Component
@@ -138,11 +137,10 @@ export default function CarListing() {
           <DialogHeader>
             <DialogTitle>Create an account</DialogTitle>
           </DialogHeader>
-          <RegisterModal />
         </DialogContent>
       </Dialog>
 
-      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 pt-20">
         {/* Navbar */}
         <Navbar 
           currentPage="cars" 
@@ -241,8 +239,6 @@ export default function CarListing() {
           </div>
         </div>
       </div>
-      {/* Dark Mode Toggle */}
-      <DarkModeToggle />
     </>
   );
 }

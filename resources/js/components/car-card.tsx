@@ -24,7 +24,7 @@ const featureLabels: Record<string, string> = {
   minAge: 'Minimum age',
 };
 
-const CarCard = ({ car, handleBooking }: any) => {
+const CarCard = ({ car, handleBooking, hideBooking }: any) => {
   const { user } = useAuth();
   // Features to show (customize as needed)
   const features = [
@@ -77,7 +77,7 @@ const CarCard = ({ car, handleBooking }: any) => {
         )}
       </div>
       {/* Request Booking Button */}
-      {user ? (
+      {!hideBooking && (user ? (
         <Link
           to={`/car-detail/${car.id}`}
           className="mt-auto w-full py-3 px-4 rounded-md font-medium bg-[#7e246c] text-white hover:bg-[#6a1f5c] transition-colors text-base shadow-sm flex items-center justify-center gap-2"
@@ -91,7 +91,7 @@ const CarCard = ({ car, handleBooking }: any) => {
         >
           <Calendar className="h-5 w-5 mr-2 inline" /> Please login to book
         </button>
-      )}
+      ))}
     </div>
   );
 };

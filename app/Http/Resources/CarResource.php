@@ -16,6 +16,7 @@ class CarResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'store_id' => $this->store_id,
             'brand' => new CarBrandResource($this->whenLoaded('brand')),
             'type' => new CarTypeResource($this->whenLoaded('type')),
             'engine' => new CarEngineResource($this->whenLoaded('engine')),

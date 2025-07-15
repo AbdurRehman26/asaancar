@@ -32,6 +32,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|in:user,store_owner',
         ]);
 
         $user = User::create([
@@ -40,9 +41,12 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Assign role using Spatie
+        $user->assignRole($request->role);
+
         event(new Registered($user));
 
-        Auth::login($user);
+        // Do not log in immediately; require email verification first
 
         return response()->json([
             'success' => true,

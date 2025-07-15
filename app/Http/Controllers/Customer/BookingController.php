@@ -25,8 +25,18 @@ class BookingController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['status', 'date_from', 'date_to']);
+        $perPage = $request->input('per_page', 10);
         $bookings = $this->bookingService->getUserBookings(auth()->id(), $filters);
-        return response()->json(['data' => $bookings]);
+        // Return paginated response with meta and links
+        return response()->json([
+            'data' => $bookings->items(),
+            'current_page' => $bookings->currentPage(),
+            'per_page' => $bookings->perPage(),
+            'total' => $bookings->total(),
+            'last_page' => $bookings->lastPage(),
+            'from' => $bookings->firstItem(),
+            'to' => $bookings->lastItem(),
+        ]);
     }
 
     /**
@@ -189,5 +199,20 @@ class BookingController extends Controller
                 'message' => $e->getMessage()
             ], 400);
         }
+    }
+
+    /**
+     * Get the current user's booking for a specific car (if any)
+     */
+    public function userBookingForCar(Request $request, $carId)
+    {
+        $booking = \App\Models\Booking::where('user_id', auth()->id())
+            ->where('car_id', $carId)
+            ->orderByDesc('created_at')
+            ->first();
+        if (!$booking) {
+            return response()->json(['data' => null]);
+        }
+        return response()->json(['data' => (new BookingResource($booking))]);
     }
 }

@@ -2,7 +2,6 @@ import { ArrowRight, Brain, CheckCircle, ChevronDown, ChevronLeft, ChevronRight,
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import LoginModal from '@/pages/auth/login-modal';
-import RegisterModal from '@/pages/auth/register-modal';
 import Navbar from '../components/navbar';
 import DarkModeToggle from '../components/ui/dark-mode-toggle';
 import { useAuth } from '@/components/AuthContext';
@@ -240,14 +239,6 @@ export default function Welcome() {
                             <LoginModal canResetPassword={true} />
                         </DialogContent>
                     </Dialog>
-                    <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Create an account</DialogTitle>
-                            </DialogHeader>
-                            <RegisterModal />
-                        </DialogContent>
-                    </Dialog>
                 </>
             )}
 
@@ -299,9 +290,9 @@ export default function Welcome() {
                             </p>
                             {!user && (
                                 <div className="mt-10 flex items-center gap-x-6">
-                                    <button onClick={() => setRegisterOpen(true)} className="rounded-lg bg-[#7e246c] px-4 py-2 text-sm text-white border border-[#7e246c] transition-colors hover:bg-[#6a1f5c] hover:border-[#6a1f5c]">
+                                    <a href="/signup" className="rounded-lg bg-[#7e246c] px-4 py-2 text-sm text-white border border-[#7e246c] transition-colors hover:bg-[#6a1f5c] hover:border-[#6a1f5c]">
                                         Register Now
-                                    </button>
+                                    </a>
                                     <button onClick={() => setLoginOpen(true)} className="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-[#7e246c] dark:hover:text-[#7e246c] transition">
                                         Log in <span aria-hidden="true">→</span>
                                     </button>

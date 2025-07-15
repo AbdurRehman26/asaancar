@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => $user,
+            'user' => new \App\Http\Resources\UserResource($user),
         ]);
     }
 

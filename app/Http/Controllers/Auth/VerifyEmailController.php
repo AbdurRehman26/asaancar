@@ -15,7 +15,7 @@ class VerifyEmailController extends Controller
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+            return $this->redirectAfterVerification($request->user());
         }
 
         if ($request->user()->markEmailAsVerified()) {
@@ -25,6 +25,14 @@ class VerifyEmailController extends Controller
             event(new Verified($user));
         }
 
+        return $this->redirectAfterVerification($request->user());
+    }
+
+    protected function redirectAfterVerification($user): RedirectResponse
+    {
+        if ($user->hasRole('store_owner') && (!$user->store_id && $user->stores()->count() === 0)) {
+            return redirect('/create-store?verified=1');
+        }
         return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
     }
 }

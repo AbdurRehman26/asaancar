@@ -4,10 +4,9 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from 'react-router-dom';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, MessageSquare } from 'lucide-react';
 import AppLogo from './app-logo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import RegisterModal from '@/pages/auth/register-modal';
 import LoginModal from '@/pages/auth/login-modal';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect, useRef } from 'react';
@@ -51,6 +50,30 @@ export function AppSidebar() {
                         <SidebarMenuButton size="lg" asChild>
                             <Link to="/dashboard">
                                 <AppLogo />
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild>
+                            <Link to="/dashboard">
+                                <LayoutGrid className="mr-2" />
+                                Dashboard Home
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild>
+                            <Link to="/dashboard/cars">
+                                <Folder className="mr-2" />
+                                Car Listings
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild>
+                            <Link to="/dashboard/messages">
+                                <MessageSquare className="mr-2" />
+                                Messages
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

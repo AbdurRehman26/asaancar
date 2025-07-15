@@ -152,11 +152,11 @@ class BookingService
     }
 
     /**
-     * Get user bookings
+     * Get user bookings (paginated)
      */
-    public function getUserBookings(int $userId, array $filters = []): array
+    public function getUserBookings(int $userId, array $filters = [])
     {
-        $query = Booking::with(['car.carBrand', 'car.carType', 'store'])
+        $query = Booking::with(['car.carBrand', 'car.carType', 'car.store', 'store'])
             ->where('user_id', $userId);
 
         // Apply filters
@@ -172,11 +172,14 @@ class BookingService
             $query->where('end_date', '<=', $filters['date_to']);
         }
 
-        $bookings = $query->orderBy('created_at', 'desc')->get();
+        $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return $bookings->map(function ($booking) {
+        // Transform each booking for API response
+        $bookings->getCollection()->transform(function ($booking) {
             return $this->formatBookingData($booking);
-        })->toArray();
+        });
+
+        return $bookings;
     }
 
     /**
@@ -312,6 +315,12 @@ class BookingService
                 'model' => $booking->car->model,
                 'year' => $booking->car->year,
                 'image' => $booking->car->image_urls[0] ?? null,
+                'store' => $booking->car->store ? [
+                    'id' => $booking->car->store->id,
+                    'name' => $booking->car->store->name,
+                    'address' => $booking->car->store->address,
+                    'phone' => $booking->car->store->contact_phone,
+                ] : null,
             ] : null,
             'store' => $booking->store ? [
                 'id' => $booking->store->id,

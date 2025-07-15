@@ -8,10 +8,11 @@ export default function DarkModeToggle() {
   return (
     <button
       aria-label="Toggle dark mode"
-      className="fixed bottom-6 right-6 z-50 rounded-full bg-[#7e246c] text-white shadow-lg w-14 h-14 flex items-center justify-center transition hover:bg-[#6a1f5c] focus:outline-none"
+      className="ml-2 rounded-md bg-transparent text-[#7e246c] dark:text-white hover:bg-[#f3e6f0] dark:hover:bg-gray-700 transition w-10 h-10 flex items-center justify-center focus:outline-none"
       onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
+      type="button"
     >
-      {isDark ? <Sun className="h-7 w-7" /> : <Moon className="h-7 w-7" />}
+      {isDark ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
     </button>
   );
 } 
