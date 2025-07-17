@@ -159,7 +159,7 @@ export default function CarDetailPage() {
       const res = await apiFetch('/api/chat/conversations');
       const data = await res.json();
       console.log('🔍 DEBUG: Fetched conversations:', data);
-      let conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(car.store.id));
+      const conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(car.store.id));
       console.log('🔍 DEBUG: Found existing conversation:', conv);
       
       if (conv) {

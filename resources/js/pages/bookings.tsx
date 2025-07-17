@@ -154,7 +154,7 @@ export default function Bookings() {
     try {
       const res = await apiFetch('/api/chat/conversations');
       const data = await res.json();
-      let conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(storeId));
+      const conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(storeId));
       if (conv) {
         setConversationId(conv.id);
         setShowChat(true);

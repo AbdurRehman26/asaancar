@@ -22,7 +22,7 @@ export default function ChatPage() {
                 setConversations(data);
                 // If booking or store param is present, auto-select or create conversation
                 if (query.booking) {
-                    let conv = data.find((c: any) => c.type === 'booking' && String(c.booking_id) === String(query.booking));
+                    const conv = data.find((c: any) => c.type === 'booking' && String(c.booking_id) === String(query.booking));
                     if (conv) {
                         setSelected(conv);
                     } else {
@@ -36,7 +36,7 @@ export default function ChatPage() {
                         });
                     }
                 } else if (query.store) {
-                    let conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(query.store));
+                    const conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(query.store));
                     if (conv) {
                         setSelected(conv);
                     } else {

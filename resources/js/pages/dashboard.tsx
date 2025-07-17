@@ -1,14 +1,24 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet, Link } from 'react-router-dom';
 import CarCard from '../components/car-card';
 import CarFilters from '../components/car-filters';
 import { Car, UserCircle, BookOpen } from 'lucide-react';
 import Chat from '../components/chat';
+
+// Add Conversation interface at the top
+interface Conversation {
+  id: string;
+  type: string;
+  booking_id?: string;
+  store?: { name?: string };
+  store_id?: string;
+  unread_count?: number;
+  last_message?: string;
+  updated_at?: string;
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,13 +41,13 @@ export default function Dashboard() {
 export function CarListings() {
     const { user, loading } = useAuth();
     const navigate = useNavigate();
-    const [stores, setStores] = useState<any[]>([]);
-    const [selectedStore, setSelectedStore] = useState<any | null>(null);
+    const [stores, setStores] = useState<Array<{ id: string; name: string }>>([]);
+    const [selectedStore, setSelectedStore] = useState<{ id: string; name: string } | null>(null);
     const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
     const [showCreateStore, setShowCreateStore] = useState(false);
 
     // Car listing state
-    const [cars, setCars] = useState<any[]>([]);
+    const [cars, setCars] = useState<Array<{ id: string }>>([]);
     const [carLoading, setCarLoading] = useState(false);
     const [filters, setFilters] = useState({
         brand_id: '',
@@ -223,9 +233,9 @@ export function CarListings() {
 export function Messages() {
     const { user, loading } = useAuth();
     const navigate = useNavigate();
-    const [conversations, setConversations] = useState<any[]>([]);
+    const [conversations, setConversations] = useState<Conversation[]>([]);
     const [conversationsLoading, setConversationsLoading] = useState(true);
-    const [selectedConv, setSelectedConv] = useState<any | null>(null);
+    const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
 
     useEffect(() => {
         if (!loading && (!user || !Array.isArray(user.roles) || !user.roles.includes('store_owner'))) {
@@ -266,7 +276,7 @@ export function Messages() {
                             <div className="p-4 text-gray-400">No conversations yet.</div>
                         ) : (
                             <div className="flex flex-col">
-                                {conversations.map((conv: any) => {
+                                {conversations.map((conv: Conversation) => {
                                     const isActive = selectedConv && selectedConv.id === conv.id;
                                     return (
                                         <button
@@ -287,7 +297,7 @@ export function Messages() {
                                                         {conv.type === 'booking' ? `Booking #${conv.booking_id}` : conv.store?.name || `Store #${conv.store_id}`}
                                                     </span>
                                                     {typeof conv.unread_count === 'number' && conv.unread_count > 0 && (
-                                                        <span className="ml-2 inline-block min-w-[20px] px-2 py-0.5 rounded-full bg-red-600 text-white text-xs text-center">{conv.unread_count}</span>
+                                                        <span className="ml-2 inline-block min-w-[20px] px-2 py-0.5 rounded-full bg-red-600 text-white text-xs text-center">{String(conv.unread_count)}</span>
                                                     )}
                                                 </div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-300 truncate">
@@ -296,7 +306,7 @@ export function Messages() {
                                             </div>
                                             {/* Time */}
                                             <div className="ml-2 text-xs text-gray-400 whitespace-nowrap">
-                                                {new Date(conv.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                {new Date(conv.updated_at ?? '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </button>
                                     );
