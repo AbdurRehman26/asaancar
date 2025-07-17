@@ -3,11 +3,12 @@
 use App\Models\User;
 
 test('guests are redirected to the login page', function () {
-    $this->get('/dashboard')->assertRedirect('/login');
+    $response = $this->getJson('/api/dashboard');
+    $response->assertStatus(401); // Unauthenticated
 });
 
 test('authenticated users can visit the dashboard', function () {
-    $this->actingAs($user = User::factory()->create());
-
-    $this->get('/dashboard')->assertOk();
+    $this->actingAs($user = User::factory()->create(), 'sanctum');
+    $response = $this->getJson('/api/dashboard');
+    $response->assertStatus(200);
 });

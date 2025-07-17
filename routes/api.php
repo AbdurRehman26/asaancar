@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Resources\UserResource;
+use App\Http\Controllers\Auth\VerifyEmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,11 @@ Route::post('/reset-password', [NewPasswordController::class, 'store']);
 Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store']);
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 
+// Email verification for API
+Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
+    ->middleware(['auth:sanctum', 'signed'])
+    ->name('verification.verify');
+
 // Public car routes (no authentication required)
 Route::prefix('cars')->group(function () {
     Route::get('/', [CarController::class, 'index']);
@@ -49,6 +55,15 @@ Route::prefix('cars')->group(function () {
 
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return new \App\Http\Resources\UserResource($request->user());
+    });
+    Route::get('/dashboard', function (Request $request) {
+        return response()->json(['message' => 'Welcome to the dashboard!']);
+    });
+    Route::patch('/settings/profile', [\App\Http\Controllers\Settings\ProfileController::class, 'update']);
+    Route::delete('/settings/profile', [\App\Http\Controllers\Settings\ProfileController::class, 'destroy']);
+    Route::put('/settings/password', [\App\Http\Controllers\Settings\PasswordController::class, 'update']);
     // Booking routes
     Route::prefix('bookings')->group(function () {
         Route::get('/', [BookingController::class, 'index']);

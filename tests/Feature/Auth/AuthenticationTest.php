@@ -11,32 +11,34 @@ use App\Models\User;
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
-    $response = $this->post('/login', [
+    $response = $this->postJson('/api/login', [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
-    $this->assertAuthenticated();
-    // Should redirect to home page instead of dashboard
-    $response->assertRedirect('/');
+    $response->assertStatus(200);
+    $response->assertJsonStructure(['token', 'user']);
 });
 
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
-    $this->post('/login', [
+    $response = $this->postJson('/api/login', [
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
 
-    $this->assertGuest();
+    $response->assertStatus(401);
+    $response->assertJsonStructure(['message']);
 });
 
 test('users can logout', function () {
     $user = User::factory()->create();
+    $token = $user->createToken('api-token')->plainTextToken;
 
-    $response = $this->actingAs($user)->post('/logout');
+    $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        ->postJson('/api/logout');
 
-    $this->assertGuest();
-    $response->assertRedirect('/');
+    $response->assertStatus(200);
+    $response->assertJsonStructure(['message']);
 });

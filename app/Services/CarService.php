@@ -315,9 +315,9 @@ class CarService
     /**
      * Get paginated cars for API listing
      */
-    public function getPaginatedCarsForListing($perPage = 9)
+    public function getPaginatedCarsForListing($perPage = 9, $filters = [])
     {
-        $cars = Car::with(['carBrand', 'carType', 'carEngine', 'store', 'carOffers' => function($query) {
+        $query = Car::with(['carBrand', 'carType', 'carEngine', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where(function($q) {
                       $q->where(function($subQ) {
@@ -331,8 +331,32 @@ class CarService
                       });
                   });
         }])
-        ->whereHas('store')
-        ->paginate($perPage);
+        ->whereHas('store');
+
+        // Apply filters
+        if (!empty($filters['brand_id'])) {
+            $query->where('car_brand_id', $filters['brand_id']);
+        }
+        if (!empty($filters['type_id'])) {
+            $query->where('car_type_id', $filters['type_id']);
+        }
+        if (!empty($filters['store_id'])) {
+            $query->where('store_id', $filters['store_id']);
+        }
+        if (!empty($filters['transmission'])) {
+            $query->where('transmission', $filters['transmission']);
+        }
+        if (!empty($filters['fuel_type'])) {
+            $query->where('fuel_type', $filters['fuel_type']);
+        }
+        if (!empty($filters['min_seats'])) {
+            $query->where('seats', '>=', $filters['min_seats']);
+        }
+        if (!empty($filters['max_price'])) {
+            // Implement price filtering if needed
+        }
+
+        $cars = $query->paginate($perPage);
 
         $formatted = $cars->getCollection()->map(function ($car) {
             return $this->formatCarForListing($car);

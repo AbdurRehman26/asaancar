@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Seed roles and permissions
-        $roles = ['admin', 'store_owner', 'customer'];
+        $roles = ['admin', 'store_owner', 'customer', 'user'];
         foreach ($roles as $role) {
             Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
         }

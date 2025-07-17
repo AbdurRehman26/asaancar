@@ -17,10 +17,10 @@ class CarFactory extends Factory
     public function definition(): array
     {
         return [
-            'store_id' => null, // to be set in seeder
-            'car_brand_id' => null, // to be set in seeder
-            'car_type_id' => null, // to be set in seeder
-            'car_engine_id' => null, // to be set in seeder
+            'store_id' => 1,
+            'car_brand_id' => 1,
+            'car_type_id' => 1,
+            'car_engine_id' => 1,
             'model' => $this->faker->bothify('Model-###'),
             'year' => $this->faker->numberBetween(2015, 2024),
             'name' => $this->faker->company . ' ' . $this->faker->word,
@@ -30,6 +30,7 @@ class CarFactory extends Factory
             'seats' => $this->faker->numberBetween(2, 8),
             'transmission' => $this->faker->randomElement(['manual', 'automatic']),
             'fuel_type' => $this->faker->randomElement(['petrol', 'diesel', 'electric', 'hybrid']),
+            'available' => true,
         ];
     }
 }

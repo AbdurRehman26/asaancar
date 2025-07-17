@@ -28,9 +28,18 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request)
     {
-        $request->user()->fill(['name' => $request->validated('name')]);
-        $request->user()->save();
-        return response()->json(['success' => true, 'user' => $request->user()]);
+        $user = $request->user();
+        $data = $request->validated();
+        $emailChanged = isset($data['email']) && $data['email'] !== $user->email;
+        $user->fill([
+            'name' => $data['name'],
+            'email' => $data['email'] ?? $user->email,
+        ]);
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
+        $user->save();
+        return response()->json(['user' => $user]);
     }
 
     /**
@@ -42,10 +51,11 @@ class ProfileController extends Controller
             'password' => ['required', 'current_password'],
         ]);
         $user = $request->user();
-        Auth::logout();
+        // For API: delete the current access token (Sanctum)
+        if ($request->user()->currentAccessToken()) {
+            $request->user()->currentAccessToken()->delete();
+        }
         $user->delete();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
         return response()->json(['success' => true]);
     }
 }

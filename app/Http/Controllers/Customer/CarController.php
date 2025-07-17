@@ -52,7 +52,11 @@ class CarController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 9);
-        $paginated = $this->carService->getPaginatedCarsForListing($perPage);
+        $filters = $request->only([
+            'brand_id', 'type_id', 'store_id', 'transmission',
+            'fuel_type', 'min_seats', 'max_price'
+        ]);
+        $paginated = $this->carService->getPaginatedCarsForListing($perPage, $filters);
         return response()->json($paginated);
     }
 

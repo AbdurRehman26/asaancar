@@ -27,6 +27,7 @@ return new class extends Migration
             $table->integer('seats');
             $table->string('transmission');
             $table->string('fuel_type');
+            $table->boolean('available')->default(true);
             $table->timestamps();
         });
     }

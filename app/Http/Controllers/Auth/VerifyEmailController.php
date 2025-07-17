@@ -5,27 +5,28 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class VerifyEmailController extends Controller
 {
     /**
      * Mark the authenticated user's email address as verified.
      */
-    public function __invoke(EmailVerificationRequest $request): RedirectResponse
+    public function __invoke(EmailVerificationRequest $request): JsonResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return $this->redirectAfterVerification($request->user());
+            return response()->json(['message' => 'Email already verified.']);
         }
 
         if ($request->user()->markEmailAsVerified()) {
             /** @var \Illuminate\Contracts\Auth\MustVerifyEmail $user */
             $user = $request->user();
-
             event(new Verified($user));
+            return response()->json(['message' => 'Email verified successfully.']);
         }
 
-        return $this->redirectAfterVerification($request->user());
+        return response()->json(['message' => 'Unable to verify email.'], 400);
     }
 
     protected function redirectAfterVerification($user): RedirectResponse
