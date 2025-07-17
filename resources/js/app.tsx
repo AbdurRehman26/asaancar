@@ -2,7 +2,7 @@ import '../css/app.css';
 
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/components/AuthContext';
 import { initializeTheme } from '@/hooks/use-appearance';
 import CarListing from './pages/car-listing';

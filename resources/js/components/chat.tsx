@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import echo from '../lib/echo';
-import axios from 'axios';
 import { apiFetch } from '@/lib/utils';
 
 interface User {
@@ -32,8 +31,8 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
 
     useEffect(() => {
         const channel = echo.private(`conversation.${conversationId}`);
-        channel.listen('MessageSent', (event: any) => {
-            setMessages((prev) => [...prev, event]);
+        channel.listen('MessageSent', (event: unknown) => {
+            setMessages((prev) => [...prev, event as Message]);
         });
         return () => {
             channel.stopListening('MessageSent');

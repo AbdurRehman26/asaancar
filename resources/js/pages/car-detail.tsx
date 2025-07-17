@@ -1,13 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, Fuel, Info, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, Fuel, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import Navbar from '../components/navbar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/pages/auth/login-modal';
-import { Link } from 'react-router-dom';
 import { apiFetch } from '@/lib/utils';
 import Chat from '../components/chat';
-import DarkModeToggle from '../components/ui/dark-mode-toggle';
+
+interface Car {
+  id: number;
+  name: string;
+  image?: string;
+  rental?: number;
+  baseFare?: number;
+  fuel?: number;
+  overtime?: number;
+  currency?: string;
+  store_id?: number;
+  store?: { id: number };
+  [key: string]: unknown;
+}
+
+interface Booking {
+  id: number;
+  status: string;
+  start_date: string;
+  end_date: string;
+  total_price: number;
+  [key: string]: unknown;
+}
 
 // No hardcoded car data
 
@@ -15,21 +36,20 @@ export default function CarDetailPage() {
   const { user } = useAuth();
   // Get car ID from URL (for demonstration, usePage.props or useParams if available)
   const carId = (typeof window !== 'undefined' && window.location.pathname.split('/').pop()) || 'N/A';
-  const [car, setCar] = useState<any>(null);
+  const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pickupAddress, setPickupAddress] = useState('Werdener Str. 87, 40233 Düsseldorf, Germany');
   const [pickupTime, setPickupTime] = useState('23:30');
   const [pickupDate, setPickupDate] = useState('2025-07-13');
   const [dropoffAddress, setDropoffAddress] = useState('Werdener Str. 87, 40233 Düsseldorf, Germany');
-  const [promo, setPromo] = useState('');
   const [refillTank, setRefillTank] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
-  const [userBooking, setUserBooking] = useState<any>(null);
+  const [userBooking, setUserBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     if (!carId) return;
@@ -40,8 +60,8 @@ export default function CarDetailPage() {
           setError('Failed to fetch car details');
           setCar(null);
         } else {
-          const data = await res.json();
-          const carData = data.data || data;
+          const json = await res.json();
+          const carData: Car = json.data || json;
           console.log('🔍 DEBUG: Car data received:', carData);
           console.log('🔍 DEBUG: Car store_id:', carData.store_id);
           console.log('🔍 DEBUG: Car store object:', carData.store);
@@ -65,16 +85,6 @@ export default function CarDetailPage() {
     }
   }, [user, car]);
 
-  // Debug logging for user and car state changes
-  useEffect(() => {
-    console.log('🔍 DEBUG: User state changed:', user);
-    console.log('🔍 DEBUG: Car state changed:', car);
-    if (car) {
-      console.log('🔍 DEBUG: Car store_id type:', typeof car.store_id);
-      console.log('🔍 DEBUG: Car store_id value:', car.store_id);
-    }
-  }, [user, car]);
-
   useEffect(() => {
     if (user && loginOpen) {
       setLoginOpen(false);
@@ -95,7 +105,6 @@ export default function CarDetailPage() {
           pickup_date: pickupDate,
           dropoff_address: dropoffAddress,
           refill_tank: refillTank,
-          promo,
         }),
       });
       if (!res.ok) {
@@ -105,7 +114,7 @@ export default function CarDetailPage() {
         // Optionally redirect or show success
         window.location.href = '/bookings';
       }
-    } catch (e) {
+    } catch {
       setError('Network error');
     } finally {
       setLoading(false);
@@ -114,7 +123,7 @@ export default function CarDetailPage() {
 
   const handleOpenChat = async () => {
     console.log('🔍 DEBUG: handleOpenChat called');
-    console.log('🔍 DEBUG: User object:', user);
+    console.log('�� DEBUG: User object:', user);
     console.log('🔍 DEBUG: Car object:', car);
     console.log('🔍 DEBUG: Car store_id:', car?.store_id);
     console.log('🔍 DEBUG: Car store object:', car?.store);
@@ -123,9 +132,9 @@ export default function CarDetailPage() {
     console.log('🔍 DEBUG: Car exists:', !!car);
     console.log('🔍 DEBUG: Store_id exists:', !!car?.store_id);
     console.log('🔍 DEBUG: Store.id exists:', !!car?.store?.id);
-    
+
     setChatError(null);
-    
+
     // Check if user is logged in
     if (!user) {
       const msg = 'Please log in to start a chat with the store.';
@@ -135,11 +144,11 @@ export default function CarDetailPage() {
       setChatError(msg);
       return;
     }
-    
+
     // Check if car has store information
     if (!car?.store?.id) {
       const msg = 'Cannot start chat: this car is not associated with a store.';
-      console.error('❌ ERROR:', msg, { 
+      console.error('❌ ERROR:', msg, {
         store_id: car?.store_id ? `exists (${car.store_id})` : 'missing',
         store_object: car?.store ? 'exists' : 'missing',
         store_id_from_object: car?.store?.id ? `exists (${car.store.id})` : 'missing',
@@ -150,18 +159,24 @@ export default function CarDetailPage() {
       setChatError(msg);
       return;
     }
-    
+
     console.log('✅ DEBUG: User is logged in and car has store_id');
     console.log('🔍 DEBUG: About to fetch conversations for store_id:', car.store.id);
-    
+
     try {
       // Fetch or create the conversation for this store
       const res = await apiFetch('/api/chat/conversations');
       const data = await res.json();
       console.log('🔍 DEBUG: Fetched conversations:', data);
-      const conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(car.store.id));
+      const conv = data.find((c: unknown): c is { id: number; type: string; store_id: number } => {
+        if (typeof c === 'object' && c !== null && 'type' in c && 'store_id' in c && 'id' in c) {
+          // @ts-expect-error: c is loosely typed from API response, checked for required fields above
+          return c.type === 'store' && String(c.store_id) === String(car.store.id);
+        }
+        return false;
+      });
       console.log('🔍 DEBUG: Found existing conversation:', conv);
-      
+
       if (conv) {
         setConversationId(conv.id);
         setShowChat(true);
@@ -184,11 +199,11 @@ export default function CarDetailPage() {
           throw new Error('Failed to create conversation. Response: ' + JSON.stringify(newConv));
         }
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('❌ ERROR: Error opening chat:', e);
       setShowChat(true);
       setConversationId(null);
-      setChatError('Could not start chat. Please try again later. ' + (e?.message || ''));
+      setChatError('Could not start chat. Please try again later. ' + ((e as Error)?.message || ''));
     }
   };
 
@@ -224,10 +239,9 @@ export default function CarDetailPage() {
 
       <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
         {/* Navbar */}
-        <Navbar 
+        <Navbar
           auth={{ user }}
           onLoginClick={() => setLoginOpen(true)}
-          onRegisterClick={() => setRegisterOpen(true)}
         />
         <div className="py-10 px-2 md:px-8">
         <div className="text-xs text-gray-400 dark:text-neutral-400 mb-2">Car ID: {carId}</div>
@@ -314,22 +328,22 @@ export default function CarDetailPage() {
                 <tr>
                   <td>Rental</td>
                   <td>1</td>
-                  <td>{car.currency} {typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A'}</td>
+                  <td>{car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}</td>
                 </tr>
                 <tr>
                   <td>Base Fare</td>
                   <td>-</td>
-                  <td>{car.currency} {typeof car.baseFare === 'number' ? car.baseFare.toLocaleString() : 'N/A'}</td>
+                  <td>{car.currency} {(typeof car.baseFare === 'number' ? car.baseFare.toLocaleString() : 'N/A')}</td>
                 </tr>
                 <tr>
                   <td>Fuel</td>
                   <td>-</td>
-                  <td>{typeof car.fuel === 'number' ? car.fuel.toLocaleString() : 'N/A'}/km</td>
+                  <td>{(typeof car.fuel === 'number' ? car.fuel.toLocaleString() : 'N/A')}/km</td>
                 </tr>
                 <tr>
                   <td>Over Time</td>
                   <td>-</td>
-                  <td>{typeof car.overtime === 'number' ? car.overtime.toLocaleString() : 'N/A'}/hour</td>
+                  <td>{(typeof car.overtime === 'number' ? car.overtime.toLocaleString() : 'N/A')}/hour</td>
                 </tr>
                 <tr>
                   <td className="text-[#7e246c] dark:text-white">Discount</td>
@@ -347,7 +361,7 @@ export default function CarDetailPage() {
             </div>
             <div className="flex flex-col gap-2 mb-2">
               <div className="text-lg font-bold text-[#7e246c] dark:text-white">Total Amount</div>
-              <div className="text-3xl font-extrabold text-[#7e246c] dark:text-white">{car.currency} {typeof totalAmount === 'number' ? totalAmount.toLocaleString() : 'N/A'}</div>
+              <div className="text-3xl font-extrabold text-[#7e246c] dark:text-white">{car.currency} {(typeof totalAmount === 'number' ? totalAmount.toLocaleString() : 'N/A')}</div>
             </div>
             <div className="text-xs text-red-700 dark:text-red-400 font-semibold mb-2">Excluding fuel & overtime charges (charges – view details)</div>
             <div className="flex items-start gap-2 mb-4">
@@ -389,7 +403,7 @@ export default function CarDetailPage() {
                   console.log('🔍 DEBUG: Button click - Car store_id:', car?.store?.id);
                   await handleOpenChat();
                 }}
-                className={`w-full py-3 rounded-md font-semibold transition mt-2 
+                className={`w-full py-3 rounded-md font-semibold transition mt-2
                   ${user ? 'bg-[#7e246c] text-white hover:bg-[#6a1f5c] cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'}`}
                 disabled={!user}
               >
@@ -440,4 +454,4 @@ export default function CarDetailPage() {
     </div>
     </>
   );
-} 
+}

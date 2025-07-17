@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, MapPin, Car } from 'lucide-react';
+import { Calendar, MapPin, Car } from 'lucide-react';
 import Navbar from '../components/navbar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/pages/auth/login-modal';
 import { apiFetch } from '@/lib/utils';
 import { useAuth } from '@/components/AuthContext';
-import DarkModeToggle from '../components/ui/dark-mode-toggle';
-import { Select } from '@/components/ui/select';
 import Chat from '../components/chat';
 
 type Booking = {
@@ -110,7 +108,7 @@ export default function Bookings() {
         console.error('Bookings fetch error:', e);
       })
       .finally(() => setLoading(false));
-  }, [user, status, page]);
+  }, [user, status, page, pagination.per_page]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -154,7 +152,7 @@ export default function Bookings() {
     try {
       const res = await apiFetch('/api/chat/conversations');
       const data = await res.json();
-      const conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(storeId));
+      const conv = data.find((c: { type: string; store_id: number }) => c.type === 'store' && String(c.store_id) === String(storeId));
       if (conv) {
         setConversationId(conv.id);
         setShowChat(true);
@@ -173,10 +171,16 @@ export default function Bookings() {
           throw new Error('Failed to create conversation.');
         }
       }
-    } catch (e: any) {
-      setShowChat(true);
-      setConversationId(null);
-      setChatError('Could not start chat. Please try again later. ' + (e?.message || ''));
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setShowChat(true);
+        setConversationId(null);
+        setChatError('Could not start chat. Please try again later. ' + e.message);
+      } else {
+        setShowChat(true);
+        setConversationId(null);
+        setChatError('Could not start chat. Please try again later. An unknown error occurred.');
+      }
     }
   };
 
@@ -236,7 +240,6 @@ export default function Bookings() {
           currentPage="bookings" 
           auth={{ user }}
           onLoginClick={() => setLoginOpen(true)}
-          onRegisterClick={() => setRegisterOpen(true)}
         />
 
         {/* Page Header */}

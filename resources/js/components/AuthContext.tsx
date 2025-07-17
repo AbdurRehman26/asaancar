@@ -76,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return true;
     } catch (e) {
+      console.error(e);
       setError('Network error');
       setLoading(false);
       return false;
@@ -112,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return true;
     } catch (e) {
+      console.error(e);
       setError('Network error');
       setLoading(false);
       return false;

@@ -40,6 +40,7 @@ export default function EditCarPage() {
           setError('Car not found');
         }
       } catch (e) {
+        console.error(e);
         setError('Network error');
       } finally {
         setLoading(false);
@@ -68,6 +69,7 @@ export default function EditCarPage() {
         navigate('/dashboard');
       }
     } catch (e) {
+      console.error(e);
       setError('Network error');
     } finally {
       setLoading(false);

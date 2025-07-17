@@ -151,17 +151,15 @@ function SidebarProvider({
 
 function Sidebar({
   side = "left",
-  variant = "sidebar",
   collapsible = "offcanvas",
   className,
   children,
   ...props
 }: React.ComponentProps<"div"> & {
   side?: "left" | "right"
-  variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, openMobile, setOpenMobile } = useSidebar()
 
   if (collapsible === "none") {
     return (

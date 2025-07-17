@@ -48,7 +48,8 @@ export default function Password() {
                 setData({ current_password: '', password: '', password_confirmation: '' });
             }
         } catch (err) {
-            setError('Network error');
+            console.error(err);
+            setError('Network error' + err);
         } finally {
             setProcessing(false);
         }

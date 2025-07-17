@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { apiFetch } from '@/lib/utils';
 
 interface Conversation {

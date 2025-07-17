@@ -7,7 +7,6 @@ import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -18,12 +17,11 @@ type LoginForm = {
 };
 
 interface LoginModalProps {
-    status?: string;
     canResetPassword: boolean;
     onSuccess?: () => void;
 }
 
-export default function LoginModal({ status, canResetPassword, onSuccess }: LoginModalProps = { canResetPassword: false }) {
+export default function LoginModal({ canResetPassword, onSuccess }: LoginModalProps = { canResetPassword: false }) {
     const { login, loading: authLoading, error: authError } = useAuth();
     const [data, setData] = useState<LoginForm>({
         email: '',

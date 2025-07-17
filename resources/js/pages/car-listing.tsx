@@ -4,10 +4,30 @@ import CarCard from '../components/car-card';
 import CarFilters from '../components/car-filters';
 import Navbar from '../components/navbar';
 import { apiFetch } from '@/lib/utils';
-import DarkModeToggle from '../components/ui/dark-mode-toggle';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/pages/auth/login-modal';
 import { useAuth } from '@/components/AuthContext';
+
+// Define Car interface for use in this file
+interface Car {
+  id: string | number;
+  name: string;
+  image?: string;
+  specifications?: {
+    seats?: number;
+    fuelType?: string;
+    transmission?: string;
+  };
+  features?: string[];
+  minAge?: number;
+  price?: {
+    perDay?: {
+      withoutDriver?: number;
+      withDriver?: number;
+    };
+  };
+  extraInfo?: string;
+}
 
 // Simple Pagination Component
 function Pagination({ currentPage, totalPages, onPageChange }: { currentPage: number, totalPages: number, onPageChange: (page: number) => void }) {
@@ -35,10 +55,9 @@ function Pagination({ currentPage, totalPages, onPageChange }: { currentPage: nu
 }
 
 export default function CarListing() {
-  const { user, login } = useAuth();
-  const [cars, setCars] = useState<any[]>([]);
+  const { user } = useAuth();
+  const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedCar, setSelectedCar] = useState<number | null>(null);
   const [bookingDate, setBookingDate] = useState('');
   const [bookingTime, setBookingTime] = useState('');
   const [duration, setDuration] = useState('hourly');
@@ -54,7 +73,6 @@ export default function CarListing() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [perPageState, setPerPageState] = useState(9);
-  const [totalCount, setTotalCount] = useState(0);
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
 
@@ -66,7 +84,6 @@ export default function CarListing() {
         setCars(data.data);
         setTotalPages(data.last_page);
         setPerPageState(data.per_page);
-        setTotalCount(data.total);
       })
       .finally(() => setLoading(false));
   }, [currentPage, perPageState]);
@@ -86,16 +103,11 @@ export default function CarListing() {
       setCars(data.data);
       setTotalPages(data.last_page);
       setPerPageState(data.per_page);
-      setTotalCount(data.total);
     } catch (error) {
-      // ...
+      console.error(error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleBooking = async (carId: number) => {
-    // ... existing booking logic ...
   };
 
   const clearFilters = () => {
@@ -111,12 +123,6 @@ export default function CarListing() {
     setCurrentPage(1);
     // Optionally re-fetch cars with cleared filters
     handleSearch();
-  };
-
-  // Handler for login modal
-  const handleLogin = async (email: string, password: string) => {
-    const success = await login(email, password);
-    if (success) setLoginOpen(false);
   };
 
   return (
@@ -142,11 +148,10 @@ export default function CarListing() {
 
       <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 pt-20">
         {/* Navbar */}
-        <Navbar 
-          currentPage="cars" 
+        <Navbar
+          currentPage="cars"
           auth={{ user }}
           onLoginClick={() => setLoginOpen(true)}
-          onRegisterClick={() => setRegisterOpen(true)}
         />
 
         {/* Page Header */}
@@ -194,7 +199,7 @@ export default function CarListing() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10">
                   {cars.map((car) => (
-                    <CarCard key={car.id} car={car} duration={duration} handleBooking={handleBooking} />
+                    <CarCard key={car.id} car={car} hideBooking />
                   ))}
                 </div>
                 {/* Bottom Pagination */}

@@ -26,6 +26,7 @@ export default function CreateStorePage() {
         setTimeout(() => navigate('/dashboard'), 1000);
       }
     } catch (e) {
+      console.error(e);
       setError('Network error');
     } finally {
       setLoading(false);

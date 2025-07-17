@@ -41,17 +41,16 @@ export default function Dashboard() {
 export function CarListings() {
     const { user, loading } = useAuth();
     const navigate = useNavigate();
-    const [stores, setStores] = useState<Array<{ id: string; name: string }>>([]);
     const [selectedStore, setSelectedStore] = useState<{ id: string; name: string } | null>(null);
-    const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
-    const [showCreateStore, setShowCreateStore] = useState(false);
 
     // Car listing state
-    const [cars, setCars] = useState<Array<{ id: string }>>([]);
+    const [cars, setCars] = useState<Array<{ id: string; name: string }>>([]);
     const [carLoading, setCarLoading] = useState(false);
+    // Update initial filters state to include store_id
     const [filters, setFilters] = useState({
         brand_id: '',
         type_id: '',
+        store_id: '',
         transmission: '',
         fuel_type: '',
         min_seats: '',
@@ -60,7 +59,6 @@ export function CarListings() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPageState, setPerPageState] = useState(9);
-    const [totalCount, setTotalCount] = useState(0);
 
     useEffect(() => {
         if (!loading && (!user || !Array.isArray(user.roles) || !user.roles.includes('store_owner'))) {
@@ -75,7 +73,6 @@ export function CarListings() {
         })
             .then(res => res.json())
             .then(data => {
-                setStores(data.data || []);
                 if (data.data && data.data.length > 0) setSelectedStore(data.data[0]);
             });
     }, []);
@@ -99,7 +96,6 @@ export function CarListings() {
                 setCars(data.data);
                 setTotalPages(data.last_page);
                 setPerPageState(data.per_page);
-                setTotalCount(data.total);
             })
             .finally(() => setCarLoading(false));
     }, [selectedStore, filters, currentPage, perPageState]);
@@ -112,6 +108,7 @@ export function CarListings() {
         setFilters({
             brand_id: '',
             type_id: '',
+            store_id: '',
             transmission: '',
             fuel_type: '',
             min_seats: '',
@@ -132,7 +129,7 @@ export function CarListings() {
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-[#7e246c] dark:text-white">Car Listings</h2>
                 {selectedStore && (
-                    <Link 
+                    <Link
                         to={`/create-car?store_id=${selectedStore.id}`}
                         className="px-4 py-2 rounded bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition-colors"
                     >
@@ -191,8 +188,8 @@ export function CarListings() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10">
                                 {cars.map((car) => (
                                     <div key={car.id} className="relative">
-                                        <CarCard car={car} hideBooking={true} />
-                                        <Link 
+                                        <CarCard car={{ ...car, name: car.name || 'Car' }} hideBooking={true} />
+                                        <Link
                                             to={`/edit-car/${car.id}`}
                                             className="absolute top-2 right-2 px-3 py-1 rounded bg-[#7e246c] text-white text-xs font-semibold hover:bg-[#6a1f5c] transition-colors"
                                         >
@@ -318,7 +315,7 @@ export function Messages() {
                     <div className="flex-1 flex items-center justify-center bg-white/80 dark:bg-gray-900 h-full min-h-[400px]">
                         {selectedConv ? (
                             <div className="w-full h-full flex flex-col">
-                                <Chat conversationId={selectedConv.id} currentUser={user} />
+                                <Chat conversationId={typeof selectedConv.id === 'string' ? Number(selectedConv.id) : selectedConv.id} currentUser={user} />
                             </div>
                         ) : (
                             <div className="min-h-[650px] flex items-center justify-center w-full text-gray-400 text-lg">Select a conversation to start chatting.</div>
@@ -332,7 +329,6 @@ export function Messages() {
 
 // Dashboard Home Section
 export function Home() {
-    const { user, loading } = useAuth();
     const [stats, setStats] = useState({ cars: 0, bookings: 0 });
     useEffect(() => {
         async function fetchStats() {

@@ -45,10 +45,11 @@ export default function ProfilePage() {
       } else {
         setProfileSuccess(true);
         const updated = await res.json();
-        setUser && setUser({ ...user, ...updated });
+        if (setUser) setUser({ ...user, ...updated });
       }
     } catch (err) {
-      setProfileError('Network error');
+      console.error(err);
+      setProfileError('Network error' + err);
     } finally {
       setProfileLoading(false);
     }
@@ -76,7 +77,8 @@ export default function ProfilePage() {
         setPasswords({ current_password: '', password: '', password_confirmation: '' });
       }
     } catch (err) {
-      setPasswordError('Network error');
+      console.error(err);
+      setPasswordError('Network error' + err);
     } finally {
       setPasswordLoading(false);
     }
@@ -155,4 +157,4 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-} 
+}

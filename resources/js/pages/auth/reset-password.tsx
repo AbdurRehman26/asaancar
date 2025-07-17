@@ -48,6 +48,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                 setSuccess(true);
             }
         } catch (err) {
+            console.error(err);
             setError('Network error');
         } finally {
             setProcessing(false);

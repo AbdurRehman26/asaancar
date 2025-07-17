@@ -1,6 +1,6 @@
-import { ArrowRight, Brain, CheckCircle, ChevronDown, ChevronLeft, ChevronRight, Menu, MessageSquare, Target, Users, X, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle, ChevronDown, MessageSquare, Target, Users, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/pages/auth/login-modal';
 import Navbar from '../components/navbar';
 import DarkModeToggle from '../components/ui/dark-mode-toggle';
@@ -111,7 +111,7 @@ const smoothScrollTo = (id: string) => {
 };
 
 // Feature Card Component
-const FeatureCard = ({ icon: Icon, title, description }: { icon: any; title: string; description: string }) => (
+const FeatureCard = ({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) => (
     <div className="reveal flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg dark:border-neutral-800 dark:bg-gray-800/80">
         <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
             <Icon className="h-6 w-6" />
@@ -150,7 +150,7 @@ const FAQItem = ({
 );
 
 // Stats Card Component
-const StatCard = ({ number, label, icon: Icon }: { number: number; label: string; icon: any }) => {
+const StatCard = ({ number, label, icon: Icon }: { number: number; label: string; icon: React.ElementType }) => {
     const { count, countRef } = useCounterAnimation(number);
     
     return (
@@ -166,22 +166,14 @@ const StatCard = ({ number, label, icon: Icon }: { number: number; label: string
     );
 };
 
-type WelcomeProps = {
-  auth?: {
-    user?: any;
-  };
-};
-
 export default function Welcome() {
     const { user } = useAuth();
     useRevealOnScroll();
     const { progress, showScrollTop } = useScrollProgress();
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeAccordion, setActiveAccordion] = useState<number | null>(null);
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
     const [loginOpen, setLoginOpen] = useState(false);
-    const [registerOpen, setRegisterOpen] = useState(false);
 
     const validateEmail = (email: string) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -263,7 +255,6 @@ export default function Welcome() {
             <Navbar 
                 auth={{ user }}
                 onLoginClick={() => setLoginOpen(true)}
-                onRegisterClick={() => setRegisterOpen(true)}
             />
 
             <main>

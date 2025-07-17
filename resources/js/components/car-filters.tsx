@@ -1,9 +1,19 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 
+type CarFiltersType = {
+  brand_id: string;
+  type_id: string;
+  store_id: string;
+  transmission: string;
+  fuel_type: string;
+  min_seats: string;
+  max_price: string;
+};
+
 type CarFiltersProps = {
-  filters: any;
-  setFilters: (filters: any) => void;
+  filters: CarFiltersType;
+  setFilters: React.Dispatch<React.SetStateAction<CarFiltersType>>;
   duration: string;
   setDuration: (duration: string) => void;
   bookingDate: string;

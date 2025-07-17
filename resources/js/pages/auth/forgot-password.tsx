@@ -34,6 +34,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 setSuccess(true);
             }
         } catch (err) {
+            console.error(err);
             setError('Network error');
         } finally {
             setProcessing(false);

@@ -42,7 +42,8 @@ export default function SignupPage() {
         setSuccess(true);
       }
     } catch (e) {
-      setError('Network error');
+      console.error(e);
+      setError('Network error' + e);
     } finally {
       setLoading(false);
     }
@@ -125,4 +126,4 @@ export default function SignupPage() {
       </div>
     </div>
   );
-} 
+}

@@ -1,7 +1,28 @@
-import { Users, Fuel, Settings, Shield, MapPin, Calendar, Star, Thermometer, Navigation, Snowflake, Car, Key } from 'lucide-react';
+import { Users, Fuel, Settings, Shield, Calendar, Thermometer, Navigation, Key } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
+
+// Define Car interface
+interface Car {
+  id: string | number;
+  name: string;
+  image?: string;
+  specifications?: {
+    seats?: number;
+    fuelType?: string;
+    transmission?: string;
+  };
+  features?: string[];
+  minAge?: number;
+  price?: {
+    perDay?: {
+      withoutDriver?: number;
+      withDriver?: number;
+    };
+  };
+  extraInfo?: string;
+}
 
 // Helper for feature icons
 const featureIcons: Record<string, React.ReactNode> = {
@@ -24,7 +45,7 @@ const featureLabels: Record<string, string> = {
   minAge: 'Minimum age',
 };
 
-const CarCard = ({ car, handleBooking, hideBooking }: any) => {
+const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
   const { user } = useAuth();
   // Features to show (customize as needed)
   const features = [
@@ -65,7 +86,7 @@ const CarCard = ({ car, handleBooking, hideBooking }: any) => {
       {/* Features Grid */}
       <div className="w-full grid grid-cols-2 gap-x-4 gap-y-2 my-4">
         {features.map(
-          (f, i) =>
+          (f) =>
             f.value && (
               <div key={f.key} className="flex items-center gap-2 text-sm text-black dark:text-white">
                 {featureIcons[f.key]}

@@ -8,8 +8,8 @@ export default function CreateCarPage() {
   const [searchParams] = useSearchParams();
   const storeIdParam = searchParams.get('store_id');
   const navigate = useNavigate();
-  const [stores, setStores] = useState<any[]>([]);
-  const [selectedStore, setSelectedStore] = useState<any | null>(null);
+  const [stores, setStores] = useState<{ id: string; name: string; address?: string }[]>([]);
+  const [selectedStore, setSelectedStore] = useState<{ id: string; name: string; address?: string } | null>(null);
   const [form, setForm] = useState({
     name: '',
     brand_id: '',
@@ -34,7 +34,7 @@ export default function CreateCarPage() {
         setStores(data.data || []);
         // Set default selected store
         if (data.data && data.data.length > 0) {
-          const defaultStore = data.data.find((s: any) => String(s.id) === String(storeIdParam)) || data.data[0];
+          const defaultStore = data.data.find((s: { id: string; name: string }) => String(s.id) === String(storeIdParam)) || data.data[0];
           setSelectedStore(defaultStore);
         }
       });
@@ -42,11 +42,6 @@ export default function CreateCarPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleStoreChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const store = stores.find((s: any) => String(s.id) === e.target.value);
-    setSelectedStore(store);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,6 +60,7 @@ export default function CreateCarPage() {
         navigate('/dashboard');
       }
     } catch (e) {
+      console.error(e);
       setError('Network error');
     } finally {
       setLoading(false);
@@ -88,7 +84,7 @@ export default function CreateCarPage() {
             {storeDropdownOpen && (
               <div className="absolute left-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-neutral-700 rounded-lg shadow-lg z-10">
                 <ul>
-                  {stores.map((store: any) => (
+                  {stores.map((store: { id: string; name: string }) => (
                     <li key={store.id}>
                       <button
                         className={`w-full text-left px-4 py-2 hover:bg-[#7e246c]/10 ${selectedStore?.id === store.id ? 'bg-[#7e246c]/20 font-bold' : ''}`}

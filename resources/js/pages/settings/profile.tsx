@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
 import DeleteUser from '@/components/delete-user';
@@ -26,8 +26,7 @@ type ProfileForm = {
     email: string;
 };
 
-export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
-    const { auth } = usePage<SharedData>().props;
+export default function Profile({ auth }: { auth: SharedData['auth'] }) {
     const [data, setData] = useState<ProfileForm>({
         name: auth.user.name,
         email: auth.user.email,
@@ -53,7 +52,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 setSuccess(true);
             }
         } catch (err) {
-            setError('Network error');
+            console.error(err);
+            setError('Network error' + err);
         } finally {
             setProcessing(false);
         }

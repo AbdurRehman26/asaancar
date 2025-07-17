@@ -12,13 +12,12 @@ import { useAuth } from '@/components/AuthContext';
 type NavbarProps = {
   currentPage?: string;
   auth?: {
-    user?: any;
+    user?: unknown;
   };
   onLoginClick?: () => void;
-  onRegisterClick?: () => void;
 };
 
-const Navbar: React.FC<NavbarProps> = ({ currentPage = '', onLoginClick, onRegisterClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ currentPage = '', onLoginClick }) => {
   const { user } = useAuth();
   const getInitials = useInitials();
 

@@ -1,6 +1,6 @@
 declare global {
     interface Window {
-        Pusher: any;
+        Pusher: unknown;
     }
 }
 

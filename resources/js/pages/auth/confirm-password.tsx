@@ -32,6 +32,7 @@ export default function ConfirmPassword() {
                 setSuccess(true);
             }
         } catch (err) {
+            console.error(err);
             setError('Network error');
         } finally {
             setProcessing(false);
