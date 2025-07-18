@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
-import DarkModeToggle from '../components/ui/dark-mode-toggle';
 import { useAuth } from '@/components/AuthContext';
 
 type NavbarProps = {
@@ -70,8 +69,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '', onLoginClick }) => {
             Dashboard
           </Link>
         )}
-        {/* Dark Mode Toggle */}
-        <DarkModeToggle />
         {/* Auth Buttons */}
         {!user ? (
           <div className="flex items-center space-x-4">

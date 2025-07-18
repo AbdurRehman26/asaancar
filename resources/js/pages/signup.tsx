@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/utils';
 import Navbar from '../components/navbar';
-import DarkModeToggle from '../components/ui/dark-mode-toggle';
 
 const roles = [
   { value: 'user', label: 'User' },
@@ -63,9 +62,6 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row relative">
-      <div className="absolute top-4 right-4 z-50">
-        <DarkModeToggle />
-      </div>
       <Navbar />
       {/* Left: Signup Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 bg-white dark:bg-gray-900 mt-20">

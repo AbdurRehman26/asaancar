@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/pages/auth/login-modal';
 import Navbar from '../components/navbar';
-import DarkModeToggle from '../components/ui/dark-mode-toggle';
 import { useAuth } from '@/components/AuthContext';
 
 // Animation utility for reveal on scroll
@@ -490,9 +489,6 @@ export default function Welcome() {
                     </div>
                 </footer>
             </main>
-
-            {/* Dark Mode Toggle */}
-            <DarkModeToggle />
         </>
     );
 }
