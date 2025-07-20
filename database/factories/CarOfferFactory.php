@@ -17,15 +17,14 @@ class CarOfferFactory extends Factory
     public function definition(): array
     {
         $start = $this->faker->dateTimeBetween('-1 month', '+1 month');
-        $end = (clone $start)->modify('+'.rand(1, 14).' days');
+        $end = (clone $start)->modify('+'.rand(1, 14).'days');
         return [
             'car_id' => null, // to be set in seeder
-            'price_with_driver' => $this->faker->randomFloat(2, 50, 200),
-            'price_without_driver' => $this->faker->randomFloat(2, 30, 150),
+            'discount_percentage' => $this->faker->randomFloat(2, 5, 50),
+            'currency' => $this->faker->randomElement(['PKR', 'USD', 'EUR', 'GBP', 'CAD', 'AUD']),
             'start_date' => $start,
             'end_date' => $end,
-            'available_from' => $start,
-            'available_to' => $end,
+            'is_active' => $this->faker->boolean(80), // 80% chance of being active
         ];
     }
 }

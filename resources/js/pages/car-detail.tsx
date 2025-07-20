@@ -122,16 +122,6 @@ export default function CarDetailPage() {
   };
 
   const handleOpenChat = async () => {
-    console.log('🔍 DEBUG: handleOpenChat called');
-    console.log('�� DEBUG: User object:', user);
-    console.log('🔍 DEBUG: Car object:', car);
-    console.log('🔍 DEBUG: Car store_id:', car?.store_id);
-    console.log('🔍 DEBUG: Car store object:', car?.store);
-    console.log('🔍 DEBUG: Car store.id:', car?.store?.id);
-    console.log('🔍 DEBUG: User exists:', !!user);
-    console.log('🔍 DEBUG: Car exists:', !!car);
-    console.log('🔍 DEBUG: Store_id exists:', !!car?.store_id);
-    console.log('🔍 DEBUG: Store.id exists:', !!car?.store?.id);
 
     setChatError(null);
 
@@ -237,7 +227,7 @@ export default function CarDetailPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-neutral-50 mt-17 dark:bg-gray-900">
         {/* Navbar */}
         <Navbar
           auth={{ user }}
@@ -269,7 +259,7 @@ export default function CarDetailPage() {
                     className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
                     placeholder="Pick-up address"
                   />
-                  <div className="flex gap-4">
+                  <div className="flex flex-col gap-4 sm:flex-row">
                     <div className="flex items-center gap-2 flex-1">
                       <Clock className="text-[#7e246c]" />
                       <input

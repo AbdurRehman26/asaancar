@@ -23,9 +23,8 @@ class UpdateCarOfferRequest extends FormRequest
     {
         return [
             'car_id' => 'required|exists:cars,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
             'discount_percentage' => 'required|numeric|min:0|max:100',
+            'currency' => 'nullable|string|size:3',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'is_active' => 'boolean',
@@ -40,10 +39,10 @@ class UpdateCarOfferRequest extends FormRequest
         return [
             'car_id.required' => 'Please select a car.',
             'car_id.exists' => 'The selected car does not exist.',
-            'title.required' => 'Please enter the offer title.',
             'discount_percentage.required' => 'Please enter the discount percentage.',
             'discount_percentage.min' => 'Discount percentage must be at least 0%.',
             'discount_percentage.max' => 'Discount percentage cannot exceed 100%.',
+            'currency.size' => 'Currency must be exactly 3 characters.',
             'start_date.required' => 'Please select a start date.',
             'end_date.required' => 'Please select an end date.',
             'end_date.after' => 'End date must be after the start date.',

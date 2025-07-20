@@ -7,18 +7,9 @@ import CarCard from '../components/car-card';
 import CarFilters from '../components/car-filters';
 import { Car, UserCircle, BookOpen } from 'lucide-react';
 import Chat from '../components/chat';
+import type { Conversation } from '@/types/dashboard';
 
-// Add Conversation interface at the top
-interface Conversation {
-  id: string;
-  type: string;
-  booking_id?: string;
-  store?: { name?: string };
-  store_id?: string;
-  unread_count?: number;
-  last_message?: string;
-  updated_at?: string;
-}
+// Remove local Conversation interface
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -142,14 +133,7 @@ export function CarListings() {
                     <CarFilters
                         filters={filters}
                         setFilters={setFilters}
-                        duration={''}
-                        setDuration={() => {}}
-                        bookingDate={''}
-                        setBookingDate={() => {}}
-                        bookingTime={''}
-                        setBookingTime={() => {}}
                         handleSearch={handleSearch}
-                        clearFilters={clearFilters}
                         loading={carLoading}
                     />
                     {/* Pagination Top */}

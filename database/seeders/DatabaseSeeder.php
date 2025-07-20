@@ -22,15 +22,27 @@ class DatabaseSeeder extends Seeder
             Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
         }
 
-        // 2. Seed car brands, types, engines
+        // 2. Create specific user with store owner role
+        $specificUser = User::firstOrCreate(
+            ['email' => 'sydabdrehman@gmail.com'],
+            [
+                'name' => 'Syed Abdul Rehman',
+                'email' => 'sydabdrehman@gmail.com',
+                'password' => bcrypt('sydabdrehman@gmail.com'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $specificUser->assignRole('store_owner');
+
+        // 3. Seed car brands, types, engines
         $carBrands = \App\Models\CarBrand::factory(8)->create();
         $carTypes = \App\Models\CarType::factory(6)->create();
         $carEngines = \App\Models\CarEngine::factory(5)->create();
 
-        // 3. Seed stores
+        // 4. Seed stores
         $stores = \App\Models\Store::factory(10)->create();
 
-        // 4. Seed users and assign roles
+        // 5. Seed users and assign roles
         $storeOwners = \App\Models\User::factory(5)->create();
         $customers = \App\Models\User::factory(10)->create();
         $admins = \App\Models\User::factory(2)->create();
@@ -47,7 +59,7 @@ class DatabaseSeeder extends Seeder
             $user->assignRole('admin');
         }
 
-        // 5. Seed cars (linked to stores, brands, types, engines)
+        // 6. Seed cars (linked to stores, brands, types, engines)
         $cars = collect();
         foreach ($stores as $store) {
             $cars = $cars->merge(\App\Models\Car::factory(8)->make()->each(function($car) use ($store, $carBrands, $carTypes, $carEngines) {
@@ -59,7 +71,7 @@ class DatabaseSeeder extends Seeder
             }));
         }
 
-        // 6. Seed bookings (linked to users, cars, stores)
+        // 7. Seed bookings (linked to users, cars, stores)
         $allUsers = $storeOwners->merge($customers);
         foreach ($cars as $car) {
             \App\Models\Booking::factory(3)->make()->each(function($booking) use ($allUsers, $car) {
@@ -70,10 +82,11 @@ class DatabaseSeeder extends Seeder
             });
         }
 
-        // 7. Optionally seed car offers, store offers, etc.
+        // 8. Optionally seed car offers, store offers, etc.
         $this->call([
             CarOfferSeeder::class,
             StoreOfferSeeder::class,
+            CitySeeder::class,
         ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\Store\CreateStoreRequest;
 use App\Http\Requests\Store\UpdateStoreRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StoreResource;
+use App\Models\City;
 
 /**
  * @OA\Tag(
@@ -38,7 +39,14 @@ class StoreController extends Controller
     public function index()
     {
         $stores = Store::paginate(10);
-        return StoreResource::collection($stores);
+        $cities = City::all();
+        return response()->json([
+            'stores' => StoreResource::collection($stores),
+            'cities' => $cities->map(fn($city) => ['id' => $city->id, 'name' => $city->name]),
+            'current_page' => $stores->currentPage(),
+            'per_page' => $stores->perPage(),
+            'total' => $stores->total(),
+        ]);
     }
 
     /**

@@ -14,79 +14,18 @@ type CarFiltersType = {
 type CarFiltersProps = {
   filters: CarFiltersType;
   setFilters: React.Dispatch<React.SetStateAction<CarFiltersType>>;
-  duration: string;
-  setDuration: (duration: string) => void;
-  bookingDate: string;
-  setBookingDate: (date: string) => void;
-  bookingTime: string;
-  setBookingTime: (time: string) => void;
   handleSearch: () => void;
-  clearFilters: () => void;
-  loading: boolean;
+  loading?: boolean;
 };
 
 const CarFilters: React.FC<CarFiltersProps> = ({
   filters,
   setFilters,
-  duration,
-  setDuration,
-  bookingDate,
-  setBookingDate,
-  bookingTime,
-  setBookingTime,
   handleSearch,
-  clearFilters,
-  loading
+  loading = false
 }) => (
   <div className="bg-white dark:bg-gray-800/80 border-2 border-[#7e246c] rounded-lg mx-4 my-4">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-        <div>
-          <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Duration</label>
-          <select 
-            value={duration} 
-            onChange={(e) => setDuration(e.target.value)}
-            className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
-          >
-            <option value="hourly">Hourly</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Date</label>
-          <input
-            type="date"
-            value={bookingDate}
-            onChange={(e) => setBookingDate(e.target.value)}
-            className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Time</label>
-          <input
-            type="time"
-            value={bookingTime}
-            onChange={(e) => setBookingTime(e.target.value)}
-            className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
-          />
-        </div>
-        <div className="flex items-end space-x-2">
-          <button 
-            onClick={handleSearch}
-            disabled={loading}
-            className="flex-1 bg-[#7e246c] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#6a1f5c] transition-colors disabled:opacity-50 shadow"
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
-          <button 
-            onClick={clearFilters}
-            className="px-4 py-2 border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-semibold"
-          >
-            Clear
-          </button>
-        </div>
-      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <div>
           <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Brand</label>

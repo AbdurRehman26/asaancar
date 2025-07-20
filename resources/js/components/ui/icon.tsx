@@ -1,11 +1,7 @@
 import { LucideIcon } from 'lucide-react';
+import type { IconPropsSimple } from '@/types/icon';
 
-interface IconProps {
-    iconNode?: LucideIcon | null;
-    className?: string;
-}
-
-export function Icon({ iconNode: IconComponent, className }: IconProps) {
+export function Icon({ iconNode: IconComponent, className }: IconPropsSimple) {
     if (!IconComponent) {
         return null;
     }

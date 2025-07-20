@@ -4,10 +4,7 @@ import { type User } from '@/types';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import { LogOut, Settings, LayoutGrid } from 'lucide-react';
-
-interface UserMenuContentProps {
-    user: User;
-}
+import type { UserMenuContentProps } from '@/types/user-menu-content';
 
 export function UserMenuContent({ user }: UserMenuContentProps) {
     console.log('UserMenuContent user:', user);
@@ -47,15 +44,13 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                         Profile
                     </Link>
                 </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            {/* Logout button */}
-            <DropdownMenuItem asChild className="dark:bg-gray-800/80 dark:text-white">
-                <button className="block w-full dark:text-white" onClick={handleLogout}>
+                <DropdownMenuSeparator />
+                {/* Logout */}
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
                     <LogOut className="mr-2" />
-                    Log out
-                </button>
-            </DropdownMenuItem>
+                    Logout
+                </DropdownMenuItem>
+            </DropdownMenuGroup>
         </>
     );
 }

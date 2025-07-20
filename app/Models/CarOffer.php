@@ -12,11 +12,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *     title="Car Offer",
  *     description="Car offer model",
  *     @OA\Property(property="id", type="integer", example=1),
- *     @OA\Property(property="store_id", type="integer", example=1),
  *     @OA\Property(property="car_id", type="integer", example=1),
- *     @OA\Property(property="title", type="string", example="Summer Sale"),
- *     @OA\Property(property="description", type="string", example="Get 20% off on all cars this summer"),
  *     @OA\Property(property="discount_percentage", type="number", format="float", example=20.00),
+ *     @OA\Property(property="currency", type="string", example="PKR", description="Currency code (3 characters)"),
  *     @OA\Property(property="start_date", type="string", format="date-time", example="2024-06-01T00:00:00Z"),
  *     @OA\Property(property="end_date", type="string", format="date-time", example="2024-08-31T23:59:59Z"),
  *     @OA\Property(property="is_active", type="boolean", example=true),
@@ -30,11 +28,9 @@ class CarOffer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'store_id',
         'car_id',
-        'title',
-        'description',
         'discount_percentage',
+        'currency',
         'start_date',
         'end_date',
         'is_active',
@@ -46,11 +42,6 @@ class CarOffer extends Model
         'discount_percentage' => 'decimal:2',
         'is_active' => 'boolean',
     ];
-
-    public function store(): BelongsTo
-    {
-        return $this->belongsTo(Store::class);
-    }
 
     public function car(): BelongsTo
     {

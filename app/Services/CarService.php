@@ -126,17 +126,20 @@ class CarService
         if ($offer) {
             $withoutDriver = $offer->price_without_driver ?? 150.00;
             $withDriver = $offer->price_with_driver ?? 200.00;
+            $currency = $offer->currency ?? 'PKR';
         } else {
             // Default pricing if no offer
             $withoutDriver = 150.00;
             $withDriver = 200.00;
+            $currency = 'PKR';
         }
 
         return [
             'perDay' => [
                 'withoutDriver' => round($withoutDriver, 2),
                 'withDriver' => round($withDriver, 2),
-            ]
+            ],
+            'currency' => $currency
         ];
     }
 
@@ -230,9 +233,8 @@ class CarService
     {
         return [
             'id' => $offer->id,
-            'title' => $offer->title,
-            'description' => $offer->description,
             'discount' => $offer->discount_percentage,
+            'currency' => $offer->currency ?? 'PKR',
             'start_date' => $offer->start_date,
             'end_date' => $offer->end_date,
             'is_active' => $offer->is_active,
@@ -276,16 +278,22 @@ class CarService
             $query->where('seats', '>=', $filters['min_seats']);
         }
 
-        if (!empty($filters['max_price'])) {
-            // This would need to be implemented based on your pricing structure
-            // $query->where('base_price', '<=', $filters['max_price']);
-        }
-
         $cars = $query->get();
 
-        return $cars->map(function ($car) {
+        $formatted = $cars->map(function ($car) {
             return $this->formatCarForListing($car);
-        })->toArray();
+        });
+
+        // Apply max price filter after formatting (since prices are calculated dynamically)
+        if (!empty($filters['max_price'])) {
+            $maxPrice = (float) $filters['max_price'];
+            $formatted = $formatted->filter(function ($car) use ($maxPrice) {
+                $price = $car['price']['perDay']['withoutDriver'] ?? 0;
+                return $price <= $maxPrice;
+            });
+        }
+
+        return $formatted->values()->toArray();
     }
 
     /**
@@ -352,9 +360,6 @@ class CarService
         if (!empty($filters['min_seats'])) {
             $query->where('seats', '>=', $filters['min_seats']);
         }
-        if (!empty($filters['max_price'])) {
-            // Implement price filtering if needed
-        }
 
         $cars = $query->paginate($perPage);
 
@@ -362,11 +367,20 @@ class CarService
             return $this->formatCarForListing($car);
         });
 
+        // Apply max price filter after formatting (since prices are calculated dynamically)
+        if (!empty($filters['max_price'])) {
+            $maxPrice = (float) $filters['max_price'];
+            $formatted = $formatted->filter(function ($car) use ($maxPrice) {
+                $price = $car['price']['perDay']['withoutDriver'] ?? 0;
+                return $price <= $maxPrice;
+            });
+        }
+
         return [
-            'data' => $formatted,
+            'data' => $formatted->values(),
             'current_page' => $cars->currentPage(),
             'last_page' => $cars->lastPage(),
-            'total' => $cars->total(),
+            'total' => $formatted->count(),
             'per_page' => $cars->perPage(),
         ];
     }

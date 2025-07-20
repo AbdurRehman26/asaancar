@@ -1,4 +1,4 @@
-import { Users, Fuel, Settings, Shield, Calendar, Thermometer, Navigation, Key } from 'lucide-react';
+import { Users, Fuel, Settings, Shield, Calendar, Thermometer, Navigation, Key, Car } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
@@ -12,16 +12,20 @@ interface Car {
     seats?: number;
     fuelType?: string;
     transmission?: string;
+    type?: string;
   };
   features?: string[];
   minAge?: number;
+  currency?: string;
   price?: {
     perDay?: {
       withoutDriver?: number;
       withDriver?: number;
     };
+    currency?: string;
   };
   extraInfo?: string;
+  brand?: string; // Added brand to the interface
 }
 
 // Helper for feature icons
@@ -29,6 +33,7 @@ const featureIcons: Record<string, React.ReactNode> = {
   seats: <Users className="h-5 w-5" />, // Seats
   fuelType: <Fuel className="h-5 w-5" />, // Fuel
   transmission: <Settings className="h-5 w-5" />, // Transmission
+  type: <Car className="h-5 w-5" />, // Car Type
   mileage: <Shield className="h-5 w-5" />, // Mileage
   gps: <Navigation className="h-5 w-5" />, // GPS
   airConditioning: <Thermometer className="h-5 w-5" />, // AC
@@ -36,13 +41,14 @@ const featureIcons: Record<string, React.ReactNode> = {
 };
 
 const featureLabels: Record<string, string> = {
-  seats: 'seats',
+  seats: '',
   fuelType: '',
   transmission: '',
+  type: '',
   mileage: '',
   gps: 'GPS',
   airConditioning: 'Air Conditioning',
-  minAge: 'Minimum age',
+  minAge: 'Minimum Age',
 };
 
 const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
@@ -50,11 +56,11 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
   // Features to show (customize as needed)
   const features = [
     { key: 'seats', value: car.specifications?.seats },
-    { key: 'fuelType', value: car.specifications?.fuelType },
-    { key: 'transmission', value: car.specifications?.transmission },
+    { key: 'fuelType', value: car.specifications?.fuelType ? car.specifications.fuelType.charAt(0).toUpperCase() + car.specifications.fuelType.slice(1) : null },
+    { key: 'transmission', value: car.specifications?.transmission ? car.specifications.transmission.charAt(0).toUpperCase() + car.specifications.transmission.slice(1) : null },
+    { key: 'type', value: car.specifications?.type ? car.specifications.type.charAt(0).toUpperCase() + car.specifications.type.slice(1) : null },
     { key: 'gps', value: car.features?.includes('GPS') ? 'Yes' : null },
     { key: 'airConditioning', value: car.features?.includes('Air Conditioning') ? 'Yes' : null },
-    { key: 'minAge', value: car.minAge || 21 },
   ];
 
   return (
@@ -70,14 +76,16 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
       </Link>
       {/* Car Name & Subtitle */}
       <div className="w-full text-center mb-2">
-        <h3 className="font-bold text-lg text-[#7e246c] dark:text-white">{car.name}</h3>
-        <div className="text-xs text-gray-500 dark:text-gray-300">or similar</div>
+        <h3 className="font-bold text-lg text-[#7e246c] dark:text-white truncate overflow-hidden whitespace-nowrap">{car.name}</h3>
+        {car.brand && (
+          <div className="text-xs text-gray-500 dark:text-gray-300 font-semibold">{car.brand}</div>
+        )}
       </div>
       {/* Price */}
       <div className="w-full text-center mb-2">
-        <div className="text-2xl font-extrabold text-[#7e246c] dark:text-white">€{car.price?.perDay?.withoutDriver ?? '--'}<span className="text-base font-medium text-[#7e246c] dark:text-white">/day</span></div>
+        <div className="text-2xl font-extrabold text-[#7e246c] dark:text-white">{car.price?.currency || 'PKR'} {car.price?.perDay?.withoutDriver ?? '--'}<span className="text-base font-medium text-[#7e246c] dark:text-white">/day</span></div>
         {car.price?.perDay?.withDriver && (
-          <div className="text-xs text-[#7e246c] dark:text-white">With driver: €{car.price.perDay.withDriver}/day</div>
+          <div className="text-xs text-[#7e246c] dark:text-white">With driver: {car.price.currency || 'PKR'} {car.price.perDay.withDriver}/day</div>
         )}
         {car.extraInfo && (
           <div className="text-xs text-gray-400 dark:text-gray-300 mt-1">{car.extraInfo}</div>

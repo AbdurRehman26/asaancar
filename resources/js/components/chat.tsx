@@ -22,11 +22,24 @@ interface ChatProps {
 export default function Chat({ conversationId, currentUser }: ChatProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        setLoading(true);
+        setError(null);
         apiFetch(`/api/chat/conversations/${conversationId}/messages`)
-            .then(async (res) => setMessages(await res.json()));
+            .then(async (res) => {
+                if (!res.ok) {
+                    setError('Failed to load messages');
+                    setMessages([]);
+                } else {
+                    setMessages(await res.json());
+                }
+            })
+            .catch(() => setError('Failed to load messages'))
+            .finally(() => setLoading(false));
     }, [conversationId]);
 
     useEffect(() => {
@@ -58,22 +71,30 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
     return (
         <div className="flex flex-col h-full min-h-[650px] bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-300 dark:border-gray-800">
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                {messages.map((msg) => (
-                    <div
-                        key={msg.id}
-                        className={`flex flex-col ${msg.sender.id === currentUser.id ? 'items-end' : 'items-start'}`}
-                    >
-                        <div className={`px-4 py-2 rounded-lg max-w-xs 
-                            ${msg.sender.id === currentUser.id 
-                                ? 'bg-primary text-white dark:bg-primary dark:text-white' 
-                                : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'}
-                        `}>
-                            <span className="block text-xs font-semibold mb-1">{msg.sender.name}</span>
-                            <span>{msg.message}</span>
+                {loading ? (
+                    <div className="flex items-center justify-center h-full text-gray-400">Loading messages...</div>
+                ) : error ? (
+                    <div className="flex items-center justify-center h-full text-red-500">{error}</div>
+                ) : messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-gray-400">No messages yet.</div>
+                ) : (
+                    messages.map((msg) => (
+                        <div
+                            key={msg.id}
+                            className={`flex flex-col ${msg.sender.id === currentUser.id ? 'items-end' : 'items-start'}`}
+                        >
+                            <div className={`px-4 py-2 rounded-lg max-w-xs 
+                                ${msg.sender.id === currentUser.id 
+                                    ? 'bg-primary text-white dark:bg-primary dark:text-white' 
+                                    : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'}
+                            `}>
+                                <span className="block text-xs font-semibold mb-1">{msg.sender.name}</span>
+                                <span>{msg.message}</span>
+                            </div>
+                            <span className="text-xs text-gray-400 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</span>
                         </div>
-                        <span className="text-xs text-gray-400 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</span>
-                    </div>
-                ))}
+                    ))
+                )}
                 <div ref={messagesEndRef} />
             </div>
             <form onSubmit={sendMessage} className="p-4 flex gap-2 border-t border-gray-300 dark:border-gray-800">

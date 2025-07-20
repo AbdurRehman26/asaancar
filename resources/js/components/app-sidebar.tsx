@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Folder, MessageSquare } from 'lucide-react';
+import { LayoutGrid, Folder, MessageSquare, Store } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect, useRef } from 'react';
@@ -19,7 +19,7 @@ export function AppSidebar() {
         wasLoginOpen.current = loginOpen;
     }, [user, loginOpen]);
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -42,6 +42,14 @@ export function AppSidebar() {
                             <Link to="/dashboard/cars">
                                 <Folder className="mr-2" />
                                 Car Listings
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild>
+                            <Link to="/dashboard/stores">
+                                <Store className="mr-2" />
+                                Car Stores
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

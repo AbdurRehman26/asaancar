@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\Customer\CarController;
 use App\Http\Controllers\Customer\StoreController;
 use App\Http\Controllers\Customer\CarBrandController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Resources\UserResource;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Customer\CityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -91,6 +93,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/conversations/{conversation}/messages', [\App\Http\Controllers\ChatController::class, 'messages']);
     Route::post('/chat/conversations/{conversation}/messages', [\App\Http\Controllers\ChatController::class, 'sendMessage']);
 });
+
+// Cities API
+Route::get('/cities', [CityController::class, 'index']);
 
 // Customer API Routes
 Route::prefix('customer')->group(function () {

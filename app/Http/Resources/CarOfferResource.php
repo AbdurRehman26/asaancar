@@ -11,10 +11,8 @@ class CarOfferResource extends JsonResource
         return [
             'id' => $this->id,
             'car' => new CarResource($this->whenLoaded('car')),
-            'store' => new StoreResource($this->whenLoaded('store')),
-            'title' => $this->title,
-            'description' => $this->description,
             'discount_percentage' => $this->discount_percentage,
+            'currency' => $this->currency,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,

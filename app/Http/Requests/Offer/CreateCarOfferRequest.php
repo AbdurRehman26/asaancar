@@ -9,11 +9,10 @@ use Illuminate\Foundation\Http\FormRequest;
  *     schema="CarOfferRequest",
  *     title="Car Offer Request",
  *     description="Car offer request data",
- *     required={"car_id", "title", "discount_percentage", "start_date", "end_date"},
+ *     required={"car_id", "discount_percentage", "start_date", "end_date"},
  *     @OA\Property(property="car_id", type="integer", example=1, description="ID of the car for the offer"),
- *     @OA\Property(property="title", type="string", example="Summer Sale", description="Offer title"),
- *     @OA\Property(property="description", type="string", nullable=true, example="Get 20% off on all cars this summer", description="Offer description"),
  *     @OA\Property(property="discount_percentage", type="number", format="float", example=20.00, description="Discount percentage (0-100)"),
+ *     @OA\Property(property="currency", type="string", example="PKR", description="Currency code (3 characters)"),
  *     @OA\Property(property="start_date", type="string", format="date-time", example="2024-06-01T00:00:00Z", description="Offer start date"),
  *     @OA\Property(property="end_date", type="string", format="date-time", example="2024-08-31T23:59:59Z", description="Offer end date"),
  *     @OA\Property(property="is_active", type="boolean", example=true, description="Whether the offer is active")
@@ -38,9 +37,8 @@ class CreateCarOfferRequest extends FormRequest
     {
         return [
             'car_id' => 'required|exists:cars,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
             'discount_percentage' => 'required|numeric|min:0|max:100',
+            'currency' => 'nullable|string|size:3',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'is_active' => 'boolean',
@@ -55,10 +53,10 @@ class CreateCarOfferRequest extends FormRequest
         return [
             'car_id.required' => 'Please select a car.',
             'car_id.exists' => 'The selected car does not exist.',
-            'title.required' => 'Please enter the offer title.',
             'discount_percentage.required' => 'Please enter the discount percentage.',
             'discount_percentage.min' => 'Discount percentage must be at least 0%.',
             'discount_percentage.max' => 'Discount percentage cannot exceed 100%.',
+            'currency.size' => 'Currency must be exactly 3 characters.',
             'start_date.required' => 'Please select a start date.',
             'end_date.required' => 'Please select an end date.',
             'end_date.after' => 'End date must be after the start date.',

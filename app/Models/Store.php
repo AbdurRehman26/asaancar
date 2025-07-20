@@ -33,12 +33,9 @@ class Store extends Model
         'city',
         'contact_phone',
         'address',
-        'data',
     ];
 
-    protected $casts = [
-        'data' => 'array',
-    ];
+    // No 'data' field or cast
 
     public function cars(): HasMany
     {

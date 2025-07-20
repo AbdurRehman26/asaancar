@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('contact_phone');
             $table->string('address')->nullable();
             $table->timestamps();
-            $table->json('data')->nullable();
         });
     }
 

@@ -18,6 +18,8 @@ class CarOfferSeeder extends Seeder
         if ($cars->count() === 0) return;
         CarOffer::factory(25)->make()->each(function ($offer) use ($cars) {
             $offer->car_id = $cars->random()->id;
+            $offer->available_from = now()->subDays(rand(1, 30));
+            $offer->available_to = now()->addDays(rand(1, 30));
             $offer->save();
         });
     }

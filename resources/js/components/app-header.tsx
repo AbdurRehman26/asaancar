@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import LoginModal from '@/pages/auth/login-modal';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/components/AuthContext';
+import type { AppHeaderProps } from '@/types/app-header';
 
 const rightNavItems: NavItem[] = [
     {
@@ -29,10 +30,6 @@ const rightNavItems: NavItem[] = [
         icon: BookOpen,
     },
 ];
-
-interface AppHeaderProps {
-    breadcrumbs?: BreadcrumbItem[];
-}
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const { user } = useAuth();

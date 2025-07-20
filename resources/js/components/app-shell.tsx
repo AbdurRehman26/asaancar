@@ -1,9 +1,5 @@
 import { SidebarProvider } from '@/components/ui/sidebar';
-
-interface AppShellProps {
-    children: React.ReactNode;
-    variant?: 'header' | 'sidebar';
-}
+import type { AppShellProps } from '@/types/app-shell';
 
 export function AppShell({ children, variant = 'header' }: AppShellProps) {
     const isOpen = true;

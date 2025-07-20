@@ -61,18 +61,12 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row relative">
+    <div className="min-h-screen flex flex-col md:flex-row">
       <Navbar />
       {/* Left: Signup Form */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-12 bg-white dark:bg-gray-900 mt-20">
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 bg-white dark:bg-gray-900 md:pt-0 pt-16">
         <div className="max-w-md w-full mx-auto">
-          {/* Logo and Headline */}
-          <div className="flex items-center gap-2 mb-6">
-            <svg className="h-8 w-8 text-[#7e246c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <circle cx="12" cy="12" r="10" strokeWidth="2" />
-            </svg>
-            <span className="text-2xl font-bold text-[#7e246c] dark:text-white">AsaanCar</span>
-          </div>
+          <div className="mt-15">
           <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Get Started with AsaanCar</h1>
           <p className="text-gray-500 dark:text-gray-300 mb-6">Create your account</p>
           {/* Step Indicator */}
@@ -105,6 +99,14 @@ export default function SignupPage() {
             </div>
             <button type="submit" className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base" disabled={loading}>{loading ? 'Signing up...' : 'Sign Up'}</button>
           </form>
+          {/* Login Link */}
+          <div className="mt-6 text-center">
+            <span className="text-gray-600 dark:text-gray-300">Already have an account? </span>
+            <a href="/login" className="text-[#7e246c] hover:underline font-semibold">
+              Log in
+            </a>
+          </div>
+          </div>
         </div>
       </div>
       {/* Right: Marketing/Visual Content */}
