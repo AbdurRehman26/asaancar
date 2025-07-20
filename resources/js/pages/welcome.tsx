@@ -102,27 +102,6 @@ const useCounterAnimation = (end: number, duration: number = 2000) => {
     return { count, countRef };
 };
 
-// Smooth scroll utility
-const smoothScrollTo = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-    }
-};
-
-// Feature Card Component
-const FeatureCard = ({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) => (
-    <div className="reveal flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg dark:border-neutral-800 dark:bg-gray-800/80">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
-            <Icon className="h-6 w-6" />
-        </div>
-        <div>
-            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
-        </div>
-    </div>
-);
-
 // FAQ Accordion Component
 const FAQItem = ({ 
     question, 
@@ -191,11 +170,6 @@ export default function Welcome() {
         alert('Thank you for subscribing!');
         setEmail('');
     };
-
-    const navLinks = [
-        { href: '#features', label: 'Features' },
-        { href: '#how-it-works', label: 'How it Works' },
-    ];
 
     const faqItems = [
         {

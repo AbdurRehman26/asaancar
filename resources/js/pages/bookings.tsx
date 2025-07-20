@@ -6,7 +6,6 @@ import LoginModal from '@/pages/auth/login-modal';
 import { apiFetch } from '@/lib/utils';
 import { useAuth } from '@/components/AuthContext';
 import Chat from '../components/chat';
-import { useRef } from 'react';
 
 type Booking = {
   id: number;

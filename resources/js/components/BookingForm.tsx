@@ -34,17 +34,12 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
   const [pickupAddress, setPickupAddress] = useState<string>('Werdener Str. 87, 40233 Düsseldorf, Germany');
   const [pickupTime, setPickupTime] = useState<string>('23:30');
   const [pickupDate, setPickupDate] = useState<string>('2025-07-13');
-  const [refillTank, setRefillTank] = useState<boolean>(false);
-  const [selectedRentalType, setSelectedRentalType] = useState<'withDriver' | 'withoutDriver'>('withoutDriver');
   const [notes, setNotes] = useState<string>('');
-  const [numberOfDays, setNumberOfDays] = useState<number>(1);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [buttonLoading, setButtonLoading] = useState(false);
 
-  const dailyPrice = selectedRentalType === 'withDriver'
-    ? (car && typeof car.withDriver === 'number' ? car.withDriver : 0)
-    : (car && typeof car.rental === 'number' ? car.rental : 0);
-  const totalAmount = dailyPrice * numberOfDays;
+  const dailyPrice = car && typeof car.rental === 'number' ? car.rental : 0;
+  const totalAmount = dailyPrice * 1; // Assuming numberOfDays is 1 for now
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,12 +63,12 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
       pickup_location: pickupAddress,
       pickup_time: pickupTime,
       pickup_date: pickupDate,
-      rental_type: selectedRentalType === 'withDriver' ? 'with_driver' : 'without_driver',
-      refill_tank: refillTank,
-      number_of_days: numberOfDays,
+      rental_type: 'without_driver', // Assuming default rental type
+      refill_tank: false, // Assuming default refill tank
+      number_of_days: 1, // Assuming default number of days
       total_price: totalAmount,
       notes,
-      car_offer_id: car.offer && typeof (car.offer as any).id === 'number' ? (car.offer as any).id : null,
+      car_offer_id: car.offer && typeof (car.offer as { id: number }).id === 'number' ? (car.offer as { id: number }).id : null,
     });
     setButtonLoading(false);
   };
