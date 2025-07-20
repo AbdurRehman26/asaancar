@@ -47,8 +47,8 @@ export default function CarDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [conversationId] = useState<number | null>(null);
-  const [chatError] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [rentalType, setRentalType] = useState<'with_driver' | 'without_driver'>('without_driver');
@@ -189,20 +189,42 @@ export default function CarDetailPage() {
                   setRentalType={setRentalType}
                   numberOfDays={numberOfDays}
                   setNumberOfDays={setNumberOfDays}
+                  onMessageStore={async () => {
+                    if (!user || !car?.store?.id) return;
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    const storeId = car.store!.id;
+                    try {
+                      const res = await apiFetch('/api/chat/conversations');
+                      const data = await res.json();
+                      const conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(storeId));
+                      if (conv) {
+                        setConversationId(conv.id);
+                        setShowChat(true);
+                        setChatError(null);
+                      } else {
+                        const createRes = await apiFetch('/api/chat/conversations', {
+                          method: 'POST',
+                          body: JSON.stringify({ type: 'store', store_id: storeId }),
+                        });
+                        const newConv = await createRes.json();
+                        if (newConv && newConv.id) {
+                          setConversationId(newConv.id);
+                          setShowChat(true);
+                          setChatError(null);
+                        } else {
+                          setShowChat(true);
+                          setConversationId(null);
+                          setChatError('Could not start chat. Please try again later.');
+                        }
+                      }
+                    } catch (e) {
+                      setShowChat(true);
+                      setConversationId(null);
+                      setChatError('Could not start chat. Please try again later.');
+                    }
+                  }}
                 />
               )}
-              <BookingPrice car={car} rentalType={rentalType} numberOfDays={numberOfDays} />
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-3">Optional Service</h3>
-                <label className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-[#7e246c]/30 transition-all duration-200">
-                  <Fuel className="h-5 w-5 text-[#7e246c]" />
-                  <span className="flex-1 text-gray-700 dark:text-gray-300">
-                    <span className="font-semibold text-gray-900 dark:text-white">Refill Tank</span>
-                    <span className="block text-sm text-gray-500 dark:text-gray-400 mt-1">Refill fuel at the end of the day</span>
-                  </span>
-                  <input type="checkbox" checked={true} onChange={() => {}} className="accent-[#7e246c] h-5 w-5 rounded" />
-                </label>
-              </div>
             </div>
           </div>
         </div>
