@@ -83,7 +83,7 @@ export default function CarListing() {
     });
     urlParams.set('page', String(page));
     navigate({ search: urlParams.toString() }, { replace: true });
-  }, [currentPage, filters, navigate]);
+  }, [currentPage, navigate]);
 
   // On initial mount, fetch with filters from URL
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function CarListing() {
         setPerPageState(data.per_page);
       })
       .finally(() => setLoading(false));
-  }, [location.search, perPageState]);
+  }, [location.search, perPageState, filters]);
 
   // When page changes, update URL and fetch
   useEffect(() => {
