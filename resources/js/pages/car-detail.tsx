@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Fuel } from 'lucide-react';
+// import { Fuel } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import Navbar from '../components/navbar';
 import { apiFetch } from '@/lib/utils';
 import Chat from '../components/chat';
-import BookingForm, { BookingPrice } from '../components/BookingForm';
+import BookingForm from '../components/BookingForm';
 import UserBookingsList from '../components/UserBookingsList';
 
 interface Car {
@@ -191,12 +191,12 @@ export default function CarDetailPage() {
                   setNumberOfDays={setNumberOfDays}
                   onMessageStore={async () => {
                     if (!user || !car?.store?.id) return;
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                     
                     const storeId = car.store!.id;
                     try {
                       const res = await apiFetch('/api/chat/conversations');
-                      const data = await res.json();
-                      const conv = data.find((c: any) => c.type === 'store' && String(c.store_id) === String(storeId));
+                      const data: Array<{ id: number; type: string; store_id: number }> = await res.json();
+                      const conv = data.find((c) => c.type === 'store' && String(c.store_id) === String(storeId));
                       if (conv) {
                         setConversationId(conv.id);
                         setShowChat(true);
@@ -217,7 +217,7 @@ export default function CarDetailPage() {
                           setChatError('Could not start chat. Please try again later.');
                         }
                       }
-                    } catch (e) {
+                    } catch {
                       setShowChat(true);
                       setConversationId(null);
                       setChatError('Could not start chat. Please try again later.');
