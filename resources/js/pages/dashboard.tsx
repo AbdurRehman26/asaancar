@@ -95,18 +95,6 @@ export function CarListings() {
         setCurrentPage(1);
         // Triggers useEffect
     };
-    const clearFilters = () => {
-        setFilters({
-            brand_id: '',
-            type_id: '',
-            store_id: '',
-            transmission: '',
-            fuel_type: '',
-            min_seats: '',
-            max_price: ''
-        });
-        setCurrentPage(1);
-    };
 
     if (loading || !user || !user.roles) {
         return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading...</div>;

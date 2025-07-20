@@ -1,9 +1,9 @@
+import React from 'react';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { type User } from '@/types';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
-import { LogOut, Settings, LayoutGrid } from 'lucide-react';
+import { Settings, LogOut, LayoutGrid } from 'lucide-react';
 import type { UserMenuContentProps } from '@/types/user-menu-content';
 
 export function UserMenuContent({ user }: UserMenuContentProps) {

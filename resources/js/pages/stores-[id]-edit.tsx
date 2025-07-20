@@ -12,7 +12,6 @@ export default function StoreEditPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [cities, setCities] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
@@ -57,7 +56,6 @@ export default function StoreEditPage() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
       if (store) setStore({ ...store, logo_url: '' }); // Clear logo_url if uploading new
     }
@@ -81,8 +79,8 @@ export default function StoreEditPage() {
       if (!res.ok) throw new Error('Failed to update store');
       setSuccess(true);
       setTimeout(() => navigate('/dashboard/stores'), 1000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setSaving(false);
     }

@@ -42,6 +42,7 @@ export default function DashboardStoresPage() {
         alert('Failed to deactivate store');
       }
     } catch (err) {
+      console.error('Error deactivating store:', err);
       alert('Error deactivating store');
     }
   };

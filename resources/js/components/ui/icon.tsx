@@ -1,4 +1,3 @@
-import { LucideIcon } from 'lucide-react';
 import type { IconPropsSimple } from '@/types/icon';
 
 export function Icon({ iconNode: IconComponent, className }: IconPropsSimple) {

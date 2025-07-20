@@ -14,10 +14,9 @@ type NavbarProps = {
   auth?: {
     user?: unknown;
   };
-  onLoginClick?: () => void;
 };
 
-const Navbar: React.FC<NavbarProps> = ({ currentPage = '', onLoginClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
   const { user } = useAuth();
   const getInitials = useInitials();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

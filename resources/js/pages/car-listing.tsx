@@ -151,21 +151,6 @@ export default function CarListing() {
     }
   };
 
-  const clearFilters = () => {
-    setFilters({
-      brand_id: '',
-      type_id: '',
-      store_id: '',
-      transmission: '',
-      fuel_type: '',
-      min_seats: '',
-      max_price: ''
-    });
-    setCurrentPage(1);
-    // Optionally re-fetch cars with cleared filters
-    handleSearch();
-  };
-
   return (
     <>
       <title>Car Listings - AsaanCar</title>
@@ -192,7 +177,6 @@ export default function CarListing() {
         <Navbar
           currentPage="cars"
           auth={{ user }}
-          onLoginClick={() => setLoginOpen(true)}
         />
 
         {/* Page Header */}
