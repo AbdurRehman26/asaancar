@@ -92,8 +92,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
                 className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
                 placeholder="Pick-up address"
               />
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <div className="flex items-center gap-2 flex-1">
+              <div className="flex flex-col gap-4 md:flex-row md:gap-4">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <Clock className="text-[#7e246c]" />
                   <input
                     type="time"
@@ -102,7 +102,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
                     className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
                   />
                 </div>
-                <div className="flex items-center gap-2 flex-1">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <Calendar className="text-[#7e246c]" />
                   <input
                     type="date"

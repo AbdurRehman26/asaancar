@@ -34,6 +34,10 @@ class AuthenticatedSessionController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
+        if (is_null($user->email_verified_at)) {
+            return response()->json(['message' => 'Please verify your email before logging in.'], 403);
+        }
+
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([

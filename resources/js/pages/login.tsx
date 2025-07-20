@@ -8,6 +8,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotError, setForgotError] = useState<string | null>(null);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
   const navigate = useNavigate();
   const { login, error: authError } = useAuth();
 
@@ -24,10 +29,34 @@ export default function LoginPage() {
     }
   };
 
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError(null);
+    setForgotSuccess(false);
+    setForgotLoading(true);
+    try {
+      const res = await fetch('/api/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        setForgotError(err.message || 'Request failed');
+      } else {
+        setForgotSuccess(true);
+      }
+    } catch {
+      setForgotError('Network error');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       <Navbar />
-      {/* Left: Login Form */}
+      {/* Left: Login or Forgot Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 bg-white dark:bg-gray-900 md:pt-0 pt-16">
         <div className="max-w-md w-full mx-auto">
           {/* Logo and Headline */}
@@ -39,25 +68,51 @@ export default function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Welcome Back</h1>
           <p className="text-gray-500 dark:text-gray-300 mb-6">Log in to your account</p>
-          {error && <div className="mb-4 text-red-600 text-center">{error}</div>}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base" placeholder="Enter your email" />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Password</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base" placeholder="Enter your password" />
-            </div>
-            <button type="submit" className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base" disabled={loading}>{loading ? 'Logging in...' : 'Log In'}</button>
-          </form>
-          {/* Signup Link */}
-          <div className="mt-6 text-center">
-            <span className="text-gray-600 dark:text-gray-300">Don't have an account? </span>
-            <a href="/signup" className="text-[#7e246c] hover:underline font-semibold">
-              Sign up
-            </a>
-          </div>
+          {!showForgot ? (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Email</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base" placeholder="Enter your email" />
+                </div>
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Password</label>
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base" placeholder="Enter your password" />
+                  <div className="mt-2 text-right">
+                    <button type="button" className="text-sm text-[#7e246c] hover:underline" onClick={() => setShowForgot(true)}>
+                      Forgot password?
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base" disabled={loading}>{loading ? 'Logging in...' : 'Log In'}</button>
+                {error && <div className="mt-3 text-red-600 text-center">{error}</div>}
+              </form>
+              {/* Signup Link */}
+              <div className="mt-6 text-center">
+                <span className="text-gray-600 dark:text-gray-300">Don't have an account? </span>
+                <a href="/signup" className="text-[#7e246c] hover:underline font-semibold">
+                  Sign up
+                </a>
+              </div>
+            </>
+          ) : (
+            <>
+              <form onSubmit={handleForgot} className="space-y-4">
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Email</label>
+                  <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} required className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base" placeholder="Enter your email" />
+                </div>
+                <button type="submit" className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base" disabled={forgotLoading}>{forgotLoading ? 'Sending...' : 'Email password reset link'}</button>
+                {forgotError && <div className="mt-3 text-red-600 text-center">{forgotError}</div>}
+                {forgotSuccess && <div className="mt-3 text-green-600 text-center">Reset link sent!</div>}
+              </form>
+              <div className="mt-6 text-center">
+                <button type="button" className="text-[#7e246c] hover:underline font-semibold" onClick={() => setShowForgot(false)}>
+                  Back to login
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
       {/* Right: Marketing/Visual Content */}

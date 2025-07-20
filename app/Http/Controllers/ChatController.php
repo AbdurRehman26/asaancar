@@ -56,6 +56,7 @@ class ChatController extends Controller
             'store_id' => 'required_if:type,store|nullable|integer',
         ]);
         $query = [
+            'user_id' => Auth::id(),
             'type' => $request->type,
             'booking_id' => $request->type === 'booking' ? $request->booking_id : null,
             'store_id' => $request->type === 'store' ? $request->store_id : null,

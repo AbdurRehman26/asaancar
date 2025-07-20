@@ -89,11 +89,11 @@ export default function LoginModal({ canResetPassword, onSuccess }: LoginModalPr
                     />
                     <Label htmlFor="remember">Remember me</Label>
                 </div>
-                {(error || authError) && <InputError message={(error || authError) ?? ''} />}
                 <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing || authLoading}>
                     {(processing || authLoading) && <LoaderCircle className="h-4 w-4 animate-spin" />}
                     Log in
                 </Button>
+                {(error || authError) && <InputError message={(error || authError) ?? ''} className="mt-2 text-center" />}
             </div>
 
             <div className="text-center text-sm text-muted-foreground">

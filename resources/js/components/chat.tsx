@@ -45,12 +45,18 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
     useEffect(() => {
         const channel = echo.private(`conversation.${conversationId}`);
         channel.listen('MessageSent', (event: unknown) => {
-            setMessages((prev) => [...prev, event as Message]);
+            const message = event as Message;
+            // Only add if not sent by current user and not already present
+            setMessages((prev) => {
+                if (message.sender.id === currentUser.id) return prev;
+                if (prev.some((m) => m.id === message.id)) return prev;
+                return [...prev, message];
+            });
         });
         return () => {
             channel.stopListening('MessageSent');
         };
-    }, [conversationId]);
+    }, [conversationId, currentUser.id]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -64,12 +70,16 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
             body: JSON.stringify({ message: input }),
         });
         const msg = await res.json();
-        setMessages((prev) => [...prev, msg]);
+        // Only add if not already present
+        setMessages((prev) => {
+            if (prev.some((m) => m.id === msg.id)) return prev;
+            return [...prev, msg];
+        });
         setInput('');
     };
 
     return (
-        <div className="flex flex-col h-full min-h-[650px] bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-300 dark:border-gray-800">
+        <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-300 dark:border-gray-800 h-[500px] max-h-full">
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {loading ? (
                     <div className="flex items-center justify-center h-full text-gray-400">Loading messages...</div>
@@ -83,9 +93,9 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                             key={msg.id}
                             className={`flex flex-col ${msg.sender.id === currentUser.id ? 'items-end' : 'items-start'}`}
                         >
-                            <div className={`px-4 py-2 rounded-lg max-w-xs
-                                ${msg.sender.id === currentUser.id
-                                    ? 'bg-primary text-white dark:bg-primary dark:text-white'
+                            <div className={`px-4 py-2 rounded-lg max-w-xs 
+                                ${msg.sender.id === currentUser.id 
+                                    ? 'bg-primary text-white dark:bg-primary dark:text-white' 
                                     : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'}
                             `}>
                                 <span className="block text-xs font-semibold mb-1">{msg.sender.name}</span>
@@ -97,7 +107,7 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            <form onSubmit={sendMessage} className="p-4 flex gap-2 border-t border-gray-300 dark:border-gray-800">
+            <form onSubmit={sendMessage} className="p-4 flex gap-2 border-t border-gray-300 dark:border-gray-800 bg-white dark:bg-gray-900">
                 <input
                     className="flex-1 rounded bg-white text-gray-900 dark:bg-gray-800 dark:text-white px-4 py-2 focus:outline-none border border-gray-300 dark:border-gray-700"
                     value={input}
