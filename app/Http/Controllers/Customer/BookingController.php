@@ -111,7 +111,7 @@ class BookingController extends Controller
         }
 
         $result = $this->bookingService->updateBookingStatus(
-            $id, 
+            $id,
             $request->validated()['status'],
             $request->validated()['notes'] ?? null
         );
@@ -205,13 +205,11 @@ class BookingController extends Controller
      */
     public function userBookingForCar(Request $request, $carId)
     {
-        $booking = \App\Models\Booking::where('user_id', auth()->id())
+        $bookings = \App\Models\Booking::where('user_id', auth()->id())
             ->where('car_id', $carId)
             ->orderByDesc('created_at')
-            ->first();
-        if (!$booking) {
-            return response()->json(['data' => null]);
-        }
-        return response()->json(['data' => (new BookingResource($booking))]);
+            ->get();
+
+        return BookingResource::collection($bookings);
     }
 }

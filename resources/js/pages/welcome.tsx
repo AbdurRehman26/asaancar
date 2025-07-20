@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import LoginModal from '@/pages/auth/login-modal';
 import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
+import Footer from '../components/Footer';
 
 // Animation utility for reveal on scroll
 const useRevealOnScroll = () => {
@@ -457,36 +458,7 @@ export default function Welcome() {
                 </section>
 
                 {/* Footer */}
-                <footer className="border-t border-neutral-200 py-12 dark:border-neutral-800 bg-white dark:bg-gray-800/80">
-                    <div className="mx-auto max-w-7xl px-6">
-                        <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-                            <div className="flex items-center gap-2 text-xl font-bold text-[#7e246c]">
-                                <svg className="h-8 w-8 text-[#7e246c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <circle cx="12" cy="12" r="10" strokeWidth="2" />
-                                </svg>
-                                AsaanCar
-                            </div>
-                            <div className="flex gap-6">
-                                {navLinks.map((link) => (
-                                    <a
-                                        key={link.href}
-                                        href={link.href}
-                                        className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#7e246c] dark:hover:text-[#7e246c] transition"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            smoothScrollTo(link.href.slice(1));
-                                        }}
-                                    >
-                                        {link.label}
-                                    </a>
-                                ))}
-                            </div>
-                            <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                                © {new Date().getFullYear()} AsaanCar. All rights reserved.
-                            </div>
-                        </div>
-                    </div>
-                </footer>
+                <Footer />
             </main>
         </>
     );

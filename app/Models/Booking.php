@@ -34,11 +34,18 @@ class Booking extends Model
         'store_id',
         'car_id',
         'user_id',
+        'car_offer_id',
         'start_date',
-        'end_date',
         'total_price',
         'status',
         'notes',
+        'pickup_location',
+        'number_of_days',
+        'rental_type',
+        'refill_tank',
+        'pickup_time',
+        'pickup_date',
+        'refill_amount_per_km',
     ];
 
     protected $casts = [

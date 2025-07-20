@@ -33,7 +33,7 @@ class CarResource extends JsonResource
             'year' => $this->year,
             // Pricing fields for frontend compatibility
             'rental' => $latestOffer ? $latestOffer->price_without_driver : 150.00, // Default daily rate
-            'baseFare' => $latestOffer ? $latestOffer->price_with_driver : 200.00, // Default with driver rate
+            'withDriver' => $latestOffer ? $latestOffer->price_with_driver : 200.00, // With driver rate
             'fuel' => 2.50, // Default fuel rate per km
             'overtime' => 25.00, // Default overtime rate per hour
             'currency' => 'USD', // Default currency

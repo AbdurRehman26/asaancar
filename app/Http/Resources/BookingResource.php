@@ -13,8 +13,10 @@ class BookingResource extends JsonResource
             'car' => new CarResource($this->whenLoaded('car')),
             'user' => new UserResource($this->whenLoaded('user')),
             'store' => new StoreResource($this->whenLoaded('store')),
-            'start_date' => $this->start_date,
-            'end_date' => $this->end_date,
+            'pickup_location' => $this->pickup_location,
+            'rental_type' => $this->rental_type,
+            'pickup_date' => $this->pickup_date,
+            'pickup_time' => $this->pickup_time,
             'total_price' => $this->total_price,
             'status' => $this->status,
             'notes' => $this->notes,
@@ -22,4 +24,4 @@ class BookingResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
     }
-} 
+}

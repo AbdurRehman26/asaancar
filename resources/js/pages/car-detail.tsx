@@ -6,6 +6,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import LoginModal from '@/pages/auth/login-modal';
 import { apiFetch } from '@/lib/utils';
 import Chat from '../components/chat';
+import BookingForm from '../components/BookingForm';
+import Footer from '../components/Footer';
+import UserBookingsList from '../components/UserBookingsList';
 
 interface Car {
   id: number;
@@ -25,8 +28,14 @@ interface Booking {
   id: number;
   status: string;
   start_date: string;
-  end_date: string;
   total_price: number;
+  pickup_location?: string;
+  number_of_days?: number;
+  rental_type?: string;
+  refill_tank?: boolean;
+  pickup_date?: string;
+  pickup_time?: string;
+  notes?: string;
   [key: string]: unknown;
 }
 
@@ -39,87 +48,37 @@ export default function CarDetailPage() {
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pickupAddress, setPickupAddress] = useState('Werdener Str. 87, 40233 Düsseldorf, Germany');
-  const [pickupTime, setPickupTime] = useState('23:30');
-  const [pickupDate, setPickupDate] = useState('2025-07-13');
-  const [dropoffAddress, setDropoffAddress] = useState('Werdener Str. 87, 40233 Düsseldorf, Germany');
-  const [refillTank, setRefillTank] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [chatButtonLoading, setChatButtonLoading] = useState(false);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
-  const [userBooking, setUserBooking] = useState<Booking | null>(null);
+  const [userBookings, setUserBookings] = useState<Booking[]>([]);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchCarAndBooking = async () => {
+    console.log('Calling booking API for car:', carId);
     if (!carId) return;
     setLoading(true);
-    apiFetch(`/api/cars/${carId}`)
-      .then(async res => {
-        if (!res.ok) {
-          setError('Failed to fetch car details');
-          setCar(null);
-        } else {
-          const json = await res.json();
-          const carData: Car = json.data || json;
-          console.log('🔍 DEBUG: Car data received:', carData);
-          console.log('🔍 DEBUG: Car pricing data:', {
-            rental: carData.rental,
-            baseFare: carData.baseFare,
-            fuel: carData.fuel,
-            overtime: carData.overtime,
-            currency: carData.currency
-          });
-          console.log('🔍 DEBUG: Car store_id:', carData.store_id);
-          console.log('🔍 DEBUG: Car store object:', carData.store);
-          setCar(carData);
-        }
-      })
-      .catch(() => setError('Network error'))
-      .finally(() => setLoading(false));
-  }, [carId]);
-
-  useEffect(() => {
-    if (user && car && car.id) {
-      apiFetch(`/api/bookings/user-car/${car.id}`)
-        .then(async res => {
-          const data = await res.json();
-          setUserBooking(data.data);
-        })
-        .catch(() => setUserBooking(null));
-    } else {
-      setUserBooking(null);
-    }
-  }, [user, car]);
-
-  useEffect(() => {
-    if (user && loginOpen) {
-      setLoginOpen(false);
-    }
-  }, [user, loginOpen]);
-
-  const handleBooking = async () => {
-    if (!car) return;
-    setLoading(true);
-    setError(null);
     try {
-      const res = await apiFetch('/api/bookings', {
-        method: 'POST',
-        body: JSON.stringify({
-          car_id: car.id,
-          pickup_address: pickupAddress,
-          pickup_time: pickupTime,
-          pickup_date: pickupDate,
-          dropoff_address: dropoffAddress,
-          refill_tank: refillTank,
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        setError(err.message || 'Booking failed');
+      const carRes = await apiFetch(`/api/cars/${carId}`);
+      if (!carRes.ok) {
+        setError('Failed to fetch car details');
+        setCar(null);
       } else {
-        // Optionally redirect or show success
-        window.location.href = '/bookings';
+        const json = await carRes.json();
+        const carData: Car = json.data || json;
+        setCar(carData);
+      }
+      const bookingRes = await apiFetch(`/api/bookings/user-car/${carId}`);
+      const bookingData = await bookingRes.json();
+      if (Array.isArray(bookingData.data)) {
+        setUserBookings(bookingData.data);
+      } else if (bookingData.data) {
+        setUserBookings([bookingData.data]);
+      } else {
+        setUserBookings([]);
       }
     } catch {
       setError('Network error');
@@ -128,7 +87,18 @@ export default function CarDetailPage() {
     }
   };
 
+  useEffect(() => {
+    fetchCarAndBooking();
+  }, [carId]);
+
+  useEffect(() => {
+    if (user && loginOpen) {
+      setLoginOpen(false);
+    }
+  }, [user, loginOpen]);
+
   const handleOpenChat = async () => {
+    setChatButtonLoading(true);
 
     setChatError(null);
 
@@ -139,6 +109,7 @@ export default function CarDetailPage() {
       setShowChat(true);
       setConversationId(null);
       setChatError(msg);
+      setChatButtonLoading(false);
       return;
     }
 
@@ -154,6 +125,7 @@ export default function CarDetailPage() {
       setShowChat(true);
       setConversationId(null);
       setChatError(msg);
+      setChatButtonLoading(false);
       return;
     }
 
@@ -202,244 +174,182 @@ export default function CarDetailPage() {
       setConversationId(null);
       setChatError('Could not start chat. Please try again later. ' + ((e as Error)?.message || ''));
     }
+    setChatButtonLoading(false);
   };
-
-  // Calculate total amount including optional services
-  const baseRental = car?.rental || 0;
-  const refillTankCost = refillTank ? 50 : 0; // $50 for refill tank service
-  const totalAmount = baseRental + refillTankCost;
 
   if (loading) {
     return (<div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading car details...</div>);
-  }
-  if (error) {
-    return (<div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-red-600">{error}</div>);
   }
   if (!car) {
     return (<div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-gray-600">Car not found.</div>);
   }
   return (
     <>
-      {/* Modals */}
-      <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Log in to your account</DialogTitle>
-          </DialogHeader>
-          <LoginModal canResetPassword={true} />
-        </DialogContent>
-      </Dialog>
-      <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create an account</DialogTitle>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-
       <div className="min-h-screen bg-neutral-50 mt-17 dark:bg-gray-900">
         {/* Navbar */}
-        <Navbar
-          auth={{ user }}
-        />
+        <Navbar auth={{ user }} />
         <div className="py-10 px-2 md:px-8">
-        <div className="text-xs text-gray-400 dark:text-neutral-400 mb-2">Car ID: {carId}</div>
-        <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800/80 rounded-2xl shadow-lg flex flex-col md:flex-row overflow-hidden">
-        {/* Left: Car & Booking Details */}
-        <div className="md:w-1/2 p-8 flex flex-col gap-8">
-          <div className="flex justify-center items-center">
-            <img src={car.image || '/images/car-placeholder.jpeg'} alt={car.name} className="h-56 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800" />
-          </div>
-          <a href="/cars" className="text-2xl font-bold text-[#7e246c] dark:text-white text-center block hover:text-[#6a1f5c] dark:hover:text-gray-200 transition">{car.name}</a>
-          <div>
-            <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white mb-4 text-center md:text-left">Pick-up & Drop-off Details</h3>
-            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-[#7e246c]/40 shadow-lg flex flex-col gap-8">
-              {/* Pick-up */}
-          <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="text-[#7e246c]" />
-                  <span className="font-semibold text-gray-900 dark:text-white text-lg">Pick-up Detail</span>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 flex flex-col gap-4 border border-[#7e246c]/30">
-                  <input
-                    type="text"
-                    value={pickupAddress}
-                    onChange={e => setPickupAddress(e.target.value)}
-                    className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
-                    placeholder="Pick-up address"
-                  />
-                  <div className="flex flex-col gap-4 sm:flex-row">
-                    <div className="flex items-center gap-2 flex-1">
-                      <Clock className="text-[#7e246c]" />
-                      <input
-                        type="time"
-                        value={pickupTime}
-                        onChange={e => setPickupTime(e.target.value)}
-                        className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2 flex-1">
-                      <Calendar className="text-[#7e246c]" />
-                      <input
-                        type="date"
-                        value={pickupDate}
-                        onChange={e => setPickupDate(e.target.value)}
-                        className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
-                      />
-                    </div>
-                  </div>
-                </div>
+          <div className="text-xs text-gray-400 dark:text-neutral-400 mb-2">Car ID: {carId}</div>
+          <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800/80 rounded-2xl shadow-lg flex flex-col md:flex-row overflow-hidden">
+            {/* Left: Car & Booking Details */}
+            <div className="md:w-1/2 p-8 flex flex-col gap-8">
+              <div className="flex justify-center items-center">
+                <img src={car.image || '/images/car-placeholder.jpeg'} alt={car.name} className="h-56 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800" />
               </div>
-              {/* Drop-off */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="text-[#7e246c]" />
-                  <span className="font-semibold text-gray-900 dark:text-white text-lg">Drop-off Details</span>
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 flex flex-col gap-2 border border-[#7e246c]/30">
-                  <input
-                    type="text"
-                    value={dropoffAddress}
-                    onChange={e => setDropoffAddress(e.target.value)}
-                    className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
-                    placeholder="Drop-off address"
-                  />
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    Overtime is applied after 10 hours or 12:00 AM, whichever comes first. Based on your time selection, overtime will apply after 11:30 PM on a daily basis. Additional day will be charged after 6:00 AM.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Right: Pricing & Booking Summary */}
-        <div className="md:w-1/2 bg-white dark:bg-gray-800/80 border-l border-gray-100 dark:border-neutral-800 p-8 flex flex-col gap-8">
-          <div>
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
-              <table className="w-full text-sm">
-              <thead>
-                <tr className="text-[#7e246c] dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left pb-3">Rate</th>
-                  <th className="pb-3">No. of days</th>
-                  <th className="text-right pb-3">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-700 dark:text-gray-300">
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <td className="py-3 font-medium">Rental</td>
-                  <td className="py-3 text-center">1</td>
-                  <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof baseRental === 'number' ? baseRental.toLocaleString() : 'N/A')}</td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <td className="py-3 font-medium">Base Fare</td>
-                  <td className="py-3 text-center">-</td>
-                  <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof car.baseFare === 'number' ? car.baseFare.toLocaleString() : 'N/A')}</td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <td className="py-3 font-medium">Fuel</td>
-                  <td className="py-3 text-center">-</td>
-                  <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{(typeof car.fuel === 'number' ? car.fuel.toLocaleString() : 'N/A')}/km</td>
-                </tr>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <td className="py-3 font-medium">Over Time</td>
-                  <td className="py-3 text-center">-</td>
-                  <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{(typeof car.overtime === 'number' ? car.overtime.toLocaleString() : 'N/A')}/hour</td>
-                </tr>
-                <tr>
-                  <td className="py-3 font-medium text-[#7e246c] dark:text-white">Discount</td>
-                  <td colSpan={2} className="py-3 text-right"><button className="text-[#7e246c] dark:text-white underline text-xs hover:text-[#6a1f5c] transition-colors">Promo code</button></td>
-                </tr>
-              </tbody>
-              </table>
-            </div>
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-3">Optional Service</h3>
-              <label className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-[#7e246c]/30 transition-all duration-200">
-                <Fuel className="h-5 w-5 text-[#7e246c]" />
-                <span className="flex-1 text-gray-700 dark:text-gray-300">
-                  <span className="font-semibold text-gray-900 dark:text-white">Refill Tank</span>
-                  <span className="block text-sm text-gray-500 dark:text-gray-400 mt-1">Refill fuel at the end of the day</span>
-                </span>
-                <input type="checkbox" checked={refillTank} onChange={e => setRefillTank(e.target.checked)} className="accent-[#7e246c] h-5 w-5 rounded" />
-              </label>
-            </div>
-            <div className="bg-gradient-to-r from-[#7e246c]/10 to-purple-500/10 dark:from-[#7e246c]/20 dark:to-purple-500/20 rounded-xl p-6 border border-[#7e246c]/20 mb-4">
-              <div className="text-lg font-bold text-[#7e246c] dark:text-white mb-2">Total Amount</div>
-              <div className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {(typeof totalAmount === 'number' ? totalAmount.toLocaleString() : 'N/A')}</div>
-            </div>
-            <div className="text-xs text-red-600 dark:text-red-400 font-medium mb-3">Excluding fuel & overtime charges <span className="underline cursor-pointer hover:text-red-700">(charges – view details)</span></div>
-            <div className="flex items-start gap-3 mb-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-              <div className="w-5 h-5 rounded-full bg-[#7e246c] flex items-center justify-center mt-0.5">
-                <span className="text-white text-xs font-bold">i</span>
-              </div>
-              <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                Kindly note that the Fuel Charges and Overtime will be applied based on the mileage of the car and extra hours of the services (if any). Your final invoice will be generated after adding the Fuel and Overtime charges at the end of your reservation. For more details please read the <a href="#" className="underline text-[#7e246c] dark:text-white">Fuel and Overtime charges and terms of use</a>.
-              </span>
-            </div>
-            <div className="flex gap-4 mt-6 flex-col">
-              {user ? (
-                <button onClick={handleBooking} className="w-full py-3 rounded-md bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition" disabled={loading}>
-                  {userBooking ? 'Create Another Booking' : 'Confirm Booking'}
-                </button>
-              ) : (
-                <button disabled className="w-full py-3 rounded-md bg-gray-300 text-gray-500 cursor-not-allowed font-semibold text-base shadow-sm flex items-center justify-center gap-2 dark:bg-gray-700 dark:text-gray-400">
-                  Please login to book
-                </button>
-              )}
-              {/* User Booking Info (if exists) */}
-              {userBooking && (
-                <div className="rounded-xl border border-[#7e246c] bg-[#7e246c]/5 dark:bg-[#7e246c]/10 p-4 mb-4 flex flex-col gap-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <CheckCircle className="text-green-600 dark:text-green-400" />
-                    <span className="font-semibold text-[#7e246c] dark:text-white">You have already booked this car</span>
-                  </div>
-                  <div className="text-sm text-gray-700 dark:text-gray-200">Status: <span className="font-bold">{userBooking.status}</span></div>
-                  <div className="text-sm text-gray-700 dark:text-gray-200">Pickup: <span className="font-bold">{userBooking.start_date}</span></div>
-                  <div className="text-sm text-gray-700 dark:text-gray-200">Dropoff: <span className="font-bold">{userBooking.end_date}</span></div>
-                  <div className="text-sm text-gray-700 dark:text-gray-200">Total: <span className="font-bold">{userBooking.total_price} {car.currency}</span></div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Booking ID: {userBooking.id}</div>
-                </div>
-              )}
-              {/* Message Store Button below booking button */}
-              <button
-                onClick={async () => {
-                  console.log('🔍 DEBUG: Message Store button clicked');
-                  console.log('🔍 DEBUG: Button click - User:', user);
-                  console.log('🔍 DEBUG: Button click - Car:', car);
-                  console.log('🔍 DEBUG: Button click - Car store_id:', car?.store?.id);
-                  await handleOpenChat();
+              <a href="/cars" className="text-2xl font-bold text-[#7e246c] dark:text-white text-center block hover:text-[#6a1f5c] dark:hover:text-gray-200 transition">{car.name}</a>
+              <BookingForm
+                car={car}
+                user={user}
+                onBooking={async (formData) => {
+                  setLoading(true);
+                  setError(null);
+                  setSuccess(null);
+                  try {
+                    const res = await apiFetch('/api/bookings', {
+                      method: 'POST',
+                      body: JSON.stringify(formData),
+                    });
+                    if (!res.ok) {
+                      const err = await res.json();
+                      setError(err.message || 'Booking failed');
+                    } else {
+                      setSuccess('Booking successful!');
+                      await fetchCarAndBooking();
+                    }
+                  } catch {
+                    setError('Network error');
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
-                className={`w-full py-3 rounded-md font-semibold transition mt-2
-                  ${user ? 'bg-[#7e246c] text-white hover:bg-[#6a1f5c] cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'}`}
-                disabled={!user}
-              >
-                {user ? 'Message Store' : 'Please login to send message'}
-              </button>
+                loading={loading}
+                error={error}
+                success={success}
+                userBookings={userBookings}
+              />
             </div>
-            {error && <div className="text-red-600 mt-2">{error}</div>}
+            {/* Right: Pricing & Booking Summary */}
+            <div className="md:w-1/2 bg-white dark:bg-gray-800/80 border-l border-gray-100 dark:border-neutral-800 p-8 flex flex-col gap-8">
+              <div>
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
+                  <div className="flex gap-6 mb-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="rentalType"
+                        value="withoutDriver"
+                        checked={true} // Always true for now, as BookingForm manages this
+                        onChange={() => {}}
+                        className="accent-[#7e246c] h-4 w-4"
+                      />
+                      <span className="font-semibold text-gray-700 dark:text-gray-200">Without Driver</span>
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">24 hrs/day</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="rentalType"
+                        value="withDriver"
+                        checked={true} // Always true for now, as BookingForm manages this
+                        onChange={() => {}}
+                        className="accent-[#7e246c] h-4 w-4"
+                      />
+                      <span className="font-semibold text-gray-700 dark:text-gray-200">With Driver</span>
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">10 hrs/day</span>
+                    </label>
+                  </div>
+                  <div className="mb-4 flex items-center gap-2">
+                    <label htmlFor="numberOfDays" className="text-[#7e246c] font-semibold">No. of Days</label>
+                    <input
+                      id="numberOfDays"
+                      type="number"
+                      min={1}
+                      value={1} // Always 1 for now, as BookingForm manages this
+                      onChange={() => {}}
+                      className="w-24 rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
+                    />
+                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-[#7e246c] dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
+                        <th className="text-left pb-3">Type</th>
+                        <th className="pb-3">Hours/Day</th>
+                        <th className="text-right pb-3">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-gray-700 dark:text-gray-300">
+                      <tr className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-3 font-medium">With Driver</td>
+                        <td className="py-3 text-center font-semibold">10 hrs/day</td>
+                        <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A')}</td>
+                      </tr>
+                      <tr>
+                        <td className="py-3 font-medium">Without Driver</td>
+                        <td className="py-3 text-center font-semibold">24 hrs/day</td>
+                        <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div className="mt-4 text-sm font-semibold text-[#7e246c] dark:text-white">
+                    Refill fuel at the end of the day or pay <span className="font-bold">PKR 32/KM</span>
+                  </div>
+                  <div className="text-sm font-semibold text-[#7e246c] dark:text-white mt-1">
+                    Overtime: <span className="font-bold">PKR 400/hr</span>
+                  </div>
+                </div>
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-3">Optional Service</h3>
+                  <label className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-[#7e246c]/30 transition-all duration-200">
+                    <Fuel className="h-5 w-5 text-[#7e246c]" />
+                    <span className="flex-1 text-gray-700 dark:text-gray-300">
+                      <span className="font-semibold text-gray-900 dark:text-white">Refill Tank</span>
+                      <span className="block text-sm text-gray-500 dark:text-gray-400 mt-1">Refill fuel at the end of the day</span>
+                    </span>
+                    <input type="checkbox" checked={true} onChange={() => {}} className="accent-[#7e246c] h-5 w-5 rounded" />
+                  </label>
+                </div>
+                <div className="bg-gradient-to-r from-[#7e246c]/10 to-purple-500/10 dark:from-[#7e246c]/20 dark:to-purple-500/20 rounded-xl p-6 border border-[#7e246c]/20 mb-4">
+                  <div className="text-lg font-bold text-[#7e246c] dark:text-white mb-2">Total Amount</div>
+                  <div className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}</div>
+                  <div className="mt-2 text-sm font-semibold">
+                    Refill: <span className="font-bold">40 PKR / Km</span>
+                  </div>
+                </div>
+                <div className="text-xs text-red-600 dark:text-red-400 font-medium mb-3">Excluding fuel & overtime charges <span className="underline cursor-pointer hover:text-red-700">(charges – view details)</span></div>
+                <div className="flex items-start gap-3 mb-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                  <div className="w-5 h-5 rounded-full bg-[#7e246c] flex items-center justify-center mt-0.5">
+                    <span className="text-white text-xs font-bold">i</span>
+                  </div>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    Kindly note that the Fuel Charges and Overtime will be applied based on the mileage of the car and extra hours of the services (if any). Your final invoice will be generated after adding the Fuel and Overtime charges at the end of your reservation. For more details please read the <a href="#" className="underline text-[#7e246c] dark:text-white">Fuel and Overtime charges and terms of use</a>.
+                  </span>
+                </div>
+                <div className="flex gap-4 mt-6 flex-col">
+                  <button
+                    onClick={async () => {
+                      await handleOpenChat();
+                    }}
+                    className={`w-full py-3 rounded-md font-semibold transition mt-2
+                      ${user ? 'bg-[#7e246c] text-white hover:bg-[#6a1f5c] cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'}`}
+                    disabled={!user || chatButtonLoading}
+                  >
+                    {chatButtonLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        Loading...
+                      </span>
+                    ) : (
+                      user ? 'Message Store' : 'Please login to send message'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
       </div>
-      {/* Footer */}
-      <footer className="border-t border-neutral-200 dark:border-neutral-800 py-12 mt-8 bg-white dark:bg-gray-800/80">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-            <div className="flex items-center gap-2 text-xl font-bold text-[#7e246c]">
-              <svg className="h-8 w-8 text-[#7e246c]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2" /></svg>
-              AsaanCar
-            </div>
-            <div className="flex gap-6">
-              <a href="/cars" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">Cars</a>
-              <a href="/" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">Home</a>
-            </div>
-            <div className="text-sm text-[#7e246c]">
-              © {new Date().getFullYear()} AsaanCar. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </footer>
+
       {/* Floating Chat Widget */}
       {showChat && user && (
         <div className="fixed bottom-6 right-6 z-50 w-96 max-w-full h-[500px] bg-gray-900 rounded-xl shadow-2xl flex flex-col border border-gray-800">
@@ -458,7 +368,8 @@ export default function CarDetailPage() {
           </div>
         </div>
       )}
-    </div>
+
+    <UserBookingsList userBookings={userBookings} car={car} />
     </>
   );
 }

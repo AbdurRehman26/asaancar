@@ -23,6 +23,8 @@ type Booking = {
       address?: string;
       phone?: string;
     };
+    withDriver?: number;
+    rental?: number;
   };
   store?: {
     id: number;
@@ -353,6 +355,39 @@ export default function Bookings() {
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                               Store: {booking.car?.store?.name || booking.store?.name || 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Modern Rate Summary Table */}
+                        <div className="w-full md:w-auto mt-4">
+                          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                            <h4 className="text-base font-bold text-[#7e246c] dark:text-white mb-2">Rate Details</h4>
+                            <table className="w-full text-sm mb-2">
+                              <thead>
+                                <tr className="text-[#7e246c] dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
+                                  <th className="text-left pb-2">Type</th>
+                                  <th className="pb-2">Hours/Day</th>
+                                  <th className="text-right pb-2">Amount</th>
+                                </tr>
+                              </thead>
+                              <tbody className="text-gray-700 dark:text-gray-300">
+                                <tr className="border-b border-gray-100 dark:border-gray-800">
+                                  <td className="py-2 font-medium">With Driver</td>
+                                  <td className="py-2 text-center font-semibold">10 hrs/day</td>
+                                  <td className="py-2 text-right font-bold text-[#7e246c] dark:text-white">{booking.car?.currency || 'PKR'} {booking.car?.withDriver ? booking.car.withDriver.toLocaleString() : 'N/A'}</td>
+                                </tr>
+                                <tr>
+                                  <td className="py-2 font-medium">Without Driver</td>
+                                  <td className="py-2 text-center font-semibold">24 hrs/day</td>
+                                  <td className="py-2 text-right font-bold text-[#7e246c] dark:text-white">{booking.car?.currency || 'PKR'} {booking.car?.rental ? booking.car.rental.toLocaleString() : 'N/A'}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <div className="text-xs font-semibold text-[#7e246c] dark:text-white mt-1">
+                              Refill fuel at the end of the day or pay <span className="font-bold">PKR 32/KM</span>
+                            </div>
+                            <div className="text-xs font-semibold text-[#7e246c] dark:text-white mt-1">
+                              Overtime: <span className="font-bold">PKR 400/hr</span>
                             </div>
                           </div>
                         </div>

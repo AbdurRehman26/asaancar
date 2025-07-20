@@ -20,6 +20,7 @@ const echo = new Echo({
     auth: {
         headers: {
             'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content,
+            ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {}),
         },
     },
 });

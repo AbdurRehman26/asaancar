@@ -19,30 +19,31 @@ class BookingService
         try {
             DB::beginTransaction();
 
-            // Validate car availability
-            if (!$this->isCarAvailable($bookingData['car_id'], $bookingData['start_date'], $bookingData['end_date'])) {
-                throw new Exception('Car is not available for the selected dates');
-            }
+            // Always use authenticated user
+            $userId = auth()->id();
 
-            // Calculate total price
-            $totalPrice = $this->calculateBookingPrice(
-                $bookingData['car_id'],
-                $bookingData['start_date'],
-                $bookingData['end_date'],
-                $bookingData['duration_type'] ?? 'hourly'
-            );
+            // Set status to pending
+            $status = 'pending';
+
+            // Calculate total price based on rental_type
+            $car = \App\Models\Car::findOrFail($bookingData['car_id']);
 
             // Create booking
             $booking = Booking::create([
-                'user_id' => $bookingData['user_id'],
+                'user_id' => $userId,
                 'car_id' => $bookingData['car_id'],
-                'store_id' => $bookingData['store_id'],
-                'start_date' => $bookingData['start_date'],
-                'end_date' => $bookingData['end_date'],
-                'duration_type' => $bookingData['duration_type'] ?? 'hourly',
-                'total_price' => $totalPrice,
-                'status' => 'pending',
+                'store_id' => $car->store_id,
+                'car_offer_id' => $bookingData['car_offer_id'] ?? null,
+                'pickup_location' => $bookingData['pickup_location'],
+                'pickup_time' => $bookingData['pickup_time'],
+                'pickup_date' => $bookingData['pickup_date'],
+                'rental_type' => $bookingData['rental_type'],
+                'refill_tank' => $bookingData['refill_tank'] ?? false,
+                'number_of_days' => $bookingData['number_of_days'],
+                'total_price' => $bookingData['total_price'],
+                'status' => $status,
                 'notes' => $bookingData['notes'] ?? null,
+                'refill_amount_per_km' => 40,
             ]);
 
             DB::commit();
@@ -103,13 +104,13 @@ class BookingService
 
         $start = Carbon::parse($startDate);
         $end = Carbon::parse($endDate);
-        
+
         // Calculate duration
         $duration = $this->calculateDuration($start, $end, $durationType);
-        
+
         // Get base price
         $basePrice = $this->getBasePrice($durationType);
-        
+
         // Apply any active offers
         $bestOffer = $car->carOffers->sortByDesc('discount_percentage')->first();
         if ($bestOffer) {
@@ -204,7 +205,7 @@ class BookingService
     {
         try {
             $booking = Booking::find($bookingId);
-            
+
             if (!$booking) {
                 throw new Exception('Booking not found');
             }
@@ -308,20 +309,7 @@ class BookingService
             'notes' => $booking->notes,
             'created_at' => $booking->created_at,
             'updated_at' => $booking->updated_at,
-            'car' => $booking->car ? [
-                'id' => $booking->car->id,
-                'name' => $booking->car->name ?? ($booking->car->carBrand ? $booking->car->carBrand->name . ' ' . $booking->car->model : $booking->car->model),
-                'brand' => $booking->car->carBrand ? $booking->car->carBrand->name : 'Unknown',
-                'model' => $booking->car->model,
-                'year' => $booking->car->year,
-                'image' => $booking->car->image_urls && count($booking->car->image_urls) > 0 ? $booking->car->image_urls[0] : null,
-                'store' => $booking->car->store ? [
-                    'id' => $booking->car->store->id,
-                    'name' => $booking->car->store->name,
-                    'address' => $booking->car->store->address,
-                    'phone' => $booking->car->store->contact_phone,
-                ] : null,
-            ] : null,
+            'car' => $booking->car ? (new \App\Http\Resources\CarResource($booking->car))->resolve() : null,
             'store' => $booking->store ? [
                 'id' => $booking->store->id,
                 'name' => $booking->store->name,
@@ -335,4 +323,4 @@ class BookingService
             ] : null,
         ];
     }
-} 
+}

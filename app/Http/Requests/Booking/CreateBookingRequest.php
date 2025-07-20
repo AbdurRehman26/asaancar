@@ -38,12 +38,16 @@ class CreateBookingRequest extends FormRequest
     {
         return [
             'car_id' => 'required|exists:cars,id',
-            'user_id' => 'required|exists:users,id',
-            'start_date' => 'required|date|after:today',
-            'end_date' => 'required|date|after:start_date',
+            'car_offer_id' => 'nullable|integer|exists:car_offers,id',
+            'pickup_location' => 'required|string|max:255',
+            'pickup_time' => 'required|string',
+            'pickup_date' => 'required|date',
+            'rental_type' => 'required|in:with_driver,without_driver',
+            'refill_tank' => 'boolean',
+            'number_of_days' => 'required|integer|min:1',
             'total_price' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,confirmed,cancelled,completed',
             'notes' => 'nullable|string|max:1000',
+            'refill_amount_per_km' => 'nullable|numeric',
         ];
     }
 
