@@ -47,8 +47,8 @@ export default function CarDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [conversationId, setConversationId] = useState<number | null>(null);
-  const [chatError, setChatError] = useState<string | null>(null);
+  const [conversationId] = useState<number | null>(null);
+  const [chatError] = useState<string | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [rentalType, setRentalType] = useState<'with_driver' | 'without_driver'>('without_driver');

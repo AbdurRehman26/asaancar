@@ -1,10 +1,9 @@
 import { ArrowRight, CheckCircle, ChevronDown, MessageSquare, Target, Users, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import LoginModal from '@/pages/auth/login-modal';
 import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
 import Footer from '../components/Footer';
+import { useNavigate } from 'react-router-dom';
 
 // Animation utility for reveal on scroll
 const useRevealOnScroll = () => {
@@ -165,7 +164,7 @@ export default function Welcome() {
     const [activeAccordion, setActiveAccordion] = useState<number | null>(null);
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
-    const [loginOpen, setLoginOpen] = useState(false);
+    const navigate = useNavigate();
 
     const validateEmail = (email: string) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -207,19 +206,7 @@ export default function Welcome() {
         <>
             <title>Welcome - AsaanCar</title>
 
-            {/* Modals */}
-            {!user && (
-                <>
-                    <Dialog open={loginOpen} onOpenChange={setLoginOpen}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Log in to your account</DialogTitle>
-                            </DialogHeader>
-                            <LoginModal canResetPassword={true} />
-                        </DialogContent>
-                    </Dialog>
-                </>
-            )}
+            {/* No login modal */}
 
             {/* Scroll Progress Bar */}
             <div 
@@ -270,7 +257,7 @@ export default function Welcome() {
                                     <a href="/signup" className="rounded-lg bg-[#7e246c] px-4 py-2 text-sm text-white border border-[#7e246c] transition-colors hover:bg-[#6a1f5c] hover:border-[#6a1f5c]">
                                         Register Now
                                     </a>
-                                    <button onClick={() => setLoginOpen(true)} className="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-[#7e246c] dark:hover:text-[#7e246c] transition">
+                                    <button onClick={() => navigate('/login')} className="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-[#7e246c] dark:hover:text-[#7e246c] transition">
                                         Log in <span aria-hidden="true">→</span>
                                     </button>
                                 </div>
