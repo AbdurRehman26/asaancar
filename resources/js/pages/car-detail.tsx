@@ -47,7 +47,6 @@ export default function CarDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [chatButtonLoading, setChatButtonLoading] = useState(false);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
@@ -95,86 +94,6 @@ export default function CarDetailPage() {
       setLoginOpen(false);
     }
   }, [user, loginOpen]);
-
-  const handleOpenChat = async () => {
-    setChatButtonLoading(true);
-
-    setChatError(null);
-
-    // Check if user is logged in
-    if (!user) {
-      const msg = 'Please log in to start a chat with the store.';
-      console.error('❌ ERROR:', msg, { user: 'missing' });
-      setShowChat(true);
-      setConversationId(null);
-      setChatError(msg);
-      setChatButtonLoading(false);
-      return;
-    }
-
-    // Check if car has store information
-    if (!car?.store?.id) {
-      const msg = 'Cannot start chat: this car is not associated with a store.';
-      console.error('❌ ERROR:', msg, {
-        store_id: car?.store_id ? `exists (${car.store_id})` : 'missing',
-        store_object: car?.store ? 'exists' : 'missing',
-        store_id_from_object: car?.store?.id ? `exists (${car.store.id})` : 'missing',
-        car_id: car?.id
-      });
-      setShowChat(true);
-      setConversationId(null);
-      setChatError(msg);
-      setChatButtonLoading(false);
-      return;
-    }
-
-    console.log('✅ DEBUG: User is logged in and car has store_id');
-    console.log('🔍 DEBUG: About to fetch conversations for store_id:', car.store.id);
-
-    try {
-      // Fetch or create the conversation for this store
-      const res = await apiFetch('/api/chat/conversations');
-      const data = await res.json();
-      console.log('🔍 DEBUG: Fetched conversations:', data);
-      const conv = data.find((c: unknown): c is { id: number; type: string; store_id: number } => {
-        if (typeof c === 'object' && c !== null && 'type' in c && 'store_id' in c && 'id' in c) {
-          // @ts-expect-error: c is loosely typed from API response, checked for required fields above
-          return c.type === 'store' && String(c.store_id) === String(car.store.id);
-        }
-        return false;
-      });
-      console.log('🔍 DEBUG: Found existing conversation:', conv);
-
-      if (conv) {
-        setConversationId(conv.id);
-        setShowChat(true);
-        setChatError(null);
-        console.log('✅ DEBUG: Using existing conversation:', conv.id);
-      } else {
-        console.log('🔍 DEBUG: No existing conversation found, creating new one');
-        const createRes = await apiFetch('/api/chat/conversations', {
-          method: 'POST',
-          body: JSON.stringify({ type: 'store', store_id: car.store.id }),
-        });
-        const newConv = await createRes.json();
-        console.log('🔍 DEBUG: Created new conversation response:', newConv);
-        if (newConv && newConv.id) {
-          setConversationId(newConv.id);
-          setShowChat(true);
-          setChatError(null);
-          console.log('✅ DEBUG: Successfully created and set conversation:', newConv.id);
-        } else {
-          throw new Error('Failed to create conversation. Response: ' + JSON.stringify(newConv));
-        }
-      }
-    } catch (e: unknown) {
-      console.error('❌ ERROR: Error opening chat:', e);
-      setShowChat(true);
-      setConversationId(null);
-      setChatError('Could not start chat. Please try again later. ' + ((e as Error)?.message || ''));
-    }
-    setChatButtonLoading(false);
-  };
 
   if (loading) {
     return (<div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading car details...</div>);
