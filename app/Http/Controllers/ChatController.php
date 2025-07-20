@@ -63,4 +63,4 @@ class ChatController extends Controller
         $conversation = \App\Models\Conversation::firstOrCreate($query);
         return response()->json($conversation);
     }
-} 
+}

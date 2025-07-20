@@ -20,6 +20,11 @@ import CreateCarPage from './pages/create-car';
 import EditCarPage from './pages/edit-car';
 import LoginPage from './pages/login';
 import StoreEditPage from './pages/stores-[id]-edit';
+import { configureEcho } from '@laravel/echo-react';
+
+configureEcho({
+    broadcaster: 'pusher',
+});
 
 function App() {
   useEffect(() => {

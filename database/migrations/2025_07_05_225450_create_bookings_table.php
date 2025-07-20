@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('pickup_location');
             $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
             $table->decimal('total_price', 10, 2);
+            $table->string('currency', 8)->default('PKR');
             $table->decimal('refill_amount_per_km', 8, 2)->default(40);
             $table->boolean('refill_tank')->default(false);
             $table->text('notes')->nullable();

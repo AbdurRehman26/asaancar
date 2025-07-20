@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, Fuel, CheckCircle } from 'lucide-react';
+import { Fuel } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import Navbar from '../components/navbar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import LoginModal from '@/pages/auth/login-modal';
 import { apiFetch } from '@/lib/utils';
 import Chat from '../components/chat';
 import BookingForm from '../components/BookingForm';
-import Footer from '../components/Footer';
 import UserBookingsList from '../components/UserBookingsList';
 
 interface Car {
@@ -49,7 +46,6 @@ export default function CarDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
-  const [registerOpen, setRegisterOpen] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [chatButtonLoading, setChatButtonLoading] = useState(false);
   const [conversationId, setConversationId] = useState<number | null>(null);
@@ -89,6 +85,7 @@ export default function CarDetailPage() {
 
   useEffect(() => {
     fetchCarAndBooking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carId]);
 
   useEffect(() => {
@@ -197,36 +194,37 @@ export default function CarDetailPage() {
                 <img src={car.image || '/images/car-placeholder.jpeg'} alt={car.name} className="h-56 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800" />
               </div>
               <a href="/cars" className="text-2xl font-bold text-[#7e246c] dark:text-white text-center block hover:text-[#6a1f5c] dark:hover:text-gray-200 transition">{car.name}</a>
-              <BookingForm
-                car={car}
-                user={user}
-                onBooking={async (formData) => {
-                  setLoading(true);
-                  setError(null);
-                  setSuccess(null);
-                  try {
-                    const res = await apiFetch('/api/bookings', {
-                      method: 'POST',
-                      body: JSON.stringify(formData),
-                    });
-                    if (!res.ok) {
-                      const err = await res.json();
-                      setError(err.message || 'Booking failed');
-                    } else {
-                      setSuccess('Booking successful!');
-                      await fetchCarAndBooking();
+              {user && car && (
+                <BookingForm
+                  car={car}
+                  user={user}
+                  onBooking={async (formData) => {
+                    setLoading(true);
+                    setError(null);
+                    setSuccess(null);
+                    try {
+                      const res = await apiFetch('/api/bookings', {
+                        method: 'POST',
+                        body: JSON.stringify(formData),
+                      });
+                      if (!res.ok) {
+                        const err = await res.json();
+                        setError(err.message || 'Booking failed');
+                      } else {
+                        setSuccess('Booking successful!');
+                        await fetchCarAndBooking();
+                      }
+                    } catch {
+                      setError('Network error');
+                    } finally {
+                      setLoading(false);
                     }
-                  } catch {
-                    setError('Network error');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                loading={loading}
-                error={error}
-                success={success}
-                userBookings={userBookings}
-              />
+                  }}
+                  error={error}
+                  success={success}
+                  userBookings={userBookings}
+                />
+              )}
             </div>
             {/* Right: Pricing & Booking Summary */}
             <div className="md:w-1/2 bg-white dark:bg-gray-800/80 border-l border-gray-100 dark:border-neutral-800 p-8 flex flex-col gap-8">
@@ -369,7 +367,7 @@ export default function CarDetailPage() {
         </div>
       )}
 
-    <UserBookingsList userBookings={userBookings} car={car} />
+    {car && <UserBookingsList userBookings={userBookings} car={car} />}
     </>
   );
 }

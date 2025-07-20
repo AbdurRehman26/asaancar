@@ -1,24 +1,43 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, Fuel } from 'lucide-react';
+import { Calendar, Clock, MapPin } from 'lucide-react';
+import type { Car } from '@/types';
 
-interface BookingFormProps {
-  car: any;
-  user: any;
-  onBooking: (data: any) => Promise<void>;
-  loading: boolean;
-  error: string | null;
-  success: string | null;
-  userBookings: any[];
+interface User {
+  id: number;
+  name: string;
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, loading, error, success, userBookings }) => {
-  const [pickupAddress, setPickupAddress] = useState('Werdener Str. 87, 40233 Düsseldorf, Germany');
-  const [pickupTime, setPickupTime] = useState('23:30');
-  const [pickupDate, setPickupDate] = useState('2025-07-13');
-  const [refillTank, setRefillTank] = useState(false);
+interface Booking {
+  id: number;
+  status: string;
+  start_date?: string;
+  total_price: number;
+  pickup_location?: string;
+  number_of_days?: number;
+  rental_type?: string;
+  refill_tank?: boolean;
+  pickup_date?: string;
+  pickup_time?: string;
+  notes?: string;
+}
+
+interface BookingFormProps {
+  car: Car;
+  user: User;
+  onBooking: (data: Record<string, unknown>) => Promise<void>;
+  error: string | null;
+  success: string | null;
+  userBookings: Booking[];
+}
+
+const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings }) => {
+  const [pickupAddress, setPickupAddress] = useState<string>('Werdener Str. 87, 40233 Düsseldorf, Germany');
+  const [pickupTime, setPickupTime] = useState<string>('23:30');
+  const [pickupDate, setPickupDate] = useState<string>('2025-07-13');
+  const [refillTank, setRefillTank] = useState<boolean>(false);
   const [selectedRentalType, setSelectedRentalType] = useState<'withDriver' | 'withoutDriver'>('withoutDriver');
-  const [notes, setNotes] = useState('');
-  const [numberOfDays, setNumberOfDays] = useState(1);
+  const [notes, setNotes] = useState<string>('');
+  const [numberOfDays, setNumberOfDays] = useState<number>(1);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [buttonLoading, setButtonLoading] = useState(false);
 

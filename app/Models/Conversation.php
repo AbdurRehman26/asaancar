@@ -10,7 +10,7 @@ class Conversation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'type', 'booking_id', 'store_id',
+        'type', 'booking_id', 'store_id', 'user_id',
     ];
 
     public function messages()
@@ -21,6 +21,11 @@ class Conversation extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'messages', 'conversation_id', 'sender_id')->distinct();
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function booking()

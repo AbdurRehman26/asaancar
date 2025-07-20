@@ -6,6 +6,7 @@ import LoginModal from '@/pages/auth/login-modal';
 import { apiFetch } from '@/lib/utils';
 import { useAuth } from '@/components/AuthContext';
 import Chat from '../components/chat';
+import { useRef } from 'react';
 
 type Booking = {
   id: number;
@@ -36,6 +37,11 @@ type Booking = {
   end_date: string;
   status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
   total_price: number;
+  rental_type?: 'with_driver' | 'without_driver';
+  pickup_location?: string;
+  pickup_date?: string;
+  pickup_time?: string;
+  currency?: string;
 };
 
 // Simple Pagination Component (copied from car-listing)
@@ -82,8 +88,12 @@ export default function Bookings() {
   const [showChat, setShowChat] = useState(false);
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
 
-  useEffect(() => {
+  const fetchBookings = () => {
     if (!user) {
       console.log('No user, skipping bookings fetch');
       return;
@@ -116,6 +126,11 @@ export default function Bookings() {
         console.error('Bookings fetch error:', e);
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, status, page, pagination.per_page]);
 
   const getStatusColor = (status: string) => {
@@ -192,29 +207,29 @@ export default function Bookings() {
     }
   };
 
-  if (!user) {
-    return (
-      <Dialog open={true} onOpenChange={() => {}}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Log in to your account</DialogTitle>
-          </DialogHeader>
-          <LoginModal canResetPassword={true} />
-        </DialogContent>
-      </Dialog>
-    );
-  }
-  console.log('Bookings data:', bookings);
-  // Debug individual booking data
-  bookings.forEach((booking, index) => {
-    console.log(`Booking ${index + 1}:`, {
-      id: booking.id,
-      car: booking.car,
-      store: booking.store,
-      status: booking.status,
-      total_price: booking.total_price
-    });
-  });
+  const handleCancelBooking = async () => {
+    if (!bookingToCancel) return;
+    setCancelLoading(true);
+    setCancelError(null);
+    try {
+      const res = await apiFetch(`/api/bookings/${bookingToCancel.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        setCancelError(err.message || 'Failed to cancel booking');
+      } else {
+        setCancelModalOpen(false);
+        setBookingToCancel(null);
+        fetchBookings();
+      }
+    } catch {
+      setCancelError('Network error');
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Modals */}
@@ -252,15 +267,43 @@ export default function Bookings() {
           </div>
         </div>
       )}
-      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 pt-28 mt-10 pt-40">
+      {/* Cancel Confirmation Modal */}
+      <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Booking</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-gray-700 dark:text-gray-200">
+            Are you sure you want to cancel this booking?
+          </div>
+          {cancelError && <div className="text-red-600 mb-2">{cancelError}</div>}
+          <div className="flex justify-end gap-4 mt-4">
+            <button
+              className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold cursor-pointer"
+              onClick={() => setCancelModalOpen(false)}
+              disabled={cancelLoading}
+            >
+              No
+            </button>
+            <button
+              className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition cursor-pointer"
+              onClick={handleCancelBooking}
+              disabled={cancelLoading}
+            >
+              {cancelLoading ? 'Cancelling...' : 'Yes, Cancel'}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 pt-28 mt-10 pt-10">
         {/* Navbar */}
-        <Navbar 
-          currentPage="bookings" 
+        <Navbar
+          currentPage="bookings"
           auth={{ user }}
         />
 
         {/* Page Header */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-1">
           <div className="flex flex-col items-start gap-2">
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">My Bookings</h1>
             <p className="text-base text-gray-500 dark:text-gray-300 font-medium">View and manage your car rental bookings.</p>
@@ -304,8 +347,8 @@ export default function Bookings() {
                 <Calendar className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No bookings found</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6">You haven't made any bookings yet.</p>
-                <a 
-                  href="/cars" 
+                <a
+                  href="/cars"
                   className="inline-flex items-center gap-2 bg-[#7e246c] text-white font-semibold px-6 py-3 rounded-md hover:bg-[#6a1f5c] transition"
                 >
                   <Car className="h-5 w-5" />
@@ -314,42 +357,45 @@ export default function Bookings() {
               </div>
             ) : (
               <>
-                <div className="space-y-6">
+                <div className="space-y-1">
                   {bookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-md transition bg-white dark:bg-gray-800"
+                      className="border border-gray-200 dark:border-gray-700 rounded-lg mt-6 p-6 hover:shadow-md transition bg-white dark:bg-gray-800"
                     >
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <img 
-                            src={booking.car?.image || '/images/car-placeholder.jpeg'} 
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div className="flex flex-1 items-center gap-4">
+                          <img
+                            src={booking.car?.image || '/images/car-placeholder.jpeg'}
                             alt={booking.car?.name || 'Car'}
                             className="w-16 h-16 object-cover rounded-lg bg-gray-100 dark:bg-gray-700"
                           />
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {booking.car?.name || 
-                               (booking.car?.brand && booking.car?.model ? `${booking.car.brand} ${booking.car.model}` : 
-                                booking.car?.model || booking.car?.brand || 'Unknown Car')}
-                            </h3>
+                            <div className="flex items-center gap-3">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                {booking.car?.name ||
+                                 (booking.car?.brand && booking.car?.model ? `${booking.car.brand} ${booking.car.model}` :
+                                  booking.car?.model || booking.car?.brand || 'Unknown Car')}
+                              </h3>
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
+                                {getStatusText(booking.status)}
+                              </span>
+                            </div>
                             {!booking.car && (
                               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                 Car details not available
                               </p>
                             )}
-                            <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            <div className="flex flex-col gap-1 mt-2 text-sm text-gray-600 dark:text-gray-300">
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                <span className="break-all">{booking.pickup_location || 'N/A'}</span>
+                              </div>
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
                                 <span>
-                                  {booking.start_date ? new Date(booking.start_date).toLocaleDateString() : 'N/A'}
-                                  {booking.end_date ? ' - ' + new Date(booking.end_date).toLocaleDateString() : ''}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                <span className="truncate max-w-32">
-                                  {booking.car?.store?.address || booking.store?.address || 'N/A'}
+                                  {booking.pickup_date ? new Date(booking.pickup_date).toLocaleDateString() : 'N/A'}
+                                  {booking.pickup_time ? `, ${booking.pickup_time}` : ''}
                                 </span>
                               </div>
                             </div>
@@ -358,70 +404,70 @@ export default function Bookings() {
                             </div>
                           </div>
                         </div>
-                        {/* Modern Rate Summary Table */}
-                        <div className="w-full md:w-auto mt-4">
-                          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                            <h4 className="text-base font-bold text-[#7e246c] dark:text-white mb-2">Rate Details</h4>
-                            <table className="w-full text-sm mb-2">
-                              <thead>
-                                <tr className="text-[#7e246c] dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
-                                  <th className="text-left pb-2">Type</th>
-                                  <th className="pb-2">Hours/Day</th>
-                                  <th className="text-right pb-2">Amount</th>
-                                </tr>
-                              </thead>
-                              <tbody className="text-gray-700 dark:text-gray-300">
-                                <tr className="border-b border-gray-100 dark:border-gray-800">
-                                  <td className="py-2 font-medium">With Driver</td>
-                                  <td className="py-2 text-center font-semibold">10 hrs/day</td>
-                                  <td className="py-2 text-right font-bold text-[#7e246c] dark:text-white">{booking.car?.currency || 'PKR'} {booking.car?.withDriver ? booking.car.withDriver.toLocaleString() : 'N/A'}</td>
-                                </tr>
-                                <tr>
-                                  <td className="py-2 font-medium">Without Driver</td>
-                                  <td className="py-2 text-center font-semibold">24 hrs/day</td>
-                                  <td className="py-2 text-right font-bold text-[#7e246c] dark:text-white">{booking.car?.currency || 'PKR'} {booking.car?.rental ? booking.car.rental.toLocaleString() : 'N/A'}</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                            <div className="text-xs font-semibold text-[#7e246c] dark:text-white mt-1">
-                              Refill fuel at the end of the day or pay <span className="font-bold">PKR 32/KM</span>
-                            </div>
-                            <div className="text-xs font-semibold text-[#7e246c] dark:text-white mt-1">
-                              Overtime: <span className="font-bold">PKR 400/hr</span>
-                            </div>
-                          </div>
+                      </div>
+                      {/* Actions and total above rate details */}
+                      <div className="flex flex-col items-end gap-2 mt-4">
+                        <div className="text-lg font-bold text-[#7e246c] dark:text-white">
+                          {booking.total_price ? `${Number(booking.total_price).toFixed(2)} ${booking.currency || 'PKR'}` : 'N/A'}
                         </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.status)}`}>
-                            {getStatusText(booking.status)}
-                          </span>
-                          <div className="text-lg font-bold text-[#7e246c] dark:text-white">
-                            {booking.total_price ? `$${booking.total_price.toFixed(2)}` : 'N/A'}
-                          </div>
-                          <div className="flex gap-2 mt-2">
-                            <a
-                              href={`/car-detail/${booking.car?.id}`}
-                              className="px-4 py-2 rounded-md bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-sm"
-                              onClick={e => e.stopPropagation()}
-                            >
-                              View Details
-                            </a>
+                        <div className="flex gap-2 mt-2">
+                          <a
+                            href={`/car-detail/${booking.car?.id}`}
+                            className="px-4 py-2 rounded-md bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-sm"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            View Details
+                          </a>
+                          <button
+                            className="px-4 py-2 rounded-md bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-sm"
+                            onClick={async e => {
+                              e.stopPropagation();
+                              const storeId = booking.car?.store?.id || booking.store?.id;
+                              if (storeId) await handleOpenChat(storeId);
+                            }}
+                            disabled={!booking.car?.store?.id && !booking.store?.id}
+                          >
+                            Message
+                          </button>
+                          {booking.status === 'pending' && (
                             <button
-                              className="px-4 py-2 rounded-md bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-sm"
-                              onClick={async e => {
-                                e.stopPropagation();
-                                const storeId = booking.car?.store?.id || booking.store?.id;
-                                if (storeId) await handleOpenChat(storeId);
+                              className="text-sm text-red-600 dark:text-red-400 hover:underline cursor-pointer"
+                              onClick={() => {
+                                setBookingToCancel(booking);
+                                setCancelModalOpen(true);
                               }}
-                              disabled={!booking.car?.store?.id && !booking.store?.id}
                             >
-                              Message
+                              Cancel
                             </button>
-                            {booking.status === 'pending' && (
-                              <button className="text-sm text-red-600 dark:text-red-400 hover:underline">
-                                Cancel
-                              </button>
+                          )}
+                        </div>
+                      </div>
+                      {/* Rate Details below actions and price */}
+                      <div className="mt-4">
+                        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                          <h4 className="text-base font-bold text-[#7e246c] dark:text-white mb-2">Rate Details</h4>
+                          <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                            {booking.rental_type === 'with_driver' ? (
+                              <>
+                                Rental Type: <span className="font-bold">With Driver</span> (
+                                {booking.currency || 'PKR'} {booking.car?.withDriver ? booking.car.withDriver.toLocaleString() : 'N/A'}
+                                ) <span className="text-xs">10 hrs/day</span>
+                              </>
+                            ) : booking.rental_type === 'without_driver' ? (
+                              <>
+                                Rental Type: <span className="font-bold">Without Driver</span> (
+                                {booking.currency || 'PKR'} {booking.car?.rental ? booking.car.rental.toLocaleString() : 'N/A'}
+                                ) <span className="text-xs">24 hrs/day</span>
+                              </>
+                            ) : (
+                              <>Rental Type: <span className="font-bold">N/A</span></>
                             )}
+                          </div>
+                          <div className="text-xs font-semibold text-[#7e246c] dark:text-white mt-1">
+                            Refill fuel at the end of the day or pay <span className="font-bold">PKR 32/KM</span>
+                          </div>
+                          <div className="text-xs font-semibold text-[#7e246c] dark:text-white mt-1">
+                            Overtime: <span className="font-bold">PKR 400/hr</span>
                           </div>
                         </div>
                       </div>
@@ -441,4 +487,4 @@ export default function Bookings() {
       </div>
     </>
   );
-} 
+}

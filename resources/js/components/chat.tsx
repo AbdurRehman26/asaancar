@@ -83,9 +83,9 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                             key={msg.id}
                             className={`flex flex-col ${msg.sender.id === currentUser.id ? 'items-end' : 'items-start'}`}
                         >
-                            <div className={`px-4 py-2 rounded-lg max-w-xs 
-                                ${msg.sender.id === currentUser.id 
-                                    ? 'bg-primary text-white dark:bg-primary dark:text-white' 
+                            <div className={`px-4 py-2 rounded-lg max-w-xs
+                                ${msg.sender.id === currentUser.id
+                                    ? 'bg-primary text-white dark:bg-primary dark:text-white'
                                     : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'}
                             `}>
                                 <span className="block text-xs font-semibold mb-1">{msg.sender.name}</span>
@@ -108,4 +108,4 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
             </form>
         </div>
     );
-} 
+}

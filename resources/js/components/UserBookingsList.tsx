@@ -1,9 +1,23 @@
 import React from 'react';
 import { CheckCircle } from 'lucide-react';
+import type { Car } from '@/types';
+
+interface Booking {
+  id: number;
+  status: string;
+  pickup_date?: string;
+  pickup_time?: string;
+  pickup_location?: string;
+  number_of_days?: number;
+  rental_type?: string;
+  refill_tank?: boolean;
+  total_price: number;
+  notes?: string;
+}
 
 interface UserBookingsListProps {
-  userBookings: any[];
-  car: any;
+  userBookings: Booking[];
+  car: Car;
 }
 
 const UserBookingsList: React.FC<UserBookingsListProps> = ({ userBookings, car }) => {

@@ -41,3 +41,14 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Car {
+  id: number;
+  name: string;
+  image?: string;
+  rental?: number;
+  withDriver?: number;
+  offer?: { id: number };
+  currency?: string;
+  [key: string]: unknown;
+}

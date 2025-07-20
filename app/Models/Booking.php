@@ -37,6 +37,7 @@ class Booking extends Model
         'car_offer_id',
         'start_date',
         'total_price',
+        'currency',
         'status',
         'notes',
         'pickup_location',
