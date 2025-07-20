@@ -314,7 +314,6 @@ export default function CarDetailPage() {
                     Refill: <span className="font-bold">40 PKR / Km</span>
                   </div>
                 </div>
-                <div className="text-xs text-red-600 dark:text-red-400 font-medium mb-3">Excluding fuel & overtime charges <span className="underline cursor-pointer hover:text-red-700">(charges – view details)</span></div>
                 <div className="flex items-start gap-3 mb-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
                   <div className="w-5 h-5 rounded-full bg-[#7e246c] flex items-center justify-center mt-0.5">
                     <span className="text-white text-xs font-bold">i</span>
