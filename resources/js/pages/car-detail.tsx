@@ -63,6 +63,13 @@ export default function CarDetailPage() {
           const json = await res.json();
           const carData: Car = json.data || json;
           console.log('🔍 DEBUG: Car data received:', carData);
+          console.log('🔍 DEBUG: Car pricing data:', {
+            rental: carData.rental,
+            baseFare: carData.baseFare,
+            fuel: carData.fuel,
+            overtime: carData.overtime,
+            currency: carData.currency
+          });
           console.log('🔍 DEBUG: Car store_id:', carData.store_id);
           console.log('🔍 DEBUG: Car store object:', carData.store);
           setCar(carData);
@@ -197,7 +204,10 @@ export default function CarDetailPage() {
     }
   };
 
-  const totalAmount = car?.rental || 0;
+  // Calculate total amount including optional services
+  const baseRental = car?.rental || 0;
+  const refillTankCost = refillTank ? 50 : 0; // $50 for refill tank service
+  const totalAmount = baseRental + refillTankCost;
 
   if (loading) {
     return (<div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading car details...</div>);
@@ -231,7 +241,6 @@ export default function CarDetailPage() {
         {/* Navbar */}
         <Navbar
           auth={{ user }}
-          onLoginClick={() => setLoginOpen(true)}
         />
         <div className="py-10 px-2 md:px-8">
         <div className="text-xs text-gray-400 dark:text-neutral-400 mb-2">Car ID: {carId}</div>
@@ -246,7 +255,7 @@ export default function CarDetailPage() {
             <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white mb-4 text-center md:text-left">Pick-up & Drop-off Details</h3>
             <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-[#7e246c]/40 shadow-lg flex flex-col gap-8">
               {/* Pick-up */}
-              <div>
+          <div>
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin className="text-[#7e246c]" />
                   <span className="font-semibold text-gray-900 dark:text-white text-lg">Pick-up Detail</span>
@@ -306,57 +315,65 @@ export default function CarDetailPage() {
         {/* Right: Pricing & Booking Summary */}
         <div className="md:w-1/2 bg-white dark:bg-gray-800/80 border-l border-gray-100 dark:border-neutral-800 p-8 flex flex-col gap-8">
           <div>
-            <table className="w-full text-sm mb-4">
+            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
+              <table className="w-full text-sm">
               <thead>
-                <tr className="text-[#7e246c] dark:text-white font-bold">
-                  <th className="text-left">Rate</th>
-                  <th>No. of days</th>
-                  <th>Amount</th>
+                <tr className="text-[#7e246c] dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left pb-3">Rate</th>
+                  <th className="pb-3">No. of days</th>
+                  <th className="text-right pb-3">Amount</th>
                 </tr>
               </thead>
-              <tbody className="text-black dark:text-white">
-                <tr>
-                  <td>Rental</td>
-                  <td>1</td>
-                  <td>{car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}</td>
+              <tbody className="text-gray-700 dark:text-gray-300">
+                <tr className="border-b border-gray-100 dark:border-gray-800">
+                  <td className="py-3 font-medium">Rental</td>
+                  <td className="py-3 text-center">1</td>
+                  <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof baseRental === 'number' ? baseRental.toLocaleString() : 'N/A')}</td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-800">
+                  <td className="py-3 font-medium">Base Fare</td>
+                  <td className="py-3 text-center">-</td>
+                  <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof car.baseFare === 'number' ? car.baseFare.toLocaleString() : 'N/A')}</td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-800">
+                  <td className="py-3 font-medium">Fuel</td>
+                  <td className="py-3 text-center">-</td>
+                  <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{(typeof car.fuel === 'number' ? car.fuel.toLocaleString() : 'N/A')}/km</td>
+                </tr>
+                <tr className="border-b border-gray-100 dark:border-gray-800">
+                  <td className="py-3 font-medium">Over Time</td>
+                  <td className="py-3 text-center">-</td>
+                  <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{(typeof car.overtime === 'number' ? car.overtime.toLocaleString() : 'N/A')}/hour</td>
                 </tr>
                 <tr>
-                  <td>Base Fare</td>
-                  <td>-</td>
-                  <td>{car.currency} {(typeof car.baseFare === 'number' ? car.baseFare.toLocaleString() : 'N/A')}</td>
-                </tr>
-                <tr>
-                  <td>Fuel</td>
-                  <td>-</td>
-                  <td>{(typeof car.fuel === 'number' ? car.fuel.toLocaleString() : 'N/A')}/km</td>
-                </tr>
-                <tr>
-                  <td>Over Time</td>
-                  <td>-</td>
-                  <td>{(typeof car.overtime === 'number' ? car.overtime.toLocaleString() : 'N/A')}/hour</td>
-                </tr>
-                <tr>
-                  <td className="text-[#7e246c] dark:text-white">Discount</td>
-                  <td colSpan={2} className="text-right"><button className="text-[#7e246c] dark:text-white underline text-xs">Promo code</button></td>
+                  <td className="py-3 font-medium text-[#7e246c] dark:text-white">Discount</td>
+                  <td colSpan={2} className="py-3 text-right"><button className="text-[#7e246c] dark:text-white underline text-xs hover:text-[#6a1f5c] transition-colors">Promo code</button></td>
                 </tr>
               </tbody>
-            </table>
-            <div className="mb-4">
-              <div className="font-semibold text-[#7e246c] dark:text-white mb-2">Optional Service</div>
-              <label className="flex items-center gap-2 bg-gray-50 dark:bg-neutral-800 rounded-lg p-3 cursor-pointer border border-gray-200 dark:border-neutral-700">
+              </table>
+            </div>
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-3">Optional Service</h3>
+              <label className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-[#7e246c]/30 transition-all duration-200">
                 <Fuel className="h-5 w-5 text-[#7e246c]" />
-                <span className="flex-1 text-black dark:text-white">Refill Tank <span className="block text-xs text-gray-500 dark:text-neutral-400">Refill fuel at the end of the day</span></span>
-                <input type="checkbox" checked={refillTank} onChange={e => setRefillTank(e.target.checked)} className="accent-[#7e246c] h-5 w-5" />
+                <span className="flex-1 text-gray-700 dark:text-gray-300">
+                  <span className="font-semibold text-gray-900 dark:text-white">Refill Tank</span>
+                  <span className="block text-sm text-gray-500 dark:text-gray-400 mt-1">Refill fuel at the end of the day</span>
+                </span>
+                <input type="checkbox" checked={refillTank} onChange={e => setRefillTank(e.target.checked)} className="accent-[#7e246c] h-5 w-5 rounded" />
               </label>
             </div>
-            <div className="flex flex-col gap-2 mb-2">
-              <div className="text-lg font-bold text-[#7e246c] dark:text-white">Total Amount</div>
-              <div className="text-3xl font-extrabold text-[#7e246c] dark:text-white">{car.currency} {(typeof totalAmount === 'number' ? totalAmount.toLocaleString() : 'N/A')}</div>
+            <div className="bg-gradient-to-r from-[#7e246c]/10 to-purple-500/10 dark:from-[#7e246c]/20 dark:to-purple-500/20 rounded-xl p-6 border border-[#7e246c]/20 mb-4">
+              <div className="text-lg font-bold text-[#7e246c] dark:text-white mb-2">Total Amount</div>
+              <div className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {(typeof totalAmount === 'number' ? totalAmount.toLocaleString() : 'N/A')}</div>
             </div>
-            <div className="text-xs text-red-700 dark:text-red-400 font-semibold mb-2">Excluding fuel & overtime charges (charges – view details)</div>
-            <div className="flex items-start gap-2 mb-4">
-              <input type="radio" checked readOnly className="accent-[#7e246c] mt-1" />
-              <span className="text-xs text-gray-700 dark:text-neutral-400">
+            <div className="text-xs text-red-600 dark:text-red-400 font-medium mb-3">Excluding fuel & overtime charges <span className="underline cursor-pointer hover:text-red-700">(charges – view details)</span></div>
+            <div className="flex items-start gap-3 mb-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+              <div className="w-5 h-5 rounded-full bg-[#7e246c] flex items-center justify-center mt-0.5">
+                <span className="text-white text-xs font-bold">i</span>
+              </div>
+              <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 Kindly note that the Fuel Charges and Overtime will be applied based on the mileage of the car and extra hours of the services (if any). Your final invoice will be generated after adding the Fuel and Overtime charges at the end of your reservation. For more details please read the <a href="#" className="underline text-[#7e246c] dark:text-white">Fuel and Overtime charges and terms of use</a>.
               </span>
             </div>

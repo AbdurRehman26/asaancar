@@ -310,11 +310,11 @@ class BookingService
             'updated_at' => $booking->updated_at,
             'car' => $booking->car ? [
                 'id' => $booking->car->id,
-                'name' => $booking->car->name ?? $booking->car->carBrand->name . ' ' . $booking->car->model,
-                'brand' => $booking->car->carBrand->name ?? 'Unknown',
+                'name' => $booking->car->name ?? ($booking->car->carBrand ? $booking->car->carBrand->name . ' ' . $booking->car->model : $booking->car->model),
+                'brand' => $booking->car->carBrand ? $booking->car->carBrand->name : 'Unknown',
                 'model' => $booking->car->model,
                 'year' => $booking->car->year,
-                'image' => $booking->car->image_urls[0] ?? null,
+                'image' => $booking->car->image_urls && count($booking->car->image_urls) > 0 ? $booking->car->image_urls[0] : null,
                 'store' => $booking->car->store ? [
                     'id' => $booking->car->store->id,
                     'name' => $booking->car->store->name,

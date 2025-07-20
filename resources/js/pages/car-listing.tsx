@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Car } from 'lucide-react';
 import CarCard from '../components/car-card';
@@ -48,15 +48,15 @@ export default function CarListing() {
   const navigate = useNavigate();
   // Helper to parse query params
   function getFiltersFromQuery(search: string) {
-    const params = new URLSearchParams(search);
+    const queryParams = new URLSearchParams(search);
     return {
-      brand_id: params.get('brand_id') || '',
-      type_id: params.get('type_id') || '',
-      store_id: params.get('store_id') || '',
-      transmission: params.get('transmission') || '',
-      fuel_type: params.get('fuel_type') || '',
-      min_seats: params.get('min_seats') || '',
-      max_price: params.get('max_price') || '',
+      brand_id: queryParams.get('brand_id') || '',
+      type_id: queryParams.get('type_id') || '',
+      store_id: queryParams.get('store_id') || '',
+      transmission: queryParams.get('transmission') || '',
+      fuel_type: queryParams.get('fuel_type') || '',
+      min_seats: queryParams.get('min_seats') || '',
+      max_price: queryParams.get('max_price') || '',
     };
   }
 
@@ -76,25 +76,30 @@ export default function CarListing() {
   }, [location.search]);
 
   // Update URL when filters or page change
-  const updateUrl = (newFilters: typeof filters, page = currentPage) => {
-    const params = new URLSearchParams();
+  const updateUrl = useCallback((newFilters: typeof filters, page = currentPage) => {
+    const urlParams = new URLSearchParams();
     Object.entries(newFilters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
+      if (value) urlParams.set(key, value);
     });
-    params.set('page', String(page));
-    navigate({ search: params.toString() }, { replace: true });
-  };
+    urlParams.set('page', String(page));
+    navigate({ search: urlParams.toString() }, { replace: true });
+  }, [currentPage, filters, navigate]);
 
   // On initial mount, fetch with filters from URL
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams();
+    // Get page from URL or default to 1
+    const urlParams = new URLSearchParams(location.search);
+    const pageFromUrl = parseInt(urlParams.get('page') || '1');
+    setCurrentPage(pageFromUrl);
+    
+    const initialParams = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.append(key, value);
+      if (value) initialParams.append(key, value);
     });
-    params.append('per_page', perPageState.toString());
-    params.append('page', currentPage.toString());
-    apiFetch(`/api/cars?${params.toString()}`)
+    initialParams.append('per_page', perPageState.toString());
+    initialParams.append('page', pageFromUrl.toString());
+    apiFetch(`/api/cars?${initialParams.toString()}`)
       .then(async res => {
         const data = await res.json();
         setCars(data.data);
@@ -102,44 +107,50 @@ export default function CarListing() {
         setPerPageState(data.per_page);
       })
       .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.search, perPageState]);
 
   // When page changes, update URL and fetch
   useEffect(() => {
-    if (currentPage !== 1) {
-      updateUrl(filters, currentPage);
-      setLoading(true);
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
-      });
-      params.append('per_page', perPageState.toString());
-      params.append('page', currentPage.toString());
-      apiFetch(`/api/cars?${params.toString()}`)
-        .then(async res => {
-          const data = await res.json();
-          setCars(data.data);
-          setTotalPages(data.last_page);
-          setPerPageState(data.per_page);
-        })
-        .finally(() => setLoading(false));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
+    // Skip the initial load since it's handled by the first useEffect
+    if (currentPage === 1) return;
+    
+    // Update URL without triggering the updateUrl dependency
+    const urlParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) urlParams.set(key, value);
+    });
+    urlParams.set('page', String(currentPage));
+    navigate({ search: urlParams.toString() }, { replace: true });
+    
+    setLoading(true);
+    const apiParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) apiParams.append(key, value);
+    });
+    apiParams.append('per_page', perPageState.toString());
+    apiParams.append('page', currentPage.toString());
+    apiFetch(`/api/cars?${apiParams.toString()}`)
+      .then(async res => {
+        const data = await res.json();
+        setCars(data.data);
+        setTotalPages(data.last_page);
+        setPerPageState(data.per_page);
+      })
+      .finally(() => setLoading(false));
+  }, [currentPage, filters, perPageState, navigate]);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     setLoading(true);
     setCurrentPage(1); // Always reset to first page on search
     updateUrl(filters, 1);
     try {
-      const params = new URLSearchParams();
+      const searchParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
+        if (value) searchParams.append(key, value);
       });
-      params.append('per_page', perPageState.toString());
-      params.append('page', '1');
-      const res = await apiFetch(`/api/cars?${params.toString()}`);
+      searchParams.append('per_page', perPageState.toString());
+      searchParams.append('page', '1');
+      const res = await apiFetch(`/api/cars?${searchParams.toString()}`);
       const data = await res.json();
       setCars(data.data);
       setTotalPages(data.last_page);
@@ -149,7 +160,7 @@ export default function CarListing() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, perPageState, updateUrl]);
 
   return (
     <>
@@ -196,29 +207,32 @@ export default function CarListing() {
             loading={loading}
           />
           {/* Top Pagination */}
-          <div className="w-full overflow-x-auto">
-            <ReactPaginate
-              breakLabel={"..."}
-              nextLabel={"Next"}
-              onPageChange={(selected) => setCurrentPage(selected.selected + 1)}
-              pageRangeDisplayed={isMobile ? 1 : 2}
-              marginPagesDisplayed={isMobile ? 1 : 2}
-              pageCount={totalPages}
-              previousLabel={"Prev"}
-              forcePage={currentPage - 1}
-              containerClassName="flex flex-wrap sm:flex-nowrap justify-center items-center gap-2 my-6 min-w-fit"
-              pageClassName=""
-              pageLinkClassName="px-3 py-1 rounded font-semibold border border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]"
-              previousClassName=""
-              previousLinkClassName="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c]"
-              nextClassName=""
-              nextLinkClassName="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c]"
-              breakClassName=""
-              breakLinkClassName="px-2 text-gray-400"
-              activeLinkClassName="bg-[#7e246c] text-white border-[#7e246c]"
-              disabledClassName="opacity-50 cursor-not-allowed"
-            />
-          </div>
+          {totalPages > 1 && (
+            <div className="w-full overflow-x-auto mb-6">
+              <ReactPaginate
+                key={`top-pagination-${totalPages}-${currentPage}`}
+                breakLabel={"..."}
+                nextLabel={"Next"}
+                onPageChange={(selected) => setCurrentPage(selected.selected + 1)}
+                pageRangeDisplayed={isMobile ? 1 : 2}
+                marginPagesDisplayed={isMobile ? 1 : 2}
+                pageCount={totalPages}
+                previousLabel={"Prev"}
+                forcePage={Math.max(0, currentPage - 1)}
+                containerClassName="flex flex-wrap sm:flex-nowrap justify-center items-center gap-2 min-w-fit"
+                pageClassName=""
+                pageLinkClassName="px-3 py-1 rounded font-semibold border border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c] cursor-pointer"
+                previousClassName=""
+                previousLinkClassName="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c] cursor-pointer"
+                nextClassName=""
+                nextLinkClassName="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c] cursor-pointer"
+                breakClassName=""
+                breakLinkClassName="px-2 text-gray-400 cursor-pointer"
+                activeLinkClassName="bg-[#7e246c] text-purple-200 border-[#7e246c] cursor-pointer font-bold"
+                disabledClassName="opacity-50 cursor-not-allowed"
+              />
+            </div>
+          )}
         </div>
 
         {/* Car Listings */}
@@ -243,27 +257,32 @@ export default function CarListing() {
                   ))}
                 </div>
                 {/* Bottom Pagination */}
-                <ReactPaginate
-                  breakLabel={"..."}
-                  nextLabel={"Next"}
-                  onPageChange={(selected) => setCurrentPage(selected.selected + 1)}
-                  pageRangeDisplayed={2}
-                  marginPagesDisplayed={2}
-                  pageCount={totalPages}
-                  previousLabel={"Prev"}
-                  forcePage={currentPage - 1}
-                  containerClassName="flex justify-center items-center gap-2 my-6"
-                  pageClassName=""
-                  pageLinkClassName="px-3 py-1 rounded font-semibold border border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]"
-                  previousClassName=""
-                  previousLinkClassName="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c]"
-                  nextClassName=""
-                  nextLinkClassName="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c]"
-                  breakClassName=""
-                  breakLinkClassName="px-2 text-gray-400"
-                  activeLinkClassName="bg-[#7e246c] text-white border-[#7e246c]"
-                  disabledClassName="opacity-50 cursor-not-allowed"
-                />
+                {totalPages > 1 && (
+                  <div className="w-full overflow-x-auto mt-6">
+                    <ReactPaginate
+                      key={`bottom-pagination-${totalPages}-${currentPage}`}
+                      breakLabel={"..."}
+                      nextLabel={"Next"}
+                      onPageChange={(selected) => setCurrentPage(selected.selected + 1)}
+                      pageRangeDisplayed={isMobile ? 1 : 2}
+                      marginPagesDisplayed={isMobile ? 1 : 2}
+                      pageCount={totalPages}
+                      previousLabel={"Prev"}
+                      forcePage={Math.max(0, currentPage - 1)}
+                      containerClassName="flex flex-wrap sm:flex-nowrap justify-center items-center gap-2 min-w-fit"
+                      pageClassName=""
+                      pageLinkClassName="px-3 py-1 rounded font-semibold border border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c] cursor-pointer"
+                      previousClassName=""
+                      previousLinkClassName="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c] cursor-pointer"
+                      nextClassName=""
+                      nextLinkClassName="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c] cursor-pointer"
+                      breakClassName=""
+                      breakLinkClassName="px-2 text-gray-400 cursor-pointer"
+                      activeLinkClassName="bg-[#7e246c] text-purple-200 border-[#7e246c] cursor-pointer font-bold"
+                      disabledClassName="opacity-50 cursor-not-allowed"
+                    />
+                  </div>
+                )}
               </>
             )}
           </div>

@@ -14,6 +14,13 @@ class CarResource extends JsonResource
      */
     public function toArray($request)
     {
+        // Get the latest active car offer for pricing
+        $latestOffer = $this->carOffers()
+            ->where('available_from', '<=', now())
+            ->where('available_to', '>=', now())
+            ->latest()
+            ->first();
+
         return [
             'id' => $this->id,
             'store_id' => $this->store_id,
@@ -24,7 +31,13 @@ class CarResource extends JsonResource
             'name' => $this->name,
             'model' => $this->model,
             'year' => $this->year,
-            'price_per_day' => $this->price_per_day,
+            // Pricing fields for frontend compatibility
+            'rental' => $latestOffer ? $latestOffer->price_without_driver : 150.00, // Default daily rate
+            'baseFare' => $latestOffer ? $latestOffer->price_with_driver : 200.00, // Default with driver rate
+            'fuel' => 2.50, // Default fuel rate per km
+            'overtime' => 25.00, // Default overtime rate per hour
+            'currency' => 'USD', // Default currency
+            'price_per_day' => $latestOffer ? $latestOffer->price_without_driver : 150.00,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

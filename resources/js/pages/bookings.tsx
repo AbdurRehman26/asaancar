@@ -24,6 +24,12 @@ type Booking = {
       phone?: string;
     };
   };
+  store?: {
+    id: number;
+    name?: string;
+    address?: string;
+    phone?: string;
+  };
   start_date: string;
   end_date: string;
   status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
@@ -197,6 +203,16 @@ export default function Bookings() {
     );
   }
   console.log('Bookings data:', bookings);
+  // Debug individual booking data
+  bookings.forEach((booking, index) => {
+    console.log(`Booking ${index + 1}:`, {
+      id: booking.id,
+      car: booking.car,
+      store: booking.store,
+      status: booking.status,
+      total_price: booking.total_price
+    });
+  });
   return (
     <>
       {/* Modals */}
@@ -239,7 +255,6 @@ export default function Bookings() {
         <Navbar 
           currentPage="bookings" 
           auth={{ user }}
-          onLoginClick={() => setLoginOpen(true)}
         />
 
         {/* Page Header */}
@@ -307,13 +322,20 @@ export default function Bookings() {
                         <div className="flex items-center gap-4">
                           <img 
                             src={booking.car?.image || '/images/car-placeholder.jpeg'} 
-                            alt={booking.car?.name}
+                            alt={booking.car?.name || 'Car'}
                             className="w-16 h-16 object-cover rounded-lg bg-gray-100 dark:bg-gray-700"
                           />
                           <div>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {booking.car?.brand} {booking.car?.model}
+                              {booking.car?.name || 
+                               (booking.car?.brand && booking.car?.model ? `${booking.car.brand} ${booking.car.model}` : 
+                                booking.car?.model || booking.car?.brand || 'Unknown Car')}
                             </h3>
+                            {!booking.car && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Car details not available
+                              </p>
+                            )}
                             <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-300">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
@@ -325,12 +347,12 @@ export default function Bookings() {
                               <div className="flex items-center gap-1">
                                 <MapPin className="h-4 w-4" />
                                 <span className="truncate max-w-32">
-                                  {booking.car?.store?.address || 'N/A'}
+                                  {booking.car?.store?.address || booking.store?.address || 'N/A'}
                                 </span>
                               </div>
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              Store: {booking.car?.store?.name || 'N/A'}
+                              Store: {booking.car?.store?.name || booking.store?.name || 'N/A'}
                             </div>
                           </div>
                         </div>
@@ -339,7 +361,7 @@ export default function Bookings() {
                             {getStatusText(booking.status)}
                           </span>
                           <div className="text-lg font-bold text-[#7e246c] dark:text-white">
-                            {booking.total_price ? `${booking.total_price} ${booking.car?.currency || ''}` : 'N/A'}
+                            {booking.total_price ? `$${booking.total_price.toFixed(2)}` : 'N/A'}
                           </div>
                           <div className="flex gap-2 mt-2">
                             <a
@@ -353,9 +375,10 @@ export default function Bookings() {
                               className="px-4 py-2 rounded-md bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-sm"
                               onClick={async e => {
                                 e.stopPropagation();
-                                if (booking.car?.store?.id) await handleOpenChat(booking.car.store.id);
+                                const storeId = booking.car?.store?.id || booking.store?.id;
+                                if (storeId) await handleOpenChat(storeId);
                               }}
-                              disabled={!booking.car?.store?.id}
+                              disabled={!booking.car?.store?.id && !booking.store?.id}
                             >
                               Message
                             </button>

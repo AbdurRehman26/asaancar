@@ -253,7 +253,6 @@ export default function Welcome() {
             {/* Navbar */}
             <Navbar 
                 auth={{ user }}
-                onLoginClick={() => setLoginOpen(true)}
             />
 
             <main>

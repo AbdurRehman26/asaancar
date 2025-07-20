@@ -15,8 +15,6 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWi
             {/* Main Navbar */}
             <Navbar 
                 auth={{ user }}
-                onLoginClick={() => {}} // These won't be used in dashboard context
-                onRegisterClick={() => {}}
             />
             
             {/* Sidebar Layout */}

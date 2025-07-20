@@ -90,6 +90,12 @@ class CarService
             'image' => $this->getPrimaryImage($car),
             'images' => $car->image_urls ?? [],
             'price' => $pricing,
+            // Frontend pricing fields for booking summary
+            'rental' => $pricing['perDay']['withoutDriver'],
+            'baseFare' => $pricing['perDay']['withDriver'],
+            'fuel' => 2.50, // Default fuel rate per km
+            'overtime' => 25.00, // Default overtime rate per hour
+            'currency' => $pricing['currency'],
             'features' => $this->extractFeatures($car),
             'specifications' => [
                 'seats' => $car->seats ?? 5,
