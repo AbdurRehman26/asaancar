@@ -4,7 +4,7 @@ import { useAuth } from '@/components/AuthContext';
 import Navbar from '../components/navbar';
 import { apiFetch } from '@/lib/utils';
 import Chat from '../components/chat';
-import BookingForm from '../components/BookingForm';
+import BookingForm, { BookingPrice } from '../components/BookingForm';
 import UserBookingsList from '../components/UserBookingsList';
 
 interface Car {
@@ -52,6 +52,8 @@ export default function CarDetailPage() {
   const [chatError, setChatError] = useState<string | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
+  const [rentalType, setRentalType] = useState<'with_driver' | 'without_driver'>('without_driver');
+  const [numberOfDays, setNumberOfDays] = useState<number>(1);
 
   const fetchCarAndBooking = async () => {
     console.log('Calling booking API for car:', carId);
@@ -188,16 +190,57 @@ export default function CarDetailPage() {
         <div className="py-10 px-2 md:px-8">
           <div className="text-xs text-gray-400 dark:text-neutral-400 mb-2">Car ID: {carId}</div>
           <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800/80 rounded-2xl shadow-lg flex flex-col md:flex-row overflow-hidden">
-            {/* Left: Car & Booking Details */}
+            {/* Left: Car Image & Rate Details */}
             <div className="md:w-1/2 p-8 flex flex-col gap-8">
               <div className="flex justify-center items-center">
                 <img src={car.image || '/images/car-placeholder.jpeg'} alt={car.name} className="h-56 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800" />
               </div>
               <a href="/cars" className="text-2xl font-bold text-[#7e246c] dark:text-white text-center block hover:text-[#6a1f5c] dark:hover:text-gray-200 transition">{car.name}</a>
-              {user && car && (
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-[#7e246c] dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left pb-3">Type</th>
+                      <th className="pb-3">Hours/Day</th>
+                      <th className="text-right pb-3">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-gray-700 dark:text-gray-300">
+                    <tr className="border-b border-gray-100 dark:border-gray-800">
+                      <td className="py-3 font-medium">With Driver</td>
+                      <td className="py-3 text-center font-semibold">10 hrs/day</td>
+                      <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A')}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 font-medium">Without Driver</td>
+                      <td className="py-3 text-center font-semibold">24 hrs/day</td>
+                      <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div className="mt-4 text-sm font-semibold text-[#7e246c] dark:text-white">
+                  Refill fuel at the end of the day or pay <span className="font-bold">PKR 32/KM</span>
+                </div>
+                <div className="text-sm font-semibold text-[#7e246c] dark:text-white mt-1">
+                  Overtime: <span className="font-bold">PKR 400/hr</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 mb-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <div className="w-5 h-5 rounded-full bg-[#7e246c] flex items-center justify-center mt-0.5">
+                  <span className="text-white text-xs font-bold">i</span>
+                </div>
+                <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  Kindly note that the Fuel Charges and Overtime will be applied based on the mileage of the car and extra hours of the services (if any). Your final invoice will be generated after adding the Fuel and Overtime charges at the end of your reservation. For more details please read the <a href="#" className="underline text-[#7e246c] dark:text-white">Fuel and Overtime charges and terms of use</a>.
+                </span>
+              </div>
+            </div>
+            {/* Right: BookingForm, Price, Optional Service */}
+            <div className="md:w-1/2 p-8 flex flex-col gap-8 bg-white dark:bg-gray-800/80 border-l border-gray-100 dark:border-neutral-800">
+              {car && (
                 <BookingForm
                   car={car}
-                  user={user}
+                  user={user ?? undefined}
                   onBooking={async (formData) => {
                     setLoading(true);
                     setError(null);
@@ -223,124 +266,23 @@ export default function CarDetailPage() {
                   error={error}
                   success={success}
                   userBookings={userBookings}
+                  rentalType={rentalType}
+                  setRentalType={setRentalType}
+                  numberOfDays={numberOfDays}
+                  setNumberOfDays={setNumberOfDays}
                 />
               )}
-            </div>
-            {/* Right: Pricing & Booking Summary */}
-            <div className="md:w-1/2 bg-white dark:bg-gray-800/80 border-l border-gray-100 dark:border-neutral-800 p-8 flex flex-col gap-8">
-              <div>
-                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
-                  <div className="flex gap-6 mb-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="rentalType"
-                        value="withoutDriver"
-                        checked={true} // Always true for now, as BookingForm manages this
-                        onChange={() => {}}
-                        className="accent-[#7e246c] h-4 w-4"
-                      />
-                      <span className="font-semibold text-gray-700 dark:text-gray-200">Without Driver</span>
-                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">24 hrs/day</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="rentalType"
-                        value="withDriver"
-                        checked={true} // Always true for now, as BookingForm manages this
-                        onChange={() => {}}
-                        className="accent-[#7e246c] h-4 w-4"
-                      />
-                      <span className="font-semibold text-gray-700 dark:text-gray-200">With Driver</span>
-                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">10 hrs/day</span>
-                    </label>
-                  </div>
-                  <div className="mb-4 flex items-center gap-2">
-                    <label htmlFor="numberOfDays" className="text-[#7e246c] font-semibold">No. of Days</label>
-                    <input
-                      id="numberOfDays"
-                      type="number"
-                      min={1}
-                      value={1} // Always 1 for now, as BookingForm manages this
-                      onChange={() => {}}
-                      className="w-24 rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
-                    />
-                  </div>
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-[#7e246c] dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
-                        <th className="text-left pb-3">Type</th>
-                        <th className="pb-3">Hours/Day</th>
-                        <th className="text-right pb-3">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-gray-700 dark:text-gray-300">
-                      <tr className="border-b border-gray-100 dark:border-gray-800">
-                        <td className="py-3 font-medium">With Driver</td>
-                        <td className="py-3 text-center font-semibold">10 hrs/day</td>
-                        <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A')}</td>
-                      </tr>
-                      <tr>
-                        <td className="py-3 font-medium">Without Driver</td>
-                        <td className="py-3 text-center font-semibold">24 hrs/day</td>
-                        <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">{car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div className="mt-4 text-sm font-semibold text-[#7e246c] dark:text-white">
-                    Refill fuel at the end of the day or pay <span className="font-bold">PKR 32/KM</span>
-                  </div>
-                  <div className="text-sm font-semibold text-[#7e246c] dark:text-white mt-1">
-                    Overtime: <span className="font-bold">PKR 400/hr</span>
-                  </div>
-                </div>
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-3">Optional Service</h3>
-                  <label className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-[#7e246c]/30 transition-all duration-200">
-                    <Fuel className="h-5 w-5 text-[#7e246c]" />
-                    <span className="flex-1 text-gray-700 dark:text-gray-300">
-                      <span className="font-semibold text-gray-900 dark:text-white">Refill Tank</span>
-                      <span className="block text-sm text-gray-500 dark:text-gray-400 mt-1">Refill fuel at the end of the day</span>
-                    </span>
-                    <input type="checkbox" checked={true} onChange={() => {}} className="accent-[#7e246c] h-5 w-5 rounded" />
-                  </label>
-                </div>
-                <div className="bg-gradient-to-r from-[#7e246c]/10 to-purple-500/10 dark:from-[#7e246c]/20 dark:to-purple-500/20 rounded-xl p-6 border border-[#7e246c]/20 mb-4">
-                  <div className="text-lg font-bold text-[#7e246c] dark:text-white mb-2">Total Amount</div>
-                  <div className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}</div>
-                  <div className="mt-2 text-sm font-semibold">
-                    Refill: <span className="font-bold">40 PKR / Km</span>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 mb-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                  <div className="w-5 h-5 rounded-full bg-[#7e246c] flex items-center justify-center mt-0.5">
-                    <span className="text-white text-xs font-bold">i</span>
-                  </div>
-                  <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                    Kindly note that the Fuel Charges and Overtime will be applied based on the mileage of the car and extra hours of the services (if any). Your final invoice will be generated after adding the Fuel and Overtime charges at the end of your reservation. For more details please read the <a href="#" className="underline text-[#7e246c] dark:text-white">Fuel and Overtime charges and terms of use</a>.
+              <BookingPrice car={car} rentalType={rentalType} numberOfDays={numberOfDays} />
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-3">Optional Service</h3>
+                <label className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-[#7e246c]/30 transition-all duration-200">
+                  <Fuel className="h-5 w-5 text-[#7e246c]" />
+                  <span className="flex-1 text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold text-gray-900 dark:text-white">Refill Tank</span>
+                    <span className="block text-sm text-gray-500 dark:text-gray-400 mt-1">Refill fuel at the end of the day</span>
                   </span>
-                </div>
-                <div className="flex gap-4 mt-6 flex-col">
-                  <button
-                    onClick={async () => {
-                      await handleOpenChat();
-                    }}
-                    className={`w-full py-3 rounded-md font-semibold transition mt-2
-                      ${user ? 'bg-[#7e246c] text-white hover:bg-[#6a1f5c] cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'}`}
-                    disabled={!user || chatButtonLoading}
-                  >
-                    {chatButtonLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        Loading...
-                      </span>
-                    ) : (
-                      user ? 'Message Store' : 'Please login to send message'
-                    )}
-                  </button>
-                </div>
+                  <input type="checkbox" checked={true} onChange={() => {}} className="accent-[#7e246c] h-5 w-5 rounded" />
+                </label>
               </div>
             </div>
           </div>
