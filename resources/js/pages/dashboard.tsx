@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Outlet, Link } from 'react-router-dom';
 import CarCard from '../components/car-card';
 import CarFilters from '../components/car-filters';
-import { Car, UserCircle, BookOpen } from 'lucide-react';
+import { Car, UserCircle, BookOpen, Store, MessageSquare } from 'lucide-react';
 import Chat from '../components/chat';
 import type { Conversation } from '@/types/dashboard';
 
@@ -327,7 +327,7 @@ export function Messages() {
 
 // Dashboard Home Section
 export function Home() {
-    const [stats, setStats] = useState({ cars: 0, bookings: 0 });
+    const [stats, setStats] = useState({ cars: 0, bookings: 0, stores: 0, messages: 0 });
     const { user } = useAuth();
     const [hasStore, setHasStore] = useState<boolean | null>(null);
     useEffect(() => {
@@ -346,31 +346,28 @@ export function Home() {
     useEffect(() => {
         async function fetchStats() {
             const token = localStorage.getItem('token');
-            const [carsRes, bookingsRes] = await Promise.all([
+            const [carsRes, bookingsRes, storesRes, messagesRes] = await Promise.all([
                 fetch('/api/customer/cars/stats', { headers: { Authorization: `Bearer ${token}` } }),
                 fetch('/api/bookings/stats', { headers: { Authorization: `Bearer ${token}` } }),
+                fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } }),
+                fetch('/api/chat/conversations', { headers: { Authorization: `Bearer ${token}` } }),
             ]);
             const carsData = await carsRes.json();
             const bookingsData = await bookingsRes.json();
-            setStats({ cars: carsData.count || 0, bookings: bookingsData.count || 0 });
+            const storesData = await storesRes.json();
+            const messagesData = await messagesRes.json();
+            setStats({
+                cars: carsData.count || 0,
+                bookings: bookingsData.count || 0,
+                stores: Array.isArray(storesData.stores) ? storesData.stores.length : 0,
+                messages: Array.isArray(messagesData) ? messagesData.length : 0,
+            });
         }
         fetchStats();
     }, []);
-    const navigate = useNavigate();
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6">
-            {/* Show CreateStore button if user is store_owner and has no store */}
-            {user && Array.isArray(user.roles) && user.roles.includes('store_owner') && hasStore === false && (
-                <div className="mb-8 flex flex-col items-center">
-                    <button
-                        className="px-6 py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition mb-4"
-                        onClick={() => navigate('/dashboard/create-store')}
-                    >
-                        Create Store
-                    </button>
-                </div>
-            )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="flex items-center gap-4 rounded-2xl border border-gray-300 dark:border-neutral-800 bg-white dark:bg-gray-800/80 p-6 shadow-lg">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
                         <Car className="h-6 w-6" />
@@ -387,6 +384,24 @@ export function Home() {
                     <div>
                         <div className="text-2xl font-bold text-[#7e246c]">{stats.bookings}</div>
                         <div className="text-gray-700 dark:text-gray-300">Bookings</div>
+                    </div>
+                </div>
+                <div className="flex items-center gap-4 rounded-2xl border border-gray-300 dark:border-neutral-800 bg-white dark:bg-gray-800/80 p-6 shadow-lg">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
+                        <Store className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <div className="text-2xl font-bold text-[#7e246c]">{stats.stores}</div>
+                        <div className="text-gray-700 dark:text-gray-300">Stores</div>
+                    </div>
+                </div>
+                <div className="flex items-center gap-4 rounded-2xl border border-gray-300 dark:border-neutral-800 bg-white dark:bg-gray-800/80 p-6 shadow-lg">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
+                        <MessageSquare className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <div className="text-2xl font-bold text-[#7e246c]">{stats.messages}</div>
+                        <div className="text-gray-700 dark:text-gray-300">Messages</div>
                     </div>
                 </div>
             </div>

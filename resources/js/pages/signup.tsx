@@ -136,7 +136,14 @@ export default function SignupPage() {
                 {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
             </div>
-            <button type="submit" className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base" disabled={loading}>{loading ? 'Signing up...' : 'Sign Up'}</button>
+            <button
+              type="submit"
+              className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base cursor-pointer"
+              disabled={loading}
+              style={{ pointerEvents: loading ? 'none' : 'auto' }}
+            >
+              {loading ? 'Signing up...' : 'Sign Up'}
+            </button>
           </form>
           {/* Login Link */}
           <div className="mt-6 text-center">

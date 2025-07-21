@@ -104,7 +104,14 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
-                <button type="submit" className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base" disabled={loading}>{loading ? 'Logging in...' : 'Log In'}</button>
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base cursor-pointer"
+                  disabled={loading}
+                  style={{ pointerEvents: loading ? 'none' : 'auto' }}
+                >
+                  {loading ? 'Logging in...' : 'Log In'}
+                </button>
                 {error && <div className="mt-3 text-red-600 text-center">{error}</div>}
               </form>
               {/* Signup Link */}
@@ -122,7 +129,14 @@ export default function LoginPage() {
                   <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Email</label>
                   <input type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} required className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base" placeholder="Enter your email" />
                 </div>
-                <button type="submit" className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base" disabled={forgotLoading}>{forgotLoading ? 'Sending...' : 'Email password reset link'}</button>
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition text-base cursor-pointer"
+                  disabled={forgotLoading}
+                  style={{ pointerEvents: forgotLoading ? 'none' : 'auto' }}
+                >
+                  {forgotLoading ? 'Sending...' : 'Email password reset link'}
+                </button>
                 {forgotError && <div className="mt-3 text-red-600 text-center">{forgotError}</div>}
                 {forgotSuccess && <div className="mt-3 text-green-600 text-center">Reset link sent!</div>}
               </form>
