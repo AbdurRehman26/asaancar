@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Car } from 'lucide-react';
 import CarCard from '../components/car-card';
-import CarFilters from '../components/car-filters';
+import UniversalCarFilter, { CarFiltersType } from '../components/universal-car-filter';
 import Navbar from '../components/navbar';
 import { apiFetch } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -47,7 +47,22 @@ export default function CarListing() {
   const location = useLocation();
   const navigate = useNavigate();
   // Helper to parse query params
-  function getFiltersFromQuery(search: string) {
+  type ListingFilters = {
+    brand_id: string;
+    type_id: string;
+    store_id: string;
+    transmission: string;
+    fuel_type: string;
+    min_seats: string;
+    max_price: string;
+    pickup_location?: string;
+    pickup_date?: string;
+    pickup_time?: string;
+    dropoff_date?: string;
+    same_location?: string;
+  };
+
+  const getFiltersFromQuery = useCallback((search: string): ListingFilters => {
     const queryParams = new URLSearchParams(search);
     return {
       brand_id: queryParams.get('brand_id') || '',
@@ -57,10 +72,15 @@ export default function CarListing() {
       fuel_type: queryParams.get('fuel_type') || '',
       min_seats: queryParams.get('min_seats') || '',
       max_price: queryParams.get('max_price') || '',
+      pickup_location: queryParams.get('pickup_location') || '',
+      pickup_date: queryParams.get('pickup_date') || '',
+      pickup_time: queryParams.get('pickup_time') || '',
+      dropoff_date: queryParams.get('dropoff_date') || '',
+      same_location: queryParams.get('same_location') || '',
     };
-  }
+  }, []);
 
-  const [filters, setFilters] = useState(() => getFiltersFromQuery(window.location.search));
+  const [filters, setFilters] = useState<ListingFilters>(() => getFiltersFromQuery(window.location.search));
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,7 +93,7 @@ export default function CarListing() {
   // Sync filters/page with URL on load
   useEffect(() => {
     setFilters(getFiltersFromQuery(location.search));
-  }, [location.search]);
+  }, [location.search, getFiltersFromQuery]);
 
   // Update URL when filters or page change
   const updateUrl = useCallback((newFilters: typeof filters, page = currentPage) => {
@@ -139,28 +159,9 @@ export default function CarListing() {
       .finally(() => setLoading(false));
   }, [currentPage, filters, perPageState, navigate]);
 
-  const handleSearch = useCallback(async () => {
-    setLoading(true);
-    setCurrentPage(1); // Always reset to first page on search
+  const handleSearch = useCallback(() => {
     updateUrl(filters, 1);
-    try {
-      const searchParams = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) searchParams.append(key, value);
-      });
-      searchParams.append('per_page', perPageState.toString());
-      searchParams.append('page', '1');
-      const res = await apiFetch(`/api/customer/cars?${searchParams.toString()}`);
-      const data = await res.json();
-      setCars(data.data);
-      setTotalPages(data.last_page);
-      setPerPageState(data.per_page);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, perPageState, updateUrl]);
+  }, [filters, updateUrl]);
 
   return (
     <>
@@ -200,10 +201,12 @@ export default function CarListing() {
 
         {/* Filters and Search */}
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6">
-          <CarFilters
-            filters={filters}
-            setFilters={setFilters}
-            handleSearch={handleSearch}
+          <UniversalCarFilter
+            onSearch={(newFilters: CarFiltersType) => {
+              setFilters(newFilters);
+              handleSearch();
+            }}
+            initialFilters={filters}
             loading={loading}
           />
           {/* Top Pagination */}

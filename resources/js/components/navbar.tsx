@@ -36,6 +36,28 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
         <Car className="h-4 w-4" />
         Car Listing
       </Link>
+      <Link
+        to="/about"
+        className={`flex items-center gap-2 text-sm font-semibold transition ${
+          currentPage === 'about'
+            ? 'text-[#7e246c] dark:text-white'
+            : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        About Us
+      </Link>
+      <Link
+        to="/contact"
+        className={`flex items-center gap-2 text-sm font-semibold transition ${
+          currentPage === 'contact'
+            ? 'text-[#7e246c] dark:text-white'
+            : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        Contact Us
+      </Link>
       {user && (
         <Link
           to="/bookings"

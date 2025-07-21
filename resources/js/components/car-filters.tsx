@@ -24,8 +24,8 @@ const CarFilters: React.FC<CarFiltersProps> = ({
   handleSearch,
   loading = false
 }) => (
-  <div className="bg-white dark:bg-gray-800/80 border-2 border-[#7e246c] rounded-lg mx-4 my-4">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+  <div className="bg-white dark:bg-gray-800/80 border-2 border-[#7e246c] rounded-lg mx-0 my-4 w-full">
+    <div className="px-4 py-4 w-full">
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <div>
           <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Brand</label>

@@ -4,6 +4,7 @@ import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
+import UniversalCarFilter from '../components/universal-car-filter';
 
 // Animation utility for reveal on scroll
 const useRevealOnScroll = () => {
@@ -102,15 +103,15 @@ const useCounterAnimation = (end: number, duration: number = 2000) => {
 };
 
 // FAQ Accordion Component
-const FAQItem = ({ 
-    question, 
-    answer, 
-    isOpen, 
-    onClick 
-}: { 
-    question: string; 
-    answer: string; 
-    isOpen: boolean; 
+const FAQItem = ({
+    question,
+    answer,
+    isOpen,
+    onClick
+}: {
+    question: string;
+    answer: string;
+    isOpen: boolean;
     onClick: () => void;
 }) => (
     <div className="border-b border-neutral-200 dark:border-neutral-800">
@@ -130,7 +131,7 @@ const FAQItem = ({
 // Stats Card Component
 const StatCard = ({ number, label, icon: Icon }: { number: number; label: string; icon: React.ElementType }) => {
     const { count, countRef } = useCounterAnimation(number);
-    
+
     return (
         <div ref={countRef} className="reveal flex flex-col items-center gap-4 rounded-xl border border-neutral-200 bg-white p-6 dark:border-neutral-800 dark:bg-gray-800/80">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
@@ -162,26 +163,7 @@ export default function Welcome() {
     useRevealOnScroll();
     const { progress, showScrollTop } = useScrollProgress();
     const [activeAccordion, setActiveAccordion] = useState<number | null>(null);
-    const [email, setEmail] = useState('');
-    const [emailError, setEmailError] = useState('');
     const navigate = useNavigate();
-
-    const validateEmail = (email: string) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    };
-
-    const handleSubscribe = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!validateEmail(email)) {
-            setEmailError('Please enter a valid email address');
-            return;
-        }
-        setEmailError('');
-        // Handle subscription logic here
-        alert('Thank you for subscribing!');
-        setEmail('');
-    };
 
     const faqItems = [
         {
@@ -209,7 +191,7 @@ export default function Welcome() {
             {/* No login modal */}
 
             {/* Scroll Progress Bar */}
-            <div 
+            <div
                 className="fixed top-0 left-0 h-1 w-full bg-[#7e246c]/20 z-50"
                 style={{ transform: `scaleX(${progress / 100})` }}
             />
@@ -226,15 +208,33 @@ export default function Welcome() {
             </button>
 
             {/* Navbar */}
-            <Navbar 
+            <Navbar
                 auth={{ user }}
             />
 
             <main>
                 {/* Hero section */}
                 <div className="relative isolate pt-14 bg-neutral-50 dark:bg-gray-900">
-                    <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-40">
-                        <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto">
+
+                    <div className="container mx-auto my-auto">
+
+                        <section id="filters" className="py-24 bg-neutral-50 dark:bg-gray-900 border-b border-neutral-200 dark:border-neutral-800">
+                            <UniversalCarFilter
+                                fullWidth={true}
+                                onSearch={filters => {
+                                    const params = new URLSearchParams();
+                                    Object.entries(filters).forEach(([key, value]) => {
+                                        if (value) params.set(key, value);
+                                    });
+                                    navigate(`/cars?${params.toString()}`);
+                                }}
+                            />
+                        </section>
+                    </div>
+
+                    <div
+                        className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-40">
+                    <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto">
                             <div className="flex">
                                 <div className="relative flex items-center gap-x-4 rounded-full px-4 py-1 text-sm leading-6 text-gray-600 ring-1 ring-[#7e246c]/20 hover:ring-[#7e246c]/30 dark:text-gray-300 dark:ring-[#7e246c]/30 dark:hover:ring-[#7e246c]/40">
                                     <span className="font-semibold text-[#7e246c]">What's new</span>
@@ -252,6 +252,7 @@ export default function Welcome() {
                                 Experience hassle-free car rentals with our intuitive platform. Find the perfect vehicle
                                 for your needs, book with confidence, and hit the road in minutes.
                             </p>
+                            {/* Register and Login buttons (only if not logged in) */}
                             {!user && (
                                 <div className="mt-10 flex items-center gap-x-6">
                                     <a href="/signup" className="rounded-lg bg-[#7e246c] px-4 py-2 text-sm text-white border border-[#7e246c] transition-colors hover:bg-[#6a1f5c] hover:border-[#6a1f5c]">
@@ -395,38 +396,6 @@ export default function Welcome() {
                                     onClick={() => setActiveAccordion(activeAccordion === index ? null : index)}
                                 />
                             ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* Newsletter Section */}
-                <section className="bg-neutral-50 py-24 dark:bg-gray-900">
-                    <div className="mx-auto max-w-7xl px-6">
-                        <div className="rounded-2xl bg-[#7e246c]/5 px-6 py-12 dark:bg-gray-800/80 md:px-12">
-                            <div className="mx-auto max-w-2xl text-center">
-                                <h2 className="reveal mb-4 text-3xl font-bold text-gray-900 dark:text-white">Stay Updated</h2>
-                                <p className="reveal mb-8 text-neutral-600 dark:text-neutral-400">
-                                    Get the latest updates and special offers from AsaanCar delivered to your inbox.
-                                </p>
-                                <form onSubmit={handleSubscribe} className="reveal flex flex-col gap-4 sm:flex-row">
-                                    <input
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="Enter your email"
-                                        className="flex-1 rounded-lg border border-neutral-200 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900 dark:text-white"
-                                    />
-                                    <button
-                                        type="submit"
-                                        className="rounded-lg bg-[#7e246c] px-6 py-2 text-white transition-colors hover:bg-[#6a1f5c]"
-                                    >
-                                        Subscribe
-                                    </button>
-                                </form>
-                                {emailError && (
-                                    <p className="mt-2 text-sm text-red-500">{emailError}</p>
-                                )}
-                            </div>
                         </div>
                     </div>
                 </section>

@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Resources\UserResource;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Customer\CityController;
+use App\Http\Controllers\Api\ContactMessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,7 @@ Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']);
 Route::post('/reset-password', [NewPasswordController::class, 'store']);
 Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store']);
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+Route::post('/contact', [ContactMessageController::class, 'store']);
 
 // Email verification for API
 Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])

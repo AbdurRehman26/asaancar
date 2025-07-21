@@ -22,6 +22,8 @@ import EditCarPage from './pages/edit-car';
 import LoginPage from './pages/login';
 import StoreEditPage from './pages/stores-[id]-edit';
 import { configureEcho } from '@laravel/echo-react';
+import About from './pages/about';
+import Contact from './pages/contact';
 
 configureEcho({
     broadcaster: 'pusher',
@@ -38,6 +40,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Welcome />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/cars" element={<CarListing />} />
           <Route path="/car-detail/:id" element={<CarDetail />} />
           <Route path="/car-detail/:id/edit" element={<CarDetailWithOffer />} />
