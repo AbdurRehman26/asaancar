@@ -116,16 +116,6 @@ export default function CarDetailPage() {
                 <img src={car.image || '/images/car-placeholder.jpeg'} alt={car.name} className="h-56 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800" />
               </div>
               <a href="/cars" className="text-2xl font-bold text-[#7e246c] dark:text-white text-center block hover:text-[#6a1f5c] dark:hover:text-gray-200 transition">{car.name}</a>
-              {user && (
-                <div className="text-center">
-                  <a 
-                    href={`/car-detail/${carId}/edit`}
-                    className="inline-block bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
-                  >
-                    Add Car Offer
-                  </a>
-                </div>
-              )}
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
                 <table className="w-full text-sm">
