@@ -5,8 +5,6 @@ import { useAuth } from '@/components/AuthContext';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import UniversalCarFilter from '../components/universal-car-filter';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCar, faShieldAlt, faDollarSign, faTachometerAlt } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
 
 // Animation utility for reveal on scroll
