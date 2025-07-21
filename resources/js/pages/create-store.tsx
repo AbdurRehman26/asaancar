@@ -9,11 +9,9 @@ export default function CreateStoreForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [description, setDescription] = useState('');
-  const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -27,7 +25,6 @@ export default function CreateStoreForm() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setLogo(file);
       setLogoPreview(URL.createObjectURL(file));
     }
   };
@@ -44,7 +41,6 @@ export default function CreateStoreForm() {
           name,
           city_id: cityId ? Number(cityId) : undefined,
           description,
-          ...(email ? { email } : {}),
           ...(phone ? { phone } : {}),
           ...(address ? { address } : {}),
         }),

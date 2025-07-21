@@ -51,6 +51,7 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
 Route::prefix('cars')->group(function () {
     Route::get('/', [CarController::class, 'index']);
     Route::get('/{id}', [CarController::class, 'show']);
+    Route::get('/{id}/edit-form', [CarController::class, 'showWithOfferForm']);
     Route::get('/search', [CarController::class, 'search']);
     Route::get('/filters', [CarController::class, 'getFilters']);
 });

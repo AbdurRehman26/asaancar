@@ -8,6 +8,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { initializeTheme } from '@/hooks/use-appearance';
 import CarListing from './pages/car-listing';
 import CarDetail from './pages/car-detail';
+import CarDetailWithOffer from './pages/car-detail-with-offer';
 import Bookings from './pages/bookings';
 import Chat from './pages/chat';
 import Dashboard from './pages/dashboard';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/" element={<Welcome />} />
           <Route path="/cars" element={<CarListing />} />
           <Route path="/car-detail/:id" element={<CarDetail />} />
+          <Route path="/car-detail/:id/edit" element={<CarDetailWithOffer />} />
           <Route path="/bookings" element={
             <ProtectedRoute>
               <Bookings />

@@ -36,7 +36,6 @@ export default function CreateCarPage() {
   const [carEngines, setCarEngines] = useState<{ id: number; name: string }[]>([]);
 
   // Image upload state
-  const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   // Load all required data
@@ -87,7 +86,6 @@ export default function CreateCarPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      setImages(prev => [...prev, ...newFiles]);
       
       // Create previews
       const newPreviews = newFiles.map(file => URL.createObjectURL(file));
@@ -96,7 +94,6 @@ export default function CreateCarPage() {
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => {
       const newPreviews = prev.filter((_, i) => i !== index);
       // Revoke the URL to free memory

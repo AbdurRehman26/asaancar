@@ -215,6 +215,12 @@ class CarResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('view_offers')
+                    ->label('View Offers')
+                    ->icon('heroicon-o-tag')
+                    ->color('success')
+                    ->url(fn (Car $record): string => "/car-detail/{$record->id}/edit")
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 // import { Fuel } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import Navbar from '../components/navbar';
@@ -40,8 +41,8 @@ interface Booking {
 
 export default function CarDetailPage() {
   const { user } = useAuth();
-  // Get car ID from URL (for demonstration, usePage.props or useParams if available)
-  const carId = (typeof window !== 'undefined' && window.location.pathname.split('/').pop()) || 'N/A';
+  const { id } = useParams<{ id: string }>();
+  const carId = id || 'N/A';
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +116,16 @@ export default function CarDetailPage() {
                 <img src={car.image || '/images/car-placeholder.jpeg'} alt={car.name} className="h-56 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800" />
               </div>
               <a href="/cars" className="text-2xl font-bold text-[#7e246c] dark:text-white text-center block hover:text-[#6a1f5c] dark:hover:text-gray-200 transition">{car.name}</a>
+              {user && (
+                <div className="text-center">
+                  <a 
+                    href={`/car-detail/${carId}/edit`}
+                    className="inline-block bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+                  >
+                    Add Car Offer
+                  </a>
+                </div>
+              )}
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
                 <table className="w-full text-sm">

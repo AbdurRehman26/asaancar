@@ -92,7 +92,7 @@ export default function CarListing() {
     const urlParams = new URLSearchParams(location.search);
     const pageFromUrl = parseInt(urlParams.get('page') || '1');
     setCurrentPage(pageFromUrl);
-    
+
     const initialParams = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value) initialParams.append(key, value);
@@ -113,7 +113,7 @@ export default function CarListing() {
   useEffect(() => {
     // Skip the initial load since it's handled by the first useEffect
     if (currentPage === 1) return;
-    
+
     // Update URL without triggering the updateUrl dependency
     const urlParams = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -121,7 +121,7 @@ export default function CarListing() {
     });
     urlParams.set('page', String(currentPage));
     navigate({ search: urlParams.toString() }, { replace: true });
-    
+
     setLoading(true);
     const apiParams = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {

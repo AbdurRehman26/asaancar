@@ -8,7 +8,6 @@ import CarFilters from '../components/car-filters';
 import { Car, UserCircle, BookOpen } from 'lucide-react';
 import Chat from '../components/chat';
 import type { Conversation } from '@/types/dashboard';
-import CreateStoreForm from './create-store';
 
 // Remove local Conversation interface
 
@@ -188,8 +187,8 @@ export function CarListings() {
                                 {cars.map((car) => (
                                     <div key={car.id} className="relative">
                                         <CarCard car={{ ...car, name: car.name || 'Car' }} hideBooking={true} />
-                                        <Link
-                                            to={`/edit-car/${car.id}`}
+                                                                                <Link
+                                            to={`/car-detail/${car.id}/edit`}
                                             className="absolute top-2 right-2 px-3 py-1 rounded bg-[#7e246c] text-white text-xs font-semibold hover:bg-[#6a1f5c] transition-colors"
                                         >
                                             Edit

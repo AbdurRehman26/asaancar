@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CarResource;
 use App\Services\CarService;
 use App\Models\Car;
+use App\Models\CarOffer;
 use App\Http\Requests\Car\CreateCarRequest;
 use App\Http\Requests\Car\UpdateCarRequest;
 use Illuminate\Http\JsonResponse;
@@ -124,6 +125,62 @@ class CarController extends Controller
             return response()->json(['message' => 'Car not found'], 404);
         }
         return response()->json(['data' => $car]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/cars/{id}/with-offer-form",
+     *     operationId="getCarWithOfferForm",
+     *     tags={"Cars"},
+     *     summary="Get car information with offer form data",
+     *     description="Returns car data by ID with additional data needed for offer form",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Car ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", ref="#/components/schemas/Car"),
+     *             @OA\Property(property="offer_form_data", type="object", 
+     *                 @OA\Property(property="currencies", type="array", @OA\Items(type="string")),
+     *                 @OA\Property(property="existing_offers", type="array", @OA\Items(ref="#/components/schemas/CarOffer"))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Car not found"
+     *     )
+     * )
+     */
+    public function showWithOfferForm(int $id)
+    {
+        $car = $this->carService->getCarForListing($id);
+        if (!$car) {
+            return response()->json(['message' => 'Car not found'], 404);
+        }
+
+        // Get existing offers for this car
+        $existingOffers = CarOffer::where('car_id', $id)
+            ->where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Available currencies
+        $currencies = ['PKR', 'USD', 'EUR', 'GBP'];
+
+        return response()->json([
+            'data' => $car,
+            'offer_form_data' => [
+                'currencies' => $currencies,
+                'existing_offers' => $existingOffers
+            ]
+        ]);
     }
 
     /**

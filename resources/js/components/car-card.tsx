@@ -105,22 +105,34 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
             )
         )}
       </div>
-      {/* Request Booking Button */}
-      {!hideBooking && (user ? (
-        <Link
-          to={`/car-detail/${car.id}`}
-          className="mt-auto w-full py-3 px-4 rounded-md font-medium bg-[#7e246c] text-white hover:bg-[#6a1f5c] transition-colors text-base shadow-sm flex items-center justify-center gap-2"
-        >
-          <Calendar className="h-5 w-5 mr-2 inline" /> Request Booking
-        </Link>
-      ) : (
-        <button
-          disabled
-          className="mt-auto w-full py-3 px-4 rounded-md font-medium bg-gray-300 text-gray-500 cursor-not-allowed text-base shadow-sm flex items-center justify-center gap-2 dark:bg-gray-700 dark:text-gray-400"
-        >
-          <Calendar className="h-5 w-5 mr-2 inline" /> Please login to book
-        </button>
-      ))}
+      {/* Action Buttons */}
+      {!hideBooking && (
+        <div className="mt-auto w-full space-y-2">
+          {user ? (
+            <>
+              <Link
+                to={`/car-detail/${car.id}`}
+                className="w-full py-3 px-4 rounded-md font-medium bg-[#7e246c] text-white hover:bg-[#6a1f5c] transition-colors text-base shadow-sm flex items-center justify-center gap-2"
+              >
+                <Calendar className="h-5 w-5 mr-2 inline" /> Request Booking
+              </Link>
+                              <Link
+                  to={`/car-detail/${car.id}/edit`}
+                  className="w-full py-2 px-4 rounded-md font-medium bg-green-600 text-white hover:bg-green-700 transition-colors text-sm shadow-sm flex items-center justify-center gap-2"
+                >
+                <Car className="h-4 w-4 mr-1 inline" /> Add Offer
+              </Link>
+            </>
+          ) : (
+            <button
+              disabled
+              className="w-full py-3 px-4 rounded-md font-medium bg-gray-300 text-gray-500 cursor-not-allowed text-base shadow-sm flex items-center justify-center gap-2 dark:bg-gray-700 dark:text-gray-400"
+            >
+              <Calendar className="h-5 w-5 mr-2 inline" /> Please login to book
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
