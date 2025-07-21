@@ -1,10 +1,13 @@
 import { ArrowRight, CheckCircle, ChevronDown, MessageSquare, Target, Users, Zap } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import UniversalCarFilter from '../components/universal-car-filter';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCar, faShieldAlt, faDollarSign, faTachometerAlt } from '@fortawesome/free-solid-svg-icons';
+import { motion } from 'framer-motion';
 
 // Animation utility for reveal on scroll
 const useRevealOnScroll = () => {
@@ -158,6 +161,47 @@ const FeatureCard = ({ icon: Icon, title, description }: { icon: React.ElementTy
   </div>
 );
 
+// Modern Hero Section with Font Awesome
+function HeroMarketplace() {
+    const navigate = useNavigate();
+
+    return (
+        <section className="relative flex min-h-125 items-center justify-center overflow-hidden">
+            {/* Floating Glows */}
+            {/* Parallax Car + Orbiting Icons */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <motion.div
+                    className="relative z-10"
+                    initial={{ y: 0 }}
+                    animate={{ y: [0, -20, 0] }}
+                    transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+                >
+                    <div className="animate-float-slow absolute top-10 left-10 h-60 w-60 rounded-full bg-purple-500/30 blur-3xl" />
+                </motion.div>
+            </div>
+            <UniversalCarFilter
+                onSearch={(filters) => {
+                    const params = new URLSearchParams();
+                    Object.entries(filters).forEach(([key, value]) => {
+                        if (value) params.set(key, value);
+                    });
+                    navigate(`/cars?${params.toString()}`);
+                }}
+            />
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <motion.div
+                    className="relative z-10"
+                    initial={{ y: 0 }}
+                    animate={{ y: [0, -20, 0] }}
+                    transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+                >
+                    <div className="animate-float-fast absolute right-0 bottom-0 h-96 w-96 rounded-full bg-blue-400/20 blur-3xl" />
+                </motion.div>
+            </div>
+        </section>
+    );
+}
+
 export default function Welcome() {
     const { user } = useAuth();
     useRevealOnScroll();
@@ -172,7 +216,7 @@ export default function Welcome() {
         },
         {
             question: 'What documents do I need?',
-            answer: 'You\'ll need a valid driver\'s license, proof of insurance, and a credit card for the security deposit.',
+            answer: "You'll need a valid driver's license, proof of insurance, and a credit card for the security deposit.",
         },
         {
             question: 'Can I cancel my booking?',
@@ -188,18 +232,18 @@ export default function Welcome() {
         <>
             <title>Welcome - AsaanCar</title>
 
+            {/* Modern Hero Section */}
+            <HeroMarketplace />
+
             {/* No login modal */}
 
             {/* Scroll Progress Bar */}
-            <div
-                className="fixed top-0 left-0 h-1 w-full bg-[#7e246c]/20 z-50"
-                style={{ transform: `scaleX(${progress / 100})` }}
-            />
+            <div className="fixed top-0 left-0 z-50 h-1 w-full bg-[#7e246c]/20" style={{ transform: `scaleX(${progress / 100})` }} />
 
             {/* Scroll to Top Button */}
             <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className={`fixed bottom-4 right-4 rounded-full bg-[#7e246c] p-3 text-white shadow-lg transition-opacity ${
+                className={`fixed right-4 bottom-4 rounded-full bg-[#7e246c] p-3 text-white shadow-lg transition-opacity ${
                     showScrollTop ? 'opacity-100' : 'opacity-0'
                 }`}
                 aria-label="Scroll to top"
@@ -208,33 +252,13 @@ export default function Welcome() {
             </button>
 
             {/* Navbar */}
-            <Navbar
-                auth={{ user }}
-            />
+            <Navbar auth={{ user }} />
 
             <main>
                 {/* Hero section */}
-                <div className="relative isolate pt-14 bg-neutral-50 dark:bg-gray-900">
-
-                    <div className="container mx-auto my-auto">
-
-                        <section id="filters" className="py-24 bg-neutral-50 dark:bg-gray-900 border-b border-neutral-200 dark:border-neutral-800">
-                            <UniversalCarFilter
-                                fullWidth={true}
-                                onSearch={filters => {
-                                    const params = new URLSearchParams();
-                                    Object.entries(filters).forEach(([key, value]) => {
-                                        if (value) params.set(key, value);
-                                    });
-                                    navigate(`/cars?${params.toString()}`);
-                                }}
-                            />
-                        </section>
-                    </div>
-
-                    <div
-                        className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-40">
-                    <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto">
+                <div className="relative isolate bg-neutral-50 pt-14 dark:bg-gray-900">
+                    <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-40">
+                        <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto">
                             <div className="flex">
                                 <div className="relative flex items-center gap-x-4 rounded-full px-4 py-1 text-sm leading-6 text-gray-600 ring-1 ring-[#7e246c]/20 hover:ring-[#7e246c]/30 dark:text-gray-300 dark:ring-[#7e246c]/30 dark:hover:ring-[#7e246c]/40">
                                     <span className="font-semibold text-[#7e246c]">What's new</span>
@@ -245,20 +269,26 @@ export default function Welcome() {
                                     </a>
                                 </div>
                             </div>
-                            <h1 className="mt-10 max-w-lg text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+                            <h1 className="mt-10 max-w-lg text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-white">
                                 Rent a car with ease
                             </h1>
                             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                Experience hassle-free car rentals with our intuitive platform. Find the perfect vehicle
-                                for your needs, book with confidence, and hit the road in minutes.
+                                Experience hassle-free car rentals with our intuitive platform. Find the perfect vehicle for your needs, book with
+                                confidence, and hit the road in minutes.
                             </p>
                             {/* Register and Login buttons (only if not logged in) */}
                             {!user && (
                                 <div className="mt-10 flex items-center gap-x-6">
-                                    <a href="/signup" className="rounded-lg bg-[#7e246c] px-4 py-2 text-sm text-white border border-[#7e246c] transition-colors hover:bg-[#6a1f5c] hover:border-[#6a1f5c]">
+                                    <a
+                                        href="/signup"
+                                        className="rounded-lg border border-[#7e246c] bg-[#7e246c] px-4 py-2 text-sm text-white transition-colors hover:border-[#6a1f5c] hover:bg-[#6a1f5c]"
+                                    >
                                         Register Now
                                     </a>
-                                    <button onClick={() => navigate('/login')} className="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-[#7e246c] dark:hover:text-[#7e246c] transition">
+                                    <button
+                                        onClick={() => navigate('/login')}
+                                        className="text-sm leading-6 font-semibold text-gray-900 transition hover:text-[#7e246c] dark:text-white dark:hover:text-[#7e246c]"
+                                    >
                                         Log in <span aria-hidden="true">→</span>
                                     </button>
                                 </div>
@@ -268,7 +298,7 @@ export default function Welcome() {
                             <div className="mx-auto w-[22.875rem] max-w-full rounded-lg bg-gradient-to-br from-[#7e246c]/10 to-[#7e246c]/5 p-8 ring-1 ring-[#7e246c]/20 dark:from-[#7e246c]/20 dark:to-[#7e246c]/10 dark:ring-[#7e246c]/30">
                                 <div className="text-center">
                                     <div className="mb-4 text-6xl">🚗</div>
-                                    <h3 className="text-xl font-semibold text-[#7e246c] mb-2">Find Your Perfect Ride</h3>
+                                    <h3 className="mb-2 text-xl font-semibold text-[#7e246c]">Find Your Perfect Ride</h3>
                                     <p className="text-sm text-neutral-600 dark:text-neutral-400">
                                         Browse our selection of quality vehicles and book with confidence
                                     </p>
@@ -279,7 +309,7 @@ export default function Welcome() {
                 </div>
 
                 {/* Features Section */}
-                <section id="features" className="py-24 bg-neutral-50 dark:bg-gray-900 border-b border-neutral-200 dark:border-neutral-800">
+                <section id="features" className="border-b border-neutral-200 bg-neutral-50 py-24 dark:border-neutral-800 dark:bg-gray-900">
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="mb-12 text-center">
                             <h2 className="reveal mb-4 text-3xl font-bold text-gray-900 dark:text-white">Why Choose AsaanCar</h2>
@@ -293,33 +323,23 @@ export default function Welcome() {
                                 title="Easy Booking"
                                 description="Book your desired car in just a few clicks with our simple booking process."
                             />
-                            <FeatureCard
-                                icon={Zap}
-                                title="Fast Service"
-                                description="Quick car delivery and pickup at your convenience."
-                            />
+                            <FeatureCard icon={Zap} title="Fast Service" description="Quick car delivery and pickup at your convenience." />
                             <FeatureCard
                                 icon={MessageSquare}
                                 title="24/7 Support"
                                 description="Our customer support team is always ready to help you."
                             />
-                            <FeatureCard
-                                icon={CheckCircle}
-                                title="Quality Cars"
-                                description="Well-maintained vehicles from trusted partners."
-                            />
+                            <FeatureCard icon={CheckCircle} title="Quality Cars" description="Well-maintained vehicles from trusted partners." />
                         </div>
                     </div>
                 </section>
 
                 {/* How It Works Section */}
-                <section id="how-it-works" className="bg-neutral-50 py-24 dark:bg-gray-900 border-b border-neutral-200 dark:border-neutral-800">
+                <section id="how-it-works" className="border-b border-neutral-200 bg-neutral-50 py-24 dark:border-neutral-800 dark:bg-gray-900">
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="mb-12 text-center">
                             <h2 className="reveal mb-4 text-3xl font-bold text-gray-900 dark:text-white">How AsaanCar Works</h2>
-                            <p className="reveal mx-auto max-w-2xl text-neutral-600 dark:text-neutral-400">
-                                Rent a car in three simple steps
-                            </p>
+                            <p className="reveal mx-auto max-w-2xl text-neutral-600 dark:text-neutral-400">Rent a car in three simple steps</p>
                         </div>
                         <div className="grid gap-8 md:grid-cols-3">
                             {[
@@ -350,41 +370,23 @@ export default function Welcome() {
                 </section>
 
                 {/* Stats Section */}
-                <section className="py-24 bg-neutral-50 dark:bg-gray-900 border-b border-neutral-200 dark:border-neutral-800">
+                <section className="border-b border-neutral-200 bg-neutral-50 py-24 dark:border-neutral-800 dark:bg-gray-900">
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                            <StatCard
-                                number={1000}
-                                label="Happy Customers"
-                                icon={Users}
-                            />
-                            <StatCard
-                                number={500}
-                                label="Cars Available"
-                                icon={Target}
-                            />
-                            <StatCard
-                                number={95}
-                                label="Customer Satisfaction"
-                                icon={CheckCircle}
-                            />
-                            <StatCard
-                                number={24}
-                                label="Hour Support"
-                                icon={MessageSquare}
-                            />
+                            <StatCard number={1000} label="Happy Customers" icon={Users} />
+                            <StatCard number={500} label="Cars Available" icon={Target} />
+                            <StatCard number={95} label="Customer Satisfaction" icon={CheckCircle} />
+                            <StatCard number={24} label="Hour Support" icon={MessageSquare} />
                         </div>
                     </div>
                 </section>
 
                 {/* FAQ Section */}
-                <section className="py-24 bg-neutral-50 dark:bg-gray-900 border-b border-neutral-200 dark:border-neutral-800">
+                <section className="border-b border-neutral-200 bg-neutral-50 py-24 dark:border-neutral-800 dark:bg-gray-900">
                     <div className="mx-auto max-w-3xl px-6">
                         <div className="mb-12 text-center">
                             <h2 className="reveal mb-4 text-3xl font-bold text-gray-900 dark:text-white">Frequently Asked Questions</h2>
-                            <p className="reveal text-neutral-600 dark:text-neutral-400">
-                                Find answers to common questions about AsaanCar.
-                            </p>
+                            <p className="reveal text-neutral-600 dark:text-neutral-400">Find answers to common questions about AsaanCar.</p>
                         </div>
                         <div className="reveal">
                             {faqItems.map((item, index) => (
