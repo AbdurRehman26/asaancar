@@ -329,17 +329,13 @@ export function Messages() {
 export function Home() {
     const [stats, setStats] = useState({ cars: 0, bookings: 0, stores: 0, messages: 0 });
     const { user } = useAuth();
-    const [hasStore, setHasStore] = useState<boolean | null>(null);
     useEffect(() => {
         async function fetchStore() {
             if (!user || !Array.isArray(user.roles) || !user.roles.includes('store_owner')) {
-                setHasStore(null);
                 return;
             }
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } });
-            const data = await res.json();
-            setHasStore(Array.isArray(data.data) && data.data.length > 0);
+            await fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } });
         }
         fetchStore();
     }, [user]);

@@ -6,8 +6,6 @@ export default function DashboardStoresPage() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [storeToDeactivate, setStoreToDeactivate] = useState<number | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -25,28 +23,6 @@ export default function DashboardStoresPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
-
-  const handleDeactivate = async (storeId: number) => {
-    try {
-      const res = await fetch(`/api/customer/stores/${storeId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      if (res.ok) {
-        setStores(stores.filter(store => store.id !== storeId));
-      } else {
-        alert('Failed to deactivate store');
-      }
-    } catch (err) {
-      console.error('Error deactivating store:', err);
-      alert('Error deactivating store');
-    }
-    setShowModal(false);
-    setStoreToDeactivate(null);
-  };
 
   return (
     <div className="p-6">
