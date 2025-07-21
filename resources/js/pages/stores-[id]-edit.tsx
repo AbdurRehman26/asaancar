@@ -6,7 +6,7 @@ import type { StoreForm } from '@/types/store';
 export default function StoreEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [store, setStore] = useState<StoreForm | null>(null);
+  const [store, setStore] = useState<StoreForm & { city_id?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -29,6 +29,7 @@ export default function StoreEditPage() {
           description: data.data?.description || '',
           logo_url: data.data?.logo_url || '',
           city: data.data?.city || '',
+          city_id: data.data?.city_id ? String(data.data.city_id) : '',
           contact_phone: data.data?.contact_phone || '',
           address: data.data?.address || '',
         });
@@ -50,7 +51,7 @@ export default function StoreEditPage() {
 
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!store) return;
-    setStore({ ...store, city: e.target.value });
+    setStore({ ...store, city_id: e.target.value });
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +75,10 @@ export default function StoreEditPage() {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify(store),
+        body: JSON.stringify({
+          ...store,
+          city_id: store?.city_id || '',
+        }),
       });
       if (!res.ok) throw new Error('Failed to update store');
       setSuccess(true);
@@ -102,14 +106,14 @@ export default function StoreEditPage() {
           ) : store ? (
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
               <div>
-                <label className="block mb-1 font-medium">Store Username</label>
+                <label className="block mb-1 font-medium">Store Username (optional)</label>
                 <input
                   type="text"
                   name="store_username"
                   value={store.store_username}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2"
-                  required
+                  placeholder="e.g., downtown_rental"
                 />
               </div>
               <div>
@@ -152,44 +156,46 @@ export default function StoreEditPage() {
               <div>
                 <label className="block mb-1 font-medium">City</label>
                 <select
-                  name="city"
-                  value={store.city}
+                  name="city_id"
+                  value={store.city_id || ''}
                   onChange={handleCityChange}
                   className="w-full border rounded px-3 py-2"
                   required
                 >
                   <option value="" disabled>Select a city</option>
                   {cities.map(c => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
+                    <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block mb-1 font-medium">Contact Phone</label>
+                <label className="block mb-1 font-medium">Contact Phone (optional)</label>
                 <input
                   type="text"
                   name="contact_phone"
                   value={store.contact_phone}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2"
-                  required
+                  placeholder="e.g., +1234567890"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block mb-1 font-medium">Address</label>
+                <label className="block mb-1 font-medium">Address (optional)</label>
                 <textarea
                   name="address"
                   value={store.address || ''}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2"
                   rows={2}
+                  placeholder="e.g., 123 Main St, City"
                 />
               </div>
               <div className="md:col-span-2 flex justify-end">
                 <button
                   type="submit"
-                  className="bg-[#7e246c] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#6a1f5c] transition"
+                  className="bg-[#7e246c] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#6a1f5c] transition cursor-pointer"
                   disabled={saving}
+                  style={{ pointerEvents: saving ? 'none' : 'auto' }}
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>

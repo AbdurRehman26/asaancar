@@ -156,41 +156,13 @@ export default function DashboardStoresPage() {
                   >
                     Edit
                   </Link>
-                  <button
-                    onClick={() => { setShowModal(true); setStoreToDeactivate(store.id); }}
-                    className="flex-1 px-3 py-2 text-sm font-medium text-center text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition cursor-pointer"
-                    type="button"
-                  >
-                    Deactivate
-                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-lg">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h2 className="text-lg font-semibold mb-4">Deactivate Store</h2>
-            <p className="mb-6">Are you sure you want to deactivate this store?</p>
-            <div className="flex justify-end gap-4">
-              <button
-                className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-                onClick={() => { setShowModal(false); setStoreToDeactivate(null); }}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-                onClick={() => storeToDeactivate && handleDeactivate(storeToDeactivate)}
-              >
-                Yes, Deactivate
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Deactivate modal removed */}
     </div>
   );
 } 

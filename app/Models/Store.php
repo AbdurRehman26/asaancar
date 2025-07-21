@@ -30,7 +30,7 @@ class Store extends Model
         'name',
         'description',
         'logo_url',
-        'city',
+        'city_id',
         'contact_phone',
         'address',
     ];
@@ -61,4 +61,4 @@ class Store extends Model
     {
         return $this->hasMany(Conversation::class);
     }
-} 
+}

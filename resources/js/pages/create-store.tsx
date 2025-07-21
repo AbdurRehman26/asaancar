@@ -4,6 +4,7 @@ import { apiFetch } from '@/lib/utils';
 
 export default function CreateStoreForm() {
   const [name, setName] = useState('');
+  const [storeUsername, setStoreUsername] = useState('');
   const [cityId, setCityId] = useState('');
   const [cities, setCities] = useState<{ id: number; name: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export default function CreateStoreForm() {
         method: 'POST',
         body: JSON.stringify({
           name,
+          ...(storeUsername ? { store_username: storeUsername } : {}),
           city_id: cityId ? Number(cityId) : undefined,
           description,
           ...(phone ? { phone } : {}),
@@ -90,6 +92,16 @@ export default function CreateStoreForm() {
               ))}
             </select>
           </div>
+          <div>
+            <label className="block mb-1 font-medium">Store Username (optional)</label>
+            <input
+              type="text"
+              value={storeUsername}
+              onChange={e => setStoreUsername(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+              placeholder="e.g., downtown_rental"
+            />
+          </div>
           <div className="md:col-span-2">
             <label className="block mb-1 font-medium">Description</label>
             <textarea
@@ -136,8 +148,9 @@ export default function CreateStoreForm() {
           <div className="md:col-span-2 flex justify-end">
             <button
               type="submit"
-              className="bg-[#7e246c] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#6a1f5c] transition"
+              className="bg-[#7e246c] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#6a1f5c] transition cursor-pointer"
               disabled={loading}
+              style={{ pointerEvents: loading ? 'none' : 'auto' }}
             >
               {loading ? 'Creating...' : 'Create Store'}
             </button>
