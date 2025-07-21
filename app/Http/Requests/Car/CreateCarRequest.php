@@ -42,6 +42,7 @@ class CreateCarRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name' => 'sometimes|string|max:255',
             'car_brand_id' => 'required|exists:car_brands,id',
             'car_type_id' => 'required|exists:car_types,id',
             'car_engine_id' => 'required|exists:car_engines,id',

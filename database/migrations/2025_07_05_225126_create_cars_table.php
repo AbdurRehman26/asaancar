@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreign('car_engine_id')->references('id')->on('car_engines')->onDelete('cascade');
             $table->string('model');
             $table->year('year');
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->string('color');
             $table->text('description')->nullable();
             $table->json('image_urls')->nullable();

@@ -38,7 +38,7 @@ class CarService
     public function getCarsForListing(): array
     {
         $cars = $this->getAvailableCars();
-        
+
         return $cars->map(function ($car) {
             return $this->formatCarForListing($car);
         })->toArray();
@@ -80,7 +80,7 @@ class CarService
     {
         $bestOffer = $this->getBestActiveOffer($car);
         $pricing = $this->calculatePricing($car, $bestOffer);
-        
+
         return [
             'id' => $car->id,
             'name' => $car->name ?? $car->carBrand->name . ' ' . $car->model,
@@ -158,7 +158,13 @@ class CarService
             return null;
         }
 
-        return is_array($car->image_urls) ? $car->image_urls[0] : $car->image_urls;
+        if (is_array($car->image_urls)) {
+            return isset($car->image_urls[0]) && is_string($car->image_urls[0]) ? (string)$car->image_urls[0] : null;
+        }
+        if (is_string($car->image_urls)) {
+            return $car->image_urls;
+        }
+        return null;
     }
 
     /**
@@ -367,6 +373,8 @@ class CarService
             $query->where('seats', '>=', $filters['min_seats']);
         }
 
+        $query->orderBy('cars.created_at', 'desc');
+
         $cars = $query->paginate($perPage);
 
         $formatted = $cars->getCollection()->map(function ($car) {
@@ -390,4 +398,4 @@ class CarService
             'per_page' => $cars->perPage(),
         ];
     }
-} 
+}

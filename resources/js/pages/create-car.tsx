@@ -2,51 +2,58 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
+import ImagesUploading, { ImageListType } from 'react-images-uploading';
 
 export default function CreateCarPage() {
   const navigate = useNavigate();
   // Form state
   const [form, setForm] = useState({
     name: '',
-    brand_id: '',
-    type_id: '',
-    engine_id: '',
-    transmission: '',
-    fuel_type: '',
-    seats: '',
-    price: '',
+    car_brand_id: '',
+    car_type_id: '',
+    car_engine_id: '',
+    store_id: '',
+    model: '',
     year: '',
     color: '',
+    seats: '',
+    transmission: '',
+    fuel_type: '',
     description: '',
-    image: '', // keep as string for URL if needed
+    with_driver_rate: '',
+    without_driver_rate: '',
   });
   // Data state
   const [carBrands, setCarBrands] = useState<{ id: number; name: string }[]>([]);
   const [carTypes, setCarTypes] = useState<{ id: number; name: string }[]>([]);
   const [carEngines, setCarEngines] = useState<{ id: number; name: string }[]>([]);
+  const [stores, setStores] = useState<{ id: number; name: string }[]>([]);
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   // Image upload state
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [images, setImages] = useState<ImageListType>([]);
+  const maxNumber = 5;
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [brandsRes, typesRes, enginesRes] = await Promise.all([
+        const [brandsRes, typesRes, enginesRes, storesRes] = await Promise.all([
           apiFetch('/api/customer/car-brands'),
           apiFetch('/api/customer/car-types'),
           apiFetch('/api/customer/car-engines'),
+          apiFetch('/api/customer/stores'),
         ]);
         const brandsData = await brandsRes.json();
         const typesData = await typesRes.json();
         const enginesData = await enginesRes.json();
+        const storesData = await storesRes.json();
         setCarBrands(brandsData.data || []);
         setCarTypes(typesData.data || []);
         setCarEngines(enginesData.data || []);
-      } catch (e) {
+        setStores(storesData.stores || []);
+      } catch {
         setError('Failed to load car form data');
       }
     }
@@ -57,12 +64,8 @@ export default function CreateCarPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImagePreview(URL.createObjectURL(file));
-      setImageFile(file);
-    }
+  const onChangeImage = (imageList: ImageListType) => {
+    setImages(imageList);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,16 +73,17 @@ export default function CreateCarPage() {
     setError(null);
     setLoading(true);
     try {
-      let body: any = {};
-      if (imageFile) {
-        body = new FormData();
-        Object.entries(form).forEach(([key, value]) => {
-          body.append(key, value);
-        });
-        body.append('image', imageFile);
-      } else {
-        body = JSON.stringify(form);
-      }
+      const body = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        body.append(key, value);
+      });
+      images.forEach((img) => {
+        if (img.file) {
+          body.append('image_urls[]', img.file);
+        }
+      });
+      body.append('with_driver_rate', form.with_driver_rate);
+      body.append('without_driver_rate', form.without_driver_rate);
       const res = await apiFetch('/api/customer/cars', {
         method: 'POST',
         body,
@@ -91,7 +95,7 @@ export default function CreateCarPage() {
         setSuccess(true);
         setTimeout(() => navigate('/dashboard/cars'), 1000);
       }
-    } catch (e) {
+    } catch {
       setError('Network error');
     } finally {
       setLoading(false);
@@ -109,23 +113,38 @@ export default function CreateCarPage() {
           <h1 className="text-2xl font-bold mb-6">Add New Car</h1>
           {error && <div className="mb-4 text-red-600 text-center">{error}</div>}
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-            <div>
-              <label className="block mb-1 font-medium">Name</label>
+            <div className="md:col-span-2">
+              <label className="block mb-1 font-medium">Name (optional)</label>
               <input
                 type="text"
                 name="name"
                 value={form.name}
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2"
-                required
-                placeholder="e.g., Honda Civic"
+                maxLength={255}
+                placeholder="e.g., Custom car display name (optional)"
               />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">Store</label>
+              <select
+                name="store_id"
+                value={form.store_id}
+                onChange={handleInputChange}
+                className="w-full border rounded px-3 py-2"
+                required
+              >
+                <option value="" disabled>Select a store</option>
+                {stores.map(store => (
+                  <option key={store.id} value={store.id}>{store.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block mb-1 font-medium">Brand</label>
               <select
-                name="brand_id"
-                value={form.brand_id}
+                name="car_brand_id"
+                value={form.car_brand_id}
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2"
                 required
@@ -139,8 +158,8 @@ export default function CreateCarPage() {
             <div>
               <label className="block mb-1 font-medium">Type</label>
               <select
-                name="type_id"
-                value={form.type_id}
+                name="car_type_id"
+                value={form.car_type_id}
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2"
                 required
@@ -154,8 +173,8 @@ export default function CreateCarPage() {
             <div>
               <label className="block mb-1 font-medium">Engine</label>
               <select
-                name="engine_id"
-                value={form.engine_id}
+                name="car_engine_id"
+                value={form.car_engine_id}
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2"
                 required
@@ -167,6 +186,19 @@ export default function CreateCarPage() {
               </select>
             </div>
             <div>
+              <label className="block mb-1 font-medium">Model</label>
+              <input
+                type="text"
+                name="model"
+                value={form.model}
+                onChange={handleInputChange}
+                className="w-full border rounded px-3 py-2"
+                required
+                maxLength={255}
+                placeholder="e.g., Civic"
+              />
+            </div>
+            <div>
               <label className="block mb-1 font-medium">Year</label>
               <input
                 type="number"
@@ -175,8 +207,8 @@ export default function CreateCarPage() {
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2"
                 required
-                min="1900"
-                max={new Date().getFullYear() + 1}
+                min="1990"
+                max="2025"
                 placeholder="e.g., 2023"
               />
             </div>
@@ -189,6 +221,7 @@ export default function CreateCarPage() {
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2"
                 required
+                maxLength={255}
                 placeholder="e.g., Blue"
               />
             </div>
@@ -244,37 +277,105 @@ export default function CreateCarPage() {
                 onChange={handleInputChange}
                 className="w-full border rounded px-3 py-2"
                 rows={3}
+                maxLength={1000}
                 placeholder="Describe the car's features, condition, and any special notes..."
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block mb-1 font-medium">Car Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="w-full border rounded px-3 py-2"
-              />
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="Car Preview"
-                  className="mt-2 h-20 rounded border object-contain bg-gray-50 dark:bg-gray-800"
-                />
-              )}
+              <label className="block mb-1 font-medium">Car Images</label>
+              <ImagesUploading
+                value={images}
+                onChange={onChangeImage}
+                maxNumber={maxNumber}
+                dataURLKey="data_url"
+                acceptType={['jpg', 'jpeg', 'png', 'webp']}
+                multiple
+              >
+                {({
+                  imageList,
+                  onImageUpload,
+                  onImageRemoveAll,
+                  onImageRemove,
+                  isDragging,
+                  dragProps
+                }) => (
+                  <div className="upload__image-wrapper">
+                    <button
+                      type="button"
+                      style={isDragging ? { color: '#7e246c' } : undefined}
+                      onClick={onImageUpload}
+                      {...dragProps}
+                      className="bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-700 rounded px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
+                      Click or Drag here to upload
+                    </button>
+                    &nbsp;
+                    {imageList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={onImageRemoveAll}
+                        className="ml-2 text-red-600 hover:underline"
+                      >
+                        Remove All
+                      </button>
+                    )}
+                    <div className="flex gap-4 mt-4">
+                      {imageList.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img src={image.data_url} alt="Car Preview" className="h-20 rounded border object-contain bg-gray-50 dark:bg-gray-800" />
+                          <button
+                            type="button"
+                            onClick={() => onImageRemove(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 cursor-pointer"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </ImagesUploading>
             </div>
+            {/* Rate Details Section */}
             <div className="md:col-span-2">
-              <label className="block mb-1 font-medium">Price (per day)</label>
-              <input
-                type="number"
-                name="price"
-                value={form.price}
-                onChange={handleInputChange}
-                className="w-full border rounded px-3 py-2"
-                required
-                min="0"
-                placeholder="e.g., 5000"
-              />
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-medium mb-1">With Driver (10 hrs/day)</label>
+                    <input
+                      type="number"
+                      name="with_driver_rate"
+                      value={form.with_driver_rate || ''}
+                      onChange={handleInputChange}
+                      className="w-full border rounded px-3 py-2"
+                      required
+                      min="0"
+                      placeholder="e.g., 7000"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-1">Without Driver (24 hrs/day)</label>
+                    <input
+                      type="number"
+                      name="without_driver_rate"
+                      value={form.without_driver_rate || ''}
+                      onChange={handleInputChange}
+                      className="w-full border rounded px-3 py-2"
+                      required
+                      min="0"
+                      placeholder="e.g., 5000"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 text-sm font-semibold text-[#7e246c] dark:text-white">
+                  Refill fuel at the end of the day or pay <span className="font-bold">PKR 32/KM</span>
+                </div>
+                <div className="text-sm font-semibold text-[#7e246c] dark:text-white mt-1">
+                  Overtime: <span className="font-bold">PKR 400/hr</span>
+                </div>
+              </div>
             </div>
             <div className="md:col-span-2 flex justify-end">
               <button
