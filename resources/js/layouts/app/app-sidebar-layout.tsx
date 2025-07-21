@@ -6,7 +6,6 @@ import Navbar from '@/components/navbar';
 import { type BreadcrumbItem } from '@/types';
 import { type PropsWithChildren } from 'react';
 import { useAuth } from '@/components/AuthContext';
-import Footer from '@/components/Footer';
 
 export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
     const { user } = useAuth();
@@ -27,7 +26,6 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWi
                     </AppContent>
                 </AppShell>
             </div>
-            <Footer />
         </div>
     );
 }

@@ -6,6 +6,8 @@ export default function DashboardStoresPage() {
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [storeToDeactivate, setStoreToDeactivate] = useState<number | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -18,15 +20,13 @@ export default function DashboardStoresPage() {
       .then(async (res) => {
         if (!res.ok) throw new Error('Failed to fetch stores');
         const data = await res.json();
-        setStores(data.data || []);
+        setStores(data.stores || []);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
 
   const handleDeactivate = async (storeId: number) => {
-    if (!confirm('Are you sure you want to deactivate this store?')) return;
-    
     try {
       const res = await fetch(`/api/customer/stores/${storeId}`, {
         method: 'DELETE',
@@ -35,7 +35,6 @@ export default function DashboardStoresPage() {
           'Accept': 'application/json',
         },
       });
-      
       if (res.ok) {
         setStores(stores.filter(store => store.id !== storeId));
       } else {
@@ -45,6 +44,8 @@ export default function DashboardStoresPage() {
       console.error('Error deactivating store:', err);
       alert('Error deactivating store');
     }
+    setShowModal(false);
+    setStoreToDeactivate(null);
   };
 
   return (
@@ -56,7 +57,7 @@ export default function DashboardStoresPage() {
         </div>
         {stores.length > 0 && (
           <Link
-            to="/create-store"
+            to="/dashboard/create-store"
             className="bg-[#7e246c] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#6a1f5c] transition flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,7 +86,7 @@ export default function DashboardStoresPage() {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No stores found</h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">Get started by creating your first car rental store.</p>
           <Link
-            to="/create-store"
+            to="/dashboard/create-store"
             className="inline-flex items-center px-4 py-2 bg-[#7e246c] text-white font-medium rounded-md hover:bg-[#6a1f5c] transition"
           >
             Create Your First Store
@@ -156,8 +157,9 @@ export default function DashboardStoresPage() {
                     Edit
                   </Link>
                   <button
-                    onClick={() => handleDeactivate(store.id)}
-                    className="flex-1 px-3 py-2 text-sm font-medium text-center text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition"
+                    onClick={() => { setShowModal(true); setStoreToDeactivate(store.id); }}
+                    className="flex-1 px-3 py-2 text-sm font-medium text-center text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition cursor-pointer"
+                    type="button"
                   >
                     Deactivate
                   </button>
@@ -165,6 +167,28 @@ export default function DashboardStoresPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-lg">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4">Deactivate Store</h2>
+            <p className="mb-6">Are you sure you want to deactivate this store?</p>
+            <div className="flex justify-end gap-4">
+              <button
+                className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                onClick={() => { setShowModal(false); setStoreToDeactivate(null); }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                onClick={() => storeToDeactivate && handleDeactivate(storeToDeactivate)}
+              >
+                Yes, Deactivate
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -8,6 +8,7 @@ import CarFilters from '../components/car-filters';
 import { Car, UserCircle, BookOpen } from 'lucide-react';
 import Chat from '../components/chat';
 import type { Conversation } from '@/types/dashboard';
+import CreateStoreForm from './create-store';
 
 // Remove local Conversation interface
 
@@ -64,13 +65,22 @@ export function CarListings() {
         })
             .then(res => res.json())
             .then(data => {
-                if (data.data && data.data.length > 0) setSelectedStore(data.data[0]);
+                if (data.stores && data.stores.length > 0) {
+                    setSelectedStore(data.stores[0]);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching stores:', error);
             });
     }, []);
 
     // Fetch cars for selected store
     useEffect(() => {
-        if (!selectedStore) return;
+        if (!selectedStore) {
+            setCars([]);
+            setTotalPages(1);
+            return;
+        }
         setCarLoading(true);
         const params = new URLSearchParams();
         params.append('store_id', selectedStore.id);
@@ -79,14 +89,24 @@ export function CarListings() {
         Object.entries(filters).forEach(([key, value]) => {
             if (value) params.append(key, value);
         });
-        fetch(`/api/cars?${params.toString()}`, {
+        fetch(`/api/customer/cars?${params.toString()}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => {
-                setCars(data.data);
-                setTotalPages(data.last_page);
-                setPerPageState(data.per_page);
+                setCars(data.data || []);
+                setTotalPages(data.last_page || 1);
+                setPerPageState(data.per_page || 9);
+            })
+            .catch(error => {
+                console.error('Error fetching cars:', error);
+                setCars([]);
+                setTotalPages(1);
             })
             .finally(() => setCarLoading(false));
     }, [selectedStore, filters, currentPage, perPageState]);
@@ -116,6 +136,13 @@ export function CarListings() {
                     </Link>
                 )}
             </div>
+            {!selectedStore && (
+                <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <p className="text-yellow-800 dark:text-yellow-200">
+                        No stores found. Please create a store first to manage cars.
+                    </p>
+                </div>
+            )}
             <div className="grid grid-cols-1 gap-8">
                 <div>
                     <CarFilters
@@ -302,11 +329,26 @@ export function Messages() {
 // Dashboard Home Section
 export function Home() {
     const [stats, setStats] = useState({ cars: 0, bookings: 0 });
+    const { user } = useAuth();
+    const [hasStore, setHasStore] = useState<boolean | null>(null);
+    useEffect(() => {
+        async function fetchStore() {
+            if (!user || !Array.isArray(user.roles) || !user.roles.includes('store_owner')) {
+                setHasStore(null);
+                return;
+            }
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } });
+            const data = await res.json();
+            setHasStore(Array.isArray(data.data) && data.data.length > 0);
+        }
+        fetchStore();
+    }, [user]);
     useEffect(() => {
         async function fetchStats() {
             const token = localStorage.getItem('token');
             const [carsRes, bookingsRes] = await Promise.all([
-                fetch('/api/cars/stats', { headers: { Authorization: `Bearer ${token}` } }),
+                fetch('/api/customer/cars/stats', { headers: { Authorization: `Bearer ${token}` } }),
                 fetch('/api/bookings/stats', { headers: { Authorization: `Bearer ${token}` } }),
             ]);
             const carsData = await carsRes.json();
@@ -315,8 +357,20 @@ export function Home() {
         }
         fetchStats();
     }, []);
+    const navigate = useNavigate();
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6">
+            {/* Show CreateStore button if user is store_owner and has no store */}
+            {user && Array.isArray(user.roles) && user.roles.includes('store_owner') && hasStore === false && (
+                <div className="mb-8 flex flex-col items-center">
+                    <button
+                        className="px-6 py-3 rounded-lg bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition mb-4"
+                        onClick={() => navigate('/dashboard/create-store')}
+                    >
+                        Create Store
+                    </button>
+                </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                 <div className="flex items-center gap-4 rounded-2xl border border-gray-300 dark:border-neutral-800 bg-white dark:bg-gray-800/80 p-6 shadow-lg">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">

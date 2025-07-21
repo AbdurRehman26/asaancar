@@ -99,7 +99,7 @@ export default function CarListing() {
     });
     initialParams.append('per_page', perPageState.toString());
     initialParams.append('page', pageFromUrl.toString());
-    apiFetch(`/api/cars?${initialParams.toString()}`)
+    apiFetch(`/api/customer/cars?${initialParams.toString()}`)
       .then(async res => {
         const data = await res.json();
         setCars(data.data);
@@ -129,7 +129,7 @@ export default function CarListing() {
     });
     apiParams.append('per_page', perPageState.toString());
     apiParams.append('page', currentPage.toString());
-    apiFetch(`/api/cars?${apiParams.toString()}`)
+    apiFetch(`/api/customer/cars?${apiParams.toString()}`)
       .then(async res => {
         const data = await res.json();
         setCars(data.data);
@@ -150,7 +150,7 @@ export default function CarListing() {
       });
       searchParams.append('per_page', perPageState.toString());
       searchParams.append('page', '1');
-      const res = await apiFetch(`/api/cars?${searchParams.toString()}`);
+      const res = await apiFetch(`/api/customer/cars?${searchParams.toString()}`);
       const data = await res.json();
       setCars(data.data);
       setTotalPages(data.last_page);

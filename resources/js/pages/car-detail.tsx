@@ -59,7 +59,7 @@ export default function CarDetailPage() {
     if (!carId) return;
     setLoading(true);
     try {
-      const carRes = await apiFetch(`/api/cars/${carId}`);
+      const carRes = await apiFetch(`/api/customer/cars/${carId}`);
       if (!carRes.ok) {
         setError('Failed to fetch car details');
         setCar(null);

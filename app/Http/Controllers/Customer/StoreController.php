@@ -74,7 +74,11 @@ class StoreController extends Controller
     public function store(CreateStoreRequest $request)
     {
         $validated = $request->validated();
+        $user = $request->user();
+
+        $validated['user_id'] = $user->id;
         $store = Store::create($validated);
+        $store->users()->attach($user->id);
         return new StoreResource($store);
     }
 
@@ -182,7 +186,7 @@ class StoreController extends Controller
     {
         $store = Store::findOrFail($id);
         $store->delete();
-        
+
         return response()->json(['message' => 'Store deleted successfully']);
     }
 }

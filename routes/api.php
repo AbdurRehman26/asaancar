@@ -103,7 +103,9 @@ Route::prefix('customer')->group(function () {
     Route::apiResource('cars', CarController::class);
 
     // Store Management Routes
-    Route::apiResource('stores', StoreController::class);
+    Route::middleware('auth:sanctum')->post('/stores', [StoreController::class, 'store']);
+    Route::apiResource('stores', StoreController::class)->except(['store']);
+    // Store Management Routes (public for POST, or add to protected if needed)
 
     // Car Brand Management Routes
     Route::apiResource('car-brands', CarBrandController::class);
@@ -119,4 +121,4 @@ Route::prefix('customer')->group(function () {
 
     // Car Offer Management Routes
     Route::apiResource('car-offers', CarOfferController::class);
-}); 
+});

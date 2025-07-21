@@ -24,9 +24,9 @@ class CarResource extends JsonResource
         return [
             'id' => $this->id,
             'store_id' => $this->store_id,
-            'brand' => new CarBrandResource($this->whenLoaded('brand')),
-            'type' => new CarTypeResource($this->whenLoaded('type')),
-            'engine' => new CarEngineResource($this->whenLoaded('engine')),
+            'brand' => new CarBrandResource($this->whenLoaded('carBrand')),
+            'type' => new CarTypeResource($this->whenLoaded('carType')),
+            'engine' => new CarEngineResource($this->whenLoaded('carEngine')),
             'store' => new StoreResource($this->whenLoaded('store')),
             'name' => $this->name,
             'model' => $this->model,
@@ -38,9 +38,8 @@ class CarResource extends JsonResource
             'overtime' => 25.00, // Default overtime rate per hour
             'currency' => 'USD', // Default currency
             'price_per_day' => $latestOffer ? $latestOffer->price_without_driver : 150.00,
-            'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
     }
-} 
+}

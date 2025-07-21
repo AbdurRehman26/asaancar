@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/utils';
 import Navbar from '../components/navbar';
+import { Eye, EyeOff } from 'lucide-react';
 
 const roles = [
   { value: 'user', label: 'User' },
@@ -17,6 +18,8 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,11 +88,47 @@ export default function SignupPage() {
             </div>
             <div>
               <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Password</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base" placeholder="Enter your password" />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base pr-12"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#7e246c] focus:outline-none"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Confirm Password</label>
-              <input type="password" value={passwordConfirmation} onChange={e => setPasswordConfirmation(e.target.value)} required className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base" placeholder="Confirm your password" />
+              <div className="relative">
+                <input
+                  type={showPasswordConfirmation ? 'text' : 'password'}
+                  value={passwordConfirmation}
+                  onChange={e => setPasswordConfirmation(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base pr-12"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#7e246c] focus:outline-none"
+                  onClick={() => setShowPasswordConfirmation((v) => !v)}
+                  aria-label={showPasswordConfirmation ? 'Hide password' : 'Show password'}
+                >
+                  {showPasswordConfirmation ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Role</label>

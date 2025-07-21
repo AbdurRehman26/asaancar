@@ -16,10 +16,9 @@ class StoreFactory extends Factory
             'name' => $this->faker->unique()->company(),
             'description' => $this->faker->sentence(),
             'logo_url' => $this->faker->imageUrl(200, 200, 'business'),
-            'city' => $this->faker->city(),
             'contact_phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),
             // 'data' => $this->faker->randomElement([null, ['foo' => 'bar']]),
         ];
     }
-} 
+}

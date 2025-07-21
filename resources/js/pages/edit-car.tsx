@@ -23,7 +23,7 @@ export default function EditCarPage() {
     async function fetchCar() {
       setLoading(true);
       try {
-        const res = await apiFetch(`/api/cars/${id}`);
+        const res = await apiFetch(`/api/customer/cars/${id}`);
         if (res.ok) {
           const data = await res.json();
           setForm({
@@ -58,7 +58,7 @@ export default function EditCarPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch(`/api/cars/${id}`, {
+      const res = await apiFetch(`/api/customer/cars/${id}`, {
         method: 'PUT',
         body: JSON.stringify(form),
       });

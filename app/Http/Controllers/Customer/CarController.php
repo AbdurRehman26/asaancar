@@ -12,6 +12,9 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CarResource;
 use App\Services\CarService;
+use App\Models\Car;
+use App\Http\Requests\Car\CreateCarRequest;
+use App\Http\Requests\Car\UpdateCarRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -86,7 +89,7 @@ class CarController extends Controller
     {
         $validated = $request->validated();
         $car = Car::create($validated);
-        return new CarResource($car->load(['brand', 'type', 'engine', 'store']));
+        return new CarResource($car->load(['carBrand', 'carType', 'carEngine', 'store']));
     }
 
     /**
@@ -161,7 +164,7 @@ class CarController extends Controller
         $car = Car::findOrFail($id);
         $validated = $request->validated();
         $car->update($validated);
-        return new CarResource($car->load(['brand', 'type', 'engine', 'store']));
+        return new CarResource($car->load(['carBrand', 'carType', 'carEngine', 'store']));
     }
 
     public function search(Request $request)

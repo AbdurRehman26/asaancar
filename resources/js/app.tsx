@@ -14,7 +14,7 @@ import Dashboard from './pages/dashboard';
 import DashboardStoresPage from './pages/dashboard-stores';
 import Welcome from './pages/welcome';
 import SignupPage from './pages/signup';
-import CreateStorePage from './pages/create-store';
+import CreateStoreForm from './pages/create-store';
 import ProfilePage from './pages/profile';
 import CreateCarPage from './pages/create-car';
 import EditCarPage from './pages/edit-car';
@@ -58,6 +58,7 @@ function App() {
             <Route path="cars" element={<Dashboard.CarListings />} />
             <Route path="messages" element={<Dashboard.Messages />} />
             <Route path="stores" element={<DashboardStoresPage />} />
+            <Route path="create-store" element={<CreateStoreForm />} />
           </Route>
           <Route path="/dashboard/stores" element={
             <ProtectedRoute>
@@ -71,11 +72,6 @@ function App() {
           } />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/create-store" element={
-            <ProtectedRoute>
-              <CreateStorePage />
-            </ProtectedRoute>
-          } />
           <Route path="/profile" element={
             <ProtectedRoute>
               <ProfilePage />

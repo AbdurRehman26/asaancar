@@ -37,11 +37,11 @@ class CreateStoreRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'store_username' => 'required|string|max:255|unique:stores,store_username',
             'description' => 'nullable|string|max:1000',
             'address' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
+            'city_id' => 'nullable|integer|exists:cities,id',
         ];
     }
 
@@ -52,8 +52,6 @@ class CreateStoreRequest extends FormRequest
     {
         return [
             'name.required' => 'Please enter the store name.',
-            'store_username.required' => 'Please enter a store username.',
-            'store_username.unique' => 'This store username is already taken.',
             'email.email' => 'Please enter a valid email address.',
         ];
     }
