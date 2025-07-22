@@ -110,3 +110,17 @@ A new route and page have been added to allow users to view car details and add 
 - Bulk offer creation
 - Offer analytics and reporting
 - Email notifications for offer creation 
+
+## Google Maps Setup
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project (or select an existing one).
+3. Enable the Maps JavaScript API for your project.
+4. Create an API key and restrict it to your domain(s).
+5. Add the following to your `.env` file in the project root:
+
+```
+VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
+```
+
+6. Restart the dev server after updating the `.env` file. 

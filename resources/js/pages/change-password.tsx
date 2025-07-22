@@ -3,6 +3,7 @@ import Navbar from '../components/navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '@/components/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function ChangePassword() {
   const { user } = useAuth();
@@ -15,6 +16,9 @@ export default function ChangePassword() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -41,8 +45,8 @@ export default function ChangePassword() {
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/change-password', {
-        method: 'POST',
+      const res = await fetch('/api/settings/password', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -96,41 +100,71 @@ export default function ChangePassword() {
           <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800/80 p-8 rounded-xl shadow border border-neutral-200 dark:border-neutral-700">
             <div>
               <label htmlFor="current_password" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">Current Password</label>
-              <input
-                type="password"
-                id="current_password"
-                name="current_password"
-                value={form.current_password}
-                onChange={handleChange}
-                className="w-full border border-[#7e246c] rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showCurrent ? 'text' : 'password'}
+                  id="current_password"
+                  name="current_password"
+                  value={form.current_password}
+                  onChange={handleChange}
+                  className="w-full border border-[#7e246c] rounded-lg px-4 py-2 pr-10 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
+                  required
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7e246c]"
+                  onClick={() => setShowCurrent((v) => !v)}
+                >
+                  {showCurrent ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
               {errors.current_password && <p className="text-red-500 text-xs mt-1">{errors.current_password}</p>}
             </div>
             <div>
               <label htmlFor="new_password" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">New Password</label>
-              <input
-                type="password"
-                id="new_password"
-                name="new_password"
-                value={form.new_password}
-                onChange={handleChange}
-                className="w-full border border-[#7e246c] rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showNew ? 'text' : 'password'}
+                  id="new_password"
+                  name="new_password"
+                  value={form.new_password}
+                  onChange={handleChange}
+                  className="w-full border border-[#7e246c] rounded-lg px-4 py-2 pr-10 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
+                  required
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7e246c]"
+                  onClick={() => setShowNew((v) => !v)}
+                >
+                  {showNew ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
               {errors.new_password && <p className="text-red-500 text-xs mt-1">{errors.new_password}</p>}
             </div>
             <div>
               <label htmlFor="confirm_password" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">Confirm New Password</label>
-              <input
-                type="password"
-                id="confirm_password"
-                name="confirm_password"
-                value={form.confirm_password}
-                onChange={handleChange}
-                className="w-full border border-[#7e246c] rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  id="confirm_password"
+                  name="confirm_password"
+                  value={form.confirm_password}
+                  onChange={handleChange}
+                  className="w-full border border-[#7e246c] rounded-lg px-4 py-2 pr-10 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
+                  required
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7e246c]"
+                  onClick={() => setShowConfirm((v) => !v)}
+                >
+                  {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
               {errors.confirm_password && <p className="text-red-500 text-xs mt-1">{errors.confirm_password}</p>}
             </div>
             <button

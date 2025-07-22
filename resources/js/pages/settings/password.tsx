@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiFetch } from '@/lib/utils';
+import { Eye, EyeOff } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -29,6 +30,9 @@ export default function Password() {
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [showCurrent, setShowCurrent] = useState(false);
+    const [showNew, setShowNew] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const updatePassword = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,41 +68,71 @@ export default function Password() {
                     <form onSubmit={updatePassword} className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="current_password">Current password</Label>
-                            <Input
-                                id="current_password"
-                                ref={currentPasswordInput}
-                                value={data.current_password}
-                                onChange={(e) => setData({ ...data, current_password: e.target.value })}
-                                type="password"
-                                className="mt-1 block w-full"
-                                autoComplete="current-password"
-                                placeholder="Current password"
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="current_password"
+                                    ref={currentPasswordInput}
+                                    value={data.current_password}
+                                    onChange={(e) => setData({ ...data, current_password: e.target.value })}
+                                    type={showCurrent ? 'text' : 'password'}
+                                    className="mt-1 block w-full pr-10"
+                                    autoComplete="current-password"
+                                    placeholder="Current password"
+                                />
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7e246c]"
+                                    onClick={() => setShowCurrent((v) => !v)}
+                                >
+                                    {showCurrent ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="password">New password</Label>
-                            <Input
-                                id="password"
-                                ref={passwordInput}
-                                value={data.password}
-                                onChange={(e) => setData({ ...data, password: e.target.value })}
-                                type="password"
-                                className="mt-1 block w-full"
-                                autoComplete="new-password"
-                                placeholder="New password"
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    ref={passwordInput}
+                                    value={data.password}
+                                    onChange={(e) => setData({ ...data, password: e.target.value })}
+                                    type={showNew ? 'text' : 'password'}
+                                    className="mt-1 block w-full pr-10"
+                                    autoComplete="new-password"
+                                    placeholder="New password"
+                                />
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7e246c]"
+                                    onClick={() => setShowNew((v) => !v)}
+                                >
+                                    {showNew ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="password_confirmation">Confirm password</Label>
-                            <Input
-                                id="password_confirmation"
-                                value={data.password_confirmation}
-                                onChange={(e) => setData({ ...data, password_confirmation: e.target.value })}
-                                type="password"
-                                className="mt-1 block w-full"
-                                autoComplete="new-password"
-                                placeholder="Confirm password"
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password_confirmation"
+                                    value={data.password_confirmation}
+                                    onChange={(e) => setData({ ...data, password_confirmation: e.target.value })}
+                                    type={showConfirm ? 'text' : 'password'}
+                                    className="mt-1 block w-full pr-10"
+                                    autoComplete="new-password"
+                                    placeholder="Confirm password"
+                                />
+                                <button
+                                    type="button"
+                                    tabIndex={-1}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7e246c]"
+                                    onClick={() => setShowConfirm((v) => !v)}
+                                >
+                                    {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
                         </div>
                         {error && <InputError message={error} />}
                         <div className="flex items-center gap-4">

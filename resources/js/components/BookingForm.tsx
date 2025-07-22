@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Fuel, MapPin } from 'lucide-react';
 import type { Car } from '@/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { StandaloneSearchBox } from '@react-google-maps/api';
+import GoogleMap from './GoogleMap';
+import { useJsApiLoader } from '@react-google-maps/api';
+
+const GOOGLE_MAP_LIBRARIES = ['places'];
 
 interface User {
   id: number;
@@ -60,6 +67,36 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [buttonLoading, setButtonLoading] = useState(false);
   const [refillTank, setRefillTank] = useState(false);
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number } | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<string>(pickupAddress);
+  const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
+
+  // @ts-ignore: @react-google-maps/api types mismatch, safe to ignore
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: GOOGLE_MAP_LIBRARIES,
+  });
+
+  // Handler for map click
+  const handleMapClick = (data: { lat: number; lng: number; address?: string }) => {
+    setSelectedLatLng({ lat: data.lat, lng: data.lng });
+    if (data.address) {
+      setSelectedAddress(data.address);
+    }
+  };
+
+  // Handler for place search
+  const handlePlaceSelected = (place: google.maps.places.PlaceResult) => {
+    if (place.geometry && place.geometry.location) {
+      setSelectedLatLng({
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      });
+      setSelectedAddress(place.formatted_address || '');
+    }
+  };
 
   // Calculate price based on rental type, number of days, and refill tank
   const dailyPrice = rentalType === 'with_driver'
@@ -115,13 +152,87 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
                       </div>
                       <div
                           className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 flex flex-col gap-4 border border-[#7e246c]/30">
-                          <input
+                          <div className="flex gap-2 items-center">
+                            <input
                               type="text"
                               value={pickupAddress}
-                              onChange={e => setPickupAddress(e.target.value)}
-                              className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
+                              readOnly
+                              className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition cursor-pointer"
                               placeholder="Pick-up address"
-                          />
+                              onClick={() => setAddressModalOpen(true)}
+                            />
+                            <button
+                              type="button"
+                              className="px-3 py-2 bg-[#7e246c] text-white rounded hover:bg-[#6a1f5c]"
+                              onClick={() => setAddressModalOpen(true)}
+                              title="Select address on map"
+                            >
+                              <MapPin className="w-5 h-5" />
+                            </button>
+                          </div>
+                          {/* Address Selection Modal */}
+                          <Dialog open={addressModalOpen} onOpenChange={setAddressModalOpen}>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Select Address</DialogTitle>
+                              </DialogHeader>
+                              {!isLoaded ? (
+                                <div>Loading map...</div>
+                              ) : (
+                                <>
+                                  <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-1">Address</label>
+                                    <StandaloneSearchBox
+                                      onLoad={ref => (searchBoxRef.current = ref)}
+                                      onPlacesChanged={() => {
+                                        const searchBox = searchBoxRef.current;
+                                        if (searchBox) {
+                                          const places = searchBox.getPlaces();
+                                          if (places && places.length > 0) {
+                                            const place = places[0];
+                                            if (place.geometry && place.geometry.location) {
+                                              setSelectedLatLng({
+                                                lat: place.geometry.location.lat(),
+                                                lng: place.geometry.location.lng(),
+                                              });
+                                              setSelectedAddress(place.formatted_address || '');
+                                            }
+                                          }
+                                        }
+                                      }}
+                                    >
+                                      <Input
+                                        value={selectedAddress}
+                                        onChange={e => setSelectedAddress(e.target.value)}
+                                        placeholder="Search or select address on map"
+                                      />
+                                    </StandaloneSearchBox>
+                                  </div>
+                                  <div className="mb-4">
+                                    <GoogleMap
+                                      showSearchBox={false}
+                                      markerPosition={selectedLatLng || undefined}
+                                      onMapClick={handleMapClick}
+                                      onPlaceSelected={handlePlaceSelected}
+                                    />
+                                  </div>
+                                  {selectedLatLng && (
+                                    <div className="text-xs text-gray-500 mb-2">Lat: {selectedLatLng.lat}, Lng: {selectedLatLng.lng}</div>
+                                  )}
+                                  <button
+                                    className="mt-2 px-4 py-2 bg-[#7e246c] text-white rounded hover:bg-[#6a1f5c]"
+                                    type="button"
+                                    onClick={() => {
+                                      setPickupAddress(selectedAddress);
+                                      setAddressModalOpen(false);
+                                    }}
+                                  >
+                                    Save Address
+                                  </button>
+                                </>
+                              )}
+                            </DialogContent>
+                          </Dialog>
                           <div className="flex flex-col gap-4 md:flex-row md:gap-4">
                               <div className="flex items-center gap-2 flex-1 min-w-0">
                                   <Clock className="text-[#7e246c]" />

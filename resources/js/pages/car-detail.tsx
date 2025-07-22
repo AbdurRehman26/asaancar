@@ -7,6 +7,10 @@ import { apiFetch } from '@/lib/utils';
 import Chat from '../components/chat';
 import BookingForm from '../components/BookingForm';
 import UserBookingsList from '../components/UserBookingsList';
+import GoogleMap from '../components/GoogleMap';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { StandaloneSearchBox } from '@react-google-maps/api';
 
 interface Car {
   id: number;
@@ -54,6 +58,42 @@ export default function CarDetailPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [rentalType, setRentalType] = useState<'with_driver' | 'without_driver'>('without_driver');
   const [numberOfDays, setNumberOfDays] = useState<number>(1);
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<string>('');
+  const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number } | null>(null);
+  const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
+
+  // Handler for map click
+  const handleMapClick = (data: { lat: number; lng: number; address?: string }) => {
+    setSelectedLatLng({ lat: data.lat, lng: data.lng });
+    if (data.address) {
+      setSelectedAddress(data.address);
+    }
+  };
+
+  // Handler for place search
+  const handlePlaceSelected = (place: google.maps.places.PlaceResult) => {
+    if (place.geometry && place.geometry.location) {
+      setSelectedLatLng({
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      });
+      setSelectedAddress(place.formatted_address || '');
+    }
+  };
+
+  // Geocode address to lat/lng
+  const geocodeAddress = (address: string) => {
+    if (!window.google || !window.google.maps) return;
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address }, (results, status) => {
+      if (status === 'OK' && results && results[0]) {
+        const loc = results[0].geometry.location;
+        setSelectedLatLng({ lat: loc.lat(), lng: loc.lng() });
+        setSelectedAddress(results[0].formatted_address || address);
+      }
+    });
+  };
 
   const fetchCarAndBooking = async () => {
     console.log('Calling booking API for car:', carId);
@@ -116,6 +156,59 @@ export default function CarDetailPage() {
                 <img src={car.image || '/images/car-placeholder.jpeg'} alt={car.name} className="h-56 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800" />
               </div>
               <a href="/cars" className="text-2xl font-bold text-[#7e246c] dark:text-white text-center block hover:text-[#6a1f5c] dark:hover:text-gray-200 transition">{car.name}</a>
+              {/* Address Selection Modal */}
+              <Dialog open={addressModalOpen} onOpenChange={setAddressModalOpen}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Select Address</DialogTitle>
+                  </DialogHeader>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">Address</label>
+                    <StandaloneSearchBox
+                      onLoad={ref => (searchBoxRef.current = ref)}
+                      onPlacesChanged={() => {
+                        const searchBox = searchBoxRef.current;
+                        if (searchBox) {
+                          const places = searchBox.getPlaces();
+                          if (places && places.length > 0) {
+                            const place = places[0];
+                            if (place.geometry && place.geometry.location) {
+                              setSelectedLatLng({
+                                lat: place.geometry.location.lat(),
+                                lng: place.geometry.location.lng(),
+                              });
+                              setSelectedAddress(place.formatted_address || '');
+                            }
+                          }
+                        }
+                      }}
+                    >
+                      <Input
+                        value={selectedAddress}
+                        onChange={e => setSelectedAddress(e.target.value)}
+                        placeholder="Search or select address on map"
+                      />
+                    </StandaloneSearchBox>
+                  </div>
+                  <div className="mb-4">
+                    <GoogleMap
+                      showSearchBox={false}
+                      markerPosition={selectedLatLng || undefined}
+                      onMapClick={handleMapClick}
+                      onPlaceSelected={handlePlaceSelected}
+                    />
+                  </div>
+                  {selectedLatLng && (
+                    <div className="text-xs text-gray-500 mb-2">Lat: {selectedLatLng.lat}, Lng: {selectedLatLng.lng}</div>
+                  )}
+                  <button
+                    className="mt-2 px-4 py-2 bg-[#7e246c] text-white rounded hover:bg-[#6a1f5c]"
+                    onClick={() => setAddressModalOpen(false)}
+                  >
+                    Save Address
+                  </button>
+                </DialogContent>
+              </Dialog>
               <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-4">Rate Details</h3>
                 <table className="w-full text-sm">
@@ -192,7 +285,7 @@ export default function CarDetailPage() {
                   setNumberOfDays={setNumberOfDays}
                   onMessageStore={async () => {
                     if (!user || !car?.store?.id) return;
-                     
+
                     const storeId = car.store!.id;
                     try {
                       const res = await apiFetch('/api/chat/conversations');
