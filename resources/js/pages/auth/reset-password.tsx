@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { apiFetch } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '@/components/navbar';
 
 interface ResetPasswordProps {
     token: string;
@@ -21,6 +23,7 @@ type ResetPasswordForm = {
 };
 
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
+    const navigate = useNavigate();
     const [data, setData] = useState<ResetPasswordForm>({
         token: token,
         email: email,
@@ -46,6 +49,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                 setError(err.message || 'Reset failed');
             } else {
                 setSuccess(true);
+                setTimeout(() => navigate('/login'), 1500);
             }
         } catch (err) {
             console.error(err);
@@ -56,57 +60,65 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
     };
 
     return (
-        <AuthLayout title="Reset password" description="Please enter your new password below">
-            <form onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            name="email"
-                            autoComplete="email"
-                            value={data.email}
-                            className="mt-1 block w-full"
-                            readOnly
-                            onChange={(e) => setData({ ...data, email: e.target.value })}
-                        />
+        <>
+            <Navbar />
+            <AuthLayout title="Reset password" description="Please enter your new password below">
+                <form onSubmit={submit}>
+                    <div className="grid gap-6">
+                        <div className="grid gap-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                name="email"
+                                autoComplete="email"
+                                value={data.email}
+                                className="mt-1 block w-full"
+                                readOnly
+                                onChange={(e) => setData({ ...data, email: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                name="password"
+                                autoComplete="new-password"
+                                value={data.password}
+                                className="mt-1 block w-full"
+                                autoFocus
+                                onChange={(e) => setData({ ...data, password: e.target.value })}
+                                placeholder="Password"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="password_confirmation">Confirm password</Label>
+                            <Input
+                                id="password_confirmation"
+                                type="password"
+                                name="password_confirmation"
+                                autoComplete="new-password"
+                                value={data.password_confirmation}
+                                className="mt-1 block w-full"
+                                onChange={(e) => setData({ ...data, password_confirmation: e.target.value })}
+                                placeholder="Confirm password"
+                            />
+                        </div>
+                        {error && <InputError message={error} />}
+                        <Button
+                            type="submit"
+                            className="mt-4 w-full cursor-pointer !bg-[#7e246c] !text-white hover:!bg-[#6a1f5c] hover:!text-white disabled:!bg-[#7e246c] disabled:!text-white"
+                            style={{ pointerEvents: 'auto' }}
+                            disabled={processing}
+                        >
+                            {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                            Reset password
+                        </Button>
+                        {success && <div className="text-green-600 text-center mt-2">Password reset successful! Redirecting to login...</div>}
                     </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            name="password"
-                            autoComplete="new-password"
-                            value={data.password}
-                            className="mt-1 block w-full"
-                            autoFocus
-                            onChange={(e) => setData({ ...data, password: e.target.value })}
-                            placeholder="Password"
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="password_confirmation">Confirm password</Label>
-                        <Input
-                            id="password_confirmation"
-                            type="password"
-                            name="password_confirmation"
-                            autoComplete="new-password"
-                            value={data.password_confirmation}
-                            className="mt-1 block w-full"
-                            onChange={(e) => setData({ ...data, password_confirmation: e.target.value })}
-                            placeholder="Confirm password"
-                        />
-                    </div>
-                    {error && <InputError message={error} />}
-                    <Button type="submit" className="mt-4 w-full" disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Reset password
-                    </Button>
-                    {success && <div className="text-green-600 text-center mt-2">Password reset successful!</div>}
-                </div>
-            </form>
-        </AuthLayout>
+                </form>
+            </AuthLayout>
+        </>
     );
 }

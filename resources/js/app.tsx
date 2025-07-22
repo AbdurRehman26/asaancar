@@ -2,7 +2,7 @@ import '../css/app.css';
 
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { AuthProvider } from '@/components/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { initializeTheme } from '@/hooks/use-appearance';
@@ -24,10 +24,21 @@ import StoreEditPage from './pages/stores-[id]-edit';
 import { configureEcho } from '@laravel/echo-react';
 import About from './pages/about';
 import Contact from './pages/contact';
+import ResetPassword from './pages/auth/reset-password';
 
 configureEcho({
     broadcaster: 'pusher',
 });
+
+function ResetPasswordWrapper() {
+  const { token } = useParams();
+  const search = new URLSearchParams(useLocation().search);
+  const email = search.get('email') || '';
+  if (!token || !email) {
+    return <div className="text-center mt-20 text-red-600">Invalid or expired reset link.</div>;
+  }
+  return <ResetPassword token={token} email={email} />;
+}
 
 function App() {
   useEffect(() => {
@@ -94,6 +105,7 @@ function App() {
               <EditCarPage />
             </ProtectedRoute>
           } />
+          <Route path="/reset-password/:token" element={<ResetPasswordWrapper />} />
           {/* Add more routes as needed */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -28,3 +28,15 @@ test('password can be reset with valid token', function () {
         return true;
     });
 });
+
+test('reset password page is accessible with valid token', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+    $this->postJson('/api/forgot-password', ['email' => $user->email]);
+    Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+        $response = $this->get('/reset-password/' . $notification->token . '?email=' . urlencode($user->email));
+        // Should not redirect to welcome (/) or return 404
+        $response->assertStatus(200);
+        return true;
+    });
+});

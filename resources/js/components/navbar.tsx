@@ -139,8 +139,111 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
         </Link>
       </div>
       {/* Desktop Nav */}
-      <div className="hidden md:flex items-center space-x-6">
-        {NavLinks}
+      <div className="hidden md:flex flex-1 items-center justify-between">
+        {/* Centered nav links */}
+        <div className="flex items-center space-x-6 mx-auto">
+          <Link
+            to="/cars"
+            className={`flex items-center gap-2 text-sm font-semibold transition ${
+              currentPage === 'cars'
+                ? 'text-[#7e246c] dark:text-white'
+                : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+            }`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Car className="h-4 w-4" />
+            Car Listing
+          </Link>
+          <Link
+            to="/about"
+            className={`flex items-center gap-2 text-sm font-semibold transition ${
+              currentPage === 'about'
+                ? 'text-[#7e246c] dark:text-white'
+                : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+            }`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            About Us
+          </Link>
+          <Link
+            to="/contact"
+            className={`flex items-center gap-2 text-sm font-semibold transition ${
+              currentPage === 'contact'
+                ? 'text-[#7e246c] dark:text-white'
+                : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+            }`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Contact Us
+          </Link>
+          {user && (
+            <Link
+              to="/bookings"
+              className={`flex items-center gap-2 text-sm font-semibold transition ${
+                currentPage === 'bookings'
+                  ? 'text-[#7e246c] dark:text-white'
+                  : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Calendar className="h-4 w-4" />
+              My Bookings
+            </Link>
+          )}
+          {user && Array.isArray(user.roles) && user.roles.includes('store_owner') && (
+            <Link
+              to="/dashboard"
+              className={`flex items-center gap-2 text-sm font-semibold transition ${
+                currentPage === 'dashboard'
+                  ? 'text-[#7e246c] dark:text-white'
+                  : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <User className="h-4 w-4" />
+              Dashboard
+            </Link>
+          )}
+        </div>
+        {/* Right-aligned auth and toggle */}
+        {!user ? (
+          <div className="flex items-center space-x-4">
+            <DarkModeToggle />
+            <Link
+              to="/login"
+              className="text-sm font-semibold text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white transition"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Login
+            </Link>
+            <Link
+              to="/signup"
+              className="bg-[#7e246c] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#6a1f5c] transition"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Register Now
+            </Link>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-2">
+            <DarkModeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="size-10 rounded-full p-1">
+                  <Avatar className="size-8 overflow-hidden rounded-full">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <UserMenuContent user={user} />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
       {/* Mobile Burger */}
       <button
