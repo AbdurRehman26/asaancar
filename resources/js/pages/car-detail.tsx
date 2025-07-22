@@ -8,7 +8,7 @@ import Chat from '../components/chat';
 import BookingForm from '../components/BookingForm';
 import UserBookingsList from '../components/UserBookingsList';
 import GoogleMap from '../components/GoogleMap';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { StandaloneSearchBox } from '@react-google-maps/api';
 
@@ -82,19 +82,6 @@ export default function CarDetailPage() {
     }
   };
 
-  // Geocode address to lat/lng
-  const geocodeAddress = (address: string) => {
-    if (!window.google || !window.google.maps) return;
-    const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({ address }, (results, status) => {
-      if (status === 'OK' && results && results[0]) {
-        const loc = results[0].geometry.location;
-        setSelectedLatLng({ lat: loc.lat(), lng: loc.lng() });
-        setSelectedAddress(results[0].formatted_address || address);
-      }
-    });
-  };
-
   const fetchCarAndBooking = async () => {
     console.log('Calling booking API for car:', carId);
     if (!carId) return;
@@ -156,7 +143,7 @@ export default function CarDetailPage() {
                 <img src={car.image || '/images/car-placeholder.jpeg'} alt={car.name} className="h-56 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800" />
               </div>
               <a href="/cars" className="text-2xl font-bold text-[#7e246c] dark:text-white text-center block hover:text-[#6a1f5c] dark:hover:text-gray-200 transition">{car.name}</a>
-              {/* Address Selection Modal */}
+
               <Dialog open={addressModalOpen} onOpenChange={setAddressModalOpen}>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>

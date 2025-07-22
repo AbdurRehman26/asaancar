@@ -72,7 +72,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
   const [selectedAddress, setSelectedAddress] = useState<string>(pickupAddress);
   const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
 
-  // @ts-ignore: @react-google-maps/api types mismatch, safe to ignore
+  // @ts-expect-error: @react-google-maps/api types mismatch, safe to ignore
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,

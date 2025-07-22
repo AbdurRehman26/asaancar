@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, StandaloneSearchBox } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, StandaloneSearchBox } from '@react-google-maps/api';
 import { MapPin } from 'lucide-react';
 
 const GOOGLE_MAP_LIBRARIES = ['places'];
@@ -54,7 +54,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   onSearchChange,
   onMapDragEnd,
 }) => {
-  // @ts-ignore: @react-google-maps/api types mismatch, safe to ignore
+  // @ts-expect-error: @react-google-maps/api types mismatch, safe to ignore
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: apiKey,
@@ -79,7 +79,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   };
 
   const handleMapCenterChanged = async () => {
-    const map = (window as any).googleMapInstance as google.maps.Map | undefined;
+    const map = (window as unknown as { googleMapInstance?: google.maps.Map }).googleMapInstance;
     if (map) {
       const center = map.getCenter();
       if (!center) return;
@@ -120,12 +120,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
         center={markerPosition || center}
         zoom={zoom}
         onDragEnd={() => {
-          const map = (window as any).googleMapInstance as google.maps.Map | undefined;
+          const map = (window as unknown as { googleMapInstance?: google.maps.Map }).googleMapInstance;
           if (map) {
             handleMapCenterChanged();
           }
         }}
-        onLoad={map => { (window as any).googleMapInstance = map; }}
+        onLoad={map => { (window as unknown as { googleMapInstance?: google.maps.Map }).googleMapInstance = map; }}
       />
       {/* Fixed pin icon overlay at center */}
       <div style={{
