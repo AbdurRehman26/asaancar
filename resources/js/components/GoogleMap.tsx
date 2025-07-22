@@ -98,6 +98,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   };
 
+  const mapOptions = {
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+  };
+
   return isLoaded ? (
     <div style={{ position: 'relative' }}>
       {showSearchBox && (
@@ -119,6 +125,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         mapContainerStyle={containerStyle}
         center={markerPosition || center}
         zoom={zoom}
+        options={mapOptions}
         onDragEnd={() => {
           const map = (window as unknown as { googleMapInstance?: google.maps.Map }).googleMapInstance;
           if (map) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useState as useReactState } from 'react';
 import { useParams } from 'react-router-dom';
 // import { Fuel } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
@@ -62,8 +62,13 @@ export default function CarDetailPage() {
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number } | null>(null);
   const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
+    // Inquiry box state
+    const [inquiry, setInquiry] = useReactState({ name: '', contact: '', message: '' });
+    const [inquiryStatus, setInquiryStatus] = useReactState<'idle' | 'sending' | 'success' | 'error'>('idle');
+    const [inquiryError, setInquiryError] = useReactState<string | null>(null);
 
-  // Handler for map click
+
+    // Handler for map click
   const handleMapClick = (data: { lat: number; lng: number; address?: string }) => {
     setSelectedLatLng({ lat: data.lat, lng: data.lng });
     if (data.address) {
@@ -129,6 +134,43 @@ export default function CarDetailPage() {
   if (!car) {
     return (<div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-gray-600">Car not found.</div>);
   }
+
+
+    const handleInquiryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setInquiry({ ...inquiry, [e.target.name]: e.target.value });
+    };
+
+    const handleInquirySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setInquiryStatus('sending');
+        setInquiryError(null);
+        try {
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: inquiry.name,
+                    email: inquiry.contact, // backend expects email, allow phone in this field
+                    message: inquiry.message,
+                    store_id: car.store_id || null,
+                    car_details: car ? { id: car.id, name: car.name } : null,
+                }),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                setInquiryStatus('error');
+                setInquiryError(data.message || 'Failed to send inquiry.');
+            } else {
+                setInquiryStatus('success');
+                setInquiry({ name: '', contact: '', message: '' });
+            }
+        } catch {
+            setInquiryStatus('error');
+            setInquiryError('Network error.');
+        }
+    };
+
+
   return (
     <>
       <div className="min-h-screen bg-neutral-50 mt-17 dark:bg-gray-900">
@@ -234,6 +276,55 @@ export default function CarDetailPage() {
                   Kindly note that the Fuel Charges and Overtime will be applied based on the mileage of the car and extra hours of the services (if any). Your final invoice will be generated after adding the Fuel and Overtime charges at the end of your reservation. For more details please read the <a href="#" className="underline text-[#7e246c] dark:text-white">Fuel and Overtime charges and terms of use</a>.
                 </span>
               </div>
+
+                {!user && (
+                    <div className="mt-8 p-6 bg-white dark:bg-gray-900 rounded-xl border border-[#7e246c]/30 shadow">
+                        <h3 className="text-lg font-bold text-[#7e246c] mb-4">Send an Inquiry to Store Owner</h3>
+                        <form onSubmit={handleInquirySubmit} className="flex flex-col gap-4">
+                            <input
+                                type="text"
+                                name="name"
+                                value={inquiry.name}
+                                onChange={handleInquiryChange}
+                                className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
+                                placeholder="Your Name"
+                                required
+                            />
+                            <input
+                                type="text"
+                                name="contact"
+                                value={inquiry.contact}
+                                onChange={handleInquiryChange}
+                                className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
+                                placeholder="Email or Phone Number"
+                                required
+                            />
+                            <textarea
+                                name="message"
+                                value={inquiry.message}
+                                onChange={handleInquiryChange}
+                                className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
+                                placeholder="Your Message"
+                                rows={4}
+                                required
+                            />
+                            <button
+                                type="submit"
+                                className="py-2 px-6 rounded bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition"
+                                disabled={inquiryStatus === 'sending'}
+                            >
+                                {inquiryStatus === 'sending' ? 'Sending...' : 'Send Inquiry'}
+                            </button>
+                            {inquiryStatus === 'success' && (
+                                <div className="text-green-600 font-semibold">Inquiry sent successfully!</div>
+                            )}
+                            {inquiryStatus === 'error' && (
+                                <div className="text-red-600 font-semibold">{inquiryError}</div>
+                            )}
+                        </form>
+                    </div>
+                )}
+
             </div>
             {/* Right: BookingForm, Price, Optional Service */}
             <div className="md:w-1/2 p-8 flex flex-col gap-8 bg-white dark:bg-gray-800/80 border-l border-gray-100 dark:border-neutral-800">

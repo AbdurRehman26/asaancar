@@ -15,9 +15,17 @@ class ContactMessageController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'message' => 'required|string',
+            'store_id' => 'nullable|integer|exists:stores,id',
+            'car_details' => 'nullable|array',
         ]);
 
-        $contact = ContactMessage::create($validated);
+        $contact = ContactMessage::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'message' => $validated['message'],
+            'store_id' => $validated['store_id'] ?? null,
+            'car_details' => $validated['car_details'] ?? null,
+        ]);
 
         return response()->json(['message' => 'Thank you for contacting us!'], 201);
     }
