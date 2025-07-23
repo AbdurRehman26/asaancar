@@ -212,4 +212,43 @@ class BookingController extends Controller
 
         return BookingResource::collection($bookings);
     }
+
+    /**
+     * Store a guest booking (unauthenticated).
+     */
+    public function guestBooking(Request $request)
+    {
+        $validated = $request->validate([
+            'car_id' => 'required|integer|exists:cars,id',
+            'guest_name' => 'required|string|max:255',
+            'guest_phone' => 'required|string|max:255',
+            'pickup_location' => 'nullable|string|max:255',
+            'pickup_time' => 'nullable|string|max:255',
+            'pickup_date' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+            'rental_type' => 'nullable|string',
+            'number_of_days' => 'nullable|integer',
+            'total_price' => 'nullable|numeric',
+            'car_offer_id' => 'nullable|integer',
+            'refill_tank' => 'nullable|boolean',
+        ]);
+
+        $bookingData = $validated;
+        $bookingData['user_id'] = null;
+
+        $result = $this->bookingService->createBooking($bookingData);
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message']
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $result['booking'],
+            'message' => $result['message']
+        ]);
+    }
 }

@@ -58,6 +58,9 @@ Route::prefix('cars')->group(function () {
     Route::get('/filters', [CarController::class, 'getFilters']);
 });
 
+// Public guest booking endpoint
+Route::post('/guest-booking', [BookingController::class, 'guestBooking']);
+
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {

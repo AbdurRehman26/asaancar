@@ -67,7 +67,6 @@ export default function CarDetailPage() {
     const [inquiryStatus, setInquiryStatus] = useReactState<'idle' | 'sending' | 'success' | 'error'>('idle');
     const [inquiryError, setInquiryError] = useReactState<string | null>(null);
 
-
     // Handler for map click
   const handleMapClick = (data: { lat: number; lng: number; address?: string }) => {
     setSelectedLatLng({ lat: data.lat, lng: data.lng });
@@ -169,7 +168,6 @@ export default function CarDetailPage() {
             setInquiryError('Network error.');
         }
     };
-
 
   return (
     <>
@@ -324,6 +322,8 @@ export default function CarDetailPage() {
                         </form>
                     </div>
                 )}
+
+                {/* Book as Guest Button (non-logged-in users) below login prompt */}
 
             </div>
             {/* Right: BookingForm, Price, Optional Service */}
