@@ -409,7 +409,136 @@ export function Home() {
     );
 }
 
+// Store Bookings Section
+export function StoreBookings() {
+    const { user, loading } = useAuth();
+    interface StoreBooking {
+        id: number;
+        car?: { name?: string; currency?: string };
+        user?: { name?: string; phone?: string; email?: string };
+        guest_name?: string;
+        guest_phone?: string;
+        pickup_date: string;
+        pickup_time: string;
+        status: string;
+        total_price: number;
+    }
+    const [bookings, setBookings] = useState<StoreBooking[]>([]);
+    const [bookingsLoading, setBookingsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [perPage, setPerPage] = useState(10);
+
+    useEffect(() => {
+        if (!loading && (!user || !Array.isArray(user.roles) || !user.roles.includes('store_owner'))) {
+            setError('You are not authorized to view this page.');
+            setBookingsLoading(false);
+            return;
+        }
+        setBookingsLoading(true);
+        fetch(`/api/dashboard/store-bookings?page=${currentPage}&per_page=${perPage}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        })
+            .then(res => res.json())
+            .then(data => {
+                setBookings(data.data || []);
+                setTotalPages(data.last_page || 1);
+                setPerPage(data.per_page || 10);
+            })
+            .catch(() => setError('Failed to fetch bookings.'))
+            .finally(() => setBookingsLoading(false));
+    }, [user, loading, currentPage, perPage]);
+
+    if (loading) {
+        return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading...</div>;
+    }
+    if (error) {
+        return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-red-600">{error}</div>;
+    }
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-[#7e246c] dark:text-white">Store Bookings</h2>
+            </div>
+            <div className="rounded-2xl bg-white/80 dark:bg-gray-800/80 border border-gray-300 dark:border-neutral-800 shadow-lg p-6 md:p-10 mt-6">
+                {bookingsLoading ? (
+                    <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                        <p className="mt-4 text-gray-600 dark:text-neutral-400">Loading bookings...</p>
+                    </div>
+                ) : bookings.length === 0 ? (
+                    <div className="text-center py-12">
+                        <BookOpen className="h-16 w-16 text-gray-400 dark:text-neutral-500 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No bookings found</h3>
+                        <p className="text-gray-600 dark:text-neutral-400">No bookings for your stores yet.</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                            <thead>
+                                <tr>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Car</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pickup Date</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pickup Time</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-neutral-700">
+                                {bookings.map((booking: StoreBooking) => (
+                                    <tr key={booking.id}>
+                                        <td className="px-4 py-2 whitespace-nowrap">{booking.id}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap">{booking.car?.name || '-'}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap">
+                                            {booking.guest_name || booking.user?.name || '-'}
+                                        </td>
+                                        <td className="px-4 py-2 whitespace-nowrap">
+                                            {booking.guest_phone || booking.user?.phone || booking.user?.email || '-'}
+                                        </td>
+                                        <td className="px-4 py-2 whitespace-nowrap">{booking.pickup_date}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap">{booking.pickup_time}</td>
+                                        <td className="px-4 py-2 whitespace-nowrap">
+                                            <span className={`px-2 py-1 rounded text-xs font-semibold ${booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>{booking.status}</span>
+                                        </td>
+                                        <td className="px-4 py-2 whitespace-nowrap">{booking.total_price} {booking.car?.currency || 'PKR'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {/* Pagination */}
+                        <div className="flex justify-center items-center gap-2 my-6">
+                            <button
+                                onClick={() => setCurrentPage(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c]"
+                            >Prev</button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`px-3 py-1 rounded font-semibold border ${page === currentPage ? 'bg-[#7e246c] text-white border-[#7e246c]' : 'border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]'}`}
+                                >{page}</button>
+                            ))}
+                            <button
+                                onClick={() => setCurrentPage(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="px-3 py-1 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 dark:border-neutral-800 dark:text-[#7e246c]"
+                            >Next</button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // Attach as properties for router usage
 Dashboard.CarListings = CarListings;
 Dashboard.Messages = Messages;
 Dashboard.Home = Home;
+Dashboard.StoreBookings = StoreBookings;

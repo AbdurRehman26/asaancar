@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useState as useReactState } from 'react';
 import { useParams } from 'react-router-dom';
-// import { Fuel } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import Navbar from '../components/navbar';
 import { apiFetch } from '@/lib/utils';
@@ -59,6 +58,7 @@ export default function CarDetailPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [rentalType, setRentalType] = useState<'with_driver' | 'without_driver'>('without_driver');
   const [numberOfDays, setNumberOfDays] = useState<number>(1);
+  const [refillTank, setRefillTank] = useState(false);
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number } | null>(null);
@@ -87,6 +87,7 @@ export default function CarDetailPage() {
     });
     const [guestBookingStatus, setGuestBookingStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
     const [guestBookingError, setGuestBookingError] = useState<string | null>(null);
+    const [guestBookingValidationError, setGuestBookingValidationError] = useState<string | null>(null);
 
     // Calculate guest booking price
     const guestDailyPrice = guestBooking.rentalType === 'with_driver'
@@ -203,11 +204,42 @@ export default function CarDetailPage() {
       ...prev,
       [name]: type === 'checkbox' ? checked : (name === 'numberOfDays' ? Number(value) : value),
     }));
+    // Only clear the error if the user is editing the field that was missing
+    if (
+      (guestBookingValidationError === 'Please enter your name.' && name === 'name') ||
+      (guestBookingValidationError === 'Please enter your phone number.' && name === 'phone') ||
+      (guestBookingValidationError === 'Please select an address.' && name === 'address') ||
+      (guestBookingValidationError === 'Please select a pickup date.' && name === 'pickupDate') ||
+      (guestBookingValidationError === 'Please select a pickup time.' && name === 'pickupTime')
+    ) {
+      setGuestBookingValidationError(null);
+    }
   };
 
   // Handle guest booking submit
   const handleGuestBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setGuestBookingValidationError(null);
+    if (!guestBooking.name.trim()) {
+      setGuestBookingValidationError('Please enter your name.');
+      return;
+    }
+    if (!guestBooking.phone.trim()) {
+      setGuestBookingValidationError('Please enter your phone number.');
+      return;
+    }
+    if (!guestBooking.address) {
+      setGuestBookingValidationError('Please select an address.');
+      return;
+    }
+    if (!guestBooking.pickupDate) {
+      setGuestBookingValidationError('Please select a pickup date.');
+      return;
+    }
+    if (!guestBooking.pickupTime) {
+      setGuestBookingValidationError('Please select a pickup time.');
+      return;
+    }
     setGuestBookingStatus('sending');
     setGuestBookingError(null);
     try {
@@ -224,6 +256,7 @@ export default function CarDetailPage() {
           pickup_location: guestBooking.address,
           rental_type: guestBooking.rentalType,
           total_price: guestDailyPrice * (numberOfDays || 1),
+          pickup_time: guestBooking.pickupTime,
         }),
       });
       if (!res.ok) {
@@ -502,167 +535,161 @@ export default function CarDetailPage() {
                                       setSelectedAddress={setSelectedAddress}
                                       selectedLatLng={selectedLatLng}
                                       setSelectedLatLng={setSelectedLatLng}
+                                      refillTank={refillTank}
+                                      setRefillTank={setRefillTank}
+                                      onGuestBook={() => {
+                                          setGuestBooking((prev) => ({
+                                              ...prev,
+                                              address: selectedAddress,
+                                              addressLatLng: selectedLatLng,
+                                              pickupDate,
+                                              pickupTime,
+                                              refillTank: refillTank,
+                                              numberOfDays,
+                                              rentalType,
+                                          }));
+                                          setGuestModalOpen(true);
+                                      }}
                                   />
-                                  {/* Guest booking section below pickup details */}
-                                  {!user && (
-                                      <>
-                                          <button
-                                              className="mt-4 w-full rounded bg-[#7e246c] px-4 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
-                                              onClick={() => {
-                                                  setGuestBooking((prev) => ({
-                                                      ...prev,
-                                                      address: selectedAddress,
-                                                      addressLatLng: selectedLatLng,
-                                                      pickupDate,
-                                                      pickupTime,
-                                                  }));
-                                                  setGuestModalOpen(true);
-                                              }}
-                                          >
-                                              Book as Guest
-                                          </button>
-                                          <Dialog open={guestModalOpen} onOpenChange={setGuestModalOpen}>
-                                              <DialogContent className="max-w-md">
-                                                  <DialogHeader>
-                                                      <DialogTitle>Book as Guest</DialogTitle>
-                                                  </DialogHeader>
-                                                  {/* Car Rate Details */}
-                                                  <div className="mb-4">
-                                                      <h3 className="mb-2 text-lg font-bold text-[#7e246c]">Rate Details</h3>
-                                                      <table className="mb-2 w-full text-sm">
-                                                          <tbody>
-                                                              <tr>
-                                                                  <td className="py-1 font-medium">With Driver</td>
-                                                                  <td className="py-1 text-right font-bold text-[#7e246c]">
-                                                                      {car.currency}{' '}
-                                                                      {typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A'}
-                                                                  </td>
-                                                              </tr>
-                                                              <tr>
-                                                                  <td className="py-1 font-medium">Without Driver</td>
-                                                                  <td className="py-1 text-right font-bold text-[#7e246c]">
-                                                                      {car.currency}{' '}
-                                                                      {typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A'}
-                                                                  </td>
-                                                              </tr>
-                                                          </tbody>
-                                                      </table>
+                                  <Dialog open={guestModalOpen} onOpenChange={setGuestModalOpen}>
+                                      <DialogContent className="max-w-md">
+                                          <DialogHeader>
+                                              <DialogTitle>Book as Guest</DialogTitle>
+                                          </DialogHeader>
+                                          {/* Car Rate Details */}
+                                          <div className="mb-4">
+                                              <h3 className="mb-2 text-lg font-bold text-[#7e246c]">Rate Details</h3>
+                                              <table className="mb-2 w-full text-sm">
+                                                  <tbody>
+                                                      <tr>
+                                                          <td className="py-1 font-medium">With Driver</td>
+                                                          <td className="py-1 text-right font-bold text-[#7e246c]">
+                                                              {car.currency}{' '}
+                                                              {typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A'}
+                                                          </td>
+                                                      </tr>
+                                                      <tr>
+                                                          <td className="py-1 font-medium">Without Driver</td>
+                                                          <td className="py-1 text-right font-bold text-[#7e246c]">
+                                                              {car.currency}{' '}
+                                                              {typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A'}
+                                                          </td>
+                                                      </tr>
+                                                  </tbody>
+                                              </table>
+                                          </div>
+                                          <form onSubmit={handleGuestBookingSubmit} className="flex flex-col gap-4">
+                                              {guestBookingValidationError && (
+                                                <div className="font-semibold text-red-600 mb-2">{guestBookingValidationError}</div>
+                                              )}
+                                              <div className="mb-4 flex flex-col gap-4">
+                                                  <div className="flex items-center gap-2">
+                                                      <User className="h-4 w-4 text-[#7e246c]" />
+                                                      <input
+                                                          type="text"
+                                                          name="name"
+                                                          value={guestBooking.name}
+                                                          onChange={handleGuestBookingChange}
+                                                          className="w-full rounded-lg border-2 border-[#7e246c] bg-white px-4 py-2 dark:bg-gray-900"
+                                                          placeholder="Your Name"
+                                                          required
+                                                      />
                                                   </div>
-                                                  <form onSubmit={handleGuestBookingSubmit} className="flex flex-col gap-4">
-                                                      <div className="mb-4 flex flex-col gap-4">
-                                                          <div className="flex items-center gap-2">
-                                                              <User className="h-4 w-4 text-[#7e246c]" />
-                                                              <input
-                                                                  type="text"
-                                                                  name="name"
-                                                                  value={guestBooking.name}
-                                                                  onChange={handleGuestBookingChange}
-                                                                  className="w-full rounded-lg border-2 border-[#7e246c] bg-white px-4 py-2 dark:bg-gray-900"
-                                                                  placeholder="Your Name"
-                                                                  required
-                                                              />
-                                                          </div>
-                                                          <div className="flex items-center gap-2">
-                                                              <Phone className="h-4 w-4 text-[#7e246c]" />
-                                                              <input
-                                                                  type="text"
-                                                                  name="phone"
-                                                                  value={guestBooking.phone}
-                                                                  onChange={handleGuestBookingChange}
-                                                                  className="w-full rounded-lg border-2 border-[#7e246c] bg-white px-4 py-2 dark:bg-gray-900"
-                                                                  placeholder="Phone Number"
-                                                                  required
-                                                              />
-                                                          </div>
-                                                          <div className="flex items-center gap-2">
-                                                              {guestBooking.refillTank ? (
-                                                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                                              ) : (
-                                                                  <XCircle className="h-4 w-4 text-red-500" />
-                                                              )}
-                                                              <span>
-                                                                  Refill Tank:{' '}
-                                                                  <span className={guestBooking.refillTank ? 'text-green-600' : 'text-red-500'}>
-                                                                      {guestBooking.refillTank ? 'Yes' : 'No'}
-                                                                  </span>
-                                                              </span>
-                                                          </div>
-                                                      </div>
-                                                      <div className="mt-2 rounded-2xl border-2 border-[#7e246c] bg-gradient-to-br from-[#f3e8ff] to-[#e0e7ff] p-6 shadow-lg dark:from-[#2d1a3a] dark:to-[#232946]">
-                                                          <div className="mb-3 flex items-center gap-2">
-                                                              <Car className="h-5 w-5 text-[#7e246c]" />
-                                                              <span className="text-lg font-bold text-[#7e246c]">Booking Preview</span>
-                                                          </div>
-                                                          <div className="mb-1 flex items-center gap-2 text-base">
-                                                              <User className="h-4 w-4 text-[#7e246c]" />
-                                                              <span className="font-semibold">Name:</span> {guestBooking.name}
-                                                          </div>
-                                                          <div className="mb-1 flex items-center gap-2 text-base">
-                                                              <Phone className="h-4 w-4 text-[#7e246c]" />
-                                                              <span className="font-semibold">Phone:</span> {guestBooking.phone}
-                                                          </div>
-                                                          <div className="mb-1 flex items-center gap-2 text-base">
-                                                              <FileText className="h-4 w-4 text-[#7e246c]" />
-                                                              <span className="font-semibold">Note:</span> {guestBooking.note || 'None'}
-                                                          </div>
-                                                          <div className="mb-1 flex items-center gap-2 text-base">
-                                                              <Calendar className="h-4 w-4 text-[#7e246c]" />
-                                                              <span className="font-semibold">Pickup Date:</span>{' '}
-                                                              {guestBooking.pickupDate || 'Not selected'}
-                                                              <span className="ml-4 font-semibold">Time:</span>{' '}
-                                                              {guestBooking.pickupTime || 'Not selected'}
-                                                          </div>
-                                                          <div className="mb-1 flex items-center gap-2 text-base">
-                                                              <Calendar className="h-4 w-4 text-[#7e246c]" />
-                                                              <span className="font-semibold">Number of Days:</span> {numberOfDays}
-                                                          </div>
-                                                          <div className="mb-1 flex items-center gap-2 text-base">
-                                                              {guestBooking.refillTank ? (
-                                                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                                              ) : (
-                                                                  <XCircle className="h-4 w-4 text-red-500" />
-                                                              )}
-                                                              <span>
-                                                                  Refill Tank:{' '}
-                                                                  <span className={guestBooking.refillTank ? 'text-green-600' : 'text-red-500'}>
-                                                                      {guestBooking.refillTank ? 'Yes' : 'No'}
-                                                                  </span>
-                                                              </span>
-                                                          </div>
-                                                          <div className="mb-1 flex items-center gap-2 text-base">
-                                                              <MapPin className="h-4 w-4 text-[#7e246c]" />
-                                                              <span>Address:</span>{' '}
-                                                              <span className="truncate">{guestBooking.address || 'Not selected'}</span>
-                                                          </div>
-                                                          <div className="mt-4 flex items-center gap-2">
-                                                              <span className="text-2xl font-extrabold text-[#7e246c]">
-                                                                  {guestBooking.rentalType == 'with_driver' ? 'With Driver' : 'Without Driver'}
-                                                              </span>
-                                                          </div>
-                                                          <div className="mt-4 flex items-center gap-2">
-                                                              <span className="text-2xl font-extrabold text-[#7e246c]">
-                                                                  {car.currency ?? 'PKR'} {guestDailyPrice * numberOfDays}
-                                                              </span>
-                                                          </div>
-                                                      </div>
-                                                      <button
-                                                          type="submit"
-                                                          className="rounded bg-[#7e246c] px-6 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
-                                                          disabled={guestBookingStatus === 'sending'}
-                                                      >
-                                                          {guestBookingStatus === 'sending' ? 'Booking...' : 'Book as Guest'}
-                                                      </button>
-                                                      {guestBookingStatus === 'success' && (
-                                                          <div className="font-semibold text-green-600">Booking successful!</div>
+                                                  <div className="flex items-center gap-2">
+                                                      <Phone className="h-4 w-4 text-[#7e246c]" />
+                                                      <input
+                                                          type="text"
+                                                          name="phone"
+                                                          value={guestBooking.phone}
+                                                          onChange={handleGuestBookingChange}
+                                                          className="w-full rounded-lg border-2 border-[#7e246c] bg-white px-4 py-2 dark:bg-gray-900"
+                                                          placeholder="Phone Number"
+                                                          required
+                                                      />
+                                                  </div>
+                                                  <div className="flex items-center gap-2">
+                                                      {guestBooking.refillTank ? (
+                                                          <CheckCircle className="h-4 w-4 text-green-600" />
+                                                      ) : (
+                                                          <XCircle className="h-4 w-4 text-red-500" />
                                                       )}
-                                                      {guestBookingStatus === 'error' && (
-                                                          <div className="font-semibold text-red-600">{guestBookingError}</div>
-                                                      )}
-                                                  </form>
-                                              </DialogContent>
-                                          </Dialog>
-                                      </>
-                                  )}
+                                                      <span>
+                                                          Refill Tank:{' '}
+                                                          <span className={guestBooking.refillTank ? 'text-green-600' : 'text-red-500'}>
+                                                              {guestBooking.refillTank ? 'Yes' : 'No'}
+                                                          </span>
+                                                      </span>
+                                                  </div>
+                                              </div>
+                                              <div className="mt-2 rounded-2xl border-2 border-[#7e246c] bg-gradient-to-br from-[#f3e8ff] to-[#e0e7ff] p-6 shadow-lg dark:from-[#2d1a3a] dark:to-[#232946]">
+                                                  <div className="mb-3 flex items-center gap-2">
+                                                      <Car className="h-5 w-5 text-[#7e246c]" />
+                                                      <span className="text-lg font-bold text-[#7e246c]">Booking Preview</span>
+                                                  </div>
+                                                  <div className="mb-1 flex items-center gap-2 text-base">
+                                                      <User className="h-4 w-4 text-[#7e246c]" />
+                                                      <span className="font-semibold">Name:</span> {guestBooking.name}
+                                                  </div>
+                                                  <div className="mb-1 flex items-center gap-2 text-base">
+                                                      <Phone className="h-4 w-4 text-[#7e246c]" />
+                                                      <span className="font-semibold">Phone:</span> {guestBooking.phone}
+                                                  </div>
+                                                  <div className="mb-1 flex items-center gap-2 text-base">
+                                                      <FileText className="h-4 w-4 text-[#7e246c]" />
+                                                      <span className="font-semibold">Note:</span> {guestBooking.note || 'None'}
+                                                  </div>
+                                                  <div className="mb-1 flex items-center gap-2 text-base">
+                                                      <Calendar className="h-4 w-4 text-[#7e246c]" />
+                                                      <span className="font-semibold">Pickup Date:</span>{' '}
+                                                      {guestBooking.pickupDate || 'Not selected'}
+                                                      <span className="ml-4 font-semibold">Time:</span>{' '}
+                                                      {guestBooking.pickupTime || 'Not selected'}
+                                                  </div>
+                                                  <div className="mb-1 flex items-center gap-2 text-base">
+                                                      <Calendar className="h-4 w-4 text-[#7e246c]" />
+                                                      <span className="font-semibold">Number of Days:</span> {numberOfDays}
+                                                  </div>
+                                                  <div className="flex items-center gap-2 text-base mb-1">
+                                                      {refillTank ? <CheckCircle className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-red-500" />}
+                                                      <span>
+                                                          Refill Tank:{' '}
+                                                          <span className={refillTank ? 'text-green-600' : 'text-red-500'}>
+                                                              {refillTank ? 'Yes' : 'No'}
+                                                          </span>
+                                                      </span>
+                                                  </div>
+                                                  <div className="mb-1 flex items-center gap-2 text-base">
+                                                      <MapPin className="h-4 w-4 text-[#7e246c]" />
+                                                      <span>Address:</span>{' '}
+                                                      <span className="truncate">{guestBooking.address || 'Not selected'}</span>
+                                                  </div>
+                                                  <div className="mt-4 flex items-center gap-2">
+                                                      <span className="text-2xl font-extrabold text-[#7e246c]">
+                                                          {guestBooking.rentalType == 'with_driver' ? 'With Driver' : 'Without Driver'}
+                                                      </span>
+                                                  </div>
+                                                  <div className="mt-4 flex items-center gap-2">
+                                                      <span className="text-2xl font-extrabold text-[#7e246c]">
+                                                          {car.currency ?? 'PKR'} {guestDailyPrice * numberOfDays}
+                                                      </span>
+                                                  </div>
+                                              </div>
+                                              <button
+                                                  type="submit"
+                                                  className="rounded bg-[#7e246c] px-6 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
+                                                  disabled={guestBookingStatus === 'sending'}
+                                              >
+                                                  {guestBookingStatus === 'sending' ? 'Booking...' : 'Book as Guest'}
+                                              </button>
+                                              {guestBookingStatus === 'success' && (
+                                                  <div className="font-semibold text-green-600">Booking successful!</div>
+                                              )}
+                                              {guestBookingStatus === 'error' && (
+                                                  <div className="font-semibold text-red-600">{guestBookingError}</div>
+                                              )}
+                                          </form>
+                                      </DialogContent>
+                                  </Dialog>
                               </>
                           )}
                       </div>

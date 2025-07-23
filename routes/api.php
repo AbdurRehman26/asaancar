@@ -86,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings/user-car/{carId}', [\App\Http\Controllers\Customer\BookingController::class, 'userBookingForCar']);
     Route::get('/cars/stats', [\App\Http\Controllers\Customer\CarController::class, 'stats']);
     Route::get('/bookings/stats', [\App\Http\Controllers\Customer\BookingController::class, 'stats']);
+    Route::middleware('auth:sanctum')->get('/dashboard/store-bookings', [App\Http\Controllers\Customer\BookingController::class, 'storeBookingsForUser']);
 });
 
 // WebPush endpoints
@@ -110,7 +111,7 @@ Route::prefix('customer')->group(function () {
 
     // Store Management Routes
     Route::middleware('auth:sanctum')->post('/stores', [StoreController::class, 'store']);
-    Route::apiResource('stores', StoreController::class)->except(['store']);
+    Route::apiResource('stores', StoreController::class)->middleware(['auth:sanctum'])->except(['store']);
     // Store Management Routes (public for POST, or add to protected if needed)
 
     // Car Brand Management Routes

@@ -13,6 +13,7 @@ export default function DashboardStoresPage() {
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
       },
     })
       .then(async (res) => {

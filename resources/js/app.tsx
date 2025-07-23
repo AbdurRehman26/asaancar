@@ -77,6 +77,7 @@ function App() {
             <Route path="stores" element={<DashboardStoresPage />} />
             <Route path="create-store" element={<CreateStoreForm />} />
             <Route path="bookings" element={<Bookings />} />
+            <Route path="store-bookings" element={<Dashboard.StoreBookings />} />
           </Route>
           <Route path="/dashboard/stores" element={
             <ProtectedRoute>

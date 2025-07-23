@@ -47,14 +47,6 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link to="/dashboard/bookings">
-                                <BookOpen className="mr-2" />
-                                Bookings
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
                             <Link to="/dashboard/stores">
                                 <Store className="mr-2" />
                                 Car Stores
@@ -69,6 +61,16 @@ export function AppSidebar() {
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+                    {user && Array.isArray(user.roles) && user.roles.includes('store_owner') && (
+                        <SidebarMenuItem>
+                            <SidebarMenuButton size="lg" asChild>
+                                <Link to="/dashboard/store-bookings">
+                                    <BookOpen className="mr-2" />
+                                    Store Bookings
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    )}
                 </SidebarMenu>
             </SidebarHeader>
 

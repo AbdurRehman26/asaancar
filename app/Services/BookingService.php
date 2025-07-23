@@ -41,6 +41,8 @@ class BookingService
                 'refill_tank' => $bookingData['refill_tank'] ?? false,
                 'number_of_days' => $bookingData['number_of_days'],
                 'total_price' => $bookingData['total_price'],
+                'guest_name' => $bookingData['guest_name'],
+                'guest_phone' => $bookingData['guest_phone'],
                 'status' => $status,
                 'notes' => $bookingData['notes'] ?? null,
                 'refill_amount_per_km' => 40,
@@ -184,6 +186,38 @@ class BookingService
     }
 
     /**
+     * Get bookings for all stores the user is associated with (paginated)
+     */
+    public function getStoreUserBookings(int $userId, array $filters = [])
+    {
+        $user = \App\Models\User::find($userId);
+        if (!$user) {
+            return collect([]);
+        }
+        $storeIds = $user->stores()->pluck('stores.id');
+
+        $query = Booking::with(['car.carBrand', 'car.carType', 'car.store', 'store'])
+            ->whereIn('store_id', $storeIds);
+
+        // Apply filters
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (!empty($filters['date_from'])) {
+            $query->where('start_date', '>=', $filters['date_from']);
+        }
+        if (!empty($filters['date_to'])) {
+            $query->where('end_date', '<=', $filters['date_to']);
+        }
+
+        $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
+        $bookings->getCollection()->transform(function ($booking) {
+            return $this->formatBookingData($booking);
+        });
+        return $bookings;
+    }
+
+    /**
      * Get booking by ID
      */
     public function getBooking(int $bookingId): ?array
@@ -299,6 +333,8 @@ class BookingService
         return [
             'id' => $booking->id,
             'user_id' => $booking->user_id,
+            'guest_phone' => $booking->guest_phone,
+            'guest_name' => $booking->guest_name,
             'car_id' => $booking->car_id,
             'store_id' => $booking->store_id,
             'rental_type' => $booking->rental_type,

@@ -79,7 +79,7 @@ class User extends Authenticatable
 
     public function stores()
     {
-        return $this->belongsToMany(Store::class);
+        return $this->belongsToMany(Store::class, 'store_user', 'user_id', 'store_id');
     }
 
     public function conversations()

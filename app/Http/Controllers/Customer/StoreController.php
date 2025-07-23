@@ -38,7 +38,7 @@ class StoreController extends Controller
      */
     public function index()
     {
-        $stores = Store::paginate(10);
+        $stores = auth()->user()->stores()->paginate(10);
         $cities = City::all();
         return response()->json([
             'stores' => StoreResource::collection($stores),

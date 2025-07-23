@@ -44,6 +44,8 @@ class Booking extends Model
         'number_of_days',
         'rental_type',
         'refill_tank',
+        'guest_phone',
+        'guest_phone',
         'pickup_time',
         'pickup_date',
         'refill_amount_per_km',

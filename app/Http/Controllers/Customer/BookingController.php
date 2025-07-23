@@ -251,4 +251,24 @@ class BookingController extends Controller
             'message' => $result['message']
         ]);
     }
+
+    /**
+     * Display bookings for all stores the user is associated with.
+     */
+    public function storeBookingsForUser(Request $request)
+    {
+        $filters = $request->only(['status', 'date_from', 'date_to']);
+        $perPage = $request->input('per_page', 10);
+        $bookings = $this->bookingService->getStoreUserBookings(auth()->id(), $filters);
+        // Return paginated response with meta and links
+        return response()->json([
+            'data' => $bookings->items(),
+            'current_page' => $bookings->currentPage(),
+            'per_page' => $bookings->perPage(),
+            'total' => $bookings->total(),
+            'last_page' => $bookings->lastPage(),
+            'from' => $bookings->firstItem(),
+            'to' => $bookings->lastItem(),
+        ]);
+    }
 }

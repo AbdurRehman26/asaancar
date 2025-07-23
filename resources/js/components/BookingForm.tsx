@@ -8,7 +8,7 @@ import GoogleMap from './GoogleMap';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { Link } from 'react-router-dom';
 
-const GOOGLE_MAP_LIBRARIES = ['places'];
+const GOOGLE_MAP_LIBRARIES = ['places'] as unknown as string[];
 
 interface User {
   id: number;
@@ -49,6 +49,8 @@ interface BookingFormProps {
   setSelectedAddress: (address: string) => void;
   selectedLatLng: { lat: number; lng: number } | null;
   setSelectedLatLng: (latLng: { lat: number; lng: number } | null) => void;
+  refillTank: boolean;
+  setRefillTank: (val: boolean) => void;
 }
 
 // Export BookingPrice as a separate component
@@ -68,16 +70,22 @@ export function BookingPrice({ car, rentalType, numberOfDays }: { car: Car; rent
   );
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings, rentalType, setRentalType, numberOfDays, setNumberOfDays, onMessageStore, pickupDate, setPickupDate, pickupTime, setPickupTime, selectedAddress, setSelectedAddress, selectedLatLng, setSelectedLatLng }) => {
+const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings, rentalType, setRentalType, numberOfDays, setNumberOfDays, onMessageStore, pickupDate, setPickupDate, pickupTime, setPickupTime, selectedAddress, setSelectedAddress, selectedLatLng, setSelectedLatLng, refillTank, setRefillTank }) => {
   // pickupAddress, pickupTime, pickupDate, selectedAddress, selectedLatLng are now controlled by parent
   const [notes, setNotes] = useState<string>('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [refillTank, setRefillTank] = useState(false);
-  const [addressModalOpen, setAddressModalOpen] = useState(false);
   const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [bookAsGuest, setBookAsGuest] = useState(false);
+  const [guestName, setGuestName] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [guestBookingStatus, setGuestBookingStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [guestBookingError, setGuestBookingError] = useState<string | null>(null);
+  const [guestBookingSuccess, setGuestBookingSuccess] = useState<string | null>(null);
 
-  // @ts-expect-error: @react-google-maps/api types mismatch, safe to ignore
+   
+   
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -129,6 +137,18 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
       setButtonLoading(false);
       return;
     }
+    if (!user && bookAsGuest) {
+      if (!guestName.trim()) {
+        setValidationError('Please enter your name.');
+        setButtonLoading(false);
+        return;
+      }
+      if (!guestPhone.trim()) {
+        setValidationError('Please enter your phone number.');
+        setButtonLoading(false);
+        return;
+      }
+    }
     await onBooking({
       car_id: car.id,
       pickup_location: selectedAddress,
@@ -140,8 +160,81 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
       total_price: totalAmount,
       notes,
       car_offer_id: car.offer && typeof (car.offer as { id: number }).id === 'number' ? (car.offer as { id: number }).id : null,
+      ...(bookAsGuest ? { guest_name: guestName, guest_phone: guestPhone } : {}),
     });
     setButtonLoading(false);
+  };
+
+  const handleGuestBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError(null);
+    setGuestBookingError(null);
+    setGuestBookingSuccess(null);
+    setGuestBookingStatus('sending');
+    // Validate guest fields
+    if (!guestName.trim()) {
+      setValidationError('Please enter your name.');
+      setGuestBookingStatus('idle');
+      return;
+    }
+    if (!guestPhone.trim()) {
+      setValidationError('Please enter your phone number.');
+      setGuestBookingStatus('idle');
+      return;
+    }
+    if (!selectedAddress) {
+      setValidationError('Please select an address.');
+      setGuestBookingStatus('idle');
+      return;
+    }
+    if (!pickupDate) {
+      setValidationError('Please select a pickup date.');
+      setGuestBookingStatus('idle');
+      return;
+    }
+    if (!pickupTime) {
+      setValidationError('Please select a pickup time.');
+      setGuestBookingStatus('idle');
+      return;
+    }
+    // Calculate price
+    const dailyPrice = rentalType === 'with_driver'
+      ? (car && typeof car.withDriver === 'number' ? car.withDriver : 0)
+      : (car && typeof car.rental === 'number' ? car.rental : 0);
+    const totalAmount = dailyPrice * numberOfDays;
+    try {
+      const res = await fetch('/api/guest-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          car_id: car.id,
+          guest_name: guestName,
+          guest_phone: guestPhone,
+          notes,
+          number_of_days: numberOfDays,
+          refill_tank: refillTank,
+          pickup_location: selectedAddress,
+          rental_type: rentalType,
+          total_price: totalAmount,
+          pickup_time: pickupTime,
+          pickup_date: pickupDate,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setGuestBookingStatus('error');
+        setGuestBookingError(data.message || 'Failed to book as guest.');
+      } else {
+        setGuestBookingStatus('success');
+        setGuestBookingSuccess('Booking successful!');
+        setGuestName('');
+        setGuestPhone('');
+        setNotes('');
+      }
+    } catch {
+      setGuestBookingStatus('error');
+      setGuestBookingError('Network error.');
+    }
   };
 
   return (
@@ -335,6 +428,41 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
           </label>
       </div>
 
+{/* Book as Guest checkbox and fields for guests */}
+{!user && (
+  <div className="mb-4 flex flex-col gap-2">
+    <label className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        checked={bookAsGuest}
+        onChange={e => setBookAsGuest(e.target.checked)}
+        className="accent-[#7e246c] h-5 w-5 rounded"
+      />
+      <span className="font-semibold text-[#7e246c]">Book as guest</span>
+    </label>
+    {bookAsGuest && (
+      <>
+        <input
+          type="text"
+          value={guestName}
+          onChange={e => setGuestName(e.target.value)}
+          className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-900 px-4 py-2"
+          placeholder="Your Name"
+          required
+        />
+        <input
+          type="text"
+          value={guestPhone}
+          onChange={e => setGuestPhone(e.target.value)}
+          className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-900 px-4 py-2"
+          placeholder="Phone Number"
+          required
+        />
+      </>
+    )}
+  </div>
+)}
+
       <div className="flex gap-4 mt-6 flex-col">
           {user ? (
               <>
@@ -372,11 +500,37 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
                   </>
               ) : (
                 <>
-                <Link
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    className={`w-full py-3 rounded-md font-semibold transition ${bookAsGuest ? 'bg-[#7e246c] text-white hover:bg-[#6a1f5c]' : 'bg-[#7e246c]/60 text-white/60 cursor-not-allowed'}`}
+                    disabled={buttonLoading || !bookAsGuest}
+                    onClick={bookAsGuest ? handleGuestBooking : undefined}
+                  >
+                    {guestBookingStatus === 'sending' ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        Booking...
+                      </span>
+                    ) : (
+                      'Book as Guest'
+                    )}
+                  </button>
+                  <Link
                     to="/login"
-                    className="bg-[#7e246c] text-white text-center font-semibold px-4 py-2 rounded-md hover:bg-[#6a1f5c] transition">
+                    className={`w-full py-3 rounded-md text-center font-semibold transition ${bookAsGuest ? 'bg-[#7e246c]/60 text-white/60 cursor-not-allowed' : 'bg-[#7e246c] text-white hover:bg-[#6a1f5c]'}`}
+                    tabIndex={bookAsGuest ? -1 : 0}
+                    aria-disabled={bookAsGuest ? 'true' : 'false'}
+                    onClick={e => { if (bookAsGuest) e.preventDefault(); }}
+                  >
                     Please Login to Book
-                </Link>
+                  </Link>
+                </div>
+                {validationError && <div className="text-red-600 mt-2 font-semibold">{validationError}</div>}
+                {guestBookingError && <div className="text-red-600 mt-2 font-semibold">{guestBookingError}</div>}
+                {guestBookingSuccess && <div className="text-green-600 mt-2 font-semibold text-center">{guestBookingSuccess}</div>}
+                {error && <div className="text-red-600 mt-2 font-semibold">{error}</div>}
+                {success && <div className="text-green-600 mt-2 font-semibold text-center">{success}</div>}
                 </>
               )}
           </div>
