@@ -41,6 +41,14 @@ interface BookingFormProps {
   numberOfDays: number;
   setNumberOfDays: (days: number) => void;
   onMessageStore?: () => void;
+  pickupDate: string;
+  setPickupDate: (date: string) => void;
+  pickupTime: string;
+  setPickupTime: (time: string) => void;
+  selectedAddress: string;
+  setSelectedAddress: (address: string) => void;
+  selectedLatLng: { lat: number; lng: number } | null;
+  setSelectedLatLng: (latLng: { lat: number; lng: number } | null) => void;
 }
 
 // Export BookingPrice as a separate component
@@ -60,22 +68,14 @@ export function BookingPrice({ car, rentalType, numberOfDays }: { car: Car; rent
   );
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings, rentalType, setRentalType, numberOfDays, setNumberOfDays, onMessageStore }) => {
-  const [pickupAddress, setPickupAddress] = useState<string>('Werdener Str. 87, 40233 Düsseldorf, Germany');
-  const [pickupTime, setPickupTime] = useState<string>('23:30');
-  const [pickupDate, setPickupDate] = useState<string>('2025-07-13');
+const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings, rentalType, setRentalType, numberOfDays, setNumberOfDays, onMessageStore, pickupDate, setPickupDate, pickupTime, setPickupTime, selectedAddress, setSelectedAddress, selectedLatLng, setSelectedLatLng }) => {
+  // pickupAddress, pickupTime, pickupDate, selectedAddress, selectedLatLng are now controlled by parent
   const [notes, setNotes] = useState<string>('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [buttonLoading, setButtonLoading] = useState(false);
   const [refillTank, setRefillTank] = useState(false);
   const [addressModalOpen, setAddressModalOpen] = useState(false);
-  const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number } | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<string>(pickupAddress);
   const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
-    const [guestBooking, setGuestBooking] = useState({ name: '', phone: '', note: '' });
-    const [guestModalOpen, setGuestModalOpen] = useState(false);
-    const [guestBookingStatus, setGuestBookingStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-    const [guestBookingError, setGuestBookingError] = useState<string | null>(null);
 
   // @ts-expect-error: @react-google-maps/api types mismatch, safe to ignore
   const { isLoaded } = useJsApiLoader({
@@ -84,38 +84,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
     libraries: GOOGLE_MAP_LIBRARIES,
   });
 
-    const handleGuestBookingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setGuestBooking({ ...guestBooking, [e.target.name]: e.target.value });
-    };
-
-    const handleGuestBookingSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setGuestBookingStatus('sending');
-        setGuestBookingError(null);
-        try {
-            const res = await fetch('/api/guest-booking', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    car_id: car.id,
-                    guest_name: guestBooking.name,
-                    guest_phone: guestBooking.phone,
-                    notes: guestBooking.note,
-                }),
-            });
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                setGuestBookingStatus('error');
-                setGuestBookingError(data.message || 'Failed to book as guest.');
-            } else {
-                setGuestBookingStatus('success');
-                setGuestBooking({ name: '', phone: '', note: '' });
-            }
-        } catch {
-            setGuestBookingStatus('error');
-            setGuestBookingError('Network error.');
-        }
-    };
 
 
     // Handler for map click
@@ -163,7 +131,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
     }
     await onBooking({
       car_id: car.id,
-      pickup_location: pickupAddress,
+      pickup_location: selectedAddress,
       pickup_time: pickupTime,
       pickup_date: pickupDate,
       rental_type: rentalType,
@@ -192,7 +160,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
                   <div className="flex gap-2 items-center">
                     <input
                       type="text"
-                      value={pickupAddress}
+                      value={selectedAddress}
                       readOnly
                       className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition cursor-pointer"
                       placeholder="Pick-up address"
@@ -260,7 +228,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
                             className="mt-2 px-4 py-2 bg-[#7e246c] text-white rounded hover:bg-[#6a1f5c]"
                             type="button"
                             onClick={() => {
-                              setPickupAddress(selectedAddress);
+                              setSelectedAddress(selectedAddress);
                               setAddressModalOpen(false);
                             }}
                           >
@@ -409,79 +377,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
                     className="bg-[#7e246c] text-white text-center font-semibold px-4 py-2 rounded-md hover:bg-[#6a1f5c] transition">
                     Please Login to Book
                 </Link>
-                  <>
-                    <button
-                      className="mt-2 w-full py-2 px-4 rounded bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition"
-                      onClick={() => setGuestModalOpen(true)}
-                    >
-                      Book as Guest
-                    </button>
-                    <Dialog open={guestModalOpen} onOpenChange={setGuestModalOpen}>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Book as Guest</DialogTitle>
-                        </DialogHeader>
-                        {/* Car Rate Details */}
-                        <div className="mb-4">
-                          <h3 className="text-lg font-bold text-[#7e246c] mb-2">Rate Details</h3>
-                          <table className="w-full text-sm mb-2">
-                            <tbody>
-                              <tr>
-                                <td className="py-1 font-medium">With Driver</td>
-                                <td className="py-1 text-right font-bold text-[#7e246c]">{car.currency} {(typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A')}</td>
-                              </tr>
-                              <tr>
-                                <td className="py-1 font-medium">Without Driver</td>
-                                <td className="py-1 text-right font-bold text-[#7e246c]">{car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <form onSubmit={handleGuestBookingSubmit} className="flex flex-col gap-4">
-                          <input
-                            type="text"
-                            name="name"
-                            value={guestBooking.name}
-                            onChange={handleGuestBookingChange}
-                            className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
-                            placeholder="Your Name"
-                            required
-                          />
-                          <input
-                            type="text"
-                            name="phone"
-                            value={guestBooking.phone}
-                            onChange={handleGuestBookingChange}
-                            className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
-                            placeholder="Phone Number"
-                            required
-                          />
-                          <textarea
-                            name="note"
-                            value={guestBooking.note}
-                            onChange={handleGuestBookingChange}
-                            className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
-                            placeholder="Note (optional)"
-                            rows={3}
-                          />
-                          <button
-                            type="submit"
-                            className="py-2 px-6 rounded bg-[#7e246c] text-white font-semibold hover:bg-[#6a1f5c] transition"
-                            disabled={guestBookingStatus === 'sending'}
-                          >
-                            {guestBookingStatus === 'sending' ? 'Booking...' : 'Book as Guest'}
-                          </button>
-                          {guestBookingStatus === 'success' && (
-                            <div className="text-green-600 font-semibold">Booking successful!</div>
-                          )}
-                          {guestBookingStatus === 'error' && (
-                            <div className="text-red-600 font-semibold">{guestBookingError}</div>
-                          )}
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  </>
-
                 </>
               )}
           </div>
