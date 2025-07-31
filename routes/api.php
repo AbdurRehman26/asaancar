@@ -124,7 +124,8 @@ Route::prefix('customer')->group(function () {
     Route::apiResource('car-engines', CarEngineController::class);
 
     // Booking Management Routes
-    Route::apiResource('bookings', BookingController::class);
+    Route::get('bookings', [BookingController::class, 'index'])->middleware('auth:sanctum');
+    Route::apiResource('bookings', BookingController::class)->except(['index']);
 
     // Car Offer Management Routes
     Route::apiResource('car-offers', CarOfferController::class);

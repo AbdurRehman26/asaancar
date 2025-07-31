@@ -91,7 +91,7 @@ class CarService
             'images' => $car->image_urls ?? [],
             'price' => $pricing,
             // Frontend pricing fields for booking summary
-            'rental' => $pricing['perDay']['withoutDriver'],
+            'withoutDriver' => $pricing['perDay']['withoutDriver'],
             'withDriver' => $pricing['perDay']['withDriver'],
             'fuel' => 2.50, // Default fuel rate per km
             'overtime' => 25.00, // Default overtime rate per hour

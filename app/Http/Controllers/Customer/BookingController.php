@@ -7,7 +7,6 @@ use App\Http\Resources\BookingResource;
 use App\Services\BookingService;
 use App\Http\Requests\Booking\CreateBookingRequest;
 use App\Http\Requests\Booking\UpdateBookingRequest;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
