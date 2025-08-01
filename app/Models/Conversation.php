@@ -37,4 +37,9 @@ class Conversation extends Model
     {
         return $this->belongsTo(Store::class);
     }
-} 
+
+    public function lastMessage(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Message::class)->orderBy('created_at', 'desc');
+    }
+}
