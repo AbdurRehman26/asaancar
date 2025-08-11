@@ -42,8 +42,8 @@ const UniversalCarFilter: React.FC<UniversalCarFilterProps> = ({
     if (onSearch) onSearch(filters);
   };
 
-  // Override CarFilters container classes for fullWidth
-  const filterClass = fullWidth ? 'w-full my-4' : className;
+  // Use fullWidth styling when fullWidth is true, otherwise use provided className
+  const filterClass = fullWidth ? 'w-full max-w-none' : className;
 
   return (
     <div className={filterClass}>

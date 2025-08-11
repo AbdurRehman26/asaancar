@@ -39,16 +39,21 @@ const handleSystemThemeChange = () => {
 };
 
 export function initializeTheme() {
-    const savedAppearance = (localStorage.getItem('appearance') as Appearance) || 'light';
-
-    applyTheme(savedAppearance);
+    // Migration: Clear old light mode preferences and set dark as default
+    const savedAppearance = localStorage.getItem('appearance') as Appearance;
+    if (savedAppearance === 'light') {
+        localStorage.removeItem('appearance');
+    }
+    
+    const currentAppearance = (localStorage.getItem('appearance') as Appearance) || 'dark';
+    applyTheme(currentAppearance);
 
     // Add the event listener for system theme changes...
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
 export function useAppearance() {
-    const [appearance, setAppearance] = useState<Appearance>('light');
+    const [appearance, setAppearance] = useState<Appearance>('dark');
 
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
@@ -64,7 +69,7 @@ export function useAppearance() {
 
     useEffect(() => {
         const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
-        updateAppearance(savedAppearance || 'light');
+        updateAppearance(savedAppearance || 'dark');
 
         return () => mediaQuery()?.removeEventListener('change', handleSystemThemeChange);
     }, [updateAppearance]);
