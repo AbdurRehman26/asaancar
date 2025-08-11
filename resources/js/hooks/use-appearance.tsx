@@ -35,16 +35,10 @@ const mediaQuery = () => {
 
 const handleSystemThemeChange = () => {
     const currentAppearance = localStorage.getItem('appearance') as Appearance;
-    applyTheme(currentAppearance || 'light');
+    applyTheme(currentAppearance || 'dark');
 };
 
 export function initializeTheme() {
-    // Migration: Clear old light mode preferences and set dark as default
-    const savedAppearance = localStorage.getItem('appearance') as Appearance;
-    if (savedAppearance === 'light') {
-        localStorage.removeItem('appearance');
-    }
-    
     const currentAppearance = (localStorage.getItem('appearance') as Appearance) || 'dark';
     applyTheme(currentAppearance);
 
@@ -53,7 +47,13 @@ export function initializeTheme() {
 }
 
 export function useAppearance() {
-    const [appearance, setAppearance] = useState<Appearance>('dark');
+    const [appearance, setAppearance] = useState<Appearance>(() => {
+        // Initialize with the saved appearance or default to dark
+        if (typeof window !== 'undefined') {
+            return (localStorage.getItem('appearance') as Appearance) || 'dark';
+        }
+        return 'dark';
+    });
 
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
@@ -68,11 +68,11 @@ export function useAppearance() {
     }, []);
 
     useEffect(() => {
-        const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
-        updateAppearance(savedAppearance || 'dark');
+        // Apply the theme on mount
+        applyTheme(appearance);
 
         return () => mediaQuery()?.removeEventListener('change', handleSystemThemeChange);
-    }, [updateAppearance]);
+    }, [appearance]);
 
     return { appearance, updateAppearance } as const;
 }
