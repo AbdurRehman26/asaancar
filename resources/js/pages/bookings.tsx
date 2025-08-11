@@ -367,7 +367,7 @@ export default function Bookings() {
                           <img
                             src={booking.car?.image || '/images/car-placeholder.jpeg'}
                             alt={booking.car?.name || 'Car'}
-                            className="w-16 h-16 object-cover rounded-lg bg-gray-100 dark:bg-gray-700"
+                            className="w-16 h-16 object-contain rounded-lg bg-gray-100 dark:bg-gray-700 p-1"
                           />
                           <div>
                             <div className="flex items-center gap-3">

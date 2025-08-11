@@ -10,7 +10,7 @@ import GoogleMap from '../components/GoogleMap';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { StandaloneSearchBox } from '@react-google-maps/api';
-import { User, Phone, FileText, Calendar, MapPin, Car, CheckCircle, XCircle } from 'lucide-react';
+import { Car } from 'lucide-react';
 
 interface Car {
   id: number;
@@ -45,8 +45,7 @@ interface Booking {
 
 export default function CarDetailPage() {
   const { user } = useAuth();
-  const { id } = useParams<{ id: string }>();
-  const carId = id || 'N/A';
+  const { id: carId } = useParams<{ id: string }>();
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,43 +55,48 @@ export default function CarDetailPage() {
   const [chatError, setChatError] = useState<string | null>(null);
   const [userBookings, setUserBookings] = useState<Booking[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
-  const [rentalType, setRentalType] = useState<'with_driver' | 'without_driver'>('without_driver');
-  const [numberOfDays, setNumberOfDays] = useState<number>(1);
-  const [refillTank, setRefillTank] = useState(false);
-  const [addressModalOpen, setAddressModalOpen] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState<string>('');
+  const [selectedAddress, setSelectedAddress] = useState('');
   const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number } | null>(null);
-  const [pickupDate, setPickupDate] = useState<string>('');
-  const [pickupTime, setPickupTime] = useState<string>('');
+  const [pickupDate, setPickupDate] = useState('');
+  const [pickupTime, setPickupTime] = useState('');
+  const [numberOfDays, setNumberOfDays] = useState(1);
+  const [rentalType, setRentalType] = useState<'without_driver' | 'with_driver'>('without_driver');
+  const [refillTank, setRefillTank] = useState(false);
+  
+  // Inquiry state
+  const [inquiry, setInquiry] = useReactState({ name: '', contact: '', message: '' });
+  const [inquiryStatus, setInquiryStatus] = useReactState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [inquiryError, setInquiryError] = useReactState<string | null>(null);
+  
+  // Address modal state
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
   const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
-    // Inquiry box state
-    const [inquiry, setInquiry] = useReactState({ name: '', contact: '', message: '' });
-    const [inquiryStatus, setInquiryStatus] = useReactState<'idle' | 'sending' | 'success' | 'error'>('idle');
-    const [inquiryError, setInquiryError] = useReactState<string | null>(null);
 
-    // Guest booking modal state
-    const [guestModalOpen, setGuestModalOpen] = useState(false);
-    const [guestBooking, setGuestBooking] = useState({
-      name: '',
-      phone: '',
-      note: '',
-      numberOfDays: 1,
-      refillTank: false,
-      address: selectedAddress,
-      rentalType: 'without_driver',
-      addressModalOpen: false,
-      addressLatLng: selectedLatLng,
-      pickupDate: pickupDate,
-      pickupTime: pickupTime,
-    });
-    const [guestBookingStatus, setGuestBookingStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-    const [guestBookingError, setGuestBookingError] = useState<string | null>(null);
-    const [guestBookingValidationError, setGuestBookingValidationError] = useState<string | null>(null);
+  // Calculate guest booking price
+  const guestDailyPrice = car?.withDriver || 0; // Assuming withDriver is the price for 'with_driver'
 
-    // Calculate guest booking price
-    const guestDailyPrice = guestBooking.rentalType === 'with_driver'
-      ? (car && typeof car.withDriver === 'number' ? car.withDriver : 0)
-      : (car && typeof car.rental === 'number' ? car.rental : 0);
+  // Get brand image path
+  const getBrandImagePath = (brandName: string) => {
+    return `/images/car-brands/${brandName.toLowerCase()}.png`;
+  };
+
+  // Handle image error - fallback to brand image or placeholder
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.currentTarget;
+    const brandName = car?.brand;
+    
+    if (brandName && typeof brandName === 'string') {
+      const brandImagePath = getBrandImagePath(brandName);
+      // Only try brand image if we haven't already tried it
+      if (target.src !== brandImagePath) {
+        target.src = brandImagePath;
+        return;
+      }
+    }
+    
+    // Final fallback to placeholder
+    target.src = '/images/car-placeholder.jpeg';
+  };
 
   // Handler for map click
   const handleMapClick = (data: { lat: number; lng: number; address?: string }) => {
@@ -196,96 +200,6 @@ export default function CarDetailPage() {
         }
     };
 
-  // Handle guest booking change
-  const handleGuestBookingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
-    setGuestBooking(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : (name === 'numberOfDays' ? Number(value) : value),
-    }));
-    // Only clear the error if the user is editing the field that was missing
-    if (
-      (guestBookingValidationError === 'Please enter your name.' && name === 'name') ||
-      (guestBookingValidationError === 'Please enter your phone number.' && name === 'phone') ||
-      (guestBookingValidationError === 'Please select an address.' && name === 'address') ||
-      (guestBookingValidationError === 'Please select a pickup date.' && name === 'pickupDate') ||
-      (guestBookingValidationError === 'Please select a pickup time.' && name === 'pickupTime')
-    ) {
-      setGuestBookingValidationError(null);
-    }
-  };
-
-  // Handle guest booking submit
-  const handleGuestBookingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setGuestBookingValidationError(null);
-    if (!guestBooking.name.trim()) {
-      setGuestBookingValidationError('Please enter your name.');
-      return;
-    }
-    if (!guestBooking.phone.trim()) {
-      setGuestBookingValidationError('Please enter your phone number.');
-      return;
-    }
-    if (!guestBooking.address) {
-      setGuestBookingValidationError('Please select an address.');
-      return;
-    }
-    if (!guestBooking.pickupDate) {
-      setGuestBookingValidationError('Please select a pickup date.');
-      return;
-    }
-    if (!guestBooking.pickupTime) {
-      setGuestBookingValidationError('Please select a pickup time.');
-      return;
-    }
-    setGuestBookingStatus('sending');
-    setGuestBookingError(null);
-    try {
-      const res = await fetch('/api/guest-booking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          car_id: car.id,
-          guest_name: guestBooking.name,
-          guest_phone: guestBooking.phone,
-          notes: guestBooking.note,
-          number_of_days: numberOfDays,
-          refill_tank: guestBooking.refillTank,
-          pickup_location: guestBooking.address,
-          rental_type: guestBooking.rentalType,
-          total_price: guestDailyPrice * (numberOfDays || 1),
-          pickup_time: guestBooking.pickupTime,
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setGuestBookingStatus('error');
-        setGuestBookingError(data.message || 'Failed to book as guest.');
-      } else {
-        setGuestBookingStatus('success');
-        setGuestBooking(prev => ({
-          ...prev,
-          name: '',
-          phone: '',
-          note: '',
-          numberOfDays: 1,
-          refillTank: false,
-          address: '',
-          rentalType: 'without_driver',
-          addressModalOpen: false,
-          addressLatLng: null,
-          pickupDate,
-          pickupTime,
-        }));
-      }
-    } catch {
-      setGuestBookingStatus('error');
-      setGuestBookingError('Network error.');
-    }
-  };
-
   return (
       <>
           <div className="mt-17 min-h-screen bg-neutral-50 dark:bg-gray-900">
@@ -300,7 +214,8 @@ export default function CarDetailPage() {
                               <img
                                   src={car.image || '/images/car-placeholder.jpeg'}
                                   alt={car.name}
-                                  className="h-56 rounded-xl bg-gray-50 object-contain dark:bg-neutral-800"
+                                  className="h-56 rounded-xl bg-gray-50 object-contain p-4 dark:bg-neutral-800"
+                                  onError={handleImageError}
                               />
                           </div>
                           <a
@@ -379,7 +294,7 @@ export default function CarDetailPage() {
                                           <td className="py-3 font-medium">With Driver</td>
                                           <td className="py-3 text-center font-semibold">10 hrs/day</td>
                                           <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                                              {car.currency} {typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A'}
+                                              {car.currency} {guestDailyPrice.toLocaleString()}
                                           </td>
                                       </tr>
                                       <tr>
@@ -537,159 +452,7 @@ export default function CarDetailPage() {
                                       setSelectedLatLng={setSelectedLatLng}
                                       refillTank={refillTank}
                                       setRefillTank={setRefillTank}
-                                      onGuestBook={() => {
-                                          setGuestBooking((prev) => ({
-                                              ...prev,
-                                              address: selectedAddress,
-                                              addressLatLng: selectedLatLng,
-                                              pickupDate,
-                                              pickupTime,
-                                              refillTank: refillTank,
-                                              numberOfDays,
-                                              rentalType,
-                                          }));
-                                          setGuestModalOpen(true);
-                                      }}
                                   />
-                                  <Dialog open={guestModalOpen} onOpenChange={setGuestModalOpen}>
-                                      <DialogContent className="max-w-md">
-                                          <DialogHeader>
-                                              <DialogTitle>Book as Guest</DialogTitle>
-                                          </DialogHeader>
-                                          {/* Car Rate Details */}
-                                          <div className="mb-4">
-                                              <h3 className="mb-2 text-lg font-bold text-[#7e246c]">Rate Details</h3>
-                                              <table className="mb-2 w-full text-sm">
-                                                  <tbody>
-                                                      <tr>
-                                                          <td className="py-1 font-medium">With Driver</td>
-                                                          <td className="py-1 text-right font-bold text-[#7e246c]">
-                                                              {car.currency}{' '}
-                                                              {typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A'}
-                                                          </td>
-                                                      </tr>
-                                                      <tr>
-                                                          <td className="py-1 font-medium">Without Driver</td>
-                                                          <td className="py-1 text-right font-bold text-[#7e246c]">
-                                                              {car.currency}{' '}
-                                                              {typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A'}
-                                                          </td>
-                                                      </tr>
-                                                  </tbody>
-                                              </table>
-                                          </div>
-                                          <form onSubmit={handleGuestBookingSubmit} className="flex flex-col gap-4">
-                                              {guestBookingValidationError && (
-                                                <div className="font-semibold text-red-600 mb-2">{guestBookingValidationError}</div>
-                                              )}
-                                              <div className="mb-4 flex flex-col gap-4">
-                                                  <div className="flex items-center gap-2">
-                                                      <User className="h-4 w-4 text-[#7e246c]" />
-                                                      <input
-                                                          type="text"
-                                                          name="name"
-                                                          value={guestBooking.name}
-                                                          onChange={handleGuestBookingChange}
-                                                          className="w-full rounded-lg border-2 border-[#7e246c] bg-white px-4 py-2 dark:bg-gray-900"
-                                                          placeholder="Your Name"
-                                                          required
-                                                      />
-                                                  </div>
-                                                  <div className="flex items-center gap-2">
-                                                      <Phone className="h-4 w-4 text-[#7e246c]" />
-                                                      <input
-                                                          type="text"
-                                                          name="phone"
-                                                          value={guestBooking.phone}
-                                                          onChange={handleGuestBookingChange}
-                                                          className="w-full rounded-lg border-2 border-[#7e246c] bg-white px-4 py-2 dark:bg-gray-900"
-                                                          placeholder="Phone Number"
-                                                          required
-                                                      />
-                                                  </div>
-                                                  <div className="flex items-center gap-2">
-                                                      {guestBooking.refillTank ? (
-                                                          <CheckCircle className="h-4 w-4 text-green-600" />
-                                                      ) : (
-                                                          <XCircle className="h-4 w-4 text-red-500" />
-                                                      )}
-                                                      <span>
-                                                          Refill Tank:{' '}
-                                                          <span className={guestBooking.refillTank ? 'text-green-600' : 'text-red-500'}>
-                                                              {guestBooking.refillTank ? 'Yes' : 'No'}
-                                                          </span>
-                                                      </span>
-                                                  </div>
-                                              </div>
-                                              <div className="mt-2 rounded-2xl border-2 border-[#7e246c] bg-gradient-to-br from-[#f3e8ff] to-[#e0e7ff] p-6 shadow-lg dark:from-[#2d1a3a] dark:to-[#232946]">
-                                                  <div className="mb-3 flex items-center gap-2">
-                                                      <Car className="h-5 w-5 text-[#7e246c]" />
-                                                      <span className="text-lg font-bold text-[#7e246c]">Booking Preview</span>
-                                                  </div>
-                                                  <div className="mb-1 flex items-center gap-2 text-base">
-                                                      <User className="h-4 w-4 text-[#7e246c]" />
-                                                      <span className="font-semibold">Name:</span> {guestBooking.name}
-                                                  </div>
-                                                  <div className="mb-1 flex items-center gap-2 text-base">
-                                                      <Phone className="h-4 w-4 text-[#7e246c]" />
-                                                      <span className="font-semibold">Phone:</span> {guestBooking.phone}
-                                                  </div>
-                                                  <div className="mb-1 flex items-center gap-2 text-base">
-                                                      <FileText className="h-4 w-4 text-[#7e246c]" />
-                                                      <span className="font-semibold">Note:</span> {guestBooking.note || 'None'}
-                                                  </div>
-                                                  <div className="mb-1 flex items-center gap-2 text-base">
-                                                      <Calendar className="h-4 w-4 text-[#7e246c]" />
-                                                      <span className="font-semibold">Pickup Date:</span>{' '}
-                                                      {guestBooking.pickupDate || 'Not selected'}
-                                                      <span className="ml-4 font-semibold">Time:</span>{' '}
-                                                      {guestBooking.pickupTime || 'Not selected'}
-                                                  </div>
-                                                  <div className="mb-1 flex items-center gap-2 text-base">
-                                                      <Calendar className="h-4 w-4 text-[#7e246c]" />
-                                                      <span className="font-semibold">Number of Days:</span> {numberOfDays}
-                                                  </div>
-                                                  <div className="flex items-center gap-2 text-base mb-1">
-                                                      {refillTank ? <CheckCircle className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-red-500" />}
-                                                      <span>
-                                                          Refill Tank:{' '}
-                                                          <span className={refillTank ? 'text-green-600' : 'text-red-500'}>
-                                                              {refillTank ? 'Yes' : 'No'}
-                                                          </span>
-                                                      </span>
-                                                  </div>
-                                                  <div className="mb-1 flex items-center gap-2 text-base">
-                                                      <MapPin className="h-4 w-4 text-[#7e246c]" />
-                                                      <span>Address:</span>{' '}
-                                                      <span className="truncate">{guestBooking.address || 'Not selected'}</span>
-                                                  </div>
-                                                  <div className="mt-4 flex items-center gap-2">
-                                                      <span className="text-2xl font-extrabold text-[#7e246c]">
-                                                          {guestBooking.rentalType == 'with_driver' ? 'With Driver' : 'Without Driver'}
-                                                      </span>
-                                                  </div>
-                                                  <div className="mt-4 flex items-center gap-2">
-                                                      <span className="text-2xl font-extrabold text-[#7e246c]">
-                                                          {car.currency ?? 'PKR'} {guestDailyPrice * numberOfDays}
-                                                      </span>
-                                                  </div>
-                                              </div>
-                                              <button
-                                                  type="submit"
-                                                  className="rounded bg-[#7e246c] px-6 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
-                                                  disabled={guestBookingStatus === 'sending'}
-                                              >
-                                                  {guestBookingStatus === 'sending' ? 'Booking...' : 'Book as Guest'}
-                                              </button>
-                                              {guestBookingStatus === 'success' && (
-                                                  <div className="font-semibold text-green-600">Booking successful!</div>
-                                              )}
-                                              {guestBookingStatus === 'error' && (
-                                                  <div className="font-semibold text-red-600">{guestBookingError}</div>
-                                              )}
-                                          </form>
-                                      </DialogContent>
-                                  </Dialog>
                               </>
                           )}
                       </div>

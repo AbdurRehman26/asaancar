@@ -1,4 +1,4 @@
-import { CheckCircle, ChevronDown, MapPin, Shield, Car } from 'lucide-react';
+import { ChevronDown, Shield, Star, Clock, Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
@@ -50,6 +50,157 @@ const FAQItem = ({
         <div className={`overflow-hidden transition-all ${isOpen ? 'max-h-40' : 'max-h-0'}`}>
             <p className="pb-4 text-sm text-neutral-600 dark:text-neutral-400">{answer}</p>
         </div>
+    </div>
+);
+
+// Car Category Card Component
+const CarCategoryCard = ({ 
+    title, 
+    subtitle, 
+    image, 
+    onClick 
+}: { 
+    title: string; 
+    subtitle: string; 
+    image: string; 
+    onClick: () => void; 
+}) => (
+    <div 
+        onClick={onClick}
+        className="group cursor-pointer rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg hover:border-[#7e246c] dark:border-neutral-800 dark:bg-gray-800/80"
+    >
+        <div className="mb-4 h-32 overflow-hidden rounded-lg relative">
+            <div className="flex h-full items-center justify-center">
+                {image.startsWith('/') ? (
+                    <img 
+                        src={image} 
+                        alt={title} 
+                        className="h-full w-full object-contain p-2"
+                        onError={(e) => {
+                            // Fallback to emoji if image fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.parentElement?.querySelector('.fallback-emoji');
+                            if (fallback) {
+                                fallback.classList.remove('hidden');
+                            }
+                        }}
+                    />
+                ) : null}
+                <div className={`text-4xl ${image.startsWith('/') ? 'hidden fallback-emoji' : ''}`}>
+                    {image}
+                </div>
+            </div>
+            {/* Category name overlay on image */}
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <h3 className="text-white font-bold text-lg text-center px-2">
+                    {title}
+                </h3>
+            </div>
+        </div>
+        <div className="text-center">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">{subtitle}</p>
+        </div>
+    </div>
+);
+
+// Car Brand Card Component
+const CarBrandCard = ({ 
+    title, 
+    subtitle, 
+    image, 
+    onClick 
+}: { 
+    title: string; 
+    subtitle: string; 
+    image: string; 
+    onClick: () => void; 
+}) => (
+    <div 
+        onClick={onClick}
+        className="group cursor-pointer rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg hover:border-[#7e246c] dark:border-neutral-800 dark:bg-gray-800/80"
+    >
+        <div className="mb-4 h-32 overflow-hidden rounded-lg relative">
+            <div className="flex h-full items-center justify-center">
+                {image.startsWith('/') ? (
+                    <img 
+                        src={image} 
+                        alt={title} 
+                        className="h-full w-full object-contain p-2"
+                        onError={(e) => {
+                            // Fallback to emoji if image fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.parentElement?.querySelector('.fallback-emoji');
+                            if (fallback) {
+                                fallback.classList.remove('hidden');
+                            }
+                        }}
+                    />
+                ) : null}
+                <div className={`text-4xl ${image.startsWith('/') ? 'hidden fallback-emoji' : ''}`}>
+                    {image}
+                </div>
+            </div>
+            {/* Brand name overlay on image */}
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <h3 className="text-white font-bold text-lg text-center px-2">
+                    {title}
+                </h3>
+            </div>
+        </div>
+        <div className="text-center">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">{subtitle}</p>
+        </div>
+    </div>
+);
+
+// Feature Card Component
+const FeatureCard = ({ 
+    icon: Icon, 
+    title, 
+    description 
+}: { 
+    icon: React.ElementType; 
+    title: string; 
+    description: string; 
+}) => (
+    <div className="flex items-start space-x-4">
+        <div className="flex-shrink-0">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c] text-white">
+                <Icon className="h-6 w-6" />
+            </div>
+        </div>
+        <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
+        </div>
+    </div>
+);
+
+// Testimonial Card Component
+const TestimonialCard = ({ 
+    name, 
+    rating, 
+    comment 
+}: { 
+    name: string; 
+    rating: number; 
+    comment: string; 
+}) => (
+    <div className="bg-white dark:bg-gray-800/80 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-neutral-800">
+        <div className="flex items-center mb-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+                <Star 
+                    key={i} 
+                    className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                />
+            ))}
+        </div>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-3">{comment}</p>
+        <p className="font-semibold text-gray-900 dark:text-white">{name}</p>
     </div>
 );
 
@@ -117,7 +268,22 @@ interface CarData {
     updated_at: string;
 }
 
-// Car Card Component
+// Car Type interface
+interface CarType {
+    id: number;
+    name: string;
+    image?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+interface CarBrand {
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at: string;
+}
+
 const CarCard = ({ 
     car 
 }: { 
@@ -132,24 +298,43 @@ const CarCard = ({
     const minutePrice = car.price?.perMinute?.withoutDriver || Math.round((dailyPrice / 24 / 60) * 100) / 100;
     const currency = car.price?.currency || car.currency || 'PKR';
     
+    // Get brand image path
+    const getBrandImagePath = (brandName: string) => {
+        return `/images/car-brands/${brandName.toLowerCase()}.png`;
+    };
+
+    // Handle image error - fallback to brand image or emoji
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        const target = e.target as HTMLImageElement;
+        const brandName = car.brand;
+        
+        if (brandName) {
+            const brandImagePath = getBrandImagePath(brandName);
+            // Only try brand image if we haven't already tried it
+            if (target.src !== brandImagePath) {
+                target.src = brandImagePath;
+                return;
+            }
+        }
+        
+        // Final fallback to emoji
+        target.style.display = 'none';
+        const fallback = target.parentElement?.querySelector('.fallback-emoji');
+        if (fallback) {
+            fallback.classList.remove('hidden');
+        }
+    };
+    
     return (
         <div className="group rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg dark:border-neutral-800 dark:bg-gray-800/80">
             <div className="mb-4 h-48 overflow-hidden rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-                <div className="flex h-full items-center justify-center">
+                <div className="flex h-full items-center justify-center p-4">
                     {primaryImage ? (
                         <img 
                             src={primaryImage} 
                             alt={car.name} 
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                                // Fallback to emoji if image fails to load
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                const fallback = target.parentElement?.querySelector('.fallback-emoji');
-                                if (fallback) {
-                                    fallback.classList.remove('hidden');
-                                }
-                            }}
+                            className="h-full w-full object-contain"
+                            onError={handleImageError}
                         />
                     ) : null}
                     <div className={`text-6xl ${primaryImage ? 'hidden fallback-emoji' : ''}`}>🚗</div>
@@ -187,86 +372,16 @@ const CarCard = ({
     );
 };
 
-// Pricing Card Component
-const PricingCard = ({ 
-    title, 
-    subtitle, 
-    description, 
-    price, 
-    unit, 
-    features, 
-    popular = false 
-}: { 
-    title: string; 
-    subtitle: string; 
-    description: string; 
-    price: string; 
-    unit: string; 
-    features: string[]; 
-    popular?: boolean; 
-}) => (
-    <div className={`relative rounded-xl border p-6 transition-all hover:shadow-lg ${
-        popular 
-            ? 'border-[#7e246c] bg-gradient-to-br from-[#7e246c]/5 to-[#7e246c]/10 dark:from-[#7e246c]/20 dark:to-[#7e246c]/10' 
-            : 'border-neutral-200 bg-white dark:border-neutral-800 dark:bg-gray-800/80'
-    }`}>
-        {popular && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#7e246c] px-4 py-1 text-xs font-medium text-white">
-                Most Popular
-            </div>
-        )}
-        <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">{subtitle}</p>
-        </div>
-        <div className="mb-4">
-            <div className="text-2xl font-bold text-[#7e246c]">
-                {price}
-                <span className="text-sm font-normal text-neutral-500">/{unit}</span>
-            </div>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
-        </div>
-        <ul className="space-y-2">
-            {features.map((feature, index) => (
-                <li key={index} className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
-                    <CheckCircle className="mr-2 h-4 w-4 text-[#7e246c]" />
-                    {feature}
-                </li>
-            ))}
-        </ul>
-    </div>
-);
-
-// Step Card Component
-const StepCard = ({ 
-    number, 
-    title, 
-    description, 
-    icon: Icon 
-}: { 
-    number: string; 
-    title: string; 
-    description: string; 
-    icon: React.ElementType; 
-}) => (
-    <div className="text-center">
-        <div className="mb-4 flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#7e246c]/10 text-[#7e246c]">
-                <Icon className="h-8 w-8" />
-            </div>
-        </div>
-        <div className="mb-2 text-sm font-medium text-[#7e246c]">{number}</div>
-        <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
-        <p className="text-neutral-600 dark:text-neutral-400">{description}</p>
-    </div>
-);
-
 export default function Welcome() {
     const { user } = useAuth();
     useRevealOnScroll();
     const [activeAccordion, setActiveAccordion] = useState<number | null>(null);
     const [latestCars, setLatestCars] = useState<CarData[]>([]);
     const [carsLoading, setCarsLoading] = useState(true);
+    const [carTypes, setCarTypes] = useState<CarType[]>([]);
+    const [carTypesLoading, setCarTypesLoading] = useState(true);
+    const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
+    const [carBrandsLoading, setCarBrandsLoading] = useState(true);
     const navigate = useNavigate();
 
     // Fetch latest cars
@@ -290,6 +405,46 @@ export default function Welcome() {
         fetchLatestCars();
     }, []);
 
+    // Fetch car types
+    useEffect(() => {
+        const fetchCarTypes = async () => {
+            try {
+                console.log('Fetching car types...');
+                const response = await fetch('/api/customer/car-types');
+                const data = await response.json();
+                console.log('Car types API response:', data);
+                setCarTypes(data.data || []);
+            } catch (error) {
+                console.error('Error fetching car types:', error);
+                setCarTypes([]);
+            } finally {
+                setCarTypesLoading(false);
+            }
+        };
+
+        fetchCarTypes();
+    }, []);
+
+    // Fetch car brands
+    useEffect(() => {
+        const fetchCarBrands = async () => {
+            try {
+                console.log('Fetching car brands...');
+                const response = await fetch('/api/customer/car-brands');
+                const data = await response.json();
+                console.log('Car brands API response:', data);
+                setCarBrands(data.data || []);
+            } catch (error) {
+                console.error('Error fetching car brands:', error);
+                setCarBrands([]);
+            } finally {
+                setCarBrandsLoading(false);
+            }
+        };
+
+        fetchCarBrands();
+    }, []);
+
     // Debug effect for car rendering
     useEffect(() => {
         console.log('Cars state updated - loading:', carsLoading, 'cars count:', latestCars.length);
@@ -307,71 +462,112 @@ export default function Welcome() {
         return () => clearInterval(interval);
     }, [carsLoading, latestCars]);
 
-    const pricingTiers = [
+    // Map car types to display data
+    const getCarTypeDisplayData = (typeName: string) => {
+        const typeMap: { [key: string]: { image: string; subtitle: string; category: string } } = {
+            'budget': { image: '🚗', subtitle: 'Daihatsu Mira or similar', category: 'budget' },
+            'standard': { image: '🚙', subtitle: 'Toyota Corolla or similar', category: 'standard' },
+            'luxury': { image: '🏎️', subtitle: 'Mercedes Benz or similar', category: 'luxury' },
+            'suv': { image: '🚐', subtitle: 'Land Cruiser or similar', category: 'suv' },
+            'vans': { image: '🚌', subtitle: 'Toyota Coaster or similar', category: 'vans' },
+            'sedan': { image: '🚙', subtitle: 'Sedan vehicles', category: 'sedan' },
+            'hatchback': { image: '🚗', subtitle: 'Hatchback vehicles', category: 'hatchback' },
+            'convertible': { image: '🏎️', subtitle: 'Convertible vehicles', category: 'convertible' },
+            'coupe': { image: '🏎️', subtitle: 'Coupe vehicles', category: 'coupe' },
+            'truck': { image: '🚛', subtitle: 'Truck vehicles', category: 'truck' }
+        };
+
+        return typeMap[typeName.toLowerCase()] || { 
+            image: '🚗', 
+            subtitle: `${typeName} vehicles`, 
+            category: typeName.toLowerCase() 
+        };
+    };
+
+    // Map car brands to display data
+    const getCarBrandDisplayData = (brandName: string) => {
+        const brandMap: { [key: string]: { image: string; subtitle: string; category: string } } = {
+            'toyota': { image: '/images/car-brands/toyota.png', subtitle: 'Reliable & Efficient', category: 'toyota' },
+            'honda': { image: '/images/car-brands/honda.png', subtitle: 'Performance & Style', category: 'honda' },
+            'suzuki': { image: '/images/car-brands/suzuki.png', subtitle: 'Compact & Practical', category: 'suzuki' },
+            'nissan': { image: '/images/car-brands/nissan.png', subtitle: 'Innovation & Comfort', category: 'nissan' },
+            'daihatsu': { image: '/images/car-brands/daihatsu.png', subtitle: 'Small & Efficient', category: 'daihatsu' },
+            'changan': { image: '/images/car-brands/changan.png', subtitle: 'Modern & Affordable', category: 'changan' },
+            'kia': { image: '/images/car-brands/kia.png', subtitle: 'Design & Technology', category: 'kia' },
+            'hyundai': { image: '/images/car-brands/hyundai.png', subtitle: 'Quality & Value', category: 'hyundai' },
+            'chevrolet': { image: '/images/car-brands/chevrolet.png', subtitle: 'American Heritage', category: 'chevrolet' },
+            'bmw': { image: '/images/car-brands/bmw.png', subtitle: 'Luxury & Performance', category: 'bmw' },
+            'ford': { image: '/images/car-brands/ford.png', subtitle: 'Built Tough', category: 'ford' },
+            'audi': { image: '/images/car-brands/audi.png', subtitle: 'Premium & Sophisticated', category: 'audi' }
+        };
+
+        return brandMap[brandName.toLowerCase()] || { 
+            image: '🚗', 
+            subtitle: `${brandName} vehicles`, 
+            category: brandName.toLowerCase() 
+        };
+    };
+
+    const features = [
         {
-            title: "Minute Rate",
-            subtitle: "Feeling spontaneous?",
-            description: "Choose this for quick drives up to 2 hours.",
-            price: "from 0,17 €",
-            unit: "minute",
-            features: ["includes FREE 200 km", "Perfect for short trips", "No minimum time"]
+            icon: Shield,
+            title: "No Hidden Charges",
+            description: "Insurance is already included in the price. What you see online is exactly what you will be charged."
         },
         {
-            title: "Hourly Rate",
-            subtitle: "Got plans?",
-            description: "Choose this for your day trips and simply pay per kilometre.",
-            price: "from 6,99 €",
-            unit: "hour",
-            features: ["+ 0,19 €/km", "unlimited kilometres", "Flexible hourly pricing"],
-            popular: true
+            icon: Award,
+            title: "Flexible Pricing Packages",
+            description: "No one size fits all. Our packages are optimized for your needs and goals."
         },
         {
-            title: "Daily Rate",
-            subtitle: "Escapade time?",
-            description: "Choose this for multiday drives and simply pay per kilometre.",
-            price: "from 30,00 €",
-            unit: "day",
-            features: ["includes FREE 60 km", "Best for longer trips", "24-hour rental period"]
+            icon: Clock,
+            title: "24 Hours Assistance",
+            description: "We provide assistance 24 hours a day, seven days a week. You are never too far away for us."
         }
     ];
 
-    const steps = [
+    const testimonials = [
         {
-            number: "1",
-            title: "Find a rental car",
-            description: "Say goodbye to the chore of visiting car rental stations! Our rental cars are available 24/7. Reserve your car via our app, whenever you need it.",
-            icon: Car
+            name: "Ali Sangi",
+            rating: 5,
+            comment: "Booked 9 SUVs/cars from AsaanCar for two days during a wedding event. And I think hiring their services was the best decision we made."
         },
         {
-            number: "2",
-            title: "Unlock the car",
-            description: "Once you're at the car you want to rent, unlock it with a push of a button. Choose your preferred rate and start your trip!",
-            icon: Shield
+            name: "Ramsha Rasool",
+            rating: 5,
+            comment: "Great service! Extremely punctual, neat, clean and maintained car, extremely professional and well mannered staff."
         },
         {
-            number: "3",
-            title: "Drop off anywhere",
-            description: "Simply end your trip anywhere in the service area — no annoying drop off procedures, no refueling required!",
-            icon: MapPin
+            name: "Mian Amin",
+            rating: 5,
+            comment: "Excellent service provided by AsaanCar. Cars were almost new and drivers were professional in driving skills."
         }
     ];
 
     const faqItems = [
         {
-            question: 'How do I book a car?',
-            answer: 'Simply browse our selection of vehicles, choose your preferred dates, and complete the booking process with secure payment.',
+            question: 'Who can rent a car?',
+            answer: 'The car with driver can be rented by anyone above the age of 16. However, in case of self-drive, minimum age for hiring a car is 21 years and your license needs to be at least 1 year old.',
         },
         {
-            question: 'What documents do I need?',
-            answer: "You'll need a valid driver's license, proof of insurance, and a credit card for the security deposit.",
+            question: 'Can I rent a car with and without driver both?',
+            answer: 'Yes, you may book any car available on our website, with driver. However, the self-drive option is currently limited to specific vehicles.',
         },
         {
-            question: 'Can I cancel my booking?',
-            answer: 'Yes, you can cancel your booking up to 24 hours before pickup with a full refund.',
+            question: 'How can I pay the rent?',
+            answer: 'We accept cash and bank transfers at the moment.',
         },
         {
-            question: 'Do you offer insurance?',
-            answer: 'Yes, we offer comprehensive insurance options to ensure your peace of mind during your rental.',
+            question: 'Do I need to pay any security deposit?',
+            answer: 'Yes, in case of the self-drive option, a security deposit is required.',
+        },
+        {
+            question: 'What happens if an accident occurs?',
+            answer: 'In case of Self-Driver option, we cover the small damages from your security deposit. Since all our cars are insured, the bigger damages are covered by the insurance.',
+        },
+        {
+            question: 'What is your fuel policy?',
+            answer: 'Customers are responsible for paying for their own fuel consumption. Each car is provided with a level of fuel and customers have to return the vehicle with the same level of fuel.',
         },
     ];
 
@@ -383,16 +579,15 @@ export default function Welcome() {
             <Navbar auth={{ user }} />
 
             <main>
-                {/* Hero Section */}
+                {/* Hero Section with Search */}
                 <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                    <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+                    <div className="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-white">
-                                Car rental from <span className="text-[#7e246c]">30,00 €/day</span>
+                                Search A Car
                             </h1>
                             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                Car rental has never been easier. We don't do car rental stations, paperwork, or checking-in times. 
-                                When you rent a car with AsaanCar, you won't wait in queues.
+                                Find the perfect car for your journey with AsaanCar - Pakistan's trusted car rental service.
                             </p>
                         </div>
                         
@@ -418,49 +613,137 @@ export default function Welcome() {
                                     href="/signup"
                                     className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
                                 >
-                                    Join for free
+                                    Sign Up
                                 </a>
                                 <button
                                     onClick={() => navigate('/login')}
                                     className="text-sm font-semibold leading-6 text-gray-900 hover:text-[#7e246c] dark:text-white dark:hover:text-[#7e246c]"
                                 >
-                                    Log in <span aria-hidden="true">→</span>
+                                    Login <span aria-hidden="true">→</span>
                                 </button>
                             </div>
                         )}
                     </div>
                 </section>
 
-                {/* How It Works Section */}
-                <section className="bg-white py-24 dark:bg-gray-900">
+                {/* Car Categories Section */}
+                <section className="bg-white py-16 dark:bg-gray-900">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="mx-auto max-w-2xl text-center">
+                        <div className="mx-auto max-w-2xl text-center flex flex-col items-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-                                Rent a car with just an app
+                                What type of car are you looking for?
                             </h2>
-                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                With our transparent pricing, you can rent a car from just a few minutes up to 30 days. 
-                                Simply rent a car that's parked near you, and drop it off anywhere in the city when you are done.
+                            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                                Browse our diverse collection of car types to find the perfect match for your needs
                             </p>
                         </div>
-                        <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-                            <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-                                {steps.map((step) => (
-                                    <StepCard
-                                        key={step.number}
-                                        number={step.number}
-                                        title={step.title}
-                                        description={step.description}
-                                        icon={step.icon}
-                                    />
-                                ))}
-                            </dl>
+                        <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+                            {carTypesLoading ? (
+                                // Loading skeleton for car types
+                                Array.from({ length: 4 }).map((_, index) => (
+                                    <div key={index} className="animate-pulse">
+                                        <div className="h-32 rounded-lg bg-gray-200 dark:bg-gray-700 mb-4"></div>
+                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                                    </div>
+                                ))
+                            ) : carTypes.length > 0 ? (
+                                carTypes.map((type) => {
+                                    const displayData = getCarTypeDisplayData(type.name);
+                                    return (
+                                        <CarCategoryCard
+                                            key={type.id}
+                                            title={type.name.charAt(0).toUpperCase() + type.name.slice(1)}
+                                            subtitle={displayData.subtitle}
+                                            image={type.image || displayData.image}
+                                            onClick={() => navigate(`/cars?type_id=${type.id}`)}
+                                        />
+                                    );
+                                })
+                            ) : (
+                                <div className="col-span-4 text-center py-12">
+                                    <div className="text-6xl mb-4">🚗</div>
+                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No car types available</h3>
+                                    <p className="text-neutral-600 dark:text-neutral-400">Check back later for car type updates.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>
 
-                {/* Car Showcase Section */}
-                <section className="bg-neutral-50 py-24 dark:bg-gray-800">
+                {/* Car Brands Section */}
+                <section className="bg-gray-50 py-16 dark:bg-gray-800">
+                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                        <div className="mx-auto max-w-2xl text-center flex flex-col items-center">
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+                                Popular Car Brands
+                            </h2>
+                            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                                Choose from our wide selection of trusted car brands
+                            </p>
+                        </div>
+                        <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:max-w-none lg:grid-cols-4">
+                            {carBrandsLoading ? (
+                                // Loading skeleton for car brands
+                                Array.from({ length: 4 }).map((_, index) => (
+                                    <div key={index} className="animate-pulse">
+                                        <div className="h-32 rounded-lg bg-gray-200 dark:bg-gray-700 mb-4"></div>
+                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                                    </div>
+                                ))
+                            ) : carBrands.length > 0 ? (
+                                carBrands.map((brand) => {
+                                    const displayData = getCarBrandDisplayData(brand.name);
+                                    return (
+                                        <CarBrandCard
+                                            key={brand.id}
+                                            title={brand.name}
+                                            subtitle={displayData.subtitle}
+                                            image={displayData.image}
+                                            onClick={() => navigate(`/cars?brand_id=${brand.id}`)}
+                                        />
+                                    );
+                                })
+                            ) : (
+                                <div className="col-span-4 text-center py-12">
+                                    <div className="text-6xl mb-4">🚗</div>
+                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No car brands available</h3>
+                                    <p className="text-neutral-600 dark:text-neutral-400">Check back later for car brand updates.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Why Choose Us Section */}
+                <section className="bg-neutral-50 py-16 dark:bg-gray-800">
+                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                        <div className="mx-auto max-w-2xl text-center">
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+                                Why Rent A Car With AsaanCar?
+                            </h2>
+                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+                                AsaanCar is widely regarded as one of the best Car Rental Service Providers serving not only Karachi but other major cities of Pakistan as well.
+                            </p>
+                        </div>
+                        <div className="mx-auto mt-16 max-w-2xl lg:max-w-none">
+                            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                                {features.map((feature) => (
+                                    <FeatureCard
+                                        key={feature.title}
+                                        icon={feature.icon}
+                                        title={feature.title}
+                                        description={feature.description}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Latest Cars Section */}
+                <section className="bg-white py-16 dark:bg-gray-900">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
@@ -507,28 +790,21 @@ export default function Welcome() {
                     </div>
                 </section>
 
-                {/* Pricing Section */}
-                <section className="bg-white py-24 dark:bg-gray-900">
+                {/* Testimonials Section */}
+                <section className="bg-neutral-50 py-16 dark:bg-gray-800">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-                                Fuss-free pricing
+                                What Our Customers Say
                             </h2>
-                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                Transparent pricing. Fuel, parking, maintenance – it's on us! Our rates are all-inclusive and flexible to your needs.
-                            </p>
                         </div>
                         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                            {pricingTiers.map((tier, index) => (
-                                <PricingCard
-                                    key={index}
-                                    title={tier.title}
-                                    subtitle={tier.subtitle}
-                                    description={tier.description}
-                                    price={tier.price}
-                                    unit={tier.unit}
-                                    features={tier.features}
-                                    popular={tier.popular}
+                            {testimonials.map((testimonial) => (
+                                <TestimonialCard
+                                    key={testimonial.name}
+                                    name={testimonial.name}
+                                    rating={testimonial.rating}
+                                    comment={testimonial.comment}
                                 />
                             ))}
                         </div>
@@ -536,15 +812,12 @@ export default function Welcome() {
                 </section>
 
                 {/* FAQ Section */}
-                <section className="bg-neutral-50 py-24 dark:bg-gray-800">
+                <section className="bg-white py-16 dark:bg-gray-900">
                     <div className="mx-auto max-w-3xl px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-                                Questions?
+                                Frequently Asked Questions
                             </h2>
-                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                Looking for more information? We cover your most frequently asked questions.
-                            </p>
                         </div>
                         <div className="mx-auto mt-16 max-w-4xl">
                             {faqItems.map((item, index) => (

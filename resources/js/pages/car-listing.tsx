@@ -159,9 +159,12 @@ export default function CarListing() {
       .finally(() => setLoading(false));
   }, [currentPage, filters, perPageState, navigate]);
 
-  const handleSearch = useCallback(() => {
-    updateUrl(filters, 1);
-  }, [filters, updateUrl]);
+  // Handle filter changes and immediately update URL
+  const handleFilterChange = useCallback((newFilters: CarFiltersType) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page
+    updateUrl(newFilters, 1);
+  }, [updateUrl]);
 
   return (
     <>
@@ -202,10 +205,7 @@ export default function CarListing() {
         {/* Filters and Search */}
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6">
           <UniversalCarFilter
-            onSearch={(newFilters: CarFiltersType) => {
-              setFilters(newFilters);
-              handleSearch();
-            }}
+            onSearch={handleFilterChange}
             initialFilters={filters}
             loading={loading}
           />

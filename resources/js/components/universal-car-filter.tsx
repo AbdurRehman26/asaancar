@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CarFilters from './car-filters';
 
 export type CarFiltersType = {
@@ -37,6 +37,11 @@ const UniversalCarFilter: React.FC<UniversalCarFilterProps> = ({
   fullWidth = false,
 }) => {
   const [filters, setFilters] = useState<CarFiltersType>(initialFilters);
+
+  // Sync internal filters with initialFilters prop
+  useEffect(() => {
+    setFilters(initialFilters);
+  }, [initialFilters]);
 
   const handleSearch = () => {
     if (onSearch) onSearch(filters);

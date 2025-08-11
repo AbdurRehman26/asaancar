@@ -8,6 +8,7 @@ interface Car {
   id: string | number;
   name: string;
   image?: string;
+  brand?: string;
   specifications?: {
     seats?: number;
     fuelType?: string;
@@ -25,7 +26,6 @@ interface Car {
     currency?: string;
   };
   extraInfo?: string;
-  brand?: string; // Added brand to the interface
 }
 
 // Helper for feature icons
@@ -53,14 +53,36 @@ const featureLabels: Record<string, string> = {
 
 const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
   const { user } = useAuth();
-  // Features to show (customize as needed)
+
+  // Get brand image path
+  const getBrandImagePath = (brandName: string) => {
+    return `/images/car-brands/${brandName.toLowerCase()}.png`;
+  };
+
+  // Handle image error - fallback to brand image or placeholder
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.currentTarget;
+    const brandName = car.brand;
+    
+    if (brandName) {
+      const brandImagePath = getBrandImagePath(brandName);
+      // Only try brand image if we haven't already tried it
+      if (target.src !== brandImagePath) {
+        target.src = brandImagePath;
+        return;
+      }
+    }
+    
+    // Final fallback to placeholder
+    target.src = '/images/car-placeholder.jpeg';
+  };
+
+  // Get features for display
   const features = [
     { key: 'seats', value: car.specifications?.seats },
-    { key: 'fuelType', value: car.specifications?.fuelType ? car.specifications.fuelType.charAt(0).toUpperCase() + car.specifications.fuelType.slice(1) : null },
-    { key: 'transmission', value: car.specifications?.transmission ? car.specifications.transmission.charAt(0).toUpperCase() + car.specifications.transmission.slice(1) : null },
-    { key: 'type', value: car.specifications?.type ? car.specifications.type.charAt(0).toUpperCase() + car.specifications.type.slice(1) : null },
-    { key: 'gps', value: car.features?.includes('GPS') ? 'Yes' : null },
-    { key: 'airConditioning', value: car.features?.includes('Air Conditioning') ? 'Yes' : null },
+    { key: 'fuelType', value: car.specifications?.fuelType },
+    { key: 'transmission', value: car.specifications?.transmission },
+    { key: 'type', value: car.specifications?.type },
   ];
 
   return (
@@ -70,8 +92,8 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
         <img
           src={car.image || '/images/car-placeholder.jpeg'}
           alt={car.name}
-          className="object-contain h-full w-full rounded-xl"
-          onError={e => (e.currentTarget.src = '/images/car-placeholder.jpeg')}
+          className="object-contain h-full w-full rounded-xl p-2"
+          onError={handleImageError}
         />
       </Link>
       {/* Car Name & Subtitle */}

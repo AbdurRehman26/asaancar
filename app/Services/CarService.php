@@ -154,16 +154,24 @@ class CarService
      */
     private function getPrimaryImage(Car $car): ?string
     {
-        if (empty($car->image_urls)) {
-            return null;
+        // First try to get car image
+        if (!empty($car->image_urls)) {
+            if (is_array($car->image_urls)) {
+                if (isset($car->image_urls[0]) && is_string($car->image_urls[0])) {
+                    return (string)$car->image_urls[0];
+                }
+            }
+            if (is_string($car->image_urls)) {
+                return $car->image_urls;
+            }
         }
 
-        if (is_array($car->image_urls)) {
-            return isset($car->image_urls[0]) && is_string($car->image_urls[0]) ? (string)$car->image_urls[0] : null;
+        // If no car image, return brand image
+        if ($car->carBrand && $car->carBrand->name) {
+            $brandName = strtolower($car->carBrand->name);
+            return "/images/car-brands/{$brandName}.png";
         }
-        if (is_string($car->image_urls)) {
-            return $car->image_urls;
-        }
+
         return null;
     }
 
@@ -321,7 +329,7 @@ class CarService
      */
     public function getCarTypes(): array
     {
-        return \App\Models\CarType::select('id', 'name')->get()->toArray();
+        return \App\Models\CarType::select('id', 'name', 'image')->get()->toArray();
     }
 
     /**

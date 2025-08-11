@@ -196,7 +196,7 @@ export default function CarDetailWithOfferPage() {
                 <img
                   src={car.image_urls?.[0] || car.image || '/images/car-placeholder.jpeg'}
                   alt={car.name}
-                  className="h-48 object-contain rounded-xl bg-gray-50 dark:bg-neutral-800"
+                  className="h-48 object-contain rounded-xl bg-gray-50 p-4 dark:bg-neutral-800"
                 />
               </div>
 

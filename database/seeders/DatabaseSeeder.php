@@ -36,7 +36,6 @@ class DatabaseSeeder extends Seeder
 
         // 3. Seed car brands, types, engines
         $carBrands = \App\Models\CarBrand::factory(8)->create();
-        $carTypes = \App\Models\CarType::factory(6)->create();
         $carEngines = \App\Models\CarEngine::factory(5)->create();
 
         // 4. Seed stores
@@ -59,13 +58,21 @@ class DatabaseSeeder extends Seeder
             $user->assignRole('admin');
         }
 
+        // 8. Optionally seed car offers, store offers, etc.
+        $this->call([
+            CarTypeSeeder::class,
+            CarOfferSeeder::class,
+            StoreOfferSeeder::class,
+            CitySeeder::class,
+        ]);
+
         // 6. Seed cars (linked to stores, brands, types, engines)
         $cars = collect();
         foreach ($stores as $store) {
-            $cars = $cars->merge(\App\Models\Car::factory(8)->make()->each(function($car) use ($store, $carBrands, $carTypes, $carEngines) {
+            $cars = $cars->merge(\App\Models\Car::factory(8)->make()->each(function($car) use ($store, $carBrands, $carEngines) {
                 $car->store_id = $store->id;
                 $car->car_brand_id = $carBrands->random()->id;
-                $car->car_type_id = $carTypes->random()->id;
+                $car->car_type_id = \App\Models\CarType::inRandomOrder()->first()->id;
                 $car->car_engine_id = $carEngines->random()->id;
                 $car->save();
             }));
@@ -81,12 +88,5 @@ class DatabaseSeeder extends Seeder
                 $booking->save();
             });
         }
-
-        // 8. Optionally seed car offers, store offers, etc.
-        $this->call([
-            CarOfferSeeder::class,
-            StoreOfferSeeder::class,
-            CitySeeder::class,
-        ]);
     }
 }

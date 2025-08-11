@@ -16,9 +16,10 @@ class CarTypeFactory extends Factory
      */
     public function definition(): array
     {
-        $types = ['sedan', 'suv', 'hatchback', 'convertible', 'truck', 'coupe'];
+        $types = ['sedan', 'suv', 'hatchback', 'hybrid'];
         return [
             'name' => $this->faker->unique()->randomElement($types),
+            'image' => '/images/car-types/' . $this->faker->randomElement($types) . '-car.jpg',
         ];
     }
 }

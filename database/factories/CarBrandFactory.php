@@ -9,14 +9,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CarBrandFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
-        $brands = ['Toyota', 'Honda', 'Ford', 'BMW', 'Audi', 'Kia', 'Hyundai', 'Chevrolet'];
+        $brands = ['Toyota', 'Honda', 'Suzuki', 'Nissan', 'Daihatsu', 'Changan', 'Kia', 'Hyundai'];
         return [
             'name' => $this->faker->unique()->randomElement($brands),
         ];
