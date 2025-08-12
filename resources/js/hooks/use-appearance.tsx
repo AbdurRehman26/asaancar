@@ -50,7 +50,8 @@ export function useAppearance() {
     const [appearance, setAppearance] = useState<Appearance>(() => {
         // Initialize with the saved appearance or default to dark
         if (typeof window !== 'undefined') {
-            return (localStorage.getItem('appearance') as Appearance) || 'dark';
+            const saved = localStorage.getItem('appearance') as Appearance;
+            return saved || 'dark';
         }
         return 'dark';
     });

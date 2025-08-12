@@ -12,6 +12,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CarResource;
 use App\Services\CarService;
+use App\Services\S3Service;
 use App\Models\Car;
 use App\Models\CarOffer;
 use App\Http\Requests\Car\CreateCarRequest;
@@ -28,10 +29,12 @@ use Illuminate\Http\Request;
 class CarController extends Controller
 {
     protected $carService;
+    protected $s3Service;
 
-    public function __construct(CarService $carService)
+    public function __construct(CarService $carService, S3Service $s3Service)
     {
         $this->carService = $carService;
+        $this->s3Service = $s3Service;
     }
 
     /**
@@ -89,6 +92,12 @@ class CarController extends Controller
     public function store(CreateCarRequest $request)
     {
         $validated = $request->validated();
+        
+        // Handle image URLs (images are now uploaded separately via ImageUpload API)
+        if ($request->has('image_urls') && is_array($request->input('image_urls'))) {
+            $validated['image_urls'] = $request->input('image_urls');
+        }
+        
         $car = Car::create($validated);
         return new CarResource($car->load(['carBrand', 'carType', 'carEngine', 'store']));
     }
@@ -220,6 +229,22 @@ class CarController extends Controller
     {
         $car = Car::findOrFail($id);
         $validated = $request->validated();
+        
+        // Handle image uploads to S3
+        if ($request->hasFile('image_urls')) {
+            // Delete old images from S3 if they exist
+            if ($car->image_urls && is_array($car->image_urls)) {
+                $this->s3Service->deleteMultipleFiles($car->image_urls);
+            }
+            
+            // Upload new images
+            $uploadedUrls = $this->s3Service->uploadMultipleFiles(
+                $request->file('image_urls'),
+                'car-images'
+            );
+            $validated['image_urls'] = $uploadedUrls;
+        }
+        
         $car->update($validated);
         return new CarResource($car->load(['carBrand', 'carType', 'carEngine', 'store']));
     }
@@ -295,6 +320,12 @@ class CarController extends Controller
     public function destroy(string $id)
     {
         $car = Car::findOrFail($id);
+        
+        // Delete images from S3 if they exist
+        if ($car->image_urls && is_array($car->image_urls)) {
+            $this->s3Service->deleteMultipleFiles($car->image_urls);
+        }
+        
         $car->delete();
 
         return response()->json(['message' => 'Car deleted successfully']);

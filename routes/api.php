@@ -19,6 +19,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Customer\CityController;
 use App\Http\Controllers\Api\ContactMessageController;
+use App\Http\Controllers\Api\ImageUploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,16 @@ Route::post('/reset-password', [NewPasswordController::class, 'store']);
 Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store']);
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 Route::post('/contact', [ContactMessageController::class, 'store']);
+
+// Image Upload API Routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/upload/image', [ImageUploadController::class, 'uploadSingle']);
+    Route::post('/upload/images', [ImageUploadController::class, 'uploadMultiple']);
+    Route::delete('/upload/image', [ImageUploadController::class, 'delete']);
+});
+
+// Public image serving route (no authentication required)
+Route::get('/images/serve', [ImageUploadController::class, 'serveImage']);
 
 // Email verification for API
 Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])

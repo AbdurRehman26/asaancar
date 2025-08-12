@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
-import ImagesUploading, { ImageListType } from 'react-images-uploading';
+import ImageUpload from '@/components/ImageUpload';
+
+interface UploadedImage {
+  url: string;
+  filename: string;
+  size: number;
+  mime_type: string;
+}
 
 export default function CreateCarPage() {
   const navigate = useNavigate();
@@ -33,8 +40,7 @@ export default function CreateCarPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   // Image upload state
-  const [images, setImages] = useState<ImageListType>([]);
-  const maxNumber = 5;
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -64,8 +70,8 @@ export default function CreateCarPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const onChangeImage = (imageList: ImageListType) => {
-    setImages(imageList);
+  const handleImagesChange = (images: UploadedImage[]) => {
+    setUploadedImages(images);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,10 +83,8 @@ export default function CreateCarPage() {
       Object.entries(form).forEach(([key, value]) => {
         body.append(key, value);
       });
-      images.forEach((img) => {
-        if (img.file) {
-          body.append('image_urls[]', img.file);
-        }
+      uploadedImages.forEach(img => {
+        body.append('image_urls[]', img.url);
       });
       body.append('with_driver_rate', form.with_driver_rate);
       body.append('without_driver_rate', form.without_driver_rate);
@@ -283,59 +287,12 @@ export default function CreateCarPage() {
             </div>
             <div className="md:col-span-2">
               <label className="block mb-1 font-medium">Car Images</label>
-              <ImagesUploading
-                value={images}
-                onChange={onChangeImage}
-                maxNumber={maxNumber}
-                dataURLKey="data_url"
-                acceptType={['jpg', 'jpeg', 'png', 'webp']}
-                multiple
-              >
-                {({
-                  imageList,
-                  onImageUpload,
-                  onImageRemoveAll,
-                  onImageRemove,
-                  isDragging,
-                  dragProps
-                }) => (
-                  <div className="upload__image-wrapper">
-                    <button
-                      type="button"
-                      style={isDragging ? { color: '#7e246c' } : undefined}
-                      onClick={onImageUpload}
-                      {...dragProps}
-                      className="bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-700 rounded px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
-                    >
-                      Click or Drag here to upload
-                    </button>
-                    &nbsp;
-                    {imageList.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={onImageRemoveAll}
-                        className="ml-2 text-red-600 hover:underline"
-                      >
-                        Remove All
-                      </button>
-                    )}
-                    <div className="flex gap-4 mt-4">
-                      {imageList.map((image, index) => (
-                        <div key={index} className="relative">
-                          <img src={image.data_url} alt="Car Preview" className="h-20 rounded border object-contain bg-gray-50 dark:bg-gray-800" />
-                          <button
-                            type="button"
-                            onClick={() => onImageRemove(index)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-md w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 cursor-pointer"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </ImagesUploading>
+              <ImageUpload
+                onImagesChange={handleImagesChange}
+                maxImages={5}
+                directory="car-images"
+                disabled={loading}
+              />
             </div>
             {/* Rate Details Section */}
             <div className="md:col-span-2">

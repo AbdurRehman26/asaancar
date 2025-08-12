@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '@/lib/utils';
+import ImageUpload from '@/components/ImageUpload';
+
+interface UploadedImage {
+  url: string;
+  filename: string;
+  size: number;
+  mime_type: string;
+}
 
 export default function CreateStoreForm() {
   const [name, setName] = useState('');
@@ -13,7 +21,7 @@ export default function CreateStoreForm() {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [description, setDescription] = useState('');
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,11 +31,8 @@ export default function CreateStoreForm() {
       .catch(() => setCities([]));
   }, []);
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setLogoPreview(URL.createObjectURL(file));
-    }
+  const handleImagesChange = (images: UploadedImage[]) => {
+    setUploadedImages(images);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,17 +40,22 @@ export default function CreateStoreForm() {
     setError(null);
     setLoading(true);
     try {
-      // For now, logo upload is UI only. To support backend upload, use FormData.
+      const formData = new FormData();
+      formData.append('name', name);
+      if (storeUsername) formData.append('store_username', storeUsername);
+      if (cityId) formData.append('city_id', cityId);
+      if (description) formData.append('description', description);
+      if (phone) formData.append('phone', phone);
+      if (address) formData.append('address', address);
+      
+      // Add logo image if uploaded
+      if (uploadedImages.length > 0) {
+        formData.append('logo_url', uploadedImages[0].url);
+      }
+
       const res = await apiFetch('/api/customer/stores', {
         method: 'POST',
-        body: JSON.stringify({
-          name,
-          ...(storeUsername ? { store_username: storeUsername } : {}),
-          city_id: cityId ? Number(cityId) : undefined,
-          description,
-          ...(phone ? { phone } : {}),
-          ...(address ? { address } : {}),
-        }),
+        body: formData,
       });
       if (!res.ok) {
         const err = await res.json();
@@ -113,19 +123,12 @@ export default function CreateStoreForm() {
           </div>
           <div>
             <label className="block mb-1 font-medium">Logo</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoChange}
-              className="w-full border rounded px-3 py-2"
+            <ImageUpload
+              onImagesChange={handleImagesChange}
+              maxImages={1}
+              directory="store-logos"
+              disabled={loading}
             />
-            {logoPreview && (
-              <img
-                src={logoPreview}
-                alt="Logo Preview"
-                className="mt-2 h-20 rounded border object-contain bg-gray-50 dark:bg-gray-800"
-              />
-            )}
           </div>
           <div>
             <label className="block mb-1 font-medium">Contact Phone</label>

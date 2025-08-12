@@ -55,7 +55,9 @@ class CreateCarRequest extends FormRequest
             'fuel_type' => 'required|in:petrol,diesel,electric,hybrid',
             'description' => 'nullable|string|max:1000',
             'image_urls' => 'nullable|array',
-            'image_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_urls.*' => 'url',
+            'with_driver_rate' => 'nullable|numeric|min:0',
+            'without_driver_rate' => 'nullable|numeric|min:0',
         ];
     }
 

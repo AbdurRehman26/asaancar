@@ -146,6 +146,7 @@ class CarResource extends Resource
                             ->label('Car Images')
                             ->multiple()
                             ->image()
+                            ->disk('s3')
                             ->directory('car-images'),
                     ])
                     ->columns(1),
