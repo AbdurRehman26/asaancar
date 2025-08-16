@@ -34,7 +34,10 @@ class VerifyEmailController extends Controller
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
-            return response()->json(['message' => 'Email verified successfully.']);
+            return response()->json([
+                'message' => 'Email verified successfully.',
+                'redirect' => '/login?verified=1'
+            ]);
         }
 
         return response()->json(['message' => 'Unable to verify email.'], 400);

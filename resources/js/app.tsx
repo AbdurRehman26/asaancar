@@ -25,6 +25,7 @@ import { configureEcho } from '@laravel/echo-react';
 import About from './pages/about';
 import Contact from './pages/contact';
 import ResetPassword from './pages/auth/reset-password';
+import EmailVerificationSuccess from './pages/email-verification-success';
 
 configureEcho({
     broadcaster: 'pusher',
@@ -107,6 +108,7 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/reset-password/:token" element={<ResetPasswordWrapper />} />
+          <Route path="/api/email/verify/:id/:hash" element={<EmailVerificationSuccess />} />
           {/* Add more routes as needed */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

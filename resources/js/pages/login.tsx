@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import Navbar from '../components/navbar';
 import { Eye, EyeOff } from 'lucide-react';
@@ -15,8 +15,17 @@ export default function LoginPage() {
   const [forgotSuccess, setForgotSuccess] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login, error: authError } = useAuth();
+
+  // Check if user just verified their email
+  useEffect(() => {
+    if (searchParams.get('verified') === '1') {
+      // Show success message for email verification
+      setError(null);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +79,19 @@ export default function LoginPage() {
           </div>
           <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Welcome Back</h1>
           <p className="text-gray-500 dark:text-gray-300 mb-6">Log in to your account</p>
+          
+          {searchParams.get('verified') === '1' && (
+            <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-green-700 dark:text-green-300 text-sm font-medium">
+                  Email verified successfully! You can now log in to your account.
+                </span>
+              </div>
+            </div>
+          )}
           {!showForgot ? (
             <>
               <form onSubmit={handleSubmit} className="space-y-4">
