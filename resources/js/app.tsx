@@ -108,6 +108,7 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/reset-password/:token" element={<ResetPasswordWrapper />} />
+          <Route path="/email/verify/:id/:hash" element={<EmailVerificationSuccess />} />
           <Route path="/api/email/verify/:id/:hash" element={<EmailVerificationSuccess />} />
           {/* Add more routes as needed */}
           <Route path="*" element={<Navigate to="/" replace />} />

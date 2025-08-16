@@ -11,6 +11,7 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\CustomEmailVerificationNotification;
 
 Route::get('/{any}', function () {
     return view('app');
@@ -90,5 +91,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function messages()
     {
         return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomEmailVerificationNotification);
     }
 }
