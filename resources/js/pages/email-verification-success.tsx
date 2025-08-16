@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, LoaderCircle } from 'lucide-react';
 
 export default function EmailVerificationSuccess() {
   const navigate = useNavigate();
+  const { id, hash } = useParams();
   const [countdown, setCountdown] = useState(5);
   const [verificationStatus, setVerificationStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
   const [errorMessage, setErrorMessage] = useState('');
@@ -11,11 +12,16 @@ export default function EmailVerificationSuccess() {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        // Get the verification URL from the current URL
-        const currentUrl = window.location.href;
+        // Get the query parameters from the current URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const expires = urlParams.get('expires');
+        const signature = urlParams.get('signature');
         
-        // Make the verification request
-        const response = await fetch(currentUrl, {
+        // Construct the API URL
+        const apiUrl = `/api/email/verify/${id}/${hash}?expires=${expires}&signature=${signature}`;
+        
+        // Make the verification request to the API
+        const response = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -41,14 +47,14 @@ export default function EmailVerificationSuccess() {
           setVerificationStatus('error');
           setErrorMessage(data.message || 'Verification failed');
         }
-              } catch {
-          setVerificationStatus('error');
-          setErrorMessage('Network error occurred');
-        }
+      } catch {
+        setVerificationStatus('error');
+        setErrorMessage('Network error occurred');
+      }
     };
 
     verifyEmail();
-  }, [navigate]);
+  }, [navigate, id, hash]);
 
   const handleManualRedirect = () => {
     navigate('/login?verified=1');
