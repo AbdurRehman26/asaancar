@@ -57,7 +57,7 @@ Route::get('/images/serve', [ImageUploadController::class, 'serveImage']);
 
 // Email verification for API
 Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
-    ->middleware(['auth:sanctum', 'signed'])
+    ->middleware(['signed'])
     ->name('verification.verify');
 
 // Public car routes (no authentication required)
