@@ -212,6 +212,14 @@ export default function CarListing() {
           {/* Top Pagination */}
           {totalPages > 1 && (
             <div className="w-full overflow-x-auto mb-6">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Page {currentPage} of {totalPages}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Showing {cars.length} cars
+                </div>
+              </div>
               <ReactPaginate
                 key={`top-pagination-${totalPages}-${currentPage}`}
                 breakLabel={"..."}
@@ -262,6 +270,14 @@ export default function CarListing() {
                 {/* Bottom Pagination */}
                 {totalPages > 1 && (
                   <div className="w-full overflow-x-auto mt-6">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Page {currentPage} of {totalPages}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Showing {cars.length} cars
+                      </div>
+                    </div>
                     <ReactPaginate
                       key={`bottom-pagination-${totalPages}-${currentPage}`}
                       breakLabel={"..."}
