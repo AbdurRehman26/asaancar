@@ -69,6 +69,7 @@ export default function SignupPage() {
       {/* Left: Signup Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 bg-white dark:bg-gray-900 md:pt-0 pt-16">
         <div className="max-w-md w-full mx-auto">
+
           <div className="mt-15">
           <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Get Started with AsaanCar</h1>
           <p className="text-gray-500 dark:text-gray-300 mb-6">Create your account</p>

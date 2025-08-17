@@ -9,7 +9,7 @@ export default function About() {
     <>
       <title>About Us - AsaanCar</title>
       <Navbar auth={{ user }} />
-      <main className="bg-neutral-50 dark:bg-gray-900 min-h-screen">
+      <main className="bg-neutral-50 dark:bg-gray-900 min-h-screen pt-20">
         <section className="max-w-3xl mx-auto px-6 py-20">
           <h1 className="text-4xl font-bold text-[#7e246c] mb-6">About Us</h1>
           <p className="text-lg text-gray-700 dark:text-gray-300 mb-10">

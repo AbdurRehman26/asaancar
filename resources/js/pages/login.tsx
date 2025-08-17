@@ -70,13 +70,7 @@ export default function LoginPage() {
       {/* Left: Login or Forgot Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 bg-white dark:bg-gray-900 md:pt-0 pt-16">
         <div className="max-w-md w-full mx-auto">
-          {/* Logo and Headline */}
-          <div className="flex items-center gap-2 mb-6">
-            <svg className="h-8 w-8 text-[#7e246c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <circle cx="12" cy="12" r="10" strokeWidth="2" />
-            </svg>
-            <span className="text-2xl font-bold text-[#7e246c] dark:text-white">AsaanCar</span>
-          </div>
+
           <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Welcome Back</h1>
           <p className="text-gray-500 dark:text-gray-300 mb-6">Log in to your account</p>
           

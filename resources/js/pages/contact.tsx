@@ -58,7 +58,7 @@ export default function Contact() {
     <>
       <title>Contact Us - AsaanCar</title>
       <Navbar auth={{ user }} />
-      <main className="bg-neutral-50 dark:bg-gray-900 min-h-screen">
+      <main className="bg-neutral-50 dark:bg-gray-900 min-h-screen pt-20">
         <section className="max-w-lg mx-auto px-6 py-20">
           <h1 className="text-4xl font-bold text-[#7e246c] mb-6">Contact Us</h1>
           <p className="mb-8 text-gray-700 dark:text-gray-300">Have a question or need help? Fill out the form below and our team will get back to you soon.</p>
