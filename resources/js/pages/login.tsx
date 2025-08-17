@@ -165,16 +165,17 @@ export default function LoginPage() {
           )}
         </div>
       </div>
-      {/* Right: Marketing/Visual Content */}
-      <div className="hidden md:flex flex-1 flex-col justify-center items-center bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-12 relative">
-        <div className="max-w-md w-full">
-          <h2 className="text-3xl font-bold mb-4">Empower Your Car Rental Experience</h2>
-          <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">From booking to management, AsaanCar gives you everything you need in one intuitive platform.</p>
-          <div className="rounded-2xl overflow-hidden shadow-lg border border-neutral-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800">
-            {/* Placeholder for app screenshot or illustration */}
-            <div className="h-64 flex items-center justify-center">
-              <span className="text-gray-500 dark:text-gray-400">[ App Screenshot / Illustration ]</span>
-            </div>
+      {/* Right: Car Image */}
+      <div className="hidden md:flex flex-1 flex-col justify-center items-center bg-white dark:bg-gray-900 p-12 relative">
+        <div className="max-w-lg w-full text-center">
+          <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Welcome to AsaanCar</h2>
+          <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">Your trusted partner for seamless car rental experiences</p>
+          <div className="rounded-2xl overflow-hidden shadow-lg">
+            <img 
+              src="/images/car-2.png" 
+              alt="Car rental illustration" 
+              className="w-full h-auto object-contain"
+            />
           </div>
         </div>
       </div>

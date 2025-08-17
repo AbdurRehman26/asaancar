@@ -54,27 +54,27 @@ const FAQItem = ({
 );
 
 // Car Category Card Component
-const CarCategoryCard = ({ 
-    title, 
-    subtitle, 
-    image, 
-    onClick 
-}: { 
-    title: string; 
-    subtitle: string; 
-    image: string; 
-    onClick: () => void; 
+const CarCategoryCard = ({
+    title,
+    subtitle,
+    image,
+    onClick
+}: {
+    title: string;
+    subtitle: string;
+    image: string;
+    onClick: () => void;
 }) => (
-    <div 
+    <div
         onClick={onClick}
         className="group cursor-pointer rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg hover:border-[#7e246c] dark:border-neutral-800 dark:bg-gray-800/80"
     >
         <div className="mb-4 h-32 overflow-hidden rounded-lg relative">
             <div className="flex h-full items-center justify-center">
                 {image.startsWith('/') ? (
-                    <img 
-                        src={image} 
-                        alt={title} 
+                    <img
+                        src={image}
+                        alt={title}
                         className="h-full w-full object-contain p-2"
                         onError={(e) => {
                             // Fallback to emoji if image fails to load
@@ -106,27 +106,27 @@ const CarCategoryCard = ({
 );
 
 // Car Brand Card Component
-const CarBrandCard = ({ 
-    title, 
-    subtitle, 
-    image, 
-    onClick 
-}: { 
-    title: string; 
-    subtitle: string; 
-    image: string; 
-    onClick: () => void; 
+const CarBrandCard = ({
+    title,
+    subtitle,
+    image,
+    onClick
+}: {
+    title: string;
+    subtitle: string;
+    image: string;
+    onClick: () => void;
 }) => (
-    <div 
+    <div
         onClick={onClick}
         className="group cursor-pointer rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg hover:border-[#7e246c] dark:border-neutral-800 dark:bg-gray-800/80"
     >
         <div className="mb-4 h-32 overflow-hidden rounded-lg relative">
             <div className="flex h-full items-center justify-center">
                 {image.startsWith('/') ? (
-                    <img 
-                        src={image} 
-                        alt={title} 
+                    <img
+                        src={image}
+                        alt={title}
                         className="h-full w-full object-contain p-2"
                         onError={(e) => {
                             // Fallback to emoji if image fails to load
@@ -158,14 +158,14 @@ const CarBrandCard = ({
 );
 
 // Feature Card Component
-const FeatureCard = ({ 
-    icon: Icon, 
-    title, 
-    description 
-}: { 
-    icon: React.ElementType; 
-    title: string; 
-    description: string; 
+const FeatureCard = ({
+    icon: Icon,
+    title,
+    description
+}: {
+    icon: React.ElementType;
+    title: string;
+    description: string;
 }) => (
     <div className="flex items-start space-x-4">
         <div className="flex-shrink-0">
@@ -181,21 +181,21 @@ const FeatureCard = ({
 );
 
 // Testimonial Card Component
-const TestimonialCard = ({ 
-    name, 
-    rating, 
-    comment 
-}: { 
-    name: string; 
-    rating: number; 
-    comment: string; 
+const TestimonialCard = ({
+    name,
+    rating,
+    comment
+}: {
+    name: string;
+    rating: number;
+    comment: string;
 }) => (
     <div className="bg-white dark:bg-gray-800/80 rounded-lg p-6 shadow-sm border border-neutral-200 dark:border-neutral-800">
         <div className="flex items-center mb-4">
             {Array.from({ length: 5 }).map((_, i) => (
-                <Star 
-                    key={i} 
-                    className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                <Star
+                    key={i}
+                    className={`h-4 w-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
                 />
             ))}
         </div>
@@ -284,20 +284,20 @@ interface CarBrand {
     updated_at: string;
 }
 
-const CarCard = ({ 
-    car 
-}: { 
-    car: CarData; 
+const CarCard = ({
+    car
+}: {
+    car: CarData;
 }) => {
     // Get the primary image (first image from images array or fallback to image field)
     const primaryImage = car.images && car.images.length > 0 ? car.images[0] : car.image;
-    
+
     // Get pricing with fallbacks
     const dailyPrice = car.price?.perDay?.withoutDriver || car.withoutDriver || 150;
     const hourlyPrice = car.price?.perHour?.withoutDriver || Math.round((dailyPrice / 24) * 10) / 10;
     const minutePrice = car.price?.perMinute?.withoutDriver || Math.round((dailyPrice / 24 / 60) * 100) / 100;
     const currency = car.price?.currency || car.currency || 'PKR';
-    
+
     // Get brand image path
     const getBrandImagePath = (brandName: string) => {
         return `/images/car-brands/${brandName.toLowerCase()}.png`;
@@ -307,7 +307,7 @@ const CarCard = ({
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         const target = e.target as HTMLImageElement;
         const brandName = car.brand;
-        
+
         if (brandName) {
             const brandImagePath = getBrandImagePath(brandName);
             // Only try brand image if we haven't already tried it
@@ -316,7 +316,7 @@ const CarCard = ({
                 return;
             }
         }
-        
+
         // Final fallback to emoji
         target.style.display = 'none';
         const fallback = target.parentElement?.querySelector('.fallback-emoji');
@@ -324,15 +324,15 @@ const CarCard = ({
             fallback.classList.remove('hidden');
         }
     };
-    
+
     return (
         <div className="group rounded-xl border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg dark:border-neutral-800 dark:bg-gray-800/80">
             <div className="mb-4 h-48 overflow-hidden rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
                 <div className="flex h-full items-center justify-center p-4">
                     {primaryImage ? (
-                        <img 
-                            src={primaryImage} 
-                            alt={car.name} 
+                        <img
+                            src={primaryImage}
+                            alt={car.name}
                             className="h-full w-full object-contain"
                             onError={handleImageError}
                         />
@@ -361,7 +361,7 @@ const CarCard = ({
                 <div className="text-xs text-neutral-500">
                     {car.specifications?.seats || 5} seats • {car.specifications?.transmission || 'Automatic'} • {car.specifications?.fuelType || 'Gasoline'}
                 </div>
-                <button 
+                <button
                     onClick={() => window.location.href = `/car-detail/${car.id}`}
                     className="rounded-lg bg-[#7e246c] px-4 py-2 text-sm font-medium text-white hover:bg-[#6a1f5c] transition-colors"
                 >
@@ -458,7 +458,7 @@ export default function Welcome() {
         const interval = setInterval(() => {
             console.log('Current cars state - loading:', carsLoading, 'count:', latestCars.length);
         }, 2000);
-        
+
         return () => clearInterval(interval);
     }, [carsLoading, latestCars]);
 
@@ -477,10 +477,10 @@ export default function Welcome() {
             'truck': { image: '🚛', subtitle: 'Truck vehicles', category: 'truck' }
         };
 
-        return typeMap[typeName.toLowerCase()] || { 
-            image: '🚗', 
-            subtitle: `${typeName} vehicles`, 
-            category: typeName.toLowerCase() 
+        return typeMap[typeName.toLowerCase()] || {
+            image: '🚗',
+            subtitle: `${typeName} vehicles`,
+            category: typeName.toLowerCase()
         };
     };
 
@@ -501,10 +501,10 @@ export default function Welcome() {
             'audi': { image: '/images/car-brands/audi.png', subtitle: 'Premium & Sophisticated', category: 'audi' }
         };
 
-        return brandMap[brandName.toLowerCase()] || { 
-            image: '🚗', 
-            subtitle: `${brandName} vehicles`, 
-            category: brandName.toLowerCase() 
+        return brandMap[brandName.toLowerCase()] || {
+            image: '🚗',
+            subtitle: `${brandName} vehicles`,
+            category: brandName.toLowerCase()
         };
     };
 
@@ -581,16 +581,16 @@ export default function Welcome() {
             <main>
                 {/* Hero Section with Search */}
                 <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                    <div className="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
+                    <div className="mx-auto max-w-7xl px-6 py-18 sm:py-24 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
-                            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-white">
+                            <h1 className="text-4xl font-bold mt-10 tracking-tight text-gray-900 sm:text-6xl dark:text-white">
                                 Search A Car
                             </h1>
                             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
                                 Find the perfect car for your journey with AsaanCar - Pakistan's trusted car rental service.
                             </p>
                         </div>
-                        
+
                         {/* Search Filter - Full Screen */}
                         <div className="mt-10 w-full max-w-none">
                             <UniversalCarFilter

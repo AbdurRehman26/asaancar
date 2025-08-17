@@ -70,12 +70,9 @@ export default function SignupPage() {
       <div className="flex-1 flex flex-col justify-center px-6 py-12 bg-white dark:bg-gray-900 md:pt-0 pt-16">
         <div className="max-w-md w-full mx-auto">
 
-          <div className="mt-15">
-          <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Get Started with AsaanCar</h1>
+          <div className="mt-24">
           <p className="text-gray-500 dark:text-gray-300 mb-6">Create your account</p>
           {/* Step Indicator */}
-          <div className="mb-6 text-sm text-[#7e246c] font-semibold">Step 1 of 1</div>
-          {/* Section Title */}
           <div className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Account Information</div>
           {error && <div className="mb-4 text-red-600 text-center">{error}</div>}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -156,16 +153,17 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
-      {/* Right: Marketing/Visual Content */}
-      <div className="hidden md:flex flex-1 flex-col justify-center items-center bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-12 relative">
-        <div className="max-w-md w-full">
-          <h2 className="text-3xl font-bold mb-4">Empower Your Car Rental Experience</h2>
-          <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">From booking to management, AsaanCar gives you everything you need in one intuitive platform.</p>
-          <div className="rounded-2xl overflow-hidden shadow-lg border border-neutral-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800">
-            {/* Placeholder for app screenshot or illustration */}
-            <div className="h-64 flex items-center justify-center">
-              <span className="text-gray-500 dark:text-gray-400">[ App Screenshot / Illustration ]</span>
-            </div>
+      {/* Right: Car Image */}
+      <div className="hidden md:flex flex-1 flex-col justify-center items-center bg-white dark:bg-gray-900 p-12 relative">
+        <div className="max-w-lg w-full text-center">
+          <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Join AsaanCar Today</h2>
+          <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">Start your journey with the best car rental platform</p>
+          <div className="rounded-2xl overflow-hidden shadow-lg">
+            <img 
+              src="/images/car-2.png" 
+              alt="Car rental illustration" 
+              className="w-full h-auto object-contain"
+            />
           </div>
         </div>
       </div>
