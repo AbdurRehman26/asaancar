@@ -70,6 +70,10 @@ Route::prefix('cars')->group(function () {
     Route::get('/filters', [CarController::class, 'getFilters']);
 });
 
+// Public filter options (no authentication required) - for customer frontend
+Route::get('/car-brands', [CarBrandController::class, 'index']);
+Route::get('/car-types', [CarTypeController::class, 'index']);
+
 // Public guest booking endpoint
 Route::post('/guest-booking', [BookingController::class, 'guestBooking']);
 

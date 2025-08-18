@@ -51,7 +51,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await fetch('/api/customer/car-brands');
+        const response = await fetch('/api/car-brands');
         const data = await response.json();
         setBrands(data.data || []);
       } catch (error) {
@@ -69,7 +69,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
   useEffect(() => {
     const fetchCarTypes = async () => {
       try {
-        const response = await fetch('/api/customer/car-types');
+        const response = await fetch('/api/car-types');
         const data = await response.json();
         setCarTypes(data.data || []);
       } catch (error) {

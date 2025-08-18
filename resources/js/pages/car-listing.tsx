@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Car } from 'lucide-react';
 import CarCard from '../components/car-card';
-import UniversalCarFilter, { CarFiltersType } from '../components/universal-car-filter';
+import UniversalCarFilter from '../components/universal-car-filter';
 import Navbar from '../components/navbar';
 import { apiFetch } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -46,7 +46,6 @@ function useResponsivePagination() {
 export default function CarListing() {
   const { user } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   // Helper to parse query params
   type ListingFilters = {
     brand_id: string;
@@ -98,76 +97,44 @@ export default function CarListing() {
     setFilters(getFiltersFromQuery(location.search));
   }, [location.search, getFiltersFromQuery]);
 
-  // Update URL when filters or page change
-  const updateUrl = useCallback((newFilters: typeof filters, page = currentPage) => {
-    const urlParams = new URLSearchParams();
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value) urlParams.set(key, value);
-    });
-    urlParams.set('page', String(page));
-    navigate({ search: urlParams.toString() }, { replace: true });
-  }, [currentPage, navigate]);
-
-  // On initial mount, fetch with filters from URL
+  // Fetch cars on component mount
   useEffect(() => {
-    setLoading(true);
-    // Get page from URL or default to 1
-    const urlParams = new URLSearchParams(location.search);
-    const pageFromUrl = parseInt(urlParams.get('page') || '1');
-    setCurrentPage(pageFromUrl);
+    const fetchCars = async () => {
+      setLoading(true);
+      try {
+        const initialParams = new URLSearchParams();
+        initialParams.append('per_page', perPageState.toString());
+        initialParams.append('page', currentPage.toString());
+        
+        // Add filters to params
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value) initialParams.append(key, value);
+        });
 
-    const initialParams = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) initialParams.append(key, value);
-    });
-    initialParams.append('per_page', perPageState.toString());
-    initialParams.append('page', pageFromUrl.toString());
-    apiFetch(`/api/customer/cars?${initialParams.toString()}`)
-      .then(async res => {
-        const data = await res.json();
-        setCars(data.data);
-        setTotalPages(data.last_page);
-        setPerPageState(data.per_page);
-      })
-      .finally(() => setLoading(false));
-  }, [location.search, perPageState, filters]);
+        const response = await apiFetch(`/api/cars?${initialParams.toString()}`);
+        if (response.ok) {
+          const data = await response.json();
+          setCars(data.data || []);
+          setTotalPages(data.last_page || 1);
+          setPerPageState(data.per_page || 9);
+        } else {
+          console.error('Failed to fetch cars');
+        }
+      } catch (error) {
+        console.error('Error fetching cars:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // When page changes, update URL and fetch
-  useEffect(() => {
-    // Skip the initial load since it's handled by the first useEffect
-    if (currentPage === 1) return;
+    fetchCars();
+  }, [filters, currentPage, perPageState]);
 
-    // Update URL without triggering the updateUrl dependency
-    const urlParams = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) urlParams.set(key, value);
-    });
-    urlParams.set('page', String(currentPage));
-    navigate({ search: urlParams.toString() }, { replace: true });
-
-    setLoading(true);
-    const apiParams = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) apiParams.append(key, value);
-    });
-    apiParams.append('per_page', perPageState.toString());
-    apiParams.append('page', currentPage.toString());
-    apiFetch(`/api/customer/cars?${apiParams.toString()}`)
-      .then(async res => {
-        const data = await res.json();
-        setCars(data.data);
-        setTotalPages(data.last_page);
-        setPerPageState(data.per_page);
-      })
-      .finally(() => setLoading(false));
-  }, [currentPage, filters, perPageState, navigate]);
-
-  // Handle filter changes and immediately update URL
-  const handleFilterChange = useCallback((newFilters: CarFiltersType) => {
-    setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page
-    updateUrl(newFilters, 1);
-  }, [updateUrl]);
+  // Handle filter changes
+  const handleFilterChange = useCallback((newFilters: Partial<ListingFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+    setCurrentPage(1);
+  }, []);
 
   return (
     <>
@@ -212,6 +179,19 @@ export default function CarListing() {
             initialFilters={filters}
             loading={loading}
           />
+          
+          {/* City Availability Notice */}
+          <div className="mt-4 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <svg className="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                Currently available in Karachi only. We'll be expanding to other cities soon!
+              </span>
+            </div>
+          </div>
+          
           {/* Top Pagination */}
           {totalPages > 1 && (
             <div className="w-full overflow-x-auto mb-6">
@@ -335,19 +315,6 @@ export default function CarListing() {
                   <li>• 24/7 customer support</li>
                   <li>• Live chat available</li>
                 </ul>
-              </div>
-            </div>
-            {/* City Availability Notice */}
-            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="text-center">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <svg className="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-                    Currently available in Karachi only. We'll be expanding to other cities soon!
-                  </span>
-                </div>
               </div>
             </div>
           </div>

@@ -389,7 +389,7 @@ export default function Welcome() {
         const fetchLatestCars = async () => {
             try {
                 console.log('Fetching latest cars...');
-                const response = await fetch('/api/customer/cars?per_page=6&page=1');
+                const response = await fetch('/api/cars?per_page=6&page=1');
                 const data = await response.json();
                 console.log('Cars API response:', data);
                 setLatestCars(data.data || []);
@@ -410,7 +410,7 @@ export default function Welcome() {
         const fetchCarTypes = async () => {
             try {
                 console.log('Fetching car types...');
-                const response = await fetch('/api/customer/car-types');
+                const response = await fetch('/api/car-types');
                 const data = await response.json();
                 console.log('Car types API response:', data);
                 setCarTypes(data.data || []);
@@ -430,7 +430,7 @@ export default function Welcome() {
         const fetchCarBrands = async () => {
             try {
                 console.log('Fetching car brands...');
-                const response = await fetch('/api/customer/car-brands');
+                const response = await fetch('/api/car-brands');
                 const data = await response.json();
                 console.log('Car brands API response:', data);
                 setCarBrands(data.data || []);
