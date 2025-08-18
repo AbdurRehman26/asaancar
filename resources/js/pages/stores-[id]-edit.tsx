@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AppLayout from '@/layouts/app-layout';
 import type { StoreForm } from '@/types/store';
+import { apiFetch } from '@/lib/utils';
 
 export default function StoreEditPage() {
   const { id } = useParams();
@@ -16,10 +17,7 @@ export default function StoreEditPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/customer/stores/${id}`, {
-      credentials: 'include',
-      headers: { 'Accept': 'application/json' },
-    })
+    apiFetch(`/api/customer/stores/${id}`)
       .then(async (res) => {
         if (!res.ok) throw new Error('Failed to fetch store');
         const data = await res.json();
@@ -38,7 +36,7 @@ export default function StoreEditPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
     // Fetch cities
-    fetch('/api/cities')
+    apiFetch('/api/cities')
       .then(res => res.json())
       .then(data => setCities(data.data || data))
       .catch(() => setCities([]));
@@ -68,13 +66,8 @@ export default function StoreEditPage() {
     setError(null);
     setSuccess(false);
     try {
-      const res = await fetch(`/api/customer/stores/${id}`, {
+      const res = await apiFetch(`/api/customer/stores/${id}`, {
         method: 'PUT',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
         body: JSON.stringify({
           ...store,
           city_id: store?.city_id || '',

@@ -9,10 +9,10 @@ use Illuminate\Foundation\Http\FormRequest;
  *     schema="CarRequest",
  *     title="Car Request",
  *     description="Car request data",
- *     required={"car_brand_id", "car_type_id", "car_engine_id", "store_id", "model", "year", "color", "seats", "transmission", "fuel_type"},
+ *     required={"car_brand_id", "car_type_id", "store_id", "model", "year", "color", "seats", "transmission", "fuel_type"},
  *     @OA\Property(property="car_brand_id", type="integer", example=1),
  *     @OA\Property(property="car_type_id", type="integer", example=1),
- *     @OA\Property(property="car_engine_id", type="integer", example=1),
+
  *     @OA\Property(property="store_id", type="integer", example=1),
  *     @OA\Property(property="model", type="string", example="Civic"),
  *     @OA\Property(property="year", type="integer", example=2020),
@@ -45,7 +45,7 @@ class CreateCarRequest extends FormRequest
             'name' => 'sometimes|string|max:255',
             'car_brand_id' => 'required|exists:car_brands,id',
             'car_type_id' => 'required|exists:car_types,id',
-            'car_engine_id' => 'required|exists:car_engines,id',
+
             'store_id' => 'required|exists:stores,id',
             'model' => 'required|string|max:255',
             'year' => 'required|integer|min:1990|max:2025',
@@ -69,7 +69,7 @@ class CreateCarRequest extends FormRequest
         return [
             'car_brand_id.required' => 'Please select a car brand.',
             'car_type_id.required' => 'Please select a car type.',
-            'car_engine_id.required' => 'Please select a car engine.',
+
             'store_id.required' => 'Please select a store.',
             'model.required' => 'Please enter the car model.',
             'year.required' => 'Please enter the car year.',

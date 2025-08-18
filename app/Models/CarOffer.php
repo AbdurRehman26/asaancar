@@ -29,10 +29,14 @@ class CarOffer extends Model
 
     protected $fillable = [
         'car_id',
+        'price_without_driver',
+        'price_with_driver',
         'discount_percentage',
         'currency',
         'start_date',
         'end_date',
+        'available_from',
+        'available_to',
         'is_active',
     ];
 

@@ -63,7 +63,10 @@ class CarController extends Controller
             'brand_id', 'type_id', 'store_id', 'transmission',
             'fuel_type', 'min_seats', 'max_price'
         ]);
-        $paginated = $this->carService->getPaginatedCarsForListing($perPage, $filters);
+        
+        $user = $request->user();
+        
+        $paginated = $this->carService->getPaginatedCarsForListing($perPage, $filters, $user);
         return response()->json($paginated);
     }
 
@@ -99,7 +102,7 @@ class CarController extends Controller
         }
         
         $car = Car::create($validated);
-        return new CarResource($car->load(['carBrand', 'carType', 'carEngine', 'store']));
+        return new CarResource($car->load(['carBrand', 'carType', 'store']));
     }
 
     /**
@@ -134,6 +137,18 @@ class CarController extends Controller
             return response()->json(['message' => 'Car not found'], 404);
         }
         return response()->json(['data' => $car]);
+    }
+
+    /**
+     * Get car data for editing (with raw IDs and relationships)
+     */
+    public function showForEdit(int $id)
+    {
+        $car = Car::with(['carBrand', 'carType', 'store'])->find($id);
+        if (!$car) {
+            return response()->json(['message' => 'Car not found'], 404);
+        }
+        return new CarResource($car);
     }
 
     /**
@@ -228,25 +243,47 @@ class CarController extends Controller
     public function update(UpdateCarRequest $request, string $id)
     {
         $car = Car::findOrFail($id);
+        
+
+        
         $validated = $request->validated();
         
-        // Handle image uploads to S3
-        if ($request->hasFile('image_urls')) {
-            // Delete old images from S3 if they exist
-            if ($car->image_urls && is_array($car->image_urls)) {
-                $this->s3Service->deleteMultipleFiles($car->image_urls);
-            }
-            
-            // Upload new images
-            $uploadedUrls = $this->s3Service->uploadMultipleFiles(
-                $request->file('image_urls'),
-                'car-images'
-            );
-            $validated['image_urls'] = $uploadedUrls;
+        // Handle image URLs (images are now uploaded separately via ImageUpload API)
+        if ($request->has('image_urls') && is_array($request->input('image_urls'))) {
+            $validated['image_urls'] = $request->input('image_urls');
         }
         
         $car->update($validated);
-        return new CarResource($car->load(['carBrand', 'carType', 'carEngine', 'store']));
+        
+        // Handle pricing fields - create or update CarOffer
+        if ($request->has('without_driver_rate') || $request->has('with_driver_rate')) {
+            $withoutDriver = $request->input('without_driver_rate');
+            $withDriver = $request->input('with_driver_rate');
+            
+            // Find existing active offer or create new one
+            $carOffer = CarOffer::where('car_id', $car->id)
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$carOffer) {
+                $carOffer = new CarOffer();
+                $carOffer->car_id = $car->id;
+                $carOffer->is_active = true;
+                $carOffer->available_from = now();
+                $carOffer->available_to = now()->addYear(); // Set to expire in 1 year
+            }
+            
+            if ($withoutDriver !== null) {
+                $carOffer->price_without_driver = $withoutDriver;
+            }
+            if ($withDriver !== null) {
+                $carOffer->price_with_driver = $withDriver;
+            }
+            
+            $carOffer->save();
+        }
+        
+        return new CarResource($car->load(['carBrand', 'carType', 'store']));
     }
 
     public function search(Request $request)
@@ -284,7 +321,7 @@ class CarController extends Controller
     {
         $user = $request->user();
         // Get all store IDs for this user
-        $storeIds = $user->stores()->pluck('id');
+        $storeIds = $user->stores()->pluck('stores.id');
         $count = \App\Models\Car::whereIn('store_id', $storeIds)->count();
         return response()->json(['count' => $count]);
     }

@@ -294,7 +294,7 @@ export default function Bookings() {
           </div>
         </DialogContent>
       </Dialog>
-      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 mt-20">
+      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 mt-28">
         {/* Navbar */}
         <Navbar
           currentPage="bookings"

@@ -40,7 +40,7 @@ class CreateStoreRequest extends FormRequest
             'store_username' => 'nullable|string|max:255|unique:stores,store_username',
             'description' => 'nullable|string|max:1000',
             'address' => 'nullable|string|max:500',
-            'phone' => 'nullable|string|max:20',
+            'contact_phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'city_id' => 'nullable|integer|exists:cities,id',
             'logo_url' => 'nullable|url',

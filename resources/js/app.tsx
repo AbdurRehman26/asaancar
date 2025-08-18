@@ -13,6 +13,7 @@ import Bookings from './pages/bookings';
 import Chat from './pages/chat';
 import Dashboard from './pages/dashboard';
 import DashboardStoresPage from './pages/dashboard-stores';
+import AdminDashboard from './pages/admin-dashboard';
 import Welcome from './pages/welcome';
 import SignupPage from './pages/signup';
 import CreateStoreForm from './pages/create-store';
@@ -80,6 +81,11 @@ function App() {
             <Route path="bookings" element={<Bookings />} />
             <Route path="store-bookings" element={<Dashboard.StoreBookings />} />
           </Route>
+          <Route path="/admin-dashboard" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/dashboard/stores" element={
             <ProtectedRoute>
               <DashboardStoresPage />

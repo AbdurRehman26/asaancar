@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import echo from '../lib/echo';
-import { apiFetch } from '@/lib/utils';
+import { apiFetch } from '../lib/utils';
 
 interface User {
     id: number;
@@ -23,6 +23,7 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(true);
+    const [sending, setSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -64,18 +65,26 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
 
     const sendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim()) return;
-        const res = await apiFetch(`/api/chat/conversations/${conversationId}/messages`, {
-            method: 'POST',
-            body: JSON.stringify({ message: input }),
-        });
-        const msg = await res.json();
-        // Only add if not already present
-        setMessages((prev) => {
-            if (prev.some((m) => m.id === msg.id)) return prev;
-            return [...prev, msg];
-        });
-        setInput('');
+        if (!input.trim() || sending) return;
+        
+        setSending(true);
+        try {
+            const res = await apiFetch(`/api/chat/conversations/${conversationId}/messages`, {
+                method: 'POST',
+                body: JSON.stringify({ message: input }),
+            });
+            const msg = await res.json();
+            // Only add if not already present
+            setMessages((prev) => {
+                if (prev.some((m) => m.id === msg.id)) return prev;
+                return [...prev, msg];
+            });
+            setInput('');
+        } catch (error) {
+            console.error('Failed to send message:', error);
+        } finally {
+            setSending(false);
+        }
     };
 
     return (
@@ -113,8 +122,26 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type a message..."
+                    disabled={sending}
                 />
-                <button type="submit" className="bg-primary text-white px-4 py-2 rounded-lg">Send</button>
+                <button 
+                    type="submit" 
+                    className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 ${
+                        sending 
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                            : 'bg-primary text-white hover:bg-primary/90 cursor-pointer'
+                    }`}
+                    disabled={sending || !input.trim()}
+                >
+                    {sending ? (
+                        <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Sending...
+                        </>
+                    ) : (
+                        'Send'
+                    )}
+                </button>
             </form>
         </div>
     );

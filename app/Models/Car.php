@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="car_brand_id", type="integer", example=1),
  *     @OA\Property(property="car_type_id", type="integer", example=1),
- *     @OA\Property(property="car_engine_id", type="integer", example=1),
+
  *     @OA\Property(property="store_id", type="integer", example=1),
  *     @OA\Property(property="model", type="string", example="Civic"),
  *     @OA\Property(property="year", type="integer", example=2020),
@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
  *     @OA\Property(property="car_brand", ref="#/components/schemas/CarBrand"),
  *     @OA\Property(property="car_type", ref="#/components/schemas/CarType"),
- *     @OA\Property(property="car_engine", ref="#/components/schemas/CarEngine"),
+
  *     @OA\Property(property="store", ref="#/components/schemas/Store")
  * )
  */
@@ -41,7 +41,7 @@ class Car extends Model
         'store_id',
         'car_brand_id',
         'car_type_id',
-        'car_engine_id',
+
         'model',
         'year',
         'name',
@@ -74,10 +74,7 @@ class Car extends Model
         return $this->belongsTo(CarType::class);
     }
     
-    public function carEngine(): BelongsTo
-    {
-        return $this->belongsTo(CarEngine::class);
-    }
+
 
     public function carOffers(): HasMany
     {

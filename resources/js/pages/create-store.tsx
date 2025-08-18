@@ -27,7 +27,18 @@ export default function CreateStoreForm() {
   useEffect(() => {
     apiFetch('/api/cities')
       .then(res => res.json())
-      .then(data => setCities(data.data || data))
+      .then(data => {
+        const allCities = data.data || data;
+        // Filter to only show Karachi
+        const karachiOnly = allCities.filter((city: { id: number; name: string }) => 
+          city.name.toLowerCase() === 'karachi'
+        );
+        setCities(karachiOnly);
+        // Auto-select Karachi if it exists
+        if (karachiOnly.length > 0) {
+          setCityId(karachiOnly[0].id.toString());
+        }
+      })
       .catch(() => setCities([]));
   }, []);
 
@@ -45,7 +56,7 @@ export default function CreateStoreForm() {
       if (storeUsername) formData.append('store_username', storeUsername);
       if (cityId) formData.append('city_id', cityId);
       if (description) formData.append('description', description);
-      if (phone) formData.append('phone', phone);
+      if (phone) formData.append('contact_phone', phone);
       if (address) formData.append('address', address);
       
       // Add logo image if uploaded

@@ -2,14 +2,26 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { useNavigate, Outlet, Link } from 'react-router-dom';
 import CarCard from '../components/car-card';
 import CarFilters from '../components/car-filters';
 import { Car, UserCircle, BookOpen, Store, MessageSquare } from 'lucide-react';
 import Chat from '../components/chat';
 import type { Conversation } from '@/types/dashboard';
 
-// (No role checks; dashboard available to any authenticated user)
+// Helper function to check if user has required role
+const hasRequiredRole = (user: any) => {
+    console.log('🔍 DEBUG: hasRequiredRole - User:', user);
+    console.log('🔍 DEBUG: hasRequiredRole - User roles:', user?.roles);
+    console.log('🔍 DEBUG: hasRequiredRole - Is array:', Array.isArray(user?.roles));
+    console.log('🔍 DEBUG: hasRequiredRole - Includes admin:', user?.roles?.includes('admin'));
+    console.log('🔍 DEBUG: hasRequiredRole - Includes store_owner:', user?.roles?.includes('store_owner'));
+    
+    // Temporarily allow any authenticated user for debugging
+    const result = user && user.id; // Just check if user exists and has an ID
+    console.log('🔍 DEBUG: hasRequiredRole - Final result:', result);
+    return result;
+};
 
 // Remove local Conversation interface
 
@@ -32,7 +44,8 @@ export default function Dashboard() {
 
 // Car Listings Section
 export function CarListings() {
-    const { loading } = useAuth();
+    const { user, loading } = useAuth();
+    const navigate = useNavigate();
     const [selectedStore, setSelectedStore] = useState<{ id: string; name: string } | null>(null);
     const [userStores, setUserStores] = useState<Array<{ id: string; name: string }>>([]);
 
@@ -54,18 +67,29 @@ export function CarListings() {
     const [totalPages, setTotalPages] = useState(1);
     const [perPageState, setPerPageState] = useState(9);
 
-    // (No role-based redirects)
+    useEffect(() => {
+        console.log('🔍 DEBUG: Dashboard - User:', user);
+        console.log('🔍 DEBUG: Dashboard - User roles:', user?.roles);
+        console.log('🔍 DEBUG: Dashboard - Loading:', loading);
+        console.log('🔍 DEBUG: Dashboard - hasRequiredRole result:', hasRequiredRole(user));
+        
+        // Temporarily disabled role check for debugging
+        // if (!loading && !hasRequiredRole(user)) {
+        //     console.log('🔍 DEBUG: Dashboard - Redirecting to welcome page');
+        //     navigate('/', { replace: true });
+        // }
+    }, [user, loading, navigate]);
 
     useEffect(() => {
         // Fetch stores for the user
-        fetch('/api/customer/stores', {
+        fetch('/api/admin/cars/filters', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
             .then(res => res.json())
             .then(data => {
-                if (data.stores && data.stores.length > 0) {
-                    setUserStores(data.stores);
-                    setSelectedStore(data.stores[0]);
+                if (data.data && data.data.stores && data.data.stores.length > 0) {
+                    setUserStores(data.data.stores);
+                    setSelectedStore(data.data.stores[0]);
                 }
             })
             .catch(error => {
@@ -115,10 +139,12 @@ export function CarListings() {
         // Triggers useEffect
     };
 
-    if (loading) {
+    if (loading || !user || !user.roles) {
         return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading...</div>;
     }
-    
+    // Temporarily disabled role check: if (!Array.isArray(user.roles) || !user.roles.includes('admin')) {
+        return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-red-600">You are not authorized to view this page.</div>;
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6">
@@ -255,13 +281,19 @@ export function CarListings() {
 // Messages Section
 export function Messages() {
     const { user, loading } = useAuth();
+    const navigate = useNavigate();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [conversationsLoading, setConversationsLoading] = useState(true);
     const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
     const [selectedStore, setSelectedStore] = useState<{ id: string; name: string } | null>(null);
     const [userStores, setUserStores] = useState<Array<{ id: string; name: string }>>([]);
 
-    // (No role-based redirects)
+    useEffect(() => {
+        // Temporarily disabled role check for debugging
+        // if (!loading && (!user || !Array.isArray(user.roles) || (!user.roles.includes('admin') && !user.roles.includes('store_owner')))) {
+        //     navigate('/', { replace: true });
+        // }
+    }, [user, loading, navigate]);
 
     useEffect(() => {
         // Fetch stores for the user
@@ -298,10 +330,12 @@ export function Messages() {
             .finally(() => setConversationsLoading(false));
     }, [selectedStore]);
 
-    if (loading) {
+    if (loading || !user || !user.roles) {
         return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading...</div>;
     }
-    
+    // Temporarily disabled role check: if (!Array.isArray(user.roles) || !user.roles.includes('admin')) {
+        return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-red-600">You are not authorized to view this page.</div>;
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6">
@@ -387,9 +421,7 @@ export function Messages() {
                     <div className="flex-1 flex items-center justify-center bg-white/80 dark:bg-gray-900 h-full min-h-[400px]">
                         {selectedConv ? (
                             <div className="w-full h-full flex flex-col">
-                                {user ? (
-                                    <Chat conversationId={typeof selectedConv.id === 'string' ? Number(selectedConv.id) : selectedConv.id} currentUser={user} />
-                                ) : null}
+                                <Chat conversationId={typeof selectedConv.id === 'string' ? Number(selectedConv.id) : selectedConv.id} currentUser={user} />
                             </div>
                         ) : (
                             <div className="min-h-[650px] flex items-center justify-center w-full text-gray-400 text-lg">Select a conversation to start chatting.</div>
@@ -409,12 +441,15 @@ export function Home() {
     const [userStores, setUserStores] = useState<Array<{ id: string; name: string }>>([]);
     useEffect(() => {
         async function fetchStores() {
+            // Temporarily disabled role check: if (!user || !Array.isArray(user.roles) || !user.roles.includes('admin')) {
+                return;
+            }
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } });
+            const response = await fetch('/api/admin/cars/filters', { headers: { Authorization: `Bearer ${token}` } });
             const data = await response.json();
-            if (data.stores && data.stores.length > 0) {
-                setUserStores(data.stores);
-                setSelectedStore(data.stores[0]);
+            if (data.data && data.data.stores && data.data.stores.length > 0) {
+                setUserStores(data.data.stores);
+                setSelectedStore(data.data.stores[0]);
             }
         }
         fetchStores();
@@ -430,7 +465,7 @@ export function Home() {
             const [carsRes, bookingsRes, storesRes, messagesRes] = await Promise.all([
                 fetch(`/api/admin/cars/stats?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } }),
                 fetch(`/api/bookings/stats?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } }),
-                fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } }),
+                fetch('/api/admin/cars/filters', { headers: { Authorization: `Bearer ${token}` } }),
                 fetch(`/api/chat/conversations?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } }),
             ]);
             const carsData = await carsRes.json();
@@ -440,7 +475,7 @@ export function Home() {
             setStats({
                 cars: carsData.total_cars || 0,
                 bookings: bookingsData.count || 0,
-                stores: Array.isArray(storesData.stores) ? storesData.stores.length : 0,
+                stores: Array.isArray(storesData.data?.stores) ? storesData.data.stores.length : 0,
                 messages: Array.isArray(messagesData) ? messagesData.length : 0,
             });
         }
@@ -525,7 +560,7 @@ export function Home() {
 
 // Store Bookings Section
 export function StoreBookings() {
-    const { loading } = useAuth();
+    const { user, loading } = useAuth();
     interface StoreBooking {
         id: number;
         car?: { name?: string; currency?: string };
@@ -547,21 +582,27 @@ export function StoreBookings() {
     const [userStores, setUserStores] = useState<Array<{ id: string; name: string }>>([]);
 
     useEffect(() => {
+        // Temporarily disabled role check: if (!loading if (!loading && (!user || !Array.isArray(user.roles) || !user.roles.includes('admin'))) {if (!loading && (!user || !Array.isArray(user.roles) || !user.roles.includes('admin'))) { (!user || !Array.isArray(user.roles) || !user.roles.includes('admin'))) {
+            // setError('You are not authorized to view this page.');
+            setBookingsLoading(false);
+            return;
+        }
+        
         // Fetch stores for the user
-        fetch('/api/customer/stores', {
+        fetch('/api/admin/cars/filters', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
             .then(res => res.json())
             .then(data => {
-                if (data.stores && data.stores.length > 0) {
-                    setUserStores(data.stores);
-                    setSelectedStore(data.stores[0]);
+                if (data.data && data.data.stores && data.data.stores.length > 0) {
+                    setUserStores(data.data.stores);
+                    setSelectedStore(data.data.stores[0]);
                 }
             })
             .catch(error => {
                 console.error('Error fetching stores:', error);
             });
-    }, [loading]);
+    }, [user, loading]);
 
     // Fetch bookings for selected store
     useEffect(() => {

@@ -76,7 +76,9 @@ class StoreController extends Controller
         $validated = $request->validated();
         $user = $request->user();
 
+        // Ensure user_id is set
         $validated['user_id'] = $user->id;
+        
         $store = Store::create($validated);
         $store->users()->attach($user->id);
         return new StoreResource($store);

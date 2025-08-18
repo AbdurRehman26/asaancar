@@ -23,10 +23,11 @@ class UpdateStoreRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'store_username' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:1000',
             'address' => 'nullable|string|max:500',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
+            'contact_phone' => 'nullable|string|max:20',
+            'logo_url' => 'nullable|string|max:500',
             'city_id' => 'nullable|integer|exists:cities,id',
         ];
     }

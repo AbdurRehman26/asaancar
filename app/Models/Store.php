@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -26,6 +27,7 @@ class Store extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'store_username',
         'name',
         'description',
@@ -54,11 +56,16 @@ class Store extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)->withTimestamps(['created_at']);
     }
 
     public function conversations()
     {
         return $this->hasMany(Conversation::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 }

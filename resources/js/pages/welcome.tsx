@@ -547,7 +547,7 @@ export default function Welcome() {
     const faqItems = [
         {
             question: 'Who can rent a car?',
-            answer: 'The car with driver can be rented by anyone above the age of 16. However, in case of self-drive, minimum age for hiring a car is 21 years and your license needs to be at least 1 year old.',
+            answer: 'The car with driver can be rented by anyone above the age of 18. However, in case of self-drive and driving license needs to be at least 1 year old.',
         },
         {
             question: 'Can I rent a car with and without driver both?',
@@ -563,7 +563,7 @@ export default function Welcome() {
         },
         {
             question: 'What happens if an accident occurs?',
-            answer: 'In case of Self-Driver option, we cover the small damages from your security deposit. Since all our cars are insured, the bigger damages are covered by the insurance.',
+            answer: 'In case of Self-Driver option, we cover the small damages from your security deposit. ',
         },
         {
             question: 'What is your fuel policy?',

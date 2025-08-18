@@ -15,6 +15,7 @@ interface Car {
   id: string | number;
   name: string;
   image?: string;
+  images?: string[];
   specifications?: {
     seats?: number;
     fuelType?: string;
@@ -55,6 +56,7 @@ export default function CarListing() {
     fuel_type: string;
     min_seats: string;
     max_price: string;
+    city_id: string;
     pickup_location?: string;
     pickup_date?: string;
     pickup_time?: string;
@@ -72,6 +74,7 @@ export default function CarListing() {
       fuel_type: queryParams.get('fuel_type') || '',
       min_seats: queryParams.get('min_seats') || '',
       max_price: queryParams.get('max_price') || '',
+      city_id: queryParams.get('city_id') || '',
       pickup_location: queryParams.get('pickup_location') || '',
       pickup_date: queryParams.get('pickup_date') || '',
       pickup_time: queryParams.get('pickup_time') || '',
@@ -316,16 +319,13 @@ export default function CarListing() {
                 <ul className="space-y-2 text-sm text-gray-600 dark:text-neutral-400">
                   <li>• Minimum booking duration: 1 day</li>
                   <li>• Free cancellation up to 24 hours before</li>
-                  <li>• Insurance included in all rentals</li>
-                  <li>• 24/7 roadside assistance</li>
                 </ul>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Requirements</h3>
                 <ul className="space-y-2 text-sm text-gray-600 dark:text-neutral-400">
                   <li>• Valid driver's license</li>
-                  <li>• Credit card for deposit</li>
-                  <li>• Minimum age: 21 years</li>
+                  <li>• Minimum age: 18 years</li>
                   <li>• Clean driving record</li>
                 </ul>
               </div>
@@ -333,10 +333,21 @@ export default function CarListing() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Support</h3>
                 <ul className="space-y-2 text-sm text-gray-600 dark:text-neutral-400">
                   <li>• 24/7 customer support</li>
-                  <li>• Emergency roadside assistance</li>
                   <li>• Live chat available</li>
-                  <li>• Phone support: +1-800-CARS</li>
                 </ul>
+              </div>
+            </div>
+            {/* City Availability Notice */}
+            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <svg className="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                    Currently available in Karachi only. We'll be expanding to other cities soon!
+                  </span>
+                </div>
               </div>
             </div>
           </div>

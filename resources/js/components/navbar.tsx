@@ -132,7 +132,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
     <nav className="fixed top-0 left-0 z-50 w-full bg-white dark:bg-gray-800/80 border-b border-neutral-200 dark:border-neutral-800 py-[13px] px-6 flex items-center justify-between">
       <div className="flex items-center gap-2 text-xl font-bold text-[#7e246c]">
         <Link to="/" className="hover:text-[#6a1f5c] transition flex items-center gap-2">
-          <img src="/images/car-logo-nameless.png" alt="AsaanCar Logo" className="h-18 w-24" />
+          <img src="/images/car-logo-nameless.png" alt="AsaanCar Logo" className="h-12 w-20" />
           <span>AsaanCar</span>
         </Link>
       </div>

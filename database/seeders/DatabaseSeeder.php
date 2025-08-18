@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
 
         // 3. Seed car brands, types, engines
         $carBrands = \App\Models\CarBrand::factory(8)->create();
-        $carEngines = \App\Models\CarEngine::factory(5)->create();
+
 
         // 4. Seed stores
         $stores = \App\Models\Store::factory(10)->create();
@@ -69,11 +69,10 @@ class DatabaseSeeder extends Seeder
         // 6. Seed cars (linked to stores, brands, types, engines)
         $cars = collect();
         foreach ($stores as $store) {
-            $cars = $cars->merge(\App\Models\Car::factory(8)->make()->each(function($car) use ($store, $carBrands, $carEngines) {
+            $cars = $cars->merge(\App\Models\Car::factory(8)->make()->each(function($car) use ($store, $carBrands) {
                 $car->store_id = $store->id;
                 $car->car_brand_id = $carBrands->random()->id;
                 $car->car_type_id = \App\Models\CarType::inRandomOrder()->first()->id;
-                $car->car_engine_id = $carEngines->random()->id;
                 $car->save();
             }));
         }

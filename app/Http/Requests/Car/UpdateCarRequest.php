@@ -24,7 +24,7 @@ class UpdateCarRequest extends FormRequest
         return [
             'car_brand_id' => 'required|exists:car_brands,id',
             'car_type_id' => 'required|exists:car_types,id',
-            'car_engine_id' => 'required|exists:car_engines,id',
+
             'store_id' => 'required|exists:stores,id',
             'model' => 'required|string|max:255',
             'year' => 'required|integer|min:1990|max:2025',
@@ -34,7 +34,7 @@ class UpdateCarRequest extends FormRequest
             'fuel_type' => 'required|in:petrol,diesel,electric,hybrid',
             'description' => 'nullable|string|max:1000',
             'image_urls' => 'nullable|array',
-            'image_urls.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_urls.*' => 'string|url',
         ];
     }
 
@@ -46,7 +46,7 @@ class UpdateCarRequest extends FormRequest
         return [
             'car_brand_id.required' => 'Please select a car brand.',
             'car_type_id.required' => 'Please select a car type.',
-            'car_engine_id.required' => 'Please select a car engine.',
+
             'store_id.required' => 'Please select a store.',
             'model.required' => 'Please enter the car model.',
             'year.required' => 'Please enter the car year.',

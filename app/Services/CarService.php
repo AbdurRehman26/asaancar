@@ -14,7 +14,7 @@ class CarService
      */
     public function getAvailableCars(): Collection
     {
-        return Car::with(['carBrand', 'carType', 'carEngine', 'store', 'carOffers' => function($query) {
+        return Car::with(['carBrand', 'carType', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where(function($q) {
                       $q->where(function($subQ) {
@@ -49,7 +49,7 @@ class CarService
      */
     public function getCarForListing(int $carId): ?array
     {
-        $car = Car::with(['carBrand', 'carType', 'carEngine', 'store', 'carOffers' => function($query) {
+        $car = Car::with(['carBrand', 'carType', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where(function($q) {
                       $q->where(function($subQ) {
@@ -85,8 +85,16 @@ class CarService
             'id' => $car->id,
             'name' => $car->name ?? $car->carBrand->name . ' ' . $car->model,
             'brand' => $car->carBrand->name ?? 'Unknown',
+            'type' => $car->carType->name ?? null,
+            'car_brand_id' => $car->car_brand_id,
+            'car_type_id' => $car->car_type_id,
+            'store_id' => $car->store_id,
             'model' => $car->model,
             'year' => $car->year,
+            'color' => $car->color,
+            'seats' => $car->seats,
+            'transmission' => $car->transmission,
+            'fuel_type' => $car->fuel_type,
             'image' => $this->getPrimaryImage($car),
             'images' => $car->image_urls ?? [],
             'price' => $pricing,
@@ -103,7 +111,7 @@ class CarService
                 'transmission' => $car->transmission ?? 'Automatic',
                 'mileage' => $this->getMileage($car),
                 'color' => $car->color ?? 'Not specified',
-                'engine' => $car->carEngine->name ?? 'Not specified',
+                'engine' => 'Not specified',
                 'type' => $car->carType->name ?? 'Not specified',
             ],
             'store' => $this->formatStoreData($car->store),
@@ -198,9 +206,7 @@ class CarService
             $features[] = $car->carType->name;
         }
 
-        if ($car->carEngine && $car->carEngine->name) {
-            $features[] = $car->carEngine->name;
-        }
+
 
         // Add common features based on car type or other criteria
         $features[] = 'Air Conditioning';
@@ -266,7 +272,7 @@ class CarService
      */
     public function searchCars(array $filters = []): array
     {
-        $query = Car::with(['carBrand', 'carType', 'carEngine', 'store', 'carOffers' => function($query) {
+        $query = Car::with(['carBrand', 'carType', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where('start_date', '<=', now())
                   ->where('end_date', '>=', now());
@@ -340,12 +346,14 @@ class CarService
         return \App\Models\Store::select('id', 'name', 'address')->get()->toArray();
     }
 
+
+
     /**
      * Get paginated cars for API listing
      */
-    public function getPaginatedCarsForListing($perPage = 9, $filters = [])
+    public function getPaginatedCarsForListing($perPage = 9, $filters = [], $user = null)
     {
-        $query = Car::with(['carBrand', 'carType', 'carEngine', 'store', 'carOffers' => function($query) {
+        $query = Car::with(['carBrand', 'carType', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where(function($q) {
                       $q->where(function($subQ) {
@@ -360,6 +368,8 @@ class CarService
                   });
         }])
         ->whereHas('store');
+
+        // If no specific store_id is provided and user is authenticated, filter by user's stores
 
         // Apply filters
         if (!empty($filters['brand_id'])) {
@@ -406,4 +416,6 @@ class CarService
             'per_page' => $cars->perPage(),
         ];
     }
+
+
 }

@@ -9,6 +9,7 @@ export type CarFiltersType = {
   fuel_type: string;
   min_seats: string;
   max_price: string;
+  city_id: string;
 };
 
 interface UniversalCarFilterProps {
@@ -27,6 +28,7 @@ const defaultFilters: CarFiltersType = {
   fuel_type: '',
   min_seats: '',
   max_price: '',
+  city_id: '',
 };
 
 const UniversalCarFilter: React.FC<UniversalCarFilterProps> = ({

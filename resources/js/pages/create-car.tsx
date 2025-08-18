@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiFetch } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
 import ImageUpload from '@/components/ImageUpload';
@@ -13,12 +13,12 @@ interface UploadedImage {
 
 export default function CreateCarPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   // Form state
   const [form, setForm] = useState({
     name: '',
     car_brand_id: '',
     car_type_id: '',
-    car_engine_id: '',
     store_id: '',
     model: '',
     year: '',
@@ -33,7 +33,6 @@ export default function CreateCarPage() {
   // Data state
   const [carBrands, setCarBrands] = useState<{ id: number; name: string }[]>([]);
   const [carTypes, setCarTypes] = useState<{ id: number; name: string }[]>([]);
-  const [carEngines, setCarEngines] = useState<{ id: number; name: string }[]>([]);
   const [stores, setStores] = useState<{ id: number; name: string }[]>([]);
   // UI state
   const [loading, setLoading] = useState(false);
@@ -45,26 +44,33 @@ export default function CreateCarPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [brandsRes, typesRes, enginesRes, storesRes] = await Promise.all([
+        const [brandsRes, typesRes, storesRes] = await Promise.all([
           apiFetch('/api/customer/car-brands'),
           apiFetch('/api/customer/car-types'),
-          apiFetch('/api/customer/car-engines'),
           apiFetch('/api/customer/stores'),
         ]);
+
         const brandsData = await brandsRes.json();
         const typesData = await typesRes.json();
-        const enginesData = await enginesRes.json();
         const storesData = await storesRes.json();
+
         setCarBrands(brandsData.data || []);
         setCarTypes(typesData.data || []);
-        setCarEngines(enginesData.data || []);
         setStores(storesData.stores || []);
+        
+        // Auto-select store if user has only one store or if store_id is in URL
+        const storeIdFromUrl = searchParams.get('store_id');
+        if (storeIdFromUrl) {
+          setForm(prev => ({ ...prev, store_id: storeIdFromUrl }));
+        } else if (storesData.stores && storesData.stores.length === 1) {
+          setForm(prev => ({ ...prev, store_id: storesData.stores[0].id.toString() }));
+        }
       } catch {
         setError('Failed to load car form data');
       }
     }
     fetchData();
-  }, []);
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -115,7 +121,6 @@ export default function CreateCarPage() {
       <div className="p-6 max-w-3xl text-left ml-0">
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow p-8">
           <h1 className="text-2xl font-bold mb-6">Add New Car</h1>
-          {error && <div className="mb-4 text-red-600 text-center">{error}</div>}
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
             <div className="md:col-span-2">
               <label className="block mb-1 font-medium">Name (optional)</label>
@@ -174,21 +179,7 @@ export default function CreateCarPage() {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block mb-1 font-medium">Engine</label>
-              <select
-                name="car_engine_id"
-                value={form.car_engine_id}
-                onChange={handleInputChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              >
-                <option value="" disabled>Select an engine</option>
-                {carEngines.map(engine => (
-                  <option key={engine.id} value={engine.id}>{engine.name}</option>
-                ))}
-              </select>
-            </div>
+
             <div>
               <label className="block mb-1 font-medium">Model</label>
               <input
@@ -334,15 +325,17 @@ export default function CreateCarPage() {
                 </div>
               </div>
             </div>
-            <div className="md:col-span-2 flex justify-end">
+            <div className="md:col-span-2 flex justify-end items-center gap-4">
+              {error && <div className="text-red-600 text-sm">{error}</div>}
               <button
                 type="submit"
-                className="bg-[#7e246c] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#6a1f5c] transition"
+                className="bg-[#7e246c] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#6a1f5c] transition cursor-pointer"
                 disabled={loading}
+                style={{ pointerEvents: loading ? 'none' : 'auto' }}
               >
                 {loading ? 'Creating...' : 'Add Car'}
               </button>
-              {success && <div className="text-green-600 mt-2 ml-4 self-center">Car created successfully!</div>}
+              {success && <div className="text-green-600 text-sm">Car created successfully!</div>}
             </div>
           </form>
         </div>

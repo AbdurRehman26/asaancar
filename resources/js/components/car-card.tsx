@@ -1,13 +1,15 @@
 import { Users, Fuel, Settings, Shield, Calendar, Thermometer, Navigation, Key, Car } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
+import ImageGalleryModal from './ImageGalleryModal';
 
 // Define Car interface
 interface Car {
   id: string | number;
   name: string;
   image?: string;
+  images?: string[];
   brand?: string;
   specifications?: {
     seats?: number;
@@ -53,6 +55,7 @@ const featureLabels: Record<string, string> = {
 
 const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
   const { user } = useAuth();
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   // Get brand image path
   const getBrandImagePath = (brandName: string) => {
@@ -85,34 +88,56 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
     { key: 'type', value: car.specifications?.type },
   ];
 
+  // Check if car has multiple images
+  const hasMultipleImages = car.images && car.images.length > 1;
+  const allImages = car.images && car.images.length > 0 ? car.images : (car.image ? [car.image] : []);
+  
+
+
   return (
     <div className="bg-white dark:bg-gray-800/80 rounded-xl shadow-md border border-[#7e246c] p-6 flex flex-col items-center min-h-[420px] transition-all hover:shadow-lg">
       {/* Car Image */}
-      <Link to={`/car-detail/${car.id}`} className="block w-full bg-gray-50 dark:bg-gray-700 rounded-xl h-36 mb-4 overflow-hidden">
+      <div 
+        className={`w-full bg-gray-50 dark:bg-gray-700 rounded-xl h-36 mb-4 overflow-hidden relative ${hasMultipleImages ? 'cursor-pointer' : ''}`}
+        onClick={hasMultipleImages ? () => setIsImageModalOpen(true) : undefined}
+      >
+        {hasMultipleImages && (
+          <div className="absolute top-2 right-2 z-10 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+            <span>📷</span>
+            <span>{car.images?.length}</span>
+          </div>
+        )}
         <img
           src={car.image || '/images/car-placeholder.jpeg'}
           alt={car.name}
           className="object-contain h-full w-full rounded-xl p-2"
           onError={handleImageError}
         />
-      </Link>
+        {hasMultipleImages && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+            <div className="bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+              Click to view gallery
+            </div>
+          </div>
+        )}
+      </div>
       {/* Car Name & Subtitle */}
-      <div className="w-full text-center mb-2">
-        <h3 className="font-bold text-lg text-[#7e246c] dark:text-white truncate overflow-hidden whitespace-nowrap">{car.name}</h3>
+      <Link to={`/car-detail/${car.id}`} className="w-full text-center mb-2 hover:opacity-80 transition-opacity">
+        <h3 className="font-bold text-lg text-[#7e246c] dark:text-white truncate overflow-hidden whitespace-nowrap cursor-pointer hover:underline">{car.name}</h3>
         {car.brand && (
           <div className="text-xs text-gray-500 dark:text-gray-300 font-semibold">{car.brand}</div>
         )}
-      </div>
+      </Link>
       {/* Price */}
-      <div className="w-full text-center mb-2">
-        <div className="text-2xl font-extrabold text-[#7e246c] dark:text-white">{car.price?.currency || 'PKR'} {car.price?.perDay?.withoutDriver ?? '--'}<span className="text-base font-medium text-[#7e246c] dark:text-white">/day</span></div>
+      <Link to={`/car-detail/${car.id}`} className="w-full text-center mb-2 hover:opacity-80 transition-opacity">
+        <div className="text-2xl font-extrabold text-[#7e246c] dark:text-white cursor-pointer hover:underline">{car.price?.currency || 'PKR'} {car.price?.perDay?.withoutDriver ?? '--'}<span className="text-base font-medium text-[#7e246c] dark:text-white">/day</span></div>
         {car.price?.perDay?.withDriver && (
           <div className="text-xs text-[#7e246c] dark:text-white">With driver: {car.price.currency || 'PKR'} {car.price.perDay.withDriver}/day</div>
         )}
         {car.extraInfo && (
           <div className="text-xs text-gray-400 dark:text-gray-300 mt-1">{car.extraInfo}</div>
         )}
-      </div>
+      </Link>
       {/* Features Grid */}
       <div className="w-full grid grid-cols-2 gap-x-4 gap-y-2 my-4">
         {features.map(
@@ -155,6 +180,14 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
           )}
         </div>
       )}
+
+      {/* Image Gallery Modal */}
+      <ImageGalleryModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        images={allImages}
+        carName={car.name}
+      />
     </div>
   );
 };

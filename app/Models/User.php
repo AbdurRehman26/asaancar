@@ -80,7 +80,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function stores()
     {
-        return $this->belongsToMany(Store::class, 'store_user', 'user_id', 'store_id');
+        return $this->belongsToMany(Store::class, 'store_user', 'user_id', 'store_id')->withTimestamps(['created_at']);
     }
 
     public function conversations()

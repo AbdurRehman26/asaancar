@@ -56,21 +56,7 @@ class CarResource extends Resource
                                 return \App\Models\CarType::create($data);
                             })
                             ->required(),
-                        Forms\Components\Select::make('car_engine_id')
-                            ->label('Engine')
-                            ->relationship('carEngine', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')
-                                    ->label('Engine Name')
-                                    ->required()
-                                    ->maxLength(255),
-                            ])
-                            ->createOptionUsing(function (array $data) {
-                                return \App\Models\CarEngine::create($data);
-                            })
-                            ->required(),
+
                         Forms\Components\TextInput::make('model')
                             ->label('Model')
                             ->required()
@@ -163,7 +149,7 @@ class CarResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('carBrand.name')->label('Brand')->searchable(),
                 Tables\Columns\TextColumn::make('carType.name')->label('Type')->searchable(),
-                Tables\Columns\TextColumn::make('carEngine.name')->label('Engine')->searchable(),
+
                 Tables\Columns\TextColumn::make('year')
                     ->label('Year')
                     ->sortable(),

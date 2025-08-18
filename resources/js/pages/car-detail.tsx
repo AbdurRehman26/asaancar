@@ -11,11 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { StandaloneSearchBox } from '@react-google-maps/api';
 import { Car } from 'lucide-react';
+import ImageGalleryModal from '../components/ImageGalleryModal';
 
 interface Car {
   id: number;
   name: string;
   image?: string;
+  images?: string[];
   rental?: number;
   baseFare?: number;
   fuel?: number;
@@ -70,10 +72,15 @@ export default function CarDetailPage() {
   
   // Address modal state
   const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
 
   // Calculate guest booking price
   const guestDailyPrice = car?.withDriver || 0; // Assuming withDriver is the price for 'with_driver'
+
+  // Check if car has multiple images
+  const hasMultipleImages = car?.images && car.images.length > 1;
+  const allImages = car?.images && car.images.length > 0 ? car.images : (car?.image ? [car.image] : []);
 
   // Get brand image path
   const getBrandImagePath = (brandName: string) => {
@@ -210,13 +217,29 @@ export default function CarDetailPage() {
                   <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-lg md:flex-row dark:bg-gray-800/80">
                       {/* Left: Car Image & Rate Details */}
                       <div className="flex flex-col gap-8 p-8 md:w-1/2">
-                          <div className="flex items-center justify-center">
+                          <div 
+                              className={`flex items-center justify-center relative ${hasMultipleImages ? 'cursor-pointer' : ''}`}
+                              onClick={hasMultipleImages ? () => setIsImageModalOpen(true) : undefined}
+                          >
+                              {hasMultipleImages && (
+                                  <div className="absolute top-4 right-4 z-10 bg-black/70 text-white text-sm px-3 py-1 rounded-full flex items-center gap-1">
+                                      <span>📷</span>
+                                      <span>{car.images?.length}</span>
+                                  </div>
+                              )}
                               <img
                                   src={car.image || '/images/car-placeholder.jpeg'}
                                   alt={car.name}
                                   className="h-56 rounded-xl bg-gray-50 object-contain p-4 dark:bg-neutral-800"
                                   onError={handleImageError}
                               />
+                              {hasMultipleImages && (
+                                  <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                      <div className="bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+                                          Click to view gallery
+                                      </div>
+                                  </div>
+                              )}
                           </div>
                           <a
                               href="/cars"
@@ -482,6 +505,14 @@ export default function CarDetailPage() {
           )}
 
           {car && <UserBookingsList userBookings={userBookings} car={car} />}
+
+          {/* Image Gallery Modal */}
+          <ImageGalleryModal
+            isOpen={isImageModalOpen}
+            onClose={() => setIsImageModalOpen(false)}
+            images={allImages}
+            carName={car?.name || 'Car'}
+          />
       </>
   );
 }

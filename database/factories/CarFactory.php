@@ -20,7 +20,7 @@ class CarFactory extends Factory
             'store_id' => 1,
             'car_brand_id' => 1,
             'car_type_id' => 1,
-            'car_engine_id' => 1,
+
             'model' => $this->faker->bothify('Model-###'),
             'year' => $this->faker->numberBetween(2015, 2024),
             'name' => $this->faker->company . ' ' . $this->faker->word,

@@ -35,6 +35,8 @@ export default function ImageUpload({
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
 
+
+
   const uploadImages = useCallback(async (files: FileList | File[]) => {
     if (uploadedImages.length + files.length > maxImages) {
       setError(`You can only upload up to ${maxImages} images`);

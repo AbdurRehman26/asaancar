@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('car_engines', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
+        Schema::table('store_user', function (Blueprint $table) {
+            $table->dropColumn('updated_at');
         });
     }
 
@@ -23,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('car_engines');
+        Schema::table('store_user', function (Blueprint $table) {
+            $table->timestamp('updated_at')->nullable();
+        });
     }
 };
