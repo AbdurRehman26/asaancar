@@ -16,8 +16,6 @@ return new class extends Migration
             $table->foreign('car_brand_id')->references('id')->on('car_brands')->onDelete('cascade');
             $table->unsignedBigInteger('car_type_id');
             $table->foreign('car_type_id')->references('id')->on('car_types')->onDelete('cascade');
-            $table->unsignedBigInteger('car_engine_id');
-            $table->foreign('car_engine_id')->references('id')->on('car_engines')->onDelete('cascade');
             $table->string('model');
             $table->year('year');
             $table->string('name')->nullable();

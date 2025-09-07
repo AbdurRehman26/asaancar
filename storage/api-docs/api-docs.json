@@ -971,7 +971,6 @@
                 "required": [
                     "car_brand_id",
                     "car_type_id",
-                    "car_engine_id",
                     "store_id",
                     "model",
                     "year",
@@ -986,10 +985,6 @@
                         "example": 1
                     },
                     "car_type_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "car_engine_id": {
                         "type": "integer",
                         "example": 1
                     },
@@ -1205,10 +1200,6 @@
                         "example": 1
                     },
                     "car_type_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "car_engine_id": {
                         "type": "integer",
                         "example": 1
                     },
