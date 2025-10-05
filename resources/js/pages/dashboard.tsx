@@ -48,7 +48,8 @@ export function CarListings() {
         fuel_type: '',
         min_seats: '',
         max_price: '',
-        city_id: ''
+        city_id: '',
+        tag_ids: [] as number[]
     });
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);

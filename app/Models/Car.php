@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -40,8 +41,8 @@ class Car extends Model
     protected $fillable = [
         'store_id',
         'car_brand_id',
+        'car_model_id',
         'car_type_id',
-
         'model',
         'year',
         'name',
@@ -69,6 +70,11 @@ class Car extends Model
         return $this->belongsTo(CarBrand::class);
     }
     
+    public function carModel(): BelongsTo
+    {
+        return $this->belongsTo(CarModel::class);
+    }
+    
     public function carType(): BelongsTo
     {
         return $this->belongsTo(CarType::class);
@@ -84,5 +90,10 @@ class Car extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'car_tags');
     }
 }

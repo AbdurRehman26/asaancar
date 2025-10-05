@@ -96,13 +96,42 @@ class CarController extends Controller
     {
         $validated = $request->validated();
         
+        // Handle model creation if model name is provided
+        if ($request->has('model') && $request->input('model') && $request->has('car_brand_id')) {
+            $modelName = $request->input('model');
+            $brandId = $request->input('car_brand_id');
+            
+            // Check if model exists for this brand
+            $existingModel = \App\Models\CarModel::where('car_brand_id', $brandId)
+                ->where('name', $modelName)
+                ->first();
+            
+            if (!$existingModel) {
+                // Create new model
+                $newModel = \App\Models\CarModel::create([
+                    'car_brand_id' => $brandId,
+                    'name' => $modelName,
+                    'slug' => \Illuminate\Support\Str::slug($modelName),
+                ]);
+                $validated['car_model_id'] = $newModel->id;
+            } else {
+                $validated['car_model_id'] = $existingModel->id;
+            }
+        }
+        
         // Handle image URLs (images are now uploaded separately via ImageUpload API)
         if ($request->has('image_urls') && is_array($request->input('image_urls'))) {
             $validated['image_urls'] = $request->input('image_urls');
         }
         
         $car = Car::create($validated);
-        return new CarResource($car->load(['carBrand', 'carType', 'store']));
+        
+        // Handle tag relationships
+        if ($request->has('tag_ids') && is_array($request->input('tag_ids'))) {
+            $car->tags()->sync($request->input('tag_ids'));
+        }
+        
+        return new CarResource($car->load(['carBrand', 'carModel', 'carType', 'store', 'tags']));
     }
 
     /**
@@ -144,7 +173,7 @@ class CarController extends Controller
      */
     public function showForEdit(int $id)
     {
-        $car = Car::with(['carBrand', 'carType', 'store'])->find($id);
+        $car = Car::with(['carBrand', 'carModel', 'carType', 'store'])->find($id);
         if (!$car) {
             return response()->json(['message' => 'Car not found'], 404);
         }
@@ -244,9 +273,30 @@ class CarController extends Controller
     {
         $car = Car::findOrFail($id);
         
-
-        
         $validated = $request->validated();
+        
+        // Handle model creation if model name is provided
+        if ($request->has('model') && $request->input('model') && $request->has('car_brand_id')) {
+            $modelName = $request->input('model');
+            $brandId = $request->input('car_brand_id');
+            
+            // Check if model exists for this brand
+            $existingModel = \App\Models\CarModel::where('car_brand_id', $brandId)
+                ->where('name', $modelName)
+                ->first();
+            
+            if (!$existingModel) {
+                // Create new model
+                $newModel = \App\Models\CarModel::create([
+                    'car_brand_id' => $brandId,
+                    'name' => $modelName,
+                    'slug' => \Illuminate\Support\Str::slug($modelName),
+                ]);
+                $validated['car_model_id'] = $newModel->id;
+            } else {
+                $validated['car_model_id'] = $existingModel->id;
+            }
+        }
         
         // Handle image URLs (images are now uploaded separately via ImageUpload API)
         if ($request->has('image_urls') && is_array($request->input('image_urls'))) {
@@ -254,6 +304,11 @@ class CarController extends Controller
         }
         
         $car->update($validated);
+        
+        // Handle tag relationships
+        if ($request->has('tag_ids') && is_array($request->input('tag_ids'))) {
+            $car->tags()->sync($request->input('tag_ids'));
+        }
         
         // Handle pricing fields - create or update CarOffer
         if ($request->has('without_driver_rate') || $request->has('with_driver_rate')) {
@@ -283,14 +338,14 @@ class CarController extends Controller
             $carOffer->save();
         }
         
-        return new CarResource($car->load(['carBrand', 'carType', 'store']));
+        return new CarResource($car->load(['carBrand', 'carModel', 'carType', 'store', 'tags']));
     }
 
     public function search(Request $request)
     {
         $filters = $request->only([
             'brand_id', 'type_id', 'store_id', 'transmission',
-            'fuel_type', 'min_seats', 'max_price'
+            'fuel_type', 'min_seats', 'max_price', 'tag_ids'
         ]);
 
         $cars = $this->carService->searchCars($filters);
@@ -301,11 +356,42 @@ class CarController extends Controller
         ]);
     }
 
+    /**
+     * Search tags by name or type
+     */
+    public function searchTags(Request $request)
+    {
+        $query = $request->input('q', '');
+        $type = $request->input('type');
+        
+        $tagsQuery = \App\Models\Tag::query();
+        
+        if ($query) {
+            $tagsQuery->where('name', 'like', "%{$query}%");
+        }
+        
+        if ($type) {
+            $tagsQuery->where('type', $type);
+        }
+        
+        $tags = $tagsQuery->select('id', 'name', 'type', 'color')
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
+            
+        return response()->json([
+            'success' => true,
+            'data' => $tags
+        ]);
+    }
+
     public function getFilters()
     {
         $brands = $this->carService->getCarBrands();
         $types = $this->carService->getCarTypes();
         $stores = $this->carService->getStores();
+        $tags = \App\Models\Tag::select('id', 'name', 'type', 'color')->get();
+        $models = \App\Models\CarModel::with('carBrand')->select('id', 'name', 'slug', 'car_brand_id')->get();
 
         return response()->json([
             'success' => true,
@@ -313,6 +399,8 @@ class CarController extends Controller
                 'brands' => $brands,
                 'types' => $types,
                 'stores' => $stores,
+                'tags' => $tags,
+                'models' => $models,
             ]
         ]);
     }

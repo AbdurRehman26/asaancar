@@ -25,10 +25,28 @@ class CarResource extends JsonResource
             'id' => $this->id,
             'store_id' => $this->store_id,
             'car_brand_id' => $this->car_brand_id,
+            'car_model_id' => $this->car_model_id,
             'car_type_id' => $this->car_type_id,
             'brand' => new CarBrandResource($this->whenLoaded('carBrand')),
+            'carModel' => $this->whenLoaded('carModel', function () {
+                return [
+                    'id' => $this->carModel->id,
+                    'name' => $this->carModel->name,
+                    'slug' => $this->carModel->slug,
+                ];
+            }),
             'type' => new CarTypeResource($this->whenLoaded('carType')),
             'store' => new StoreResource($this->whenLoaded('store')),
+            'tags' => $this->whenLoaded('tags', function () {
+                return $this->tags->map(function ($tag) {
+                    return [
+                        'id' => $tag->id,
+                        'name' => $tag->name,
+                        'type' => $tag->type,
+                        'color' => $tag->color,
+                    ];
+                });
+            }),
             'name' => $this->name,
             'model' => $this->model,
             'year' => $this->year,

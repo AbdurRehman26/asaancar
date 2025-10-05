@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
         $specificUser->assignRole('store_owner');
 
         // 3. Seed car brands, types, engines
-        $carBrands = \App\Models\CarBrand::factory(8)->create();
+        $carBrands = \App\Models\CarBrand::factory(10)->create();
 
 
         // 4. Seed stores
@@ -61,6 +61,8 @@ class DatabaseSeeder extends Seeder
         // 8. Optionally seed car offers, store offers, etc.
         $this->call([
             CarTypeSeeder::class,
+            CarModelSeeder::class,
+            ColorSeeder::class,
             CarOfferSeeder::class,
             StoreOfferSeeder::class,
             CitySeeder::class,

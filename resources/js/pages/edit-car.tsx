@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import ImageUpload from '@/components/ImageUpload';
+import ModelSelector from '@/components/ModelSelector';
 
 export default function EditCarPage() {
   const { id } = useParams();
@@ -26,6 +27,7 @@ export default function EditCarPage() {
   });
   const [carBrands, setCarBrands] = useState<{ id: number; name: string }[]>([]);
   const [carTypes, setCarTypes] = useState<{ id: number; name: string }[]>([]);
+  const [colors, setColors] = useState<{ id: number; name: string; hex_code: string }[]>([]);
   const [stores, setStores] = useState<{ id: number; name: string }[]>([]);
   const [uploadedImages, setUploadedImages] = useState<{ url: string; filename: string; size: number; mime_type: string }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,20 +38,23 @@ export default function EditCarPage() {
       setLoading(true);
       try {
         // Fetch car data and form options in parallel
-        const [carRes, brandsRes, typesRes, storesRes] = await Promise.all([
+        const [carRes, brandsRes, typesRes, colorsRes, storesRes] = await Promise.all([
           apiFetch(`/api/customer/cars/${id}`),
           apiFetch('/api/customer/car-brands'),
           apiFetch('/api/customer/car-types'),
+          apiFetch('/api/colors'),
           apiFetch('/api/customer/stores'),
         ]);
 
         // Set form options first
         const brandsData = await brandsRes.json();
         const typesData = await typesRes.json();
+        const colorsData = await colorsRes.json();
         const storesData = await storesRes.json();
         
         setCarBrands(brandsData.data || []);
         setCarTypes(typesData.data || []);
+        setColors(colorsData.data || []);
         setStores(storesData.stores || []);
 
         if (carRes.ok) {
@@ -115,7 +120,12 @@ export default function EditCarPage() {
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
+
+  const handleModelChange = (modelName: string) => {
+    setForm({ ...form, model: modelName });
   };
 
   const moveImage = (fromIndex: number, toIndex: number) => {
@@ -231,21 +241,6 @@ export default function EditCarPage() {
               </select>
             </div>
             <div>
-              <label className="block mb-1 font-medium">Brand</label>
-              <select
-                name="car_brand_id"
-                value={form.car_brand_id}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              >
-                <option value="" disabled>Select a brand</option>
-                {carBrands.map(brand => (
-                  <option key={brand.id} value={brand.id}>{brand.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
               <label className="block mb-1 font-medium">Type</label>
               <select
                 name="car_type_id"
@@ -261,16 +256,28 @@ export default function EditCarPage() {
               </select>
             </div>
             <div>
-              <label className="block mb-1 font-medium">Model</label>
-              <input
-                type="text"
-                name="model"
-                value={form.model}
+              <label className="block mb-1 font-medium">Brand</label>
+              <select
+                name="car_brand_id"
+                value={form.car_brand_id}
                 onChange={handleChange}
                 className="w-full border rounded px-3 py-2"
                 required
-                maxLength={255}
-                placeholder="e.g., Civic"
+              >
+                <option value="" disabled>Select a brand</option>
+                {carBrands.map(brand => (
+                  <option key={brand.id} value={brand.id}>{brand.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">Model</label>
+              <ModelSelector
+                selectedModel={form.model}
+                onModelChange={handleModelChange}
+                brandId={form.car_brand_id}
+                placeholder="Type or select a model..."
+                disabled={!form.car_brand_id}
               />
             </div>
             <div>
@@ -289,16 +296,18 @@ export default function EditCarPage() {
             </div>
             <div>
               <label className="block mb-1 font-medium">Color</label>
-              <input
-                type="text"
+              <select
                 name="color"
                 value={form.color}
                 onChange={handleChange}
                 className="w-full border rounded px-3 py-2"
                 required
-                maxLength={255}
-                placeholder="e.g., Blue"
-              />
+              >
+                <option value="" disabled>Select a color</option>
+                {colors.map(color => (
+                  <option key={color.id} value={color.name}>{color.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block mb-1 font-medium">Number of Seats</label>

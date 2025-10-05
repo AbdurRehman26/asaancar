@@ -128,6 +128,29 @@ class CarResource extends Resource
                             ->label('Description')
                             ->rows(3)
                             ->maxLength(1000),
+                        Forms\Components\Select::make('tags')
+                            ->label('Tags')
+                            ->relationship('tags', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Tag Name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('type')
+                                    ->label('Tag Type')
+                                    ->maxLength(255),
+                                Forms\Components\ColorPicker::make('color')
+                                    ->label('Tag Color'),
+                                Forms\Components\Textarea::make('description')
+                                    ->label('Tag Description')
+                                    ->rows(2),
+                            ])
+                            ->createOptionUsing(function (array $data) {
+                                return \App\Models\Tag::create($data);
+                            }),
                         Forms\Components\FileUpload::make('image_urls')
                             ->label('Car Images')
                             ->multiple()

@@ -68,11 +68,15 @@ Route::prefix('cars')->group(function () {
     Route::get('/{id}/edit-form', [CarController::class, 'showWithOfferForm']);
     Route::get('/search', [CarController::class, 'search']);
     Route::get('/filters', [CarController::class, 'getFilters']);
+    Route::get('/tags/search', [CarController::class, 'searchTags']);
 });
 
 // Public filter options (no authentication required) - for customer frontend
 Route::get('/car-brands', [CarBrandController::class, 'index']);
 Route::get('/car-types', [CarTypeController::class, 'index']);
+Route::get('/car-models', [\App\Http\Controllers\Customer\CarModelController::class, 'index']);
+Route::get('/car-models/brand/{brandId}', [\App\Http\Controllers\Customer\CarModelController::class, 'getByBrand']);
+Route::get('/colors', [\App\Http\Controllers\Customer\ColorController::class, 'index']);
 
 // Public guest booking endpoint
 Route::post('/guest-booking', [BookingController::class, 'guestBooking']);

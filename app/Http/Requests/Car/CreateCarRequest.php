@@ -58,6 +58,8 @@ class CreateCarRequest extends FormRequest
             'image_urls.*' => 'url',
             'with_driver_rate' => 'nullable|numeric|min:0',
             'without_driver_rate' => 'nullable|numeric|min:0',
+            'tag_ids' => 'nullable|array',
+            'tag_ids.*' => 'exists:tags,id',
         ];
     }
 

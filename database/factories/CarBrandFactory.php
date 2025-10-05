@@ -11,7 +11,7 @@ class CarBrandFactory extends Factory
 {
     public function definition(): array
     {
-        $brands = ['Toyota', 'Honda', 'Suzuki', 'Nissan', 'Daihatsu', 'Changan', 'Kia', 'Hyundai'];
+        $brands = ['Toyota', 'Honda', 'Suzuki', 'Nissan', 'Daihatsu', 'Changan', 'Kia', 'Hyundai', 'BMW', 'Mercedes', 'Audi'];
         return [
             'name' => $this->faker->unique()->randomElement($brands),
         ];

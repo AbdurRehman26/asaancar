@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
+import TagSelector from './TagSelector';
 
 type CarFiltersType = {
   brand_id: string;
@@ -10,6 +11,7 @@ type CarFiltersType = {
   min_seats: string;
   max_price: string;
   city_id: string;
+  tag_ids: number[];
 };
 
 type CarBrand = {
@@ -209,6 +211,14 @@ const CarFilters: React.FC<CarFiltersProps> = ({
               value={filters.max_price}
               onChange={(e) => setFilters({...filters, max_price: e.target.value})}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Tags</label>
+            <TagSelector
+              selectedTags={filters.tag_ids || []}
+              onTagsChange={(tagIds) => setFilters({...filters, tag_ids: tagIds})}
+              placeholder="Search tags to filter cars..."
             />
           </div>
           <div className="flex items-end">

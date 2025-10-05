@@ -35,6 +35,8 @@ class UpdateCarRequest extends FormRequest
             'description' => 'nullable|string|max:1000',
             'image_urls' => 'nullable|array',
             'image_urls.*' => 'string|url',
+            'tag_ids' => 'nullable|array',
+            'tag_ids.*' => 'exists:tags,id',
         ];
     }
 

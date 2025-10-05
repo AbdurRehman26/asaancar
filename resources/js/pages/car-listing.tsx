@@ -56,6 +56,7 @@ export default function CarListing() {
     min_seats: string;
     max_price: string;
     city_id: string;
+    tag_ids: number[];
     pickup_location?: string;
     pickup_date?: string;
     pickup_time?: string;
@@ -74,6 +75,7 @@ export default function CarListing() {
       min_seats: queryParams.get('min_seats') || '',
       max_price: queryParams.get('max_price') || '',
       city_id: queryParams.get('city_id') || '',
+      tag_ids: queryParams.get('tag_ids') ? queryParams.get('tag_ids')!.split(',').map(Number) : [],
       pickup_location: queryParams.get('pickup_location') || '',
       pickup_date: queryParams.get('pickup_date') || '',
       pickup_time: queryParams.get('pickup_time') || '',
