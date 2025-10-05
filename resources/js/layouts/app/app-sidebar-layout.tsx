@@ -13,11 +13,11 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWi
     return (
         <div className="flex min-h-screen w-full flex-col pt-16">
             {/* Main Navbar */}
-            <Navbar 
+            <Navbar
                 auth={{ user }}
             />
             {/* Sidebar Layout */}
-            <div className="flex flex-1 ml-64">
+            <div className="flex flex-1 ml-64 mt-2.5">
                 <AppShell variant="sidebar">
                     <AppSidebar />
                     <AppContent variant="sidebar" className="overflow-x-hidden">

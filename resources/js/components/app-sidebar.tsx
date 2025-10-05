@@ -18,7 +18,7 @@ export function AppSidebar() {
         wasLoginOpen.current = loginOpen;
     }, [user, loginOpen]);
     return (
-        <Sidebar collapsible="icon">
+        <Sidebar collapsible="icon" className="mt-2">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>

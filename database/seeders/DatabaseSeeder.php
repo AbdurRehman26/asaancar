@@ -32,31 +32,11 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        $specificUser->assignRole('store_owner');
+        $specificUser->assignRole('admin');
 
         // 3. Seed car brands, types, engines
         $carBrands = \App\Models\CarBrand::factory(10)->create();
 
-
-        // 4. Seed stores
-        $stores = \App\Models\Store::factory(10)->create();
-
-        // 5. Seed users and assign roles
-        $storeOwners = \App\Models\User::factory(5)->create();
-        $customers = \App\Models\User::factory(10)->create();
-        $admins = \App\Models\User::factory(2)->create();
-
-        foreach ($storeOwners as $user) {
-            $user->assignRole('store_owner');
-            // Attach each store owner to 1-3 random stores
-            $user->stores()->attach($stores->random(rand(1,3))->pluck('id')->toArray());
-        }
-        foreach ($customers as $user) {
-            $user->assignRole('customer');
-        }
-        foreach ($admins as $user) {
-            $user->assignRole('admin');
-        }
 
         // 8. Optionally seed car offers, store offers, etc.
         $this->call([
@@ -64,31 +44,10 @@ class DatabaseSeeder extends Seeder
             CarModelSeeder::class,
             ColorSeeder::class,
             YearSeeder::class,
+            StoreSeeder::class,
             CarOfferSeeder::class,
             StoreOfferSeeder::class,
             CitySeeder::class,
         ]);
-
-        // 6. Seed cars (linked to stores, brands, types, engines)
-        $cars = collect();
-        foreach ($stores as $store) {
-            $cars = $cars->merge(\App\Models\Car::factory(8)->make()->each(function($car) use ($store, $carBrands) {
-                $car->store_id = $store->id;
-                $car->car_brand_id = $carBrands->random()->id;
-                $car->car_type_id = \App\Models\CarType::inRandomOrder()->first()->id;
-                $car->save();
-            }));
-        }
-
-        // 7. Seed bookings (linked to users, cars, stores)
-        $allUsers = $storeOwners->merge($customers);
-        foreach ($cars as $car) {
-            \App\Models\Booking::factory(3)->make()->each(function($booking) use ($allUsers, $car) {
-                $booking->user_id = $allUsers->random()->id;
-                $booking->car_id = $car->id;
-                $booking->store_id = $car->store_id;
-                $booking->save();
-            });
-        }
     }
 }

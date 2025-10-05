@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import TagSelector from './TagSelector';
 
 type CarFiltersType = {
   brand_id: string;
@@ -93,7 +92,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
         const data = await response.json();
         const allCities = data.data || data;
         // Filter to only show Karachi for now
-        const karachiOnly = allCities.filter((city: City) => 
+        const karachiOnly = allCities.filter((city: City) =>
           city.name.toLowerCase() === 'karachi'
         );
         setCities(karachiOnly);
@@ -118,8 +117,8 @@ const CarFilters: React.FC<CarFiltersProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 w-full">
           <div>
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">City</label>
-            <select 
-              value={filters.city_id} 
+            <select
+              value={filters.city_id}
               onChange={(e) => setFilters({...filters, city_id: e.target.value})}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
               disabled={citiesLoading}
@@ -134,8 +133,8 @@ const CarFilters: React.FC<CarFiltersProps> = ({
           </div>
           <div>
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Brand</label>
-            <select 
-              value={filters.brand_id} 
+            <select
+              value={filters.brand_id}
               onChange={(e) => setFilters({...filters, brand_id: e.target.value})}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
               disabled={brandsLoading}
@@ -150,8 +149,8 @@ const CarFilters: React.FC<CarFiltersProps> = ({
           </div>
           <div>
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Type</label>
-            <select 
-              value={filters.type_id} 
+            <select
+              value={filters.type_id}
               onChange={(e) => setFilters({...filters, type_id: e.target.value})}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
               disabled={carTypesLoading}
@@ -166,8 +165,8 @@ const CarFilters: React.FC<CarFiltersProps> = ({
           </div>
           <div>
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Transmission</label>
-            <select 
-              value={filters.transmission} 
+            <select
+              value={filters.transmission}
               onChange={(e) => setFilters({...filters, transmission: e.target.value})}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             >
@@ -178,8 +177,8 @@ const CarFilters: React.FC<CarFiltersProps> = ({
           </div>
           <div>
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Fuel Type</label>
-            <select 
-              value={filters.fuel_type} 
+            <select
+              value={filters.fuel_type}
               onChange={(e) => setFilters({...filters, fuel_type: e.target.value})}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             >
@@ -191,8 +190,8 @@ const CarFilters: React.FC<CarFiltersProps> = ({
           </div>
           <div>
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Min Seats</label>
-            <select 
-              value={filters.min_seats} 
+            <select
+              value={filters.min_seats}
               onChange={(e) => setFilters({...filters, min_seats: e.target.value})}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             >
@@ -213,16 +212,8 @@ const CarFilters: React.FC<CarFiltersProps> = ({
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             />
           </div>
-          <div className="col-span-2">
-            <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Tags</label>
-            <TagSelector
-              selectedTags={filters.tag_ids || []}
-              onTagsChange={(tagIds) => setFilters({...filters, tag_ids: tagIds})}
-              placeholder="Search tags to filter cars..."
-            />
-          </div>
           <div className="flex items-end">
-            <button 
+            <button
               onClick={handleSearch}
               disabled={loading}
               className="w-full bg-[#7e246c] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#6a1f5c] transition-colors disabled:opacity-50 flex items-center justify-center shadow"
@@ -237,4 +228,4 @@ const CarFilters: React.FC<CarFiltersProps> = ({
   );
 };
 
-export default CarFilters; 
+export default CarFilters;

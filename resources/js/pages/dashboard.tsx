@@ -33,8 +33,8 @@ export default function Dashboard() {
 // Car Listings Section
 export function CarListings() {
     const { loading } = useAuth();
-    const [selectedStore, setSelectedStore] = useState<{ id: string; name: string } | null>(null);
-    const [userStores, setUserStores] = useState<Array<{ id: string; name: string }>>([]);
+    const [selectedStore, setSelectedStore] = useState<{ id: number; name: string } | null>(null);
+    const [userStores, setUserStores] = useState<Array<{ id: number; name: string }>>([]);
 
     // Car listing state
     const [cars, setCars] = useState<Array<{ id: string; name: string }>>([]);
@@ -81,13 +81,13 @@ export function CarListings() {
         
         // Only add store_id if a specific store is selected (not "All Stores")
         if (selectedStore) {
-            params.append('store_id', selectedStore.id);
+            params.append('store_id', selectedStore.id.toString());
         }
         
         params.append('per_page', perPageState.toString());
         params.append('page', currentPage.toString());
         Object.entries(filters).forEach(([key, value]) => {
-            if (value) params.append(key, value);
+            if (value) params.append(key, Array.isArray(value) ? value.join(',') : value.toString());
         });
         fetch(`/api/admin/cars?${params.toString()}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -148,7 +148,7 @@ export function CarListings() {
                             if (storeId === 'all') {
                                 setSelectedStore(null);
                             } else {
-                                const store = userStores.find(s => s.id === storeId);
+                                const store = userStores.find(s => s.id.toString() === storeId);
                                 setSelectedStore(store || null);
                             }
                         }}
@@ -259,8 +259,8 @@ export function Messages() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [conversationsLoading, setConversationsLoading] = useState(true);
     const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
-    const [selectedStore, setSelectedStore] = useState<{ id: string; name: string } | null>(null);
-    const [userStores, setUserStores] = useState<Array<{ id: string; name: string }>>([]);
+    const [selectedStore, setSelectedStore] = useState<{ id: number; name: string } | null>(null);
+    const [userStores, setUserStores] = useState<Array<{ id: number; name: string }>>([]);
 
     // (No role-based redirects)
 
@@ -286,7 +286,7 @@ export function Messages() {
         setConversationsLoading(true);
         const params = new URLSearchParams();
         if (selectedStore) {
-            params.append('store_id', selectedStore.id);
+            params.append('store_id', selectedStore.id.toString());
         }
         
         fetch(`/api/chat/conversations?${params.toString()}`, {
@@ -319,7 +319,7 @@ export function Messages() {
                             if (storeId === 'all') {
                                 setSelectedStore(null);
                             } else {
-                                const store = userStores.find(s => s.id === storeId);
+                                const store = userStores.find(s => s.id.toString() === storeId);
                                 setSelectedStore(store || null);
                             }
                         }}
@@ -406,8 +406,8 @@ export function Messages() {
 export function Home() {
     const [stats, setStats] = useState({ cars: 0, bookings: 0, stores: 0, messages: 0 });
     const { user } = useAuth();
-    const [selectedStore, setSelectedStore] = useState<{ id: string; name: string } | null>(null);
-    const [userStores, setUserStores] = useState<Array<{ id: string; name: string }>>([]);
+    const [selectedStore, setSelectedStore] = useState<{ id: number; name: string } | null>(null);
+    const [userStores, setUserStores] = useState<Array<{ id: number; name: string }>>([]);
     useEffect(() => {
         async function fetchStores() {
             const token = localStorage.getItem('token');
@@ -425,7 +425,7 @@ export function Home() {
             const token = localStorage.getItem('token');
             const params = new URLSearchParams();
             if (selectedStore) {
-                params.append('store_id', selectedStore.id);
+                params.append('store_id', selectedStore.id.toString());
             }
             
             const [carsRes, bookingsRes, storesRes, messagesRes] = await Promise.all([
@@ -462,7 +462,7 @@ export function Home() {
                             if (storeId === 'all') {
                                 setSelectedStore(null);
                             } else {
-                                const store = userStores.find(s => s.id === storeId);
+                                const store = userStores.find(s => s.id.toString() === storeId);
                                 setSelectedStore(store || null);
                             }
                         }}
@@ -544,8 +544,8 @@ export function StoreBookings() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPage, setPerPage] = useState(10);
-    const [selectedStore, setSelectedStore] = useState<{ id: string; name: string } | null>(null);
-    const [userStores, setUserStores] = useState<Array<{ id: string; name: string }>>([]);
+    const [selectedStore, setSelectedStore] = useState<{ id: number; name: string } | null>(null);
+    const [userStores, setUserStores] = useState<Array<{ id: number; name: string }>>([]);
 
     useEffect(() => {
         // Fetch stores for the user
@@ -576,7 +576,7 @@ export function StoreBookings() {
         const params = new URLSearchParams();
         params.append('page', currentPage.toString());
         params.append('per_page', perPage.toString());
-        params.append('store_id', selectedStore.id);
+        params.append('store_id', selectedStore.id.toString());
         
         fetch(`/api/dashboard/store-bookings?${params.toString()}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -617,7 +617,7 @@ export function StoreBookings() {
                             if (storeId === 'all') {
                                 setSelectedStore(null);
                             } else {
-                                const store = userStores.find(s => s.id === storeId);
+                                const store = userStores.find(s => s.id.toString() === storeId);
                                 setSelectedStore(store || null);
                             }
                         }}

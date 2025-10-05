@@ -82,11 +82,11 @@ Route::get('/years', [\App\Http\Controllers\Customer\YearController::class, 'ind
 // Public guest booking endpoint
 Route::post('/guest-booking', [BookingController::class, 'guestBooking']);
 
+// User information endpoint
+Route::get('/user', [\App\Http\Controllers\Api\UserController::class, 'me'])->middleware('auth:sanctum');
+
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return new \App\Http\Resources\UserResource($request->user());
-    });
     Route::get('/dashboard', function (Request $request) {
         return response()->json(['message' => 'Welcome to the dashboard!']);
     });
@@ -159,4 +159,8 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/cars/stats', [AdminCarController::class, 'stats']);
     Route::get('/cars/filters', [AdminCarController::class, 'getFilters']);
     Route::get('/cars/{id}', [AdminCarController::class, 'show']);
+    
+    // Admin Store Management Routes
+    Route::get('/stores', [\App\Http\Controllers\Customer\StoreController::class, 'index']);
+    Route::get('/stores/{id}', [\App\Http\Controllers\Customer\StoreController::class, 'show']);
 });

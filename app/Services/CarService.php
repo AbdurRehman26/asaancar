@@ -378,6 +378,16 @@ class CarService
         ->whereHas('store');
 
         // If no specific store_id is provided and user is authenticated, filter by user's stores
+        // Admin users can see all cars, regular users only see cars from their stores
+        if (empty($filters['store_id']) && $user && !$user->hasRole('admin')) {
+            $userStoreIds = $user->stores()->pluck('stores.id')->toArray();
+            if (!empty($userStoreIds)) {
+                $query->whereIn('store_id', $userStoreIds);
+            } else {
+                // If user has no stores, return empty result
+                $query->where('id', 0);
+            }
+        }
 
         // Apply filters
         if (!empty($filters['brand_id'])) {

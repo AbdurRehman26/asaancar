@@ -38,7 +38,15 @@ class StoreController extends Controller
      */
     public function index()
     {
-        $stores = auth()->user()->stores()->paginate(10);
+        $user = auth()->user();
+        
+        // If user is admin, show all stores; otherwise show only user's stores
+        if ($user->hasRole('admin')) {
+            $stores = Store::with('users')->paginate(10);
+        } else {
+            $stores = $user->stores()->paginate(10);
+        }
+        
         $cities = City::all();
         return response()->json([
             'stores' => StoreResource::collection($stores),
