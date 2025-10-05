@@ -77,6 +77,7 @@ Route::get('/car-types', [CarTypeController::class, 'index']);
 Route::get('/car-models', [\App\Http\Controllers\Customer\CarModelController::class, 'index']);
 Route::get('/car-models/brand/{brandId}', [\App\Http\Controllers\Customer\CarModelController::class, 'getByBrand']);
 Route::get('/colors', [\App\Http\Controllers\Customer\ColorController::class, 'index']);
+Route::get('/years', [\App\Http\Controllers\Customer\YearController::class, 'index']);
 
 // Public guest booking endpoint
 Route::post('/guest-booking', [BookingController::class, 'guestBooking']);

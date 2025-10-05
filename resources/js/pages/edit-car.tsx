@@ -28,6 +28,7 @@ export default function EditCarPage() {
   const [carBrands, setCarBrands] = useState<{ id: number; name: string }[]>([]);
   const [carTypes, setCarTypes] = useState<{ id: number; name: string }[]>([]);
   const [colors, setColors] = useState<{ id: number; name: string; hex_code: string }[]>([]);
+  const [years, setYears] = useState<{ id: number; year: number }[]>([]);
   const [stores, setStores] = useState<{ id: number; name: string }[]>([]);
   const [uploadedImages, setUploadedImages] = useState<{ url: string; filename: string; size: number; mime_type: string }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,11 +39,12 @@ export default function EditCarPage() {
       setLoading(true);
       try {
         // Fetch car data and form options in parallel
-        const [carRes, brandsRes, typesRes, colorsRes, storesRes] = await Promise.all([
+        const [carRes, brandsRes, typesRes, colorsRes, yearsRes, storesRes] = await Promise.all([
           apiFetch(`/api/customer/cars/${id}`),
           apiFetch('/api/customer/car-brands'),
           apiFetch('/api/customer/car-types'),
           apiFetch('/api/colors'),
+          apiFetch('/api/years'),
           apiFetch('/api/customer/stores'),
         ]);
 
@@ -50,11 +52,13 @@ export default function EditCarPage() {
         const brandsData = await brandsRes.json();
         const typesData = await typesRes.json();
         const colorsData = await colorsRes.json();
+        const yearsData = await yearsRes.json();
         const storesData = await storesRes.json();
         
         setCarBrands(brandsData.data || []);
         setCarTypes(typesData.data || []);
         setColors(colorsData.data || []);
+        setYears(yearsData.data || []);
         setStores(storesData.stores || []);
 
         if (carRes.ok) {
@@ -282,17 +286,18 @@ export default function EditCarPage() {
             </div>
             <div>
               <label className="block mb-1 font-medium">Year</label>
-              <input
-                type="number"
+              <select
                 name="year"
                 value={form.year}
                 onChange={handleChange}
                 className="w-full border rounded px-3 py-2"
                 required
-                min="1990"
-                max="2025"
-                placeholder="e.g., 2023"
-              />
+              >
+                <option value="" disabled>Select a year</option>
+                {years.map(year => (
+                  <option key={year.id} value={year.year}>{year.year}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block mb-1 font-medium">Color</label>

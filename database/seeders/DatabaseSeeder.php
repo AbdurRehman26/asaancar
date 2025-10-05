@@ -63,6 +63,7 @@ class DatabaseSeeder extends Seeder
             CarTypeSeeder::class,
             CarModelSeeder::class,
             ColorSeeder::class,
+            YearSeeder::class,
             CarOfferSeeder::class,
             StoreOfferSeeder::class,
             CitySeeder::class,
