@@ -22,21 +22,15 @@ class CarModelSeeder extends Seeder
             ],
             "Toyota" => [
                 "Corolla",
-                "Corolla X",
-                "XCorolla",
                 "Yaris",
                 "Revo",
                 "Rocco",
                 "Fortuner",
                 "GR",
                 "Land Cruiser",
-                "Land Cruiser V8",
-                "Land Cruiser Prado",
             ],
             "Honda" => [
                 "Civic",
-                "Civic X",
-                "Civic RS",
                 "Honda BR-V",
             ],
             "Kia" => [
@@ -51,11 +45,8 @@ class CarModelSeeder extends Seeder
             ],
             "Mercedes" => [
                 "Mercedes",
-                "Mercedes Benz AMG C200",
-                "Mercedes Benz AMG C180",
             ],
             "Audi" => [
-                "Audi",
                 "A4",
                 "A5",
                 "A6",
