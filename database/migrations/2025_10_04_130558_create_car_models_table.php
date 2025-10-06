@@ -16,18 +16,9 @@ return new class extends Migration
             $table->foreignId('car_brand_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->integer('year_from')->nullable();
-            $table->integer('year_to')->nullable();
-            $table->string('body_type')->nullable();
-            $table->integer('default_seats')->nullable();
-            $table->string('default_transmission')->nullable();
-            $table->string('default_fuel_type')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->string('image')->nullable();
             $table->timestamps();
-            
             $table->index(['car_brand_id', 'name']);
-            $table->index(['is_active', 'name']);
         });
     }
 

@@ -7,15 +7,12 @@ import { Settings, LogOut, LayoutGrid } from 'lucide-react';
 import type { UserMenuContentProps } from '@/types/user-menu-content';
 
 export function UserMenuContent({ user }: UserMenuContentProps) {
-    console.log('UserMenuContent user:', user);
     const cleanup = useMobileNavigation();
     const { logout } = useAuth();
     const handleLogout = () => {
         cleanup();
         logout();
     };
-    // Log the name directly before rendering
-    console.log('user.name:', user.name, typeof user.name, user);
 
     return (
         <>

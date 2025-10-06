@@ -54,7 +54,7 @@ export default function EditCarPage() {
         const colorsData = await colorsRes.json();
         const yearsData = await yearsRes.json();
         const storesData = await storesRes.json();
-        
+
         setCarBrands(brandsData.data || []);
         setCarTypes(typesData.data || []);
         setColors(colorsData.data || []);
@@ -64,17 +64,16 @@ export default function EditCarPage() {
         if (carRes.ok) {
           const response = await carRes.json();
           const carData = response.data; // Extract data from the nested structure
-          console.log('Car data received:', carData);
-          
+
           // Extract values from the nested structure
           const store = carData.store || {};
-          
+
           // Use IDs directly from the API response
           const brandId = carData.car_brand_id?.toString() || '';
           const typeId = carData.car_type_id?.toString() || '';
-          
 
-          
+
+
           const formData = {
             name: carData.name || '',
             car_brand_id: brandId,
@@ -90,15 +89,9 @@ export default function EditCarPage() {
             without_driver_rate: carData.withoutDriver?.toString() || '',
             with_driver_rate: carData.withDriver?.toString() || '',
           };
-          
-          console.log('Setting form data:', formData);
+
           setForm(formData);
-          
-          // Debug: Check if form is populated correctly after a delay
-          setTimeout(() => {
-            console.log('Form state after setting:', form);
-          }, 100);
-          
+
           // Set uploaded images if they exist
           if (carData.images && Array.isArray(carData.images)) {
             const images = carData.images.map((url: string) => ({
@@ -120,7 +113,7 @@ export default function EditCarPage() {
       }
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -141,23 +134,20 @@ export default function EditCarPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Check if form data is loaded
     if (!form.car_brand_id || !form.car_type_id || !form.store_id) {
       setError('Form data is still loading. Please wait and try again.');
       return;
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     // Validate required fields
     const requiredFields = ['car_brand_id', 'car_type_id', 'store_id', 'model', 'year', 'color', 'seats', 'transmission', 'fuel_type'];
     const missingFields = requiredFields.filter(field => !form[field as keyof typeof form]);
-    
-    console.log('Form data at submission:', form);
-    console.log('Missing fields:', missingFields);
-    
+
     if (missingFields.length > 0) {
       setError(`Please fill in all required fields: ${missingFields.join(', ')}`);
       setLoading(false);
@@ -171,10 +161,7 @@ export default function EditCarPage() {
         with_driver_rate: form.with_driver_rate,
         without_driver_rate: form.without_driver_rate,
       };
-      
-      // Debug: Log what's being sent
-      console.log('Request body being sent:', requestBody);
-      
+
       const res = await apiFetch(`/api/customer/cars/${id}`, {
         method: 'PUT',
         headers: {
@@ -413,7 +400,7 @@ export default function EditCarPage() {
             <div className="md:col-span-2">
               <label className="block mb-1 font-medium">Car Images</label>
               <p className="text-xs text-gray-500 mb-2">Images are displayed in upload order. Use ↑↓ buttons to reorder.</p>
-              
+
               {/* All Images Display */}
               {uploadedImages.length > 0 && (
                 <div className="mb-4">
@@ -432,7 +419,7 @@ export default function EditCarPage() {
                             }}
                           />
                         </div>
-                        
+
                         {/* Reorder Controls */}
                         <div className="absolute top-2 left-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           {index > 0 && (
@@ -458,7 +445,7 @@ export default function EditCarPage() {
                             </button>
                           )}
                         </div>
-                        
+
                         {/* Delete Button */}
                         <button
                           type="button"
@@ -471,7 +458,7 @@ export default function EditCarPage() {
                         >
                           <X className="w-4 h-4" />
                         </button>
-                        
+
                         {/* Image Info */}
                         <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                           <p className="truncate">{image.filename}</p>
@@ -482,7 +469,7 @@ export default function EditCarPage() {
                   </div>
                 </div>
               )}
-              
+
               {/* Add New Images */}
               {uploadedImages.length < 5 && (
                 <ImageUpload
@@ -511,4 +498,4 @@ export default function EditCarPage() {
       </div>
     </AppLayout>
   );
-} 
+}

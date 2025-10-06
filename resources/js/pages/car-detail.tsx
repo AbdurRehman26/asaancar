@@ -64,12 +64,12 @@ export default function CarDetailPage() {
   const [numberOfDays, setNumberOfDays] = useState(1);
   const [rentalType, setRentalType] = useState<'without_driver' | 'with_driver'>('without_driver');
   const [refillTank, setRefillTank] = useState(false);
-  
+
   // Inquiry state
   const [inquiry, setInquiry] = useReactState({ name: '', contact: '', message: '' });
   const [inquiryStatus, setInquiryStatus] = useReactState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [inquiryError, setInquiryError] = useReactState<string | null>(null);
-  
+
   // Address modal state
   const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -91,7 +91,7 @@ export default function CarDetailPage() {
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.currentTarget;
     const brandName = car?.brand;
-    
+
     if (brandName && typeof brandName === 'string') {
       const brandImagePath = getBrandImagePath(brandName);
       // Only try brand image if we haven't already tried it
@@ -100,7 +100,7 @@ export default function CarDetailPage() {
         return;
       }
     }
-    
+
     // Final fallback to placeholder
     target.src = '/images/car-placeholder.jpeg';
   };
@@ -125,11 +125,9 @@ export default function CarDetailPage() {
   };
 
   const fetchCarAndBooking = async () => {
-    console.log('Calling booking API for car:', carId);
     if (!carId) return;
     setLoading(true);
     try {
-      const carRes = await apiFetch(`/api/cars/${carId}`);
       if (!carRes.ok) {
         setError('Failed to fetch car details');
         setCar(null);
@@ -217,7 +215,7 @@ export default function CarDetailPage() {
                   <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-lg md:flex-row dark:bg-gray-800/80">
                       {/* Left: Car Image & Rate Details */}
                       <div className="flex flex-col gap-8 p-8 md:w-1/2">
-                          <div 
+                          <div
                               className={`flex items-center justify-center relative ${hasMultipleImages ? 'cursor-pointer' : ''}`}
                               onClick={hasMultipleImages ? () => setIsImageModalOpen(true) : undefined}
                           >

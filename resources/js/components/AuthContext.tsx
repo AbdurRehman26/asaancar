@@ -24,7 +24,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // On mount, check for token and fetch user
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
-    console.log('🔍 DEBUG: AuthContext - Stored token:', storedToken ? 'exists' : 'missing');
     if (storedToken) {
       setToken(storedToken);
       apiFetch('/api/user')
@@ -34,17 +33,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Unwrap .data if present
             setUser(userData.data || userData);
           } else {
-            console.log('🔍 DEBUG: AuthContext - User fetch failed, status:', res.status);
             setUser(null);
             localStorage.removeItem('token');
             setToken(null);
           }
         })
         .catch((error) => {
-          console.log('🔍 DEBUG: AuthContext - User fetch error:', error);
-          setUser(null);
-          localStorage.removeItem('token');
-          setToken(null);
+            console.error('Failed to fetch user:', error);
+            setUser(null);
+            localStorage.removeItem('token');
+            setToken(null);
         })
         .finally(() => setLoading(false));
     } else {
@@ -67,8 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
       const data = await res.json();
-      console.log('🔍 DEBUG: AuthContext - Login response:', data);
-      console.log('🔍 DEBUG: AuthContext - User from login:', data.user);
       localStorage.setItem('token', data.token);
       setToken(data.token);
       // Unwrap .data if present
@@ -131,4 +127,4 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
   return ctx;
-} 
+}

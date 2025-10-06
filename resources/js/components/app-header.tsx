@@ -38,9 +38,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const wasLoginOpen = useRef(false);
 
     useEffect(() => {
-        console.log('Auth user changed:', user, 'Login open:', loginOpen);
         if (user && loginOpen) {
-            console.log('Closing login modal');
             setLoginOpen(false);
         }
         wasLoginOpen.current = loginOpen;

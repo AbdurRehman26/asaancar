@@ -72,7 +72,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
           My Bookings
         </Link>
       )}
-      {user && Array.isArray(user.roles) && user.roles.includes('store_owner') && (
+    {user && Array.isArray(user.roles) && (user.roles.includes('store_owner') || user.roles.includes('admin')) && (
         <Link
           to="/dashboard"
           className={`flex items-center gap-2 text-sm font-semibold transition ${
@@ -188,7 +188,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
               My Bookings
             </Link>
           )}
-          {user && Array.isArray(user.roles) && user.roles.includes('store_owner') && (
+          {user && Array.isArray(user.roles) && (user.roles.includes('store_owner') || user.roles.includes('admin')) && (
             <Link
               to="/dashboard"
               className={`flex items-center gap-2 text-sm font-semibold transition ${

@@ -16,6 +16,7 @@ class CarModel extends Model
         'car_brand_id',
         'name',
         'slug',
+        'image',
     ];
 
     protected $casts = [

@@ -388,12 +388,9 @@ export default function Welcome() {
     useEffect(() => {
         const fetchLatestCars = async () => {
             try {
-                console.log('Fetching latest cars...');
                 const response = await fetch('/api/cars?per_page=6&page=1');
                 const data = await response.json();
-                console.log('Cars API response:', data);
                 setLatestCars(data.data || []);
-                console.log('Set latest cars:', data.data || []);
             } catch (error) {
                 console.error('Error fetching latest cars:', error);
                 setLatestCars([]);
@@ -409,10 +406,8 @@ export default function Welcome() {
     useEffect(() => {
         const fetchCarTypes = async () => {
             try {
-                console.log('Fetching car types...');
                 const response = await fetch('/api/car-types');
                 const data = await response.json();
-                console.log('Car types API response:', data);
                 setCarTypes(data.data || []);
             } catch (error) {
                 console.error('Error fetching car types:', error);
@@ -429,10 +424,8 @@ export default function Welcome() {
     useEffect(() => {
         const fetchCarBrands = async () => {
             try {
-                console.log('Fetching car brands...');
                 const response = await fetch('/api/car-brands');
                 const data = await response.json();
-                console.log('Car brands API response:', data);
                 setCarBrands(data.data || []);
             } catch (error) {
                 console.error('Error fetching car brands:', error);
@@ -444,23 +437,6 @@ export default function Welcome() {
 
         fetchCarBrands();
     }, []);
-
-    // Debug effect for car rendering
-    useEffect(() => {
-        console.log('Cars state updated - loading:', carsLoading, 'cars count:', latestCars.length);
-        if (latestCars.length > 0) {
-            console.log('First car data:', latestCars[0]);
-        }
-    }, [carsLoading, latestCars]);
-
-    // Additional debug effect to track when cars disappear
-    useEffect(() => {
-        const interval = setInterval(() => {
-            console.log('Current cars state - loading:', carsLoading, 'count:', latestCars.length);
-        }, 2000);
-
-        return () => clearInterval(interval);
-    }, [carsLoading, latestCars]);
 
     // Map car types to display data
     const getCarTypeDisplayData = (typeName: string) => {

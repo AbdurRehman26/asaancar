@@ -69,8 +69,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: { currentPage: nu
 }
 
 export default function Bookings() {
-  const { user, token } = useAuth();
-  console.log('user:', user, 'token:', token);
+  const { user } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -94,7 +93,6 @@ export default function Bookings() {
 
   const fetchBookings = () => {
     if (!user) {
-      console.log('No user, skipping bookings fetch');
       return;
     }
     setLoading(true);
@@ -104,13 +102,11 @@ export default function Bookings() {
     params.append('per_page', String(pagination.per_page));
     apiFetch(`/api/bookings?${params.toString()}`)
       .then(async (res) => {
-        console.log('Bookings API response:', res);
         if (!res.ok) {
           setError('Failed to fetch bookings');
           setBookings([]);
         } else {
           const data = await res.json();
-          console.log('Bookings data:', data);
           setBookings(data.data || []);
           setPagination({
             current_page: data.current_page,

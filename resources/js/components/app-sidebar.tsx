@@ -10,9 +10,7 @@ export function AppSidebar() {
     const wasLoginOpen = useRef(false);
 
     useEffect(() => {
-        console.log('Sidebar - Auth user changed:', user, 'Login open:', loginOpen);
         if (user && loginOpen) {
-            console.log('Sidebar - Closing login modal');
             setLoginOpen(false);
         }
         wasLoginOpen.current = loginOpen;
