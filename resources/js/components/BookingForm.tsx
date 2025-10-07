@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, Fuel, MapPin } from 'lucide-react';
+import { Calendar, Clock, MapPin } from 'lucide-react';
+import { useToast } from '@/contexts/ToastContext';
 import type { Car } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -63,14 +64,12 @@ export function BookingPrice({ car, rentalType, numberOfDays }: { car: Car; rent
     <div className="mt-6 bg-gradient-to-r from-[#7e246c]/10 to-purple-500/10 dark:from-[#7e246c]/20 dark:to-purple-500/20 rounded-xl p-6 border border-[#7e246c]/20">
       <div className="text-lg font-bold text-[#7e246c] dark:text-white mb-2">Total Amount</div>
       <div className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {totalAmount.toLocaleString()}</div>
-      <div className="mt-2 text-sm font-semibold">
-        Refill: <span className="font-bold">40 PKR / Km</span>
-      </div>
     </div>
   );
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings, rentalType, setRentalType, numberOfDays, setNumberOfDays, onMessageStore, pickupDate, setPickupDate, pickupTime, setPickupTime, selectedAddress, setSelectedAddress, selectedLatLng, setSelectedLatLng, refillTank, setRefillTank }) => {
+const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings, rentalType, setRentalType, numberOfDays, setNumberOfDays, onMessageStore, pickupDate, setPickupDate, pickupTime, setPickupTime, selectedAddress, setSelectedAddress, selectedLatLng, setSelectedLatLng, refillTank }) => {
+  const { success: showSuccess, error: showError } = useToast();
   // pickupAddress, pickupTime, pickupDate, selectedAddress, selectedLatLng are now controlled by parent
   const [notes, setNotes] = useState<string>('');
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -84,8 +83,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
   const [guestBookingError, setGuestBookingError] = useState<string | null>(null);
   const [guestBookingSuccess, setGuestBookingSuccess] = useState<string | null>(null);
 
-   
-   
+
+
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -224,9 +223,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
         const data = await res.json().catch(() => ({}));
         setGuestBookingStatus('error');
         setGuestBookingError(data.message || 'Failed to book as guest.');
+        showError('Guest Booking Failed', data.message || 'Failed to create booking. Please try again.');
       } else {
         setGuestBookingStatus('success');
         setGuestBookingSuccess('Booking successful!');
+        showSuccess('Guest Booking Successful', 'Your booking request has been sent successfully!');
         setGuestName('');
         setGuestPhone('');
         setNotes('');
@@ -234,6 +235,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
     } catch {
       setGuestBookingStatus('error');
       setGuestBookingError('Network error.');
+      showError('Network Error', 'Unable to connect. Please check your internet connection and try again.');
     }
   };
 
@@ -365,30 +367,36 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
               <div className="flex flex-col gap-2 flex-1">
                   <label className="font-semibold text-[#7e246c]">Rental Type</label>
                   <div className="flex gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                              type="radio"
-                              name="rentalType"
-                              value="without_driver"
-                              checked={rentalType === 'without_driver'}
-                              onChange={() => setRentalType('without_driver')}
-                              className="accent-[#7e246c] h-4 w-4"
-                          />
-                          <span className="font-semibold text-gray-700 dark:text-gray-200">Without Driver</span>
-                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">24 hrs/day</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                              type="radio"
-                              name="rentalType"
-                              value="with_driver"
-                              checked={rentalType === 'with_driver'}
-                              onChange={() => setRentalType('with_driver')}
-                              className="accent-[#7e246c] h-4 w-4"
-                          />
-                          <span className="font-semibold text-gray-700 dark:text-gray-200">With Driver</span>
-                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">10 hrs/day</span>
-                      </label>
+                      {/* Only show Without Driver option if price is available */}
+                      {car && typeof car.rental === 'number' && car.rental > 0 && (
+                          <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                  type="radio"
+                                  name="rentalType"
+                                  value="without_driver"
+                                  checked={rentalType === 'without_driver'}
+                                  onChange={() => setRentalType('without_driver')}
+                                  className="accent-[#7e246c] h-4 w-4"
+                              />
+                              <span className="font-semibold text-gray-700 dark:text-gray-200">Without Driver</span>
+                              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">24 hrs/day</span>
+                          </label>
+                      )}
+                      {/* Only show With Driver option if price is available */}
+                      {car && typeof car.withDriver === 'number' && car.withDriver > 0 && (
+                          <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                  type="radio"
+                                  name="rentalType"
+                                  value="with_driver"
+                                  checked={rentalType === 'with_driver'}
+                                  onChange={() => setRentalType('with_driver')}
+                                  className="accent-[#7e246c] h-4 w-4"
+                              />
+                              <span className="font-semibold text-gray-700 dark:text-gray-200">With Driver</span>
+                              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">10 hrs/day</span>
+                          </label>
+                      )}
                   </div>
               </div>
               <div className="flex flex-col gap-2 flex-1">
@@ -410,23 +418,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
           <div className="text-lg font-bold text-[#7e246c] dark:text-white mb-2">Total Amount</div>
           <div
               className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {totalAmount.toLocaleString()}</div>
-          <div className="mt-2 text-sm font-semibold">
-              Refill: <span className="font-bold">{refillTank ? 'Included' : '40 PKR / Km'}</span>
-          </div>
       </div>
 
-      <div className="mb-6">
-          <h3 className="text-lg font-bold text-[#7e246c] dark:text-white mb-3">Optional Service</h3>
-          <label
-              className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 cursor-pointer border-2 border-gray-200 dark:border-gray-700 hover:border-[#7e246c]/30 transition-all duration-200">
-              <Fuel className="h-5 w-5 text-[#7e246c]" />
-              <span className="flex-1 text-gray-700 dark:text-gray-300">
-                <span className="font-semibold text-gray-900 dark:text-white">Refill Tank</span>
-                <span className="block text-sm text-gray-500 dark:text-gray-400 mt-1">Refill fuel at the end of the day</span>
-              </span>
-              <input type="checkbox" checked={refillTank} onChange={e => setRefillTank(e.target.checked)} className="accent-[#7e246c] h-5 w-5 rounded" />
-          </label>
-      </div>
 
 {/* Book as Guest checkbox and fields for guests */}
 {!user && (
@@ -436,9 +429,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
         type="checkbox"
         checked={bookAsGuest}
         onChange={e => setBookAsGuest(e.target.checked)}
-        className="accent-[#7e246c] h-5 w-5 rounded"
+        className="accent-[#7e246c] mt-3 h-5 w-5 rounded"
       />
-      <span className="font-semibold text-[#7e246c]">Book as guest</span>
+      <span className="mt-3 font-semibold text-[#7e246c]">Book as guest</span>
     </label>
     {bookAsGuest && (
       <>

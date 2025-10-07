@@ -22,6 +22,7 @@ class CarModelSeeder extends Seeder
             ],
             "Toyota" => [
                 "Corolla",
+                "Corolla X",
                 "Yaris",
                 "Revo",
                 "Rocco",
@@ -31,6 +32,8 @@ class CarModelSeeder extends Seeder
             ],
             "Honda" => [
                 "Civic",
+                "Civic X",
+                "Civic RS",
                 "Honda BR-V",
             ],
             "Kia" => [
@@ -47,6 +50,7 @@ class CarModelSeeder extends Seeder
                 "Mercedes",
             ],
             "Audi" => [
+                "A3",
                 "A4",
                 "A5",
                 "A6",
@@ -63,6 +67,7 @@ class CarModelSeeder extends Seeder
         ];
 
         foreach ($brandModels as $brandName => $models) {
+
             // Find or create the brand
             $brand = CarBrand::firstOrCreate(
                 ['name' => $brandName],
@@ -70,9 +75,9 @@ class CarModelSeeder extends Seeder
             );
 
             echo "Processing brand: {$brandName} (ID: {$brand->id})\n";
-
             // Add models for this brand
             foreach ($models as $modelName) {
+
                 // Check if model already exists for this brand
                 $existingModel = CarModel::where('car_brand_id', $brand->id)
                     ->where('name', $modelName)
@@ -82,7 +87,6 @@ class CarModelSeeder extends Seeder
                     // Create unique slug by appending brand name if needed
                     $baseSlug = \Illuminate\Support\Str::slug($modelName);
                     $slug = $baseSlug;
-                    $counter = 1;
 
                     // Check if slug already exists
                     while (CarModel::where('slug', $slug)->exists()) {
@@ -109,10 +113,10 @@ class CarModelSeeder extends Seeder
                             $existingModel->update(['image' => $imagePath]);
                             echo "  Updated model: {$modelName} [Added Image: {$imagePath}]\n";
                         } else {
-                            echo "  Model already exists: {$modelName}\n";
+                            echo "  Model already exists: {$modelName} (no image found)\n";
                         }
                     } else {
-                        echo "  Model already exists: {$modelName}\n";
+                        echo "  Model already exists: {$modelName} (has image: {$existingModel->image})\n";
                     }
                 }
             }
@@ -146,11 +150,14 @@ class CarModelSeeder extends Seeder
             'Honda BR-V' => 'honda-brv',
             'Land Cruiser' => 'land-cruiser',
             'WagonR' => 'wagon-r',
-            'Corolla X' => 'corolla-x',
-            'XCorolla' => 'corolla-x',
+            'Corolla X' => 'corolla',
+            'XCorolla' => 'corolla',
             'A4' => 'audi',
             'A5' => 'audi',
             'A6' => 'audi',
+            'A3' => 'audi',
+            'Civic RS' => 'civic',
+            'Civic X' => 'civic',
         ];
 
         if (isset($specificMappings[$modelName])) {

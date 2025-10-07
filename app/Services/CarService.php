@@ -39,7 +39,9 @@ class CarService
     {
         $cars = $this->getAvailableCars();
 
-        return $cars->map(function ($car) {
+        return $cars->filter(function ($car) {
+            return $this->hasWithoutDriverPricing($car);
+        })->map(function ($car) {
             return $this->formatCarForListing($car);
         })->toArray();
     }
@@ -49,7 +51,7 @@ class CarService
      */
     public function getCarForListing(int $carId): ?array
     {
-        $car = Car::with(['carBrand', 'carType', 'store', 'carOffers' => function($query) {
+        $car = Car::with(['carBrand', 'carModel', 'carType', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where(function($q) {
                       $q->where(function($subQ) {
@@ -98,6 +100,12 @@ class CarService
             'fuel_type' => $car->fuel_type,
             'image' => $this->getPrimaryImage($car),
             'images' => $car->image_urls ?? [],
+            'carModel' => $car->carModel ? [
+                'id' => $car->carModel->id,
+                'name' => $car->carModel->name,
+                'slug' => $car->carModel->slug,
+                'image' => $car->carModel->image,
+            ] : null,
             'price' => $pricing,
             // Frontend pricing fields for booking summary
             'withoutDriver' => $pricing['perDay']['withoutDriver'],
@@ -129,7 +137,22 @@ class CarService
      */
     private function getBestActiveOffer(Car $car): ?CarOffer
     {
-        return $car->carOffers->sortByDesc('discount_percentage')->first();
+        // First try to find an offer with actual pricing (without driver or with driver)
+        $offerWithPricing = $car->carOffers->filter(function ($offer) {
+            return $offer->price_without_driver !== null || $offer->price_with_driver !== null;
+        })->sortByDesc('discount_percentage')->first();
+        
+        // If no offer with pricing found, return the offer with highest discount
+        return $offerWithPricing ?: $car->carOffers->sortByDesc('discount_percentage')->first();
+    }
+
+    /**
+     * Check if car has "without driver" pricing
+     */
+    private function hasWithoutDriverPricing(Car $car): bool
+    {
+        $bestOffer = $this->getBestActiveOffer($car);
+        return $bestOffer && $bestOffer->price_without_driver !== null;
     }
 
     /**
@@ -139,20 +162,20 @@ class CarService
     {
         // Use actual prices from car offer if available, otherwise use defaults
         if ($offer) {
-            $withoutDriver = $offer->price_without_driver ?? 150.00;
-            $withDriver = $offer->price_with_driver ?? 200.00;
+            $withoutDriver = $offer->price_without_driver;
+            $withDriver = $offer->price_with_driver;
             $currency = $offer->currency ?? 'PKR';
         } else {
             // Default pricing if no offer
-            $withoutDriver = 150.00;
-            $withDriver = 200.00;
+            $withoutDriver = null;
+            $withDriver = null;
             $currency = 'PKR';
         }
 
         return [
             'perDay' => [
-                'withoutDriver' => round($withoutDriver, 2),
-                'withDriver' => round($withDriver, 2),
+                'withoutDriver' => $withoutDriver ? round($withoutDriver, 2) : null,
+                'withDriver' => $withDriver ? round($withDriver, 2) : null,
             ],
             'currency' => $currency
         ];
@@ -175,13 +198,19 @@ class CarService
             }
         }
 
-        // If no car image, return brand image
+        // Second priority: Car model image
+        if ($car->carModel && $car->carModel->image) {
+            return $car->carModel->image;
+        }
+
+        // Third priority: Brand image
         if ($car->carBrand && $car->carBrand->name) {
             $brandName = strtolower($car->carBrand->name);
             return "/images/car-brands/{$brandName}.png";
         }
 
-        return null;
+        // Final fallback: placeholder
+        return '/images/car-placeholder.jpeg';
     }
 
     /**

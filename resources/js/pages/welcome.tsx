@@ -67,7 +67,7 @@ const CarCategoryCard = ({
 }) => (
     <div
         onClick={onClick}
-        className="group cursor-pointer rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg hover:border-[#7e246c] dark:border-neutral-800 dark:bg-gray-800/80"
+        className="group cursor-pointer rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg hover:border-[#7e246c] dark:hover:border-white dark:border-neutral-800 dark:bg-gray-800/80"
     >
         <div className="mb-4 h-32 overflow-hidden rounded-lg relative">
             <div className="flex h-full items-center justify-center">
@@ -90,12 +90,6 @@ const CarCategoryCard = ({
                 <div className={`text-4xl ${image.startsWith('/') ? 'hidden fallback-emoji' : ''}`}>
                     {image}
                 </div>
-            </div>
-            {/* Category name overlay on image */}
-            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <h3 className="text-white font-bold text-lg text-center px-2">
-                    {title}
-                </h3>
             </div>
         </div>
         <div className="text-center">
@@ -119,7 +113,7 @@ const CarBrandCard = ({
 }) => (
     <div
         onClick={onClick}
-        className="group cursor-pointer rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg hover:border-[#7e246c] dark:border-neutral-800 dark:bg-gray-800/80"
+        className="group cursor-pointer rounded-lg border border-neutral-200 bg-white p-6 transition-all hover:shadow-lg hover:border-[#7e246c] dark:hover:border-neutral-50 dark:border-neutral-800 dark:bg-gray-800/80"
     >
         <div className="mb-4 h-32 overflow-hidden rounded-lg relative">
             <div className="flex h-full items-center justify-center">
@@ -142,12 +136,6 @@ const CarBrandCard = ({
                 <div className={`text-4xl ${image.startsWith('/') ? 'hidden fallback-emoji' : ''}`}>
                     {image}
                 </div>
-            </div>
-            {/* Brand name overlay on image */}
-            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <h3 className="text-white font-bold text-lg text-center px-2">
-                    {title}
-                </h3>
             </div>
         </div>
         <div className="text-center">
@@ -214,16 +202,14 @@ interface CarData {
     description: string;
     image?: string;
     images?: string[];
+    carModel?: {
+        id: number;
+        name: string;
+        slug: string;
+        image?: string;
+    };
     price?: {
         perDay?: {
-            withoutDriver: number;
-            withDriver: number;
-        };
-        perHour?: {
-            withoutDriver: number;
-            withDriver: number;
-        };
-        perMinute?: {
             withoutDriver: number;
             withDriver: number;
         };
@@ -285,17 +271,17 @@ interface CarBrand {
 }
 
 const CarCard = ({
-    car
+    car,
+    navigate
 }: {
     car: CarData;
+    navigate: (path: string) => void;
 }) => {
     // Get the primary image (first image from images array or fallback to image field)
     const primaryImage = car.images && car.images.length > 0 ? car.images[0] : car.image;
 
     // Get pricing with fallbacks
-    const dailyPrice = car.price?.perDay?.withoutDriver || car.withoutDriver || 150;
-    const hourlyPrice = car.price?.perHour?.withoutDriver || Math.round((dailyPrice / 24) * 10) / 10;
-    const minutePrice = car.price?.perMinute?.withoutDriver || Math.round((dailyPrice / 24 / 60) * 100) / 100;
+    const dailyPrice = car.price?.perDay?.withDriver || car.withDriver || 150;
     const currency = car.price?.currency || car.currency || 'PKR';
 
     // Get brand image path
@@ -303,14 +289,20 @@ const CarCard = ({
         return `/images/car-brands/${brandName.toLowerCase()}.png`;
     };
 
-    // Handle image error - fallback to brand image or emoji
+    // Handle image error - fallback to car model image, then brand image, then emoji
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         const target = e.target as HTMLImageElement;
-        const brandName = car.brand;
 
+        // First try car model image
+        if (car.carModel?.image && target.src !== car.carModel.image) {
+            target.src = car.carModel.image;
+            return;
+        }
+
+        // Then try brand image
+        const brandName = car.brand;
         if (brandName) {
             const brandImagePath = getBrandImagePath(brandName);
-            // Only try brand image if we haven't already tried it
             if (target.src !== brandImagePath) {
                 target.src = brandImagePath;
                 return;
@@ -347,14 +339,7 @@ const CarCard = ({
                 <div className="text-sm">
                     <span className="font-medium text-[#7e246c]">from {dailyPrice} {currency}</span>
                     <span className="text-neutral-500"> /day</span>
-                </div>
-                <div className="text-sm">
-                    <span className="font-medium text-[#7e246c]">{hourlyPrice} {currency}</span>
-                    <span className="text-neutral-500"> /hour</span>
-                </div>
-                <div className="text-sm">
-                    <span className="font-medium text-[#7e246c]">{minutePrice} {currency}</span>
-                    <span className="text-neutral-500"> /minute</span>
+                    <div className="text-xs text-[#7e246c] font-medium">With driver</div>
                 </div>
             </div>
             <div className="mt-4 flex items-center justify-between">
@@ -362,8 +347,8 @@ const CarCard = ({
                     {car.specifications?.seats || 5} seats • {car.specifications?.transmission || 'Automatic'} • {car.specifications?.fuelType || 'Gasoline'}
                 </div>
                 <button
-                    onClick={() => window.location.href = `/car-detail/${car.id}`}
-                    className="rounded-lg bg-[#7e246c] px-4 py-2 text-sm font-medium text-white hover:bg-[#6a1f5c] transition-colors"
+                    onClick={() => navigate(`/car-detail/${car.id}`)}
+                    className="rounded-lg bg-[#7e246c] px-4 py-2 text-sm font-medium text-white hover:bg-[#6a1f5c] hover:shadow-md transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#7e246c] focus:ring-offset-2 active:scale-95 relative z-10"
                 >
                     View Details
                 </button>
@@ -658,10 +643,10 @@ export default function Welcome() {
                                 Choose from our wide selection of trusted car brands
                             </p>
                         </div>
-                        <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:max-w-none lg:grid-cols-4">
+                        <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:max-w-none lg:grid-cols-3 justify-items-center">
                             {carBrandsLoading ? (
                                 // Loading skeleton for car brands
-                                Array.from({ length: 4 }).map((_, index) => (
+                                Array.from({ length: 3 }).map((_, index) => (
                                     <div key={index} className="animate-pulse">
                                         <div className="h-32 rounded-lg bg-gray-200 dark:bg-gray-700 mb-4"></div>
                                         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
@@ -669,51 +654,31 @@ export default function Welcome() {
                                     </div>
                                 ))
                             ) : carBrands.length > 0 ? (
-                                carBrands.map((brand) => {
-                                    const displayData = getCarBrandDisplayData(brand.name);
-                                    return (
-                                        <CarBrandCard
-                                            key={brand.id}
-                                            title={brand.name}
-                                            subtitle={displayData.subtitle}
-                                            image={displayData.image}
-                                            onClick={() => navigate(`/cars?brand_id=${brand.id}`)}
-                                        />
-                                    );
-                                })
+                                carBrands
+                                    .filter((brand) =>
+                                        brand.name.toLowerCase() === 'toyota' ||
+                                        brand.name.toLowerCase() === 'honda' ||
+                                        brand.name.toLowerCase() === 'suzuki'
+                                    )
+                                    .map((brand) => {
+                                        const displayData = getCarBrandDisplayData(brand.name);
+                                        return (
+                                            <CarBrandCard
+                                                key={brand.id}
+                                                title={brand.name}
+                                                subtitle={displayData.subtitle}
+                                                image={displayData.image}
+                                                onClick={() => navigate(`/cars?brand_id=${brand.id}`)}
+                                            />
+                                        );
+                                    })
                             ) : (
-                                <div className="col-span-4 text-center py-12">
+                                <div className="col-span-3 text-center py-12">
                                     <div className="text-6xl mb-4">🚗</div>
                                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No car brands available</h3>
                                     <p className="text-neutral-600 dark:text-neutral-400">Check back later for car brand updates.</p>
                                 </div>
                             )}
-                        </div>
-                    </div>
-                </section>
-
-                {/* Why Choose Us Section */}
-                <section className="bg-neutral-50 py-16 dark:bg-gray-800">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="mx-auto max-w-2xl text-center">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-                                Why Rent A Car With AsaanCar?
-                            </h2>
-                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                AsaanCar is widely regarded as one of the best Car Rental Service Providers serving not only Karachi but other major cities of Pakistan as well.
-                            </p>
-                        </div>
-                        <div className="mx-auto mt-16 max-w-2xl lg:max-w-none">
-                            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                                {features.map((feature) => (
-                                    <FeatureCard
-                                        key={feature.title}
-                                        icon={feature.icon}
-                                        title={feature.title}
-                                        description={feature.description}
-                                    />
-                                ))}
-                            </div>
                         </div>
                     </div>
                 </section>
@@ -743,7 +708,7 @@ export default function Welcome() {
                                 ))
                             ) : latestCars.length > 0 ? (
                                 latestCars.map((car, index) => (
-                                    <CarCard key={car.id || index} car={car} />
+                                    <CarCard key={car.id || index} car={car} navigate={navigate} />
                                 ))
                             ) : (
                                 <div className="col-span-3 text-center py-12">
@@ -763,6 +728,32 @@ export default function Welcome() {
                                 </button>
                             </div>
                         )}
+                    </div>
+                </section>
+
+                {/* Why Choose Us Section */}
+                <section className="bg-neutral-50 py-16 dark:bg-gray-800">
+                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                        <div className="mx-auto max-w-2xl text-center">
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+                                Why Rent A Car With AsaanCar?
+                            </h2>
+                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+                                AsaanCar is widely regarded as one of the best Car Rental Service Providers serving not only Karachi but other major cities of Pakistan as well.
+                            </p>
+                        </div>
+                        <div className="mx-auto mt-16 max-w-2xl lg:max-w-none">
+                            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                                {features.map((feature) => (
+                                    <FeatureCard
+                                        key={feature.title}
+                                        icon={feature.icon}
+                                        title={feature.title}
+                                        description={feature.description}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </section>
 

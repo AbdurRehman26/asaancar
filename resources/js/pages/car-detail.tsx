@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useState as useReactState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import Navbar from '../components/navbar';
 import { apiFetch } from '@/lib/utils';
 import Chat from '../components/chat';
@@ -18,13 +19,47 @@ interface Car {
   name: string;
   image?: string;
   images?: string[];
+  brand?: string;
+  carModel?: {
+    id: number;
+    name: string;
+    slug: string;
+    image?: string;
+  };
+  specifications?: {
+    seats?: number;
+    fuelType?: string;
+    transmission?: string;
+    type?: string;
+  };
+  features?: string[];
+  minAge?: number;
+  currency?: string;
   rental?: number;
+  withDriver?: number;
   baseFare?: number;
   fuel?: number;
   overtime?: number;
-  currency?: string;
   store_id?: number;
-  store?: { id: number };
+  store?: {
+    id: number;
+    name?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    rating?: number;
+    reviews?: number;
+    description?: string;
+    logo_url?: string;
+  };
+  price?: {
+    perDay?: {
+      withoutDriver?: number;
+      withDriver?: number;
+    };
+    currency?: string;
+  };
+  withoutDriver?: number;
   [key: string]: unknown;
 }
 
@@ -48,6 +83,7 @@ interface Booking {
 export default function CarDetailPage() {
   const { user } = useAuth();
   const { id: carId } = useParams<{ id: string }>();
+  const { success: showSuccess, error: showError } = useToast();
   const [car, setCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,26 +111,51 @@ export default function CarDetailPage() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const searchBoxRef = React.useRef<google.maps.places.SearchBox | null>(null);
 
-  // Calculate guest booking price
-  const guestDailyPrice = car?.withDriver || 0; // Assuming withDriver is the price for 'with_driver'
-
-  // Check if car has multiple images
-  const hasMultipleImages = car?.images && car.images.length > 1;
-  const allImages = car?.images && car.images.length > 0 ? car.images : (car?.image ? [car.image] : []);
-
   // Get brand image path
   const getBrandImagePath = (brandName: string) => {
     return `/images/car-brands/${brandName.toLowerCase()}.png`;
   };
 
-  // Handle image error - fallback to brand image or placeholder
+  // Get primary image with fallback logic
+  const getPrimaryImage = () => {
+    // 1. First try car's main image
+    if (car?.image) {
+      return car.image.startsWith('/') ? car.image : `/${car.image}`;
+    }
+
+    // 2. Then try car model image
+    if (car?.carModel?.image) {
+      return car.carModel.image.startsWith('/') ? car.carModel.image : `/${car.carModel.image}`;
+    }
+
+    // 3. Then try brand image
+    if (car?.brand) {
+      return getBrandImagePath(car.brand);
+    }
+
+    // 4. Final fallback to placeholder
+    return '/images/car-placeholder.jpeg';
+  };
+
+  // Check if car has multiple images
+  const hasMultipleImages = car?.images && car.images.length > 1;
+  const allImages = car?.images && car.images.length > 0 ? car.images : [getPrimaryImage()];
+
+  // Handle image error - fallback to car model image, then brand image, then placeholder
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.currentTarget;
-    const brandName = car?.brand;
 
+    // First try car model image
+    if (car?.carModel?.image && target.src !== car.carModel.image) {
+      const modelImagePath = car.carModel.image.startsWith('/') ? car.carModel.image : `/${car.carModel.image}`;
+      target.src = modelImagePath;
+      return;
+    }
+
+    // Then try brand image
+    const brandName = car?.brand;
     if (brandName && typeof brandName === 'string') {
       const brandImagePath = getBrandImagePath(brandName);
-      // Only try brand image if we haven't already tried it
       if (target.src !== brandImagePath) {
         target.src = brandImagePath;
         return;
@@ -128,6 +189,7 @@ export default function CarDetailPage() {
     if (!carId) return;
     setLoading(true);
     try {
+      const carRes = await apiFetch(`/api/cars/${carId}`);
       if (!carRes.ok) {
         setError('Failed to fetch car details');
         setCar(null);
@@ -156,6 +218,24 @@ export default function CarDetailPage() {
     fetchCarAndBooking();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carId]);
+
+  // Set default rental type based on available pricing
+  useEffect(() => {
+    if (car) {
+      // If withDriver price is available and without_driver is not, default to with_driver
+      if (car.withDriver && car.withDriver > 0 && (!car.rental || car.rental <= 0)) {
+        setRentalType('with_driver');
+      }
+      // If without_driver price is available and with_driver is not, default to without_driver
+      else if (car.rental && car.rental > 0 && (!car.withDriver || car.withDriver <= 0)) {
+        setRentalType('without_driver');
+      }
+      // If both are available, keep the current selection or default to without_driver
+      else if (car.rental && car.rental > 0 && car.withDriver && car.withDriver > 0) {
+        // Keep current selection
+      }
+    }
+  }, [car]);
 
   useEffect(() => {
     if (user && loginOpen) {
@@ -195,13 +275,16 @@ export default function CarDetailPage() {
                 const data = await res.json().catch(() => ({}));
                 setInquiryStatus('error');
                 setInquiryError(data.message || 'Failed to send inquiry.');
+                showError('Inquiry Failed', data.message || 'Failed to send inquiry. Please try again.');
             } else {
                 setInquiryStatus('success');
                 setInquiry({ name: '', contact: '', message: '' });
+                showSuccess('Inquiry Sent', 'Your inquiry has been sent successfully to the store owner!');
             }
         } catch {
             setInquiryStatus('error');
             setInquiryError('Network error.');
+            showError('Network Error', 'Unable to send inquiry. Please check your internet connection and try again.');
         }
     };
 
@@ -226,7 +309,7 @@ export default function CarDetailPage() {
                                   </div>
                               )}
                               <img
-                                  src={car.image || '/images/car-placeholder.jpeg'}
+                                  src={getPrimaryImage()}
                                   alt={car.name}
                                   className="h-56 rounded-xl bg-gray-50 object-contain p-4 dark:bg-neutral-800"
                                   onError={handleImageError}
@@ -315,7 +398,7 @@ export default function CarDetailPage() {
                                           <td className="py-3 font-medium">With Driver</td>
                                           <td className="py-3 text-center font-semibold">10 hrs/day</td>
                                           <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                                              {car.currency} {guestDailyPrice.toLocaleString()}
+                                              {car.currency} {car.withDriver ? car.withDriver.toLocaleString() : 'N/A'}
                                           </td>
                                       </tr>
                                       <tr>
@@ -327,27 +410,51 @@ export default function CarDetailPage() {
                                       </tr>
                                   </tbody>
                               </table>
-                              <div className="mt-4 text-sm font-semibold text-[#7e246c] dark:text-white">
-                                  Refill fuel at the end of the day or pay <span className="font-bold">PKR 32/KM</span>
-                              </div>
-                              <div className="mt-1 text-sm font-semibold text-[#7e246c] dark:text-white">
-                                  Overtime: <span className="font-bold">PKR 400/hr</span>
-                              </div>
                           </div>
                           <div className="mb-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
                               <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#7e246c]">
                                   <span className="text-xs font-bold text-white">i</span>
                               </div>
                               <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                                  Kindly note that the Fuel Charges and Overtime will be applied based on the mileage of the car and extra hours of
-                                  the services (if any). Your final invoice will be generated after adding the Fuel and Overtime charges at the end of
-                                  your reservation. For more details please read the{' '}
-                                  <a href="#" className="text-[#7e246c] underline dark:text-white">
-                                      Fuel and Overtime charges and terms of use
-                                  </a>
-                                  .
+                                  Additional terms and conditions including fuel charges, overtime rates, and other service details will be discussed verbally
+                                  with the store owner upon booking confirmation. Please contact the store directly for any specific requirements or questions.
                               </span>
                           </div>
+
+                          {/* Store Information */}
+                          {car?.store && (
+                              <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900/50">
+                                  <h3 className="mb-4 text-lg font-bold text-[#7e246c] dark:text-white">Store Information</h3>
+                                  <div className="space-y-3">
+                                      <div>
+                                          <h4 className="font-semibold text-gray-900 dark:text-white">{car.store.name}</h4>
+                                          {car.store.description && (
+                                              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{car.store.description}</p>
+                                          )}
+                                      </div>
+                                      {car.store.address && (
+                                          <div className="flex items-start gap-2">
+                                              <span className="text-[#7e246c] mt-0.5">📍</span>
+                                              <span className="text-sm text-gray-600 dark:text-gray-300">{car.store.address}</span>
+                                          </div>
+                                      )}
+                                      {car.store.phone && (
+                                          <div className="flex items-center gap-2">
+                                              <span className="text-[#7e246c]">📞</span>
+                                              <span className="text-sm text-gray-600 dark:text-gray-300">{car.store.phone}</span>
+                                          </div>
+                                      )}
+                                      {car.store.rating && (
+                                          <div className="flex items-center gap-2">
+                                              <span className="text-[#7e246c]">⭐</span>
+                                              <span className="text-sm text-gray-600 dark:text-gray-300">
+                                                  {car.store.rating}/5 ({car.store.reviews} reviews)
+                                              </span>
+                                          </div>
+                                      )}
+                                  </div>
+                              </div>
+                          )}
 
                           {!user && (
                               <div className="mt-8 rounded-xl border border-[#7e246c]/30 bg-white p-6 shadow dark:bg-gray-900">
@@ -401,7 +508,6 @@ export default function CarDetailPage() {
                                       car={car}
                                       user={user ?? undefined}
                                       onBooking={async (formData) => {
-                                          setLoading(true);
                                           setError(null);
                                           setSuccess(null);
                                           try {
@@ -412,14 +518,15 @@ export default function CarDetailPage() {
                                               if (!res.ok) {
                                                   const err = await res.json();
                                                   setError(err.message || 'Booking failed');
+                                                  showError('Booking Failed', err.message || 'Failed to create booking. Please try again.');
                                               } else {
                                                   setSuccess('Booking successful!');
+                                                  showSuccess('Booking Successful', 'Your booking request has been sent successfully!');
                                                   await fetchCarAndBooking();
                                               }
                                           } catch {
                                               setError('Network error');
-                                          } finally {
-                                              setLoading(false);
+                                              showError('Network Error', 'Unable to connect. Please check your internet connection and try again.');
                                           }
                                       }}
                                       error={error}

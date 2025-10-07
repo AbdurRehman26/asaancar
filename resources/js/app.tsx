@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { AuthProvider } from '@/components/AuthContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { initializeTheme } from '@/hooks/use-appearance';
 import CarListing from './pages/car-listing';
@@ -50,8 +51,9 @@ function App() {
 
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
@@ -118,8 +120,9 @@ function App() {
           <Route path="/api/email/verify/:id/:hash" element={<EmailVerificationSuccess />} />
           {/* Add more routes as needed */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

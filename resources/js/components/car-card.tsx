@@ -11,6 +11,12 @@ interface Car {
   image?: string;
   images?: string[];
   brand?: string;
+  carModel?: {
+    id: number;
+    name: string;
+    slug: string;
+    image?: string;
+  };
   specifications?: {
     seats?: number;
     fuelType?: string;
@@ -62,14 +68,20 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
     return `/images/car-brands/${brandName.toLowerCase()}.png`;
   };
 
-  // Handle image error - fallback to brand image or placeholder
+  // Handle image error - fallback to car model image, then brand image, then placeholder
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.currentTarget;
-    const brandName = car.brand;
     
+    // First try car model image
+    if (car.carModel?.image && target.src !== car.carModel.image) {
+      target.src = car.carModel.image;
+      return;
+    }
+    
+    // Then try brand image
+    const brandName = car.brand;
     if (brandName) {
       const brandImagePath = getBrandImagePath(brandName);
-      // Only try brand image if we haven't already tried it
       if (target.src !== brandImagePath) {
         target.src = brandImagePath;
         return;
@@ -130,9 +142,10 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
       </Link>
       {/* Price */}
       <Link to={`/car-detail/${car.id}`} className="w-full text-center mb-2 hover:opacity-80 transition-opacity">
-        <div className="text-2xl font-extrabold text-[#7e246c] dark:text-white cursor-pointer hover:underline">{car.price?.currency || 'PKR'} {car.price?.perDay?.withoutDriver ?? '--'}<span className="text-base font-medium text-[#7e246c] dark:text-white">/day</span></div>
-        {car.price?.perDay?.withDriver && (
-          <div className="text-xs text-[#7e246c] dark:text-white">With driver: {car.price.currency || 'PKR'} {car.price.perDay.withDriver}/day</div>
+        <div className="text-2xl font-extrabold text-[#7e246c] dark:text-white cursor-pointer hover:underline">{car.price?.currency || 'PKR'} {car.price?.perDay?.withDriver ?? '--'}<span className="text-base font-medium text-[#7e246c] dark:text-white">/day</span></div>
+        <div className="text-xs text-[#7e246c] dark:text-white font-medium">With driver</div>
+        {car.price?.perDay?.withoutDriver && (
+          <div className="text-xs text-gray-500 dark:text-gray-400">Without driver: {car.price.currency || 'PKR'} {car.price.perDay.withoutDriver}/day</div>
         )}
         {car.extraInfo && (
           <div className="text-xs text-gray-400 dark:text-gray-300 mt-1">{car.extraInfo}</div>
@@ -153,33 +166,44 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
         )}
       </div>
       {/* Action Buttons */}
-      {!hideBooking && (
-        <div className="mt-auto w-full space-y-2">
-          {user ? (
-            <>
-              <Link
-                to={`/car-detail/${car.id}`}
-                className="w-full py-3 px-4 rounded-md font-medium bg-[#7e246c] text-white hover:bg-[#6a1f5c] transition-colors text-base shadow-sm flex items-center justify-center gap-2"
-              >
-                <Calendar className="h-5 w-5 mr-2 inline" /> Request Booking
-              </Link>
-                              <Link
-                  to={`/car-detail/${car.id}/edit`}
-                  className="w-full py-2 px-4 rounded-md font-medium bg-green-600 text-white hover:bg-green-700 transition-colors text-sm shadow-sm flex items-center justify-center gap-2"
+      <div className="mt-auto w-full space-y-2">
+        {/* View Details Button - Always shown */}
+        <Link
+          to={`/car-detail/${car.id}`}
+          className="w-full py-3 px-4 rounded-md font-medium bg-[#7e246c] text-white hover:bg-[#6a1f5c] transition-colors text-base shadow-sm flex items-center justify-center gap-2"
+        >
+          <Car className="h-5 w-5 mr-2 inline" /> View Details
+        </Link>
+        
+        {/* Booking/Action Buttons - Only shown when not hiding booking */}
+        {!hideBooking && (
+          <>
+            {user ? (
+              <>
+                <Link
+                  to={`/car-detail/${car.id}`}
+                  className="w-full py-3 px-4 rounded-md font-medium bg-green-600 text-white hover:bg-green-700 transition-colors text-base shadow-sm flex items-center justify-center gap-2"
                 >
-                <Car className="h-4 w-4 mr-1 inline" /> Add Offer
-              </Link>
-            </>
-          ) : (
-            <button
-              disabled
-              className="w-full py-3 px-4 rounded-md font-medium bg-gray-300 text-gray-500 cursor-not-allowed text-base shadow-sm flex items-center justify-center gap-2 dark:bg-gray-700 dark:text-gray-400"
-            >
-              <Calendar className="h-5 w-5 mr-2 inline" /> Please login to book
-            </button>
-          )}
-        </div>
-      )}
+                  <Calendar className="h-5 w-5 mr-2 inline" /> Request Booking
+                </Link>
+                <Link
+                  to={`/car-detail/${car.id}/edit`}
+                  className="w-full py-2 px-4 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm shadow-sm flex items-center justify-center gap-2"
+                >
+                  <Car className="h-4 w-4 mr-1 inline" /> Add Offer
+                </Link>
+              </>
+            ) : (
+              <button
+                disabled
+                className="w-full py-3 px-4 rounded-md font-medium bg-gray-300 text-gray-500 cursor-not-allowed text-base shadow-sm flex items-center justify-center gap-2 dark:bg-gray-700 dark:text-gray-400"
+              >
+                <Calendar className="h-5 w-5 mr-2 inline" /> Please login to book
+              </button>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Image Gallery Modal */}
       <ImageGalleryModal

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import Navbar from '../components/navbar';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login, error: authError } = useAuth();
+  const { success: showSuccess, error: showError } = useToast();
 
   // Check if user just verified their email
   useEffect(() => {
@@ -34,9 +36,11 @@ export default function LoginPage() {
     const success = await login(email, password);
     setLoading(false);
     if (success) {
+      showSuccess('Login Successful', 'Welcome back! You have been logged in successfully.');
       navigate('/');
     } else {
       setError(authError || 'Login failed');
+      showError('Login Failed', authError || 'Invalid email or password. Please try again.');
     }
   };
 
@@ -54,11 +58,14 @@ export default function LoginPage() {
       if (!res.ok) {
         const err = await res.json();
         setForgotError(err.message || 'Request failed');
+        showError('Password Reset Failed', err.message || 'Failed to send reset email. Please try again.');
       } else {
         setForgotSuccess(true);
+        showSuccess('Reset Email Sent', 'Password reset instructions have been sent to your email address.');
       }
     } catch {
       setForgotError('Network error');
+      showError('Network Error', 'Unable to connect. Please check your internet connection and try again.');
     } finally {
       setForgotLoading(false);
     }
