@@ -21,7 +21,7 @@ class CarOfferFactory extends Factory
         return [
             'car_id' => null, // to be set in seeder
             'discount_percentage' => $this->faker->randomFloat(2, 5, 50),
-            'currency' => $this->faker->randomElement(['PKR', 'USD', 'EUR', 'GBP', 'CAD', 'AUD']),
+            'currency' => 'PKR',
             'start_date' => $start,
             'end_date' => $end,
             'is_active' => $this->faker->boolean(80), // 80% chance of being active

@@ -334,6 +334,7 @@ class CarImportSeeder extends Seeder
                     'car_id' => $car->id,
                     'price_with_driver' => $carData['with_driver_rate'],
                     'price_without_driver' => null,
+                    'currency' => 'PKR',
                     'available_from' => now(),
                     'available_to' => now()->addYear(),
                     'is_active' => true,

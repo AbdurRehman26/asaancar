@@ -64,7 +64,7 @@ class CarResource extends JsonResource
             'withDriver' => $latestOffer ? $latestOffer->price_with_driver : null, // With driver rate
             'fuel' => 2.50, // Default fuel rate per km
             'overtime' => 25.00, // Default overtime rate per hour
-            'currency' => 'USD', // Default currency
+            'currency' => 'PKR', // Default currency
             'price_per_day' => $latestOffer ? $latestOffer->price_without_driver : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

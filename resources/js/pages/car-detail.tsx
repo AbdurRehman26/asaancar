@@ -398,7 +398,7 @@ export default function CarDetailPage() {
                                           <td className="py-3 font-medium">With Driver</td>
                                           <td className="py-3 text-center font-semibold">10 hrs/day</td>
                                           <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                                              {car.currency} {car.withDriver ? car.withDriver.toLocaleString() : 'N/A'}
+                                              {car.currency || 'PKR'} {car.withDriver ? car.withDriver.toLocaleString() : 'N/A'}
                                           </td>
                                       </tr>
                                       <tr>
