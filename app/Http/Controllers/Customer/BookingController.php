@@ -256,7 +256,7 @@ class BookingController extends Controller
      */
     public function storeBookingsForUser(Request $request)
     {
-        $filters = $request->only(['status', 'date_from', 'date_to']);
+        $filters = $request->only(['status', 'date_from', 'date_to', 'store_id']);
         $perPage = $request->input('per_page', 10);
         $bookings = $this->bookingService->getStoreUserBookings(auth()->id(), $filters);
         // Return paginated response with meta and links

@@ -194,10 +194,20 @@ class BookingService
         if (!$user) {
             return collect([]);
         }
-        $storeIds = $user->stores()->pluck('stores.id');
 
-        $query = Booking::with(['car.carBrand', 'car.carType', 'car.store', 'store'])
-            ->whereIn('store_id', $storeIds);
+        $query = Booking::with(['car.carBrand', 'car.carType', 'car.store', 'store']);
+
+        // If user is admin, show all bookings from all stores
+        if ($user->hasRole('admin')) {
+            // Admin users can see all stores, but can filter by specific store
+            if (!empty($filters['store_id'])) {
+                $query->where('store_id', $filters['store_id']);
+            }
+        } else {
+            // For non-admin users, only show bookings from their associated stores
+            $storeIds = $user->stores()->pluck('stores.id');
+            $query->whereIn('store_id', $storeIds);
+        }
 
         // Apply filters
         if (!empty($filters['status'])) {
