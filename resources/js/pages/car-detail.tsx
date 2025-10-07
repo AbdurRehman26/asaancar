@@ -405,7 +405,7 @@ export default function CarDetailPage() {
                                           <td className="py-3 font-medium">Without Driver</td>
                                           <td className="py-3 text-center font-semibold">24 hrs/day</td>
                                           <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                                              {car.currency} {typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A'}
+                                              {car.currency || 'PKR'} {typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A'}
                                           </td>
                                       </tr>
                                   </tbody>

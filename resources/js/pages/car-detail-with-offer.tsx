@@ -279,14 +279,14 @@ export default function CarDetailWithOfferPage() {
                       <td className="py-3 font-medium">With Driver</td>
                       <td className="py-3 text-center font-semibold">10 hrs/day</td>
                       <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                        {car.currency} {(typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A')}
+                        {car.currency || 'PKR'} {(typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A')}
                       </td>
                     </tr>
                     <tr>
                       <td className="py-3 font-medium">Without Driver</td>
                       <td className="py-3 text-center font-semibold">24 hrs/day</td>
                       <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                        {car.currency} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}
+                        {car.currency || 'PKR'} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}
                       </td>
                     </tr>
                   </tbody>
