@@ -3,38 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import ImageGalleryModal from './ImageGalleryModal';
-
-// Define Car interface
-interface Car {
-  id: string | number;
-  name: string;
-  image?: string;
-  images?: string[];
-  brand?: string;
-  carModel?: {
-    id: number;
-    name: string;
-    slug: string;
-    image?: string;
-  };
-  specifications?: {
-    seats?: number;
-    fuelType?: string;
-    transmission?: string;
-    type?: string;
-  };
-  features?: string[];
-  minAge?: number;
-  currency?: string;
-  price?: {
-    perDay?: {
-      withoutDriver?: number;
-      withDriver?: number;
-    };
-    currency?: string;
-  };
-  extraInfo?: string;
-}
+import { Car as CarType } from '@/types';
 
 // Helper for feature icons
 const featureIcons: Record<string, React.ReactNode> = {
@@ -59,7 +28,7 @@ const featureLabels: Record<string, string> = {
   minAge: 'Minimum Age',
 };
 
-const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
+const CarCard = ({ car, hideBooking, showEditButton }: { car: CarType; hideBooking: boolean; showEditButton?: boolean }) => {
   const { user } = useAuth();
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
@@ -68,28 +37,83 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
     return `/images/car-brands/${brandName.toLowerCase()}.png`;
   };
 
+  // Get primary image with fallback logic (same as car detail page)
+  const getPrimaryImage = () => {
+
+    // 1. First try car's main image
+    if (car?.image) {
+      return car.image.startsWith('/') ? car.image : `/${car.image}`;
+    }
+
+    // 2. Then try car model image
+    if (car?.car_model?.image) {
+      return car.car_model.image.startsWith('/') ? car.car_model.image : `/${car.car_model.image}`;
+    }
+
+    // 3. Then try brand image
+    if (car?.brand) {
+      return getBrandImagePath(car.brand);
+    }
+
+    // 4. Final fallback to placeholder
+    return '/images/car-placeholder.jpeg';
+  };
+
   // Handle image error - fallback to car model image, then brand image, then placeholder
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.currentTarget;
     
-    // First try car model image
-    if (car.carModel?.image && target.src !== car.carModel.image) {
-      target.src = car.carModel.image;
-      return;
+    // Get or initialize the set of attempted URLs for this image element
+    if (!target.dataset.attemptedUrls) {
+      target.dataset.attemptedUrls = JSON.stringify([]);
     }
+    const attemptedUrls = new Set(JSON.parse(target.dataset.attemptedUrls));
     
-    // Then try brand image
-    const brandName = car.brand;
-    if (brandName) {
-      const brandImagePath = getBrandImagePath(brandName);
-      if (target.src !== brandImagePath) {
-        target.src = brandImagePath;
+    // Helper function to normalize a path to absolute URL
+    const normalizeToAbsoluteUrl = (path: string) => {
+      if (path.startsWith('http')) {
+        return path;
+      }
+      return new URL(path, window.location.origin).href;
+    };
+    
+    // Helper function to check if URL has been attempted and add it to the set
+    const tryUrl = (url: string) => {
+      const absoluteUrl = normalizeToAbsoluteUrl(url);
+      if (!attemptedUrls.has(absoluteUrl)) {
+        attemptedUrls.add(absoluteUrl);
+        target.dataset.attemptedUrls = JSON.stringify(Array.from(attemptedUrls));
+        target.src = url;
+        return true;
+      }
+      return false;
+    };
+
+    // First try car model image
+    if (car?.car_model?.image) {
+      const modelImagePath = car.car_model.image.startsWith('/') ? car.car_model.image : `/${car.car_model.image}`;
+      if (tryUrl(modelImagePath)) {
         return;
       }
     }
+
+    // Then try brand image
+    const brandName = car?.brand;
+    if (brandName && typeof brandName === 'string') {
+      const brandImagePath = getBrandImagePath(brandName);
+      if (tryUrl(brandImagePath)) {
+        return;
+      }
+    }
+
+    // Final fallback to placeholder (only if not already attempted)
+    const placeholderPath = '/images/car-placeholder.jpeg';
+    if (tryUrl(placeholderPath)) {
+      return;
+    }
     
-    // Final fallback to placeholder
-    target.src = '/images/car-placeholder.jpeg';
+    // If all fallbacks have been attempted, prevent further error handling
+    target.onerror = null;
   };
 
   // Get features for display
@@ -101,15 +125,15 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
   ];
 
   // Check if car has multiple images
-  const hasMultipleImages = car.images && car.images.length > 1;
-  const allImages = car.images && car.images.length > 0 ? car.images : (car.image ? [car.image] : []);
-  
+  const hasMultipleImages = car?.images && car.images.length > 1;
+  const allImages = car?.images && car.images.length > 0 ? car.images : [getPrimaryImage()];
+
 
 
   return (
     <div className="bg-white dark:bg-gray-800/80 rounded-xl shadow-md border border-[#7e246c] p-6 flex flex-col items-center min-h-[420px] transition-all hover:shadow-lg">
       {/* Car Image */}
-      <div 
+      <div
         className={`w-full bg-gray-50 dark:bg-gray-700 rounded-xl h-36 mb-4 overflow-hidden relative ${hasMultipleImages ? 'cursor-pointer' : ''}`}
         onClick={hasMultipleImages ? () => setIsImageModalOpen(true) : undefined}
       >
@@ -120,7 +144,7 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
           </div>
         )}
         <img
-          src={car.image || '/images/car-placeholder.jpeg'}
+          src={getPrimaryImage()}
           alt={car.name}
           className="object-contain h-full w-full rounded-xl p-2"
           onError={handleImageError}
@@ -174,7 +198,17 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
         >
           <Car className="h-5 w-5 mr-2 inline" /> View Details
         </Link>
-        
+
+        {/* Edit Button - Only shown when showEditButton is true */}
+        {showEditButton && (
+          <Link
+            to={`/edit-car/${car.id}`}
+            className="w-full py-2 px-4 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm shadow-sm flex items-center justify-center gap-2"
+          >
+            <Settings className="h-4 w-4 mr-1 inline" /> Edit Car
+          </Link>
+        )}
+
         {/* Booking/Action Buttons - Only shown when not hiding booking */}
         {!hideBooking && (
           <>
@@ -216,4 +250,4 @@ const CarCard = ({ car, hideBooking }: { car: Car; hideBooking: boolean }) => {
   );
 };
 
-export default CarCard; 
+export default CarCard;

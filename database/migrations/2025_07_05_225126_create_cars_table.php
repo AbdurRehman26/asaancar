@@ -23,8 +23,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->json('image_urls')->nullable();
             $table->integer('seats');
-            $table->string('transmission');
-            $table->string('fuel_type');
+            $table->enum('transmission', ['manual', 'automatic']);
+            $table->enum('fuel_type', ['petrol', 'diesel', 'electric', 'hybrid']);
             $table->boolean('available')->default(true);
             $table->timestamps();
         });

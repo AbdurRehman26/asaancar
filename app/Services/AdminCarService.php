@@ -14,7 +14,7 @@ class AdminCarService
      */
     public function getPaginatedCarsForAdmin($perPage = 9, $filters = [], $user = null)
     {
-        $query = Car::with(['carBrand', 'carType', 'store', 'carOffers' => function($query) {
+        $query = Car::with(['carBrand', 'carModel', 'carType', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where(function($q) {
                       $q->where(function($subQ) {
@@ -120,6 +120,7 @@ class AdminCarService
         return [
             'id' => $car->id,
             'name' => $car->name ?? $car->carBrand->name . ' ' . $car->model,
+            'car_model' => $car->carModel,
             'brand' => $car->carBrand->name ?? 'Unknown',
             'type' => $car->carType->name ?? null,
             'car_brand_id' => $car->car_brand_id,
@@ -207,7 +208,7 @@ class AdminCarService
         if ($car->image_urls && is_array($car->image_urls) && count($car->image_urls) > 0) {
             return $car->image_urls[0];
         }
-        return '/images/car-placeholder.jpeg';
+        return '';
     }
 
     /**

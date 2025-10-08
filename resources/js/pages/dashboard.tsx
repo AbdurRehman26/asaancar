@@ -214,15 +214,7 @@ export function CarListings() {
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10">
                                 {cars.map((car) => (
-                                    <div key={car.id} className="relative">
-                                        <CarCard car={{ ...car, name: car.name || 'Car' }} hideBooking={true} />
-                                                                                <Link
-                                            to={`/edit-car/${car.id}`}
-                                            className="absolute top-2 right-2 px-3 py-1 rounded bg-[#7e246c] text-white text-xs font-semibold hover:bg-[#6a1f5c] transition-colors"
-                                        >
-                                            Edit
-                                        </Link>
-                                    </div>
+                                    <CarCard key={car.id} car={{ ...car, name: car.name || 'Car' }} hideBooking={true} showEditButton={true} />
                                 ))}
                             </div>
                         )}

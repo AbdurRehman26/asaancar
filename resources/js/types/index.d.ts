@@ -43,12 +43,36 @@ export interface User {
 }
 
 export interface Car {
-  id: number;
+  id: string | number;
   name: string;
   image?: string;
+  images?: string[];
+  brand?: string;
+  car_model?: {
+    id: number;
+    name: string;
+    slug: string;
+    image?: string;
+  };
+  specifications?: {
+    seats?: number;
+    fuelType?: string;
+    transmission?: string;
+    type?: string;
+  };
+  features?: string[];
+  minAge?: number;
+  currency?: string;
+  price?: {
+    perDay?: {
+      withoutDriver?: number;
+      withDriver?: number;
+    };
+    currency?: string;
+  };
+  extraInfo?: string;
   rental?: number;
   withDriver?: number;
   offer?: { id: number };
-  currency?: string;
   [key: string]: unknown;
 }
