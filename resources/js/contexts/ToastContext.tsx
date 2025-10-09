@@ -40,6 +40,15 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [progress, setProgress] = useState<Record<string, number>>({});
 
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[id];
+      return newProgress;
+    });
+  }, []);
+
   const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: Toast = {
@@ -69,16 +78,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         });
       }, 50);
     }
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-    setProgress(prev => {
-      const newProgress = { ...prev };
-      delete newProgress[id];
-      return newProgress;
-    });
-  }, []);
+  }, [removeToast]);
 
   const success = useCallback((title: string, message?: string, duration?: number) => {
     addToast({ type: 'success', title, message, duration });

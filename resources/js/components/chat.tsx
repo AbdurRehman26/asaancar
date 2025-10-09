@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import echo from '../lib/echo';
-import { apiFetch } from '../lib/utils';
+import { apiFetch } from '@/lib/utils';
 
 interface User {
     id: number;
@@ -9,9 +9,23 @@ interface User {
 
 interface Message {
     id: number;
-    sender: User;
-    message: string;
-    created_at: string;
+    conversation_id: number;
+    sender_id: number;
+    message: string | object;
+    is_read: boolean;
+    created_at: string | object;
+    updated_at: string | object;
+    sender?: User; // Optional sender object for when it's populated
+}
+
+interface RawMessage {
+    id: number | string;
+    conversation_id: number | string;
+    sender_id: number | string;
+    message: string | object;
+    is_read: boolean;
+    created_at: string | object;
+    updated_at: string | object;
 }
 
 interface ChatProps {
@@ -36,7 +50,20 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                     setError('Failed to load messages');
                     setMessages([]);
                 } else {
-                    setMessages(await res.json());
+                    const messagesData = await res.json();
+                    // Ensure all message properties are properly formatted
+                    const formattedMessages = messagesData.map((msg: RawMessage) => {
+                        return {
+                            id: Number(msg.id) || 0,
+                            conversation_id: Number(msg.conversation_id) || 0,
+                            sender_id: Number(msg.sender_id) || 0,
+                            message: String(msg.message || ''),
+                            is_read: Boolean(msg.is_read),
+                            created_at: String(msg.created_at || new Date().toISOString()),
+                            updated_at: String(msg.updated_at || new Date().toISOString())
+                        };
+                    });
+                    setMessages(formattedMessages);
                 }
             })
             .catch(() => setError('Failed to load messages'))
@@ -46,12 +73,22 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
     useEffect(() => {
         const channel = echo.private(`conversation.${conversationId}`);
         channel.listen('MessageSent', (event: unknown) => {
-            const message = event as Message;
+            const message = event as RawMessage;
+            // Format the message to ensure proper types
+            const formattedMessage = {
+                id: Number(message.id) || 0,
+                conversation_id: Number(message.conversation_id) || 0,
+                sender_id: Number(message.sender_id) || 0,
+                message: String(message.message || ''),
+                is_read: Boolean(message.is_read),
+                created_at: String(message.created_at || new Date().toISOString()),
+                updated_at: String(message.updated_at || new Date().toISOString())
+            };
             // Only add if not sent by current user and not already present
             setMessages((prev) => {
-                if (message.sender.id === currentUser.id) return prev;
-                if (prev.some((m) => m.id === message.id)) return prev;
-                return [...prev, message];
+                if (formattedMessage.sender_id === currentUser.id) return prev;
+                if (prev.some((m) => m.id === formattedMessage.id)) return prev;
+                return [...prev, formattedMessage];
             });
         });
         return () => {
@@ -66,7 +103,7 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
     const sendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || sending) return;
-        
+
         setSending(true);
         try {
             const res = await apiFetch(`/api/chat/conversations/${conversationId}/messages`, {
@@ -74,10 +111,20 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 body: JSON.stringify({ message: input }),
             });
             const msg = await res.json();
+            // Format the message to ensure proper types
+            const formattedMsg = {
+                id: Number(msg.id) || 0,
+                conversation_id: Number(msg.conversation_id) || 0,
+                sender_id: Number(msg.sender_id) || 0,
+                message: String(msg.message || ''),
+                is_read: Boolean(msg.is_read),
+                created_at: String(msg.created_at || new Date().toISOString()),
+                updated_at: String(msg.updated_at || new Date().toISOString())
+            };
             // Only add if not already present
             setMessages((prev) => {
-                if (prev.some((m) => m.id === msg.id)) return prev;
-                return [...prev, msg];
+                if (prev.some((m) => m.id === formattedMsg.id)) return prev;
+                return [...prev, formattedMsg];
             });
             setInput('');
         } catch (error) {
@@ -97,22 +144,27 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 ) : messages.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-gray-400">No messages yet.</div>
                 ) : (
-                    messages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            className={`flex flex-col ${msg.sender.id === currentUser.id ? 'items-end' : 'items-start'}`}
-                        >
-                            <div className={`px-4 py-2 rounded-lg max-w-xs 
-                                ${msg.sender.id === currentUser.id 
-                                    ? 'bg-primary text-white dark:bg-primary dark:text-white' 
-                                    : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'}
-                            `}>
-                                <span className="block text-xs font-semibold mb-1">{msg.sender.name}</span>
-                                <span>{msg.message}</span>
+                    messages.map((msg) => {
+                        const isCurrentUser = msg.sender_id === currentUser.id;
+                        const senderName = isCurrentUser ? currentUser.name : `User ${msg.sender_id}`;
+
+                        return (
+                            <div
+                                key={msg.id}
+                                className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}
+                            >
+                                <div className={`px-4 py-2 rounded-lg max-w-xs
+                                    ${isCurrentUser
+                                        ? 'bg-primary text-white dark:bg-primary dark:text-white'
+                                        : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'}
+                                `}>
+                                    <span className="block text-xs font-semibold mb-1">{senderName}</span>
+                                    <span>{typeof msg.message === 'string' ? msg.message : JSON.stringify(msg.message)}</span>
+                                </div>
+                                <span className="text-xs text-gray-400 mt-1">{new Date(typeof msg.created_at === 'string' ? msg.created_at : JSON.stringify(msg.created_at)).toLocaleTimeString()}</span>
                             </div>
-                            <span className="text-xs text-gray-400 mt-1">{new Date(msg.created_at).toLocaleTimeString()}</span>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
                 <div ref={messagesEndRef} />
             </div>
@@ -124,11 +176,11 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                     placeholder="Type a message..."
                     disabled={sending}
                 />
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 ${
-                        sending 
-                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                        sending
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                             : 'bg-primary text-white hover:bg-primary/90 cursor-pointer'
                     }`}
                     disabled={sending || !input.trim()}
