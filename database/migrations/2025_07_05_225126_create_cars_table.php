@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('car_type_id');
             $table->foreign('car_type_id')->references('id')->on('car_types')->onDelete('cascade');
             $table->string('model');
-            $table->year('year');
+            $table->string('year')->nullable();
             $table->string('name')->nullable();
             $table->string('color');
             $table->text('description')->nullable();

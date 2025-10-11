@@ -124,19 +124,20 @@ export default function CarListings() {
                 </div>
             )}
 
-            <div className="flex flex-col lg:flex-row gap-6">
-                {/* Filters Sidebar */}
-                <div className="w-full lg:w-80 flex-shrink-0">
-                    <CarFilters
-                        filters={filters}
-                        setFilters={setFilters}
-                        onFiltersChange={(newFilters) => {
-                            setFilters(newFilters);
-                            setCurrentPage(1); // Reset to first page when filters change
-                        }}
-                    />
-                </div>
+            {/* Filters Sidebar */}
+            <div className="w-full flex-shrink-0">
+                <CarFilters
+                    filters={filters}
+                    setFilters={setFilters}
+                    onFiltersChange={(newFilters) => {
+                        setFilters(newFilters);
+                        setCurrentPage(1); // Reset to first page when filters change
+                    }}
+                />
+            </div>
 
+
+            <div className="flex flex-col lg:flex-row gap-6">
                 {/* Cars Grid */}
                 <div className="flex-1">
                     <div className="mb-6 flex justify-between items-center">

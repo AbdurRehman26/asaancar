@@ -83,7 +83,7 @@ export default function AdminDashboard() {
 
         setCarLoading(true);
         const params = new URLSearchParams();
-        
+
         params.append('per_page', perPageState.toString());
         params.append('page', currentPage.toString());
         Object.entries(filters).forEach(([key, value]) => {
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
     if (loading || !user || !user.roles) {
         return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading...</div>;
     }
-    
+
     if (!Array.isArray(user.roles) || !user.roles.includes('admin')) {
         return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-red-600">You are not authorized to view this page.</div>;
     }
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
                     {/* Admin Stats */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-[#7e246c] dark:text-white mb-6">Admin Dashboard</h1>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                 <div className="flex items-center">
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                 <div className="flex items-center">
                                     <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                 <div className="flex items-center">
                                     <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
@@ -180,7 +180,7 @@ export default function AdminDashboard() {
                                 View and manage all cars across all stores
                             </p>
                         </div>
-                        
+
                         <div className="p-6">
                             <CarFilters
                                 filters={filters}
@@ -188,7 +188,7 @@ export default function AdminDashboard() {
                                 handleSearch={handleSearch}
                                 loading={carLoading}
                             />
-                            
+
                             {/* Pagination Top */}
                             <div className="flex justify-center items-center gap-2 my-6">
                                 <button

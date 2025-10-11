@@ -50,6 +50,7 @@ class CarModelSeeder extends Seeder
                 "Mercedes",
             ],
             "Audi" => [
+                "Audi",
                 "A3",
                 "A4",
                 "A5",
@@ -61,8 +62,11 @@ class CarModelSeeder extends Seeder
             "BMW" => [
                 "BMW",
             ],
-            "Other" => [
+            "Limousine" => [
                 "Limousine",
+            ],
+            "Other" => [
+                "Other",
             ],
         ];
 
