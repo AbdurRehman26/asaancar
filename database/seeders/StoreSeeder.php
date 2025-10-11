@@ -22,6 +22,7 @@ class StoreSeeder extends Seeder
         $stores = [
             [
                 'id' => 1,
+                'city_id' => 1,
                 'store_username' => 'hamidrenta',
                 'name' => 'Hamid Renta Car',
                 'address' => 'Shop No A-1, Sector 11-H, KDA Flats, Nagan Chowrangi, North Karachi',
@@ -33,6 +34,7 @@ class StoreSeeder extends Seeder
             ],
             [
                 'id' => 2,
+                'city_id' => 1,
                 'store_username' => 'faraztransport',
                 'name' => 'FARAZ TRANSPORT SERVICE',
                 'address' => 'Shop No. K-6 Al Azam Square, Block-1, F.B Area, Karachi',
@@ -44,6 +46,7 @@ class StoreSeeder extends Seeder
             ],
             [
                 'id' => 3,
+                'city_id' => 1,
                 'store_username' => 'ahmedrentacar',
                 'name' => 'AHMED RENT A CAR Transport Services',
                 'address' => 'Shop #1, 10/703, Liaquatabad No.10, Karachi',
@@ -55,6 +58,7 @@ class StoreSeeder extends Seeder
             ],
             [
                 'id' => 4,
+                'city_id' => 1,
                 'store_username' => 'nsrentacar',
                 'name' => 'NS Rent-A-Car & Transport Services',
                 'address' => 'K-6, Al-Azam Square, F.B. Area, Karachi, Pakistan',
@@ -66,6 +70,7 @@ class StoreSeeder extends Seeder
             ],
             [
                 'id' => 5,
+                'city_id' => 1,
                 'store_username' => 'farhanrentacar',
                 'name' => 'Farhan Rent A Car',
                 'address' => 'Address not specified',
@@ -77,6 +82,7 @@ class StoreSeeder extends Seeder
             ],
             [
                 'id' => 6,
+                'city_id' => 1,
                 'store_username' => 'sufiyancardeal',
                 'name' => 'Sufiyan Car Deal',
                 'address' => 'Shop # K-7A, Al-Azam Square, Block-1, F.B. Area, Karachi, Pakistan',
@@ -88,6 +94,7 @@ class StoreSeeder extends Seeder
             ],
             [
                 'id' => 7,
+                'city_id' => 1,
                 'store_username' => 'startransportservices',
                 'name' => 'Star Transport Services',
                 'address' => 'Shop No K-6A, Al Azam Square, F.B. Area Block 1',
