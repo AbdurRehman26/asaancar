@@ -5,15 +5,14 @@ import { useAuth } from '@/components/AuthContext';
 
 export default function Contact() {
   const { user } = useAuth();
-  const [form, setForm] = useState({ name: '', email: '', message: '' });
-  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [form, setForm] = useState({ name: '', contact_info: '', message: '' });
+  const [errors, setErrors] = useState<{ name?: string; contact_info?: string; message?: string }>({});
   const [submitted, setSubmitted] = useState(false);
 
   const validate = () => {
     const newErrors: typeof errors = {};
     if (!form.name.trim()) newErrors.name = 'Name is required.';
-    if (!form.email.trim()) newErrors.email = 'Email is required.';
-    else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) newErrors.email = 'Invalid email address.';
+    if (!form.contact_info.trim()) newErrors.contact_info = 'Contact information is required.';
     if (!form.message.trim()) newErrors.message = 'Message is required.';
     return newErrors;
   };
@@ -41,7 +40,7 @@ export default function Contact() {
       });
       if (res.ok) {
         setSubmitted(true);
-        setForm({ name: '', email: '', message: '' });
+        setForm({ name: '', contact_info: '', message: '' });
         setErrors({});
       } else if (res.status === 422) {
         const data = await res.json();
@@ -82,17 +81,18 @@ export default function Contact() {
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">Email</label>
+                <label htmlFor="contact_info" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">Contact Information</label>
                 <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={form.email}
+                  type="text"
+                  id="contact_info"
+                  name="contact_info"
+                  value={form.contact_info}
                   onChange={handleChange}
+                  placeholder="Email or phone number"
                   className="w-full border border-[#7e246c] rounded-lg px-4 py-2 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
                   required
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                {errors.contact_info && <p className="text-red-500 text-xs mt-1">{errors.contact_info}</p>}
               </div>
               <div>
                 <label htmlFor="message" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">Message</label>
