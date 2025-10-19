@@ -97,10 +97,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('bookings')->group(function () {
         Route::get('/', [BookingController::class, 'index']);
         Route::post('/', [BookingController::class, 'store']);
+        Route::get('/stats', [BookingController::class, 'stats']);
         Route::get('/{id}', [BookingController::class, 'show']);
         Route::put('/{id}', [BookingController::class, 'update']);
         Route::delete('/{id}', [BookingController::class, 'destroy']);
-        Route::get('/stats', [BookingController::class, 'stats']);
         Route::post('/check-availability', [BookingController::class, 'checkAvailability']);
         Route::post('/calculate-price', [BookingController::class, 'calculatePrice']);
     });
@@ -159,7 +159,7 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/cars/stats', [AdminCarController::class, 'stats']);
     Route::get('/cars/filters', [AdminCarController::class, 'getFilters']);
     Route::get('/cars/{id}', [AdminCarController::class, 'show']);
-    
+
     // Admin Store Management Routes
     Route::get('/stores', [\App\Http\Controllers\Customer\StoreController::class, 'index']);
     Route::get('/stores/{id}', [\App\Http\Controllers\Customer\StoreController::class, 'show']);

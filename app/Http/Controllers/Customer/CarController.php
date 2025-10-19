@@ -159,9 +159,9 @@ class CarController extends Controller
      *     )
      * )
      */
-    public function show(int $id)
+    public function show($id)
     {
-        $car = $this->carService->getCarForListing($id);
+        $car = $this->carService->getCarForListing((int) $id);
         if (!$car) {
             return response()->json(['message' => 'Car not found'], 404);
         }
@@ -171,9 +171,9 @@ class CarController extends Controller
     /**
      * Get car data for editing (with raw IDs and relationships)
      */
-    public function showForEdit(int $id)
+    public function showForEdit($id)
     {
-        $car = Car::with(['carBrand', 'carModel', 'carType', 'store'])->find($id);
+        $car = Car::with(['carBrand', 'carModel', 'carType', 'store'])->find((int) $id);
         if (!$car) {
             return response()->json(['message' => 'Car not found'], 404);
         }
@@ -211,9 +211,9 @@ class CarController extends Controller
      *     )
      * )
      */
-    public function showWithOfferForm(int $id)
+    public function showWithOfferForm($id)
     {
-        $car = $this->carService->getCarForListing($id);
+        $car = $this->carService->getCarForListing((int) $id);
         if (!$car) {
             return response()->json(['message' => 'Car not found'], 404);
         }

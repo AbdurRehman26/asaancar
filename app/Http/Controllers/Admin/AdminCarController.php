@@ -36,9 +36,9 @@ class AdminCarController extends Controller
     /**
      * Get car details for admin
      */
-    public function show(int $id)
+    public function show($id)
     {
-        $car = Car::with(['carBrand', 'carType', 'store', 'carOffers'])->find($id);
+        $car = Car::with(['carBrand', 'carType', 'store', 'carOffers'])->find((int) $id);
         if (!$car) {
             return response()->json(['message' => 'Car not found'], 404);
         }

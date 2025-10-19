@@ -230,10 +230,10 @@ class BookingService
     /**
      * Get booking by ID
      */
-    public function getBooking(int $bookingId): ?array
+    public function getBooking($bookingId): ?array
     {
         $booking = Booking::with(['car.carBrand', 'car.carType', 'store', 'user'])
-            ->find($bookingId);
+            ->find((int) $bookingId);
 
         if (!$booking) {
             return null;
@@ -245,10 +245,10 @@ class BookingService
     /**
      * Update booking status
      */
-    public function updateBookingStatus(int $bookingId, string $status, string $notes = null): array
+    public function updateBookingStatus($bookingId, string $status, string $notes = null): array
     {
         try {
-            $booking = Booking::find($bookingId);
+            $booking = Booking::find((int) $bookingId);
 
             if (!$booking) {
                 throw new Exception('Booking not found');
@@ -276,11 +276,11 @@ class BookingService
     /**
      * Cancel booking
      */
-    public function cancelBooking(int $bookingId, int $userId): array
+    public function cancelBooking($bookingId, $userId): array
     {
         try {
-            $booking = Booking::where('id', $bookingId)
-                ->where('user_id', $userId)
+            $booking = Booking::where('id', (int) $bookingId)
+                ->where('user_id', (int) $userId)
                 ->first();
 
             if (!$booking) {

@@ -70,9 +70,9 @@ class BookingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
+    public function show($id)
     {
-        $booking = $this->bookingService->getBooking($id);
+        $booking = $this->bookingService->getBooking((int) $id);
         if (!$booking) {
             return response()->json(['message' => 'Booking not found'], 404);
         }
@@ -90,9 +90,9 @@ class BookingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateBookingRequest $request, int $id)
+    public function update(UpdateBookingRequest $request, $id)
     {
-        $booking = $this->bookingService->getBooking($id);
+        $booking = $this->bookingService->getBooking((int) $id);
 
         if (!$booking) {
             return response()->json([
@@ -121,9 +121,9 @@ class BookingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id)
+    public function destroy($id)
     {
-        $result = $this->bookingService->cancelBooking($id, auth()->id());
+        $result = $this->bookingService->cancelBooking((int) $id, auth()->id());
 
         return response()->json($result);
     }
@@ -135,8 +135,10 @@ class BookingController extends Controller
     {
         $user = $request->user();
         // Get all store IDs for this user
-        $storeIds = $user->stores()->pluck('id');
+        $storeIds = $user->stores()->pluck('stores.id');
+
         $count = \App\Models\Booking::whereIn('store_id', $storeIds)->count();
+
         return response()->json(['count' => $count]);
     }
 

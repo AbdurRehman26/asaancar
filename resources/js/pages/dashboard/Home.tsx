@@ -1,27 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/components/AuthContext';
 import { Car, BookOpen, Store, MessageSquare } from 'lucide-react';
 
 export default function Home() {
     const [stats, setStats] = useState({ cars: 0, bookings: 0, stores: 0, messages: 0 });
     const [statsLoading, setStatsLoading] = useState(false);
     const [statsError, setStatsError] = useState<string | null>(null);
-    const { user } = useAuth();
-    const [selectedStore, setSelectedStore] = useState<{ id: number; name: string } | null>(null);
-    const [userStores, setUserStores] = useState<Array<{ id: number; name: string }>>([]);
-
-    useEffect(() => {
-        async function fetchStores() {
-            const token = localStorage.getItem('token');
-            const response = await fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } });
-            const data = await response.json();
-            if (data.stores && data.stores.length > 0) {
-                setUserStores(data.stores);
-                setSelectedStore(data.stores[0]);
-            }
-        }
-        fetchStores();
-    }, [user]);
 
     useEffect(() => {
         async function fetchStats() {
@@ -31,26 +14,56 @@ export default function Home() {
             try {
                 const token = localStorage.getItem('token');
                 const params = new URLSearchParams();
-                if (selectedStore) {
-                    params.append('store_id', selectedStore.id.toString());
+
+                // Fetch each endpoint individually to better handle errors
+                let carsData = { total_cars: 0 };
+                let bookingsData = { count: 0 };
+                let storesData = { stores: [] };
+                let messagesData = [];
+
+                try {
+                    const carsRes = await fetch(`/api/admin/cars/stats?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
+                    if (carsRes.ok) {
+                        carsData = await carsRes.json();
+                    } else {
+                        console.error('Cars stats failed:', carsRes.status, carsRes.statusText);
+                    }
+                } catch (error) {
+                    console.error('Cars stats error:', error);
                 }
 
-                const [carsRes, bookingsRes, storesRes, messagesRes] = await Promise.all([
-                    fetch(`/api/admin/cars/stats?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch(`/api/bookings/stats?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch(`/api/chat/conversations?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } }),
-                ]);
-
-                // Check if all responses are ok
-                if (!carsRes.ok || !bookingsRes.ok || !storesRes.ok || !messagesRes.ok) {
-                    throw new Error('Failed to fetch statistics data');
+                try {
+                    const bookingsRes = await fetch(`/api/bookings/stats?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
+                    if (bookingsRes.ok) {
+                        bookingsData = await bookingsRes.json();
+                    } else {
+                        console.error('Bookings stats failed:', bookingsRes.status, bookingsRes.statusText);
+                    }
+                } catch (error) {
+                    console.error('Bookings stats error:', error);
                 }
 
-                const carsData = await carsRes.json();
-                const bookingsData = await bookingsRes.json();
-                const storesData = await storesRes.json();
-                const messagesData = await messagesRes.json();
+                try {
+                    const storesRes = await fetch('/api/customer/stores', { headers: { Authorization: `Bearer ${token}` } });
+                    if (storesRes.ok) {
+                        storesData = await storesRes.json();
+                    } else {
+                        console.error('Stores failed:', storesRes.status, storesRes.statusText);
+                    }
+                } catch (error) {
+                    console.error('Stores error:', error);
+                }
+
+                try {
+                    const messagesRes = await fetch(`/api/chat/conversations?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
+                    if (messagesRes.ok) {
+                        messagesData = await messagesRes.json();
+                    } else {
+                        console.error('Messages failed:', messagesRes.status, messagesRes.statusText);
+                    }
+                } catch (error) {
+                    console.error('Messages error:', error);
+                }
 
                 setStats({
                     cars: carsData.total_cars || 0,
@@ -66,38 +79,10 @@ export default function Home() {
             }
         }
         fetchStats();
-    }, [selectedStore]);
+    }, []);
 
     return (
         <div className="max-w-7xl sm:px-8 lg:px-12 py-6">
-            {/* Store Selection Dropdown */}
-            {userStores.length > 0 && (
-                <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                        Select Store
-                    </label>
-                    <select
-                        value={selectedStore?.id || ''}
-                        onChange={(e) => {
-                            const storeId = e.target.value;
-                            if (storeId === 'all') {
-                                setSelectedStore(null);
-                            } else {
-                                const store = userStores.find(s => s.id.toString() === storeId);
-                                setSelectedStore(store || null);
-                            }
-                        }}
-                        className="w-full max-w-xs border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
-                    >
-                        <option value="all">All Stores</option>
-                        {userStores.map((store) => (
-                            <option key={store.id} value={store.id}>
-                                {store.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            )}
 
             {statsError ? (
                 <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
