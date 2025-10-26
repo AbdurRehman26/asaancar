@@ -265,7 +265,7 @@ export default function CarDetailPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: inquiry.name,
-                    email: inquiry.contact, // backend expects email, allow phone in this field
+                    contact_info: inquiry.contact, // Fixed: backend expects contact_info, not email
                     message: inquiry.message,
                     store_id: car.store_id || null,
                     car_details: car ? { id: car.id, name: car.name } : null,
@@ -276,15 +276,32 @@ export default function CarDetailPage() {
                 setInquiryStatus('error');
                 setInquiryError(data.message || 'Failed to send inquiry.');
                 showError('Inquiry Failed', data.message || 'Failed to send inquiry. Please try again.');
+                
+                // Clear error message after 5 seconds
+                setTimeout(() => {
+                    setInquiryStatus('idle');
+                    setInquiryError(null);
+                }, 5000);
             } else {
                 setInquiryStatus('success');
                 setInquiry({ name: '', contact: '', message: '' });
                 showSuccess('Inquiry Sent', 'Your inquiry has been sent successfully to the store owner!');
+                
+                // Clear success message after 5 seconds
+                setTimeout(() => {
+                    setInquiryStatus('idle');
+                }, 5000);
             }
         } catch {
             setInquiryStatus('error');
             setInquiryError('Network error.');
             showError('Network Error', 'Unable to send inquiry. Please check your internet connection and try again.');
+            
+            // Clear error message after 5 seconds
+            setTimeout(() => {
+                setInquiryStatus('idle');
+                setInquiryError(null);
+            }, 5000);
         }
     };
 
@@ -322,12 +339,9 @@ export default function CarDetailPage() {
                                   </div>
                               )}
                           </div>
-                          <a
-                              href="/cars"
-                              className="block text-center text-2xl font-bold text-[#7e246c] transition hover:text-[#6a1f5c] dark:text-white dark:hover:text-gray-200"
-                          >
+                          <h1 className="block text-center text-2xl font-bold text-[#7e246c] dark:text-white">
                               {car.name}
-                          </a>
+                          </h1>
 
                           <Dialog open={addressModalOpen} onOpenChange={setAddressModalOpen}>
                               <DialogContent className="max-w-2xl">
@@ -456,49 +470,6 @@ export default function CarDetailPage() {
                               </div>
                           )}
 
-                          {!user && (
-                              <div className="mt-8 rounded-xl border border-[#7e246c]/30 bg-white p-6 shadow dark:bg-gray-900">
-                                  <h3 className="mb-4 text-lg font-bold text-[#7e246c]">Send an Inquiry to Store Owner</h3>
-                                  <form onSubmit={handleInquirySubmit} className="flex flex-col gap-4">
-                                      <input
-                                          type="text"
-                                          name="name"
-                                          value={inquiry.name}
-                                          onChange={handleInquiryChange}
-                                          className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
-                                          placeholder="Your Name"
-                                          required
-                                      />
-                                      <input
-                                          type="text"
-                                          name="contact"
-                                          value={inquiry.contact}
-                                          onChange={handleInquiryChange}
-                                          className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
-                                          placeholder="Email or Phone Number"
-                                          required
-                                      />
-                                      <textarea
-                                          name="message"
-                                          value={inquiry.message}
-                                          onChange={handleInquiryChange}
-                                          className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
-                                          placeholder="Your Message"
-                                          rows={4}
-                                          required
-                                      />
-                                      <button
-                                          type="submit"
-                                          className="rounded bg-[#7e246c] px-6 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
-                                          disabled={inquiryStatus === 'sending'}
-                                      >
-                                          {inquiryStatus === 'sending' ? 'Sending...' : 'Send Inquiry'}
-                                      </button>
-                                      {inquiryStatus === 'success' && <div className="font-semibold text-green-600">Inquiry sent successfully!</div>}
-                                      {inquiryStatus === 'error' && <div className="font-semibold text-red-600">{inquiryError}</div>}
-                                  </form>
-                              </div>
-                          )}
                       </div>
                       {/* Right: BookingForm, Price, Optional Service */}
                       <div className="flex flex-col gap-8 border-l border-gray-100 bg-white p-8 md:w-1/2 dark:border-neutral-800 dark:bg-gray-800/80">
@@ -581,6 +552,51 @@ export default function CarDetailPage() {
                                       refillTank={refillTank}
                                       setRefillTank={setRefillTank}
                                   />
+                                  
+                                  {/* Send an Inquiry to Store Owner - Only show when user is not logged in */}
+                                  {!user && (
+                                      <div className="rounded-xl border border-[#7e246c]/30 bg-white p-6 shadow dark:bg-gray-900">
+                                          <h3 className="mb-4 text-lg font-bold text-[#7e246c]">Send an Inquiry to Store Owner</h3>
+                                          <form onSubmit={handleInquirySubmit} className="flex flex-col gap-4">
+                                              <input
+                                                  type="text"
+                                                  name="name"
+                                                  value={inquiry.name}
+                                                  onChange={handleInquiryChange}
+                                                  className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
+                                                  placeholder="Your Name"
+                                                  required
+                                              />
+                                              <input
+                                                  type="text"
+                                                  name="contact"
+                                                  value={inquiry.contact}
+                                                  onChange={handleInquiryChange}
+                                                  className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
+                                                  placeholder="Email or Phone Number"
+                                                  required
+                                              />
+                                              <textarea
+                                                  name="message"
+                                                  value={inquiry.message}
+                                                  onChange={handleInquiryChange}
+                                                  className="rounded-lg border-2 border-[#7e246c] px-4 py-2"
+                                                  placeholder="Your Message"
+                                                  rows={4}
+                                                  required
+                                              />
+                                              <button
+                                                  type="submit"
+                                                  className="rounded bg-[#7e246c] px-6 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
+                                                  disabled={inquiryStatus === 'sending'}
+                                              >
+                                                  {inquiryStatus === 'sending' ? 'Sending...' : 'Send Inquiry'}
+                                              </button>
+                                              {inquiryStatus === 'success' && <div className="font-semibold text-green-600">Inquiry sent successfully!</div>}
+                                              {inquiryStatus === 'error' && <div className="font-semibold text-red-600">{inquiryError}</div>}
+                                          </form>
+                                      </div>
+                                  )}
                               </>
                           )}
                       </div>

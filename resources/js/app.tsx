@@ -78,6 +78,7 @@ function App() {
             <Route index element={<Dashboard.Home />} />
             <Route path="cars" element={<Dashboard.CarListings />} />
             <Route path="messages" element={<Dashboard.Messages />} />
+            <Route path="inquiries" element={<Dashboard.Inquiries />} />
             <Route path="stores" element={<DashboardStoresPage />} />
             <Route path="create-store" element={<CreateStoreForm />} />
             <Route path="bookings" element={<Bookings />} />

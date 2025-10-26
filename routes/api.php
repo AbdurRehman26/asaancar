@@ -163,4 +163,11 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     // Admin Store Management Routes
     Route::get('/stores', [\App\Http\Controllers\Customer\StoreController::class, 'index']);
     Route::get('/stores/{id}', [\App\Http\Controllers\Customer\StoreController::class, 'show']);
+    
+    // Admin User Management Routes
+    Route::get('/users/stats', [\App\Http\Controllers\Api\UserController::class, 'stats']);
+    
+    // Admin Contact Messages Routes
+    Route::get('/contact-messages', [ContactMessageController::class, 'index']);
+    Route::get('/contact-messages/stats', [ContactMessageController::class, 'stats']);
 });

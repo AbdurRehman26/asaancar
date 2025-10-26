@@ -50,9 +50,17 @@ class AdminCarController extends Controller
      */
     public function stats(Request $request)
     {
-        $totalCars = Car::count();
-        $activeCars = Car::whereHas('store')->count();
-        $inactiveCars = Car::whereDoesntHave('store')->count();
+        $storeId = $request->get('store_id');
+        
+        $query = Car::query();
+        
+        if ($storeId) {
+            $query->where('store_id', $storeId);
+        }
+        
+        $totalCars = $query->count();
+        $activeCars = $query->clone()->whereHas('store')->count();
+        $inactiveCars = $query->clone()->whereDoesntHave('store')->count();
 
         return response()->json([
             'total_cars' => $totalCars,

@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { useAuth } from '@/components/AuthContext';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import CarCard from '../components/car-card';
 import CarFilters from '../components/car-filters';
 import { Car, Store, BarChart3 } from 'lucide-react';
@@ -17,6 +17,50 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function AdminDashboard() {
     const { user, loading } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Helper to parse query params
+    type AdminFilters = {
+        brand_id: string;
+        type_id: string;
+        store_id: string;
+        transmission: string;
+        fuel_type: string;
+        min_seats: string;
+        max_price: string;
+    };
+
+    const getFiltersFromQuery = useCallback((search: string): AdminFilters => {
+        const queryParams = new URLSearchParams(search);
+        return {
+            brand_id: queryParams.get('brand_id') || '',
+            type_id: queryParams.get('type_id') || '',
+            store_id: queryParams.get('store_id') || '',
+            transmission: queryParams.get('transmission') || '',
+            fuel_type: queryParams.get('fuel_type') || '',
+            min_seats: queryParams.get('min_seats') || '',
+            max_price: queryParams.get('max_price') || '',
+        };
+    }, []);
+
+    // Function to update URL parameters
+    const updateURLParams = useCallback((newFilters: AdminFilters, page: number = 1) => {
+        const params = new URLSearchParams();
+        
+        // Add filters to params
+        Object.entries(newFilters).forEach(([key, value]) => {
+            if (value && value !== '') {
+                params.set(key, value.toString());
+            }
+        });
+        
+        // Add pagination params
+        params.set('page', page.toString());
+        params.set('per_page', perPageState.toString());
+        
+        // Update URL without triggering a page reload
+        navigate(`/admin-dashboard?${params.toString()}`, { replace: true });
+    }, [navigate, perPageState]);
     const [stats, setStats] = useState({
         total_cars: 0,
         active_cars: 0,
@@ -42,20 +86,41 @@ export default function AdminDashboard() {
         price_with_driver?: number;
     }>>([]);
     const [carLoading, setCarLoading] = useState(false);
-    const [filters, setFilters] = useState({
-        brand_id: '',
-        type_id: '',
-        store_id: '',
-        transmission: '',
-        fuel_type: '',
-        min_seats: '',
-        max_price: '',
-    });
+    const [filters, setFilters] = useState<AdminFilters>(() => getFiltersFromQuery(window.location.search));
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPageState, setPerPageState] = useState(9);
 
+    // Sync filters/page with URL on load
     useEffect(() => {
+        setFilters(getFiltersFromQuery(location.search));
+    }, [location.search, getFiltersFromQuery]);
+
+    // Handle filter changes
+    const handleFilterChange = useCallback((newFilters: Partial<AdminFilters>) => {
+        const updatedFilters = { ...filters, ...newFilters };
+        setFilters(updatedFilters);
+        setCurrentPage(1);
+        updateURLParams(updatedFilters, 1);
+  }, [filters, updateURLParams]);
+
+  // Handle clear filters
+  const handleClearFilters = useCallback(() => {
+    const defaultFilters: AdminFilters = {
+      brand_id: '',
+      type_id: '',
+      store_id: '',
+      transmission: '',
+      fuel_type: '',
+      min_seats: '',
+      max_price: '',
+    };
+    setFilters(defaultFilters);
+    setCurrentPage(1);
+    updateURLParams(defaultFilters, 1);
+  }, [updateURLParams]);
+
+  useEffect(() => {
         if (!loading && (!user || !Array.isArray(user.roles) || !user.roles.includes('admin'))) {
             navigate('/', { replace: true });
         }
@@ -111,11 +176,6 @@ export default function AdminDashboard() {
             })
             .finally(() => setCarLoading(false));
     }, [filters, currentPage, perPageState, user]);
-
-    const handleSearch = () => {
-        setCurrentPage(1);
-        // Triggers useEffect
-    };
 
     if (loading || !user || !user.roles) {
         return <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-gray-900 text-xl text-[#7e246c]">Loading...</div>;
@@ -185,7 +245,8 @@ export default function AdminDashboard() {
                             <CarFilters
                                 filters={filters}
                                 setFilters={setFilters}
-                                handleSearch={handleSearch}
+                                handleSearch={handleFilterChange}
+                                onClearFilters={handleClearFilters}
                                 loading={carLoading}
                             />
 

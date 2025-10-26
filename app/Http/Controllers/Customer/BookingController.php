@@ -134,10 +134,19 @@ class BookingController extends Controller
     public function stats(Request $request)
     {
         $user = $request->user();
+        $storeId = $request->get('store_id');
+        
         // Get all store IDs for this user
         $storeIds = $user->stores()->pluck('stores.id');
+        
+        $query = \App\Models\Booking::whereIn('store_id', $storeIds);
+        
+        // Filter by specific store if provided
+        if ($storeId) {
+            $query->where('store_id', $storeId);
+        }
 
-        $count = \App\Models\Booking::whereIn('store_id', $storeIds)->count();
+        $count = $query->count();
 
         return response()->json(['count' => $count]);
     }

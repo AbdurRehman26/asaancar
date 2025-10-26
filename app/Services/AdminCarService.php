@@ -72,7 +72,8 @@ class AdminCarService
         if (!empty($filters['max_price'])) {
             $maxPrice = (float) $filters['max_price'];
             $formatted = $formatted->filter(function ($car) use ($maxPrice) {
-                $price = $car['price']['perDay']['withoutDriver'] ?? 0;
+                // Use withDriver price if available, otherwise withoutDriver price
+                $price = $car['price']['perDay']['withDriver'] ?? $car['price']['perDay']['withoutDriver'] ?? 0;
                 return $price <= $maxPrice;
             });
         }

@@ -545,11 +545,19 @@ export default function Welcome() {
                     <div className="mx-auto max-w-7xl px-6 py-18 sm:py-24 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h1 className="text-4xl font-bold mt-10 tracking-tight text-gray-900 sm:text-6xl dark:text-white">
-                                Search A Car
+                                Search Your Rental Car
                             </h1>
                             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                Find the perfect car for your journey with AsaanCar - Pakistan's trusted car rental service.
+                                Find the perfect car for your journey with AsaanCar - <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted car rental service</span>.
                             </p>
+                            
+                            {/* Karachi Availability Notice */}
+                            <div className="mt-4 inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 ring-1 ring-blue-700/20 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-300/20">
+                                <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                                Currently available in Karachi only. We'll be expanding to other cities soon!
+                            </div>
                         </div>
 
                         {/* Search Filter - Full Screen */}
@@ -558,7 +566,15 @@ export default function Welcome() {
                                 onSearch={(filters) => {
                                     const params = new URLSearchParams();
                                     Object.entries(filters).forEach(([key, value]) => {
-                                        if (value) params.set(key, value);
+                                        if (value) {
+                                            if (Array.isArray(value)) {
+                                                if (value.length > 0) {
+                                                    params.set(key, value.join(','));
+                                                }
+                                            } else {
+                                                params.set(key, value.toString());
+                                            }
+                                        }
                                     });
                                     navigate(`/cars?${params.toString()}`);
                                 }}

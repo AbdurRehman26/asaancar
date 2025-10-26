@@ -10,4 +10,9 @@ class ContactMessage extends Model
     protected $casts = [
         'car_details' => 'array',
     ];
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
 }

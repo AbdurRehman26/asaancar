@@ -15,7 +15,17 @@ class ChatController extends Controller
     public function conversations(Request $request)
     {
         $user = Auth::user();
-        $conversations = $user->conversations()->with(['lastMessage', 'booking', 'store'])->latest('updated_at')->get();
+        $storeId = $request->get('store_id');
+        
+        $query = $user->conversations()->with(['lastMessage', 'booking', 'store']);
+        
+        // Filter by store if provided
+        if ($storeId) {
+            $query->where('store_id', $storeId);
+        }
+        
+        $conversations = $query->latest('updated_at')->get();
+        
         // Add unread count for each conversation
         $conversations->transform(function ($conv) use ($user) {
             $conv->unread_count = $conv->messages()->where('is_read', false)->where('sender_id', '!=', $user->id)->count();

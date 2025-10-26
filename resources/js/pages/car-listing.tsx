@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Car } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Car as CarIcon } from 'lucide-react';
 import CarCard from '../components/car-card';
 import UniversalCarFilter from '../components/universal-car-filter';
 import Navbar from '../components/navbar';
@@ -9,28 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import LoginModal from '@/pages/auth/login-modal';
 import { useAuth } from '@/components/AuthContext';
 import ReactPaginate from 'react-paginate';
-
-// Define Car interface for use in this file
-interface Car {
-  id: string | number;
-  name: string;
-  image?: string;
-  images?: string[];
-  specifications?: {
-    seats?: number;
-    fuelType?: string;
-    transmission?: string;
-  };
-  features?: string[];
-  minAge?: number;
-  price?: {
-    perDay?: {
-      withoutDriver?: number;
-      withDriver?: number;
-    };
-  };
-  extraInfo?: string;
-}
+import { Car } from '@/types';
 
 function useResponsivePagination() {
   const [isMobile, setIsMobile] = useState(false);
@@ -46,6 +25,7 @@ function useResponsivePagination() {
 export default function CarListing() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   // Helper to parse query params
   type ListingFilters = {
     brand_id: string;
@@ -55,7 +35,6 @@ export default function CarListing() {
     fuel_type: string;
     min_seats: string;
     max_price: string;
-    city_id: string;
     tag_ids: number[];
     pickup_location?: string;
     pickup_date?: string;
@@ -74,7 +53,6 @@ export default function CarListing() {
       fuel_type: queryParams.get('fuel_type') || '',
       min_seats: queryParams.get('min_seats') || '',
       max_price: queryParams.get('max_price') || '',
-      city_id: queryParams.get('city_id') || '',
       tag_ids: queryParams.get('tag_ids') ? queryParams.get('tag_ids')!.split(',').map(Number) : [],
       pickup_location: queryParams.get('pickup_location') || '',
       pickup_date: queryParams.get('pickup_date') || '',
@@ -94,6 +72,31 @@ export default function CarListing() {
   const [registerOpen, setRegisterOpen] = useState(false);
   const isMobile = useResponsivePagination();
 
+  // Function to update URL parameters
+  const updateURLParams = useCallback((newFilters: ListingFilters, page: number = 1) => {
+    const params = new URLSearchParams();
+    
+    // Add filters to params
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value && value !== '') {
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            params.set(key, value.join(','));
+          }
+        } else {
+          params.set(key, value.toString());
+        }
+      }
+    });
+    
+    // Add pagination params
+    params.set('page', page.toString());
+    params.set('per_page', perPageState.toString());
+    
+    // Update URL without triggering a page reload
+    navigate(`/cars?${params.toString()}`, { replace: true });
+  }, [navigate, perPageState]);
+
   // Sync filters/page with URL on load
   useEffect(() => {
     setFilters(getFiltersFromQuery(location.search));
@@ -110,7 +113,15 @@ export default function CarListing() {
         
         // Add filters to params
         Object.entries(filters).forEach(([key, value]) => {
-          if (value) initialParams.append(key, value);
+          if (value) {
+            if (Array.isArray(value)) {
+              if (value.length > 0) {
+                initialParams.append(key, value.join(','));
+              }
+            } else {
+              initialParams.append(key, value.toString());
+            }
+          }
         });
 
         const response = await apiFetch(`/api/cars?${initialParams.toString()}`);
@@ -134,9 +145,40 @@ export default function CarListing() {
 
   // Handle filter changes
   const handleFilterChange = useCallback((newFilters: Partial<ListingFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    const updatedFilters = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
     setCurrentPage(1);
-  }, []);
+    updateURLParams(updatedFilters, 1);
+  }, [filters, updateURLParams]);
+
+  // Handle pagination changes
+  const handlePageChange = useCallback((selected: { selected: number }) => {
+    const newPage = selected.selected + 1;
+    setCurrentPage(newPage);
+    updateURLParams(filters, newPage);
+  }, [filters, updateURLParams]);
+
+  // Handle clear filters
+  const handleClearFilters = useCallback(() => {
+    const defaultFilters: ListingFilters = {
+      brand_id: '',
+      type_id: '',
+      store_id: '',
+      transmission: '',
+      fuel_type: '',
+      min_seats: '',
+      max_price: '',
+      tag_ids: [],
+      pickup_location: '',
+      pickup_date: '',
+      pickup_time: '',
+      dropoff_date: '',
+      same_location: '',
+    };
+    setFilters(defaultFilters);
+    setCurrentPage(1);
+    updateURLParams(defaultFilters, 1);
+  }, [updateURLParams]);
 
   return (
     <>
@@ -178,6 +220,7 @@ export default function CarListing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6">
           <UniversalCarFilter
             onSearch={handleFilterChange}
+            onClearFilters={handleClearFilters}
             initialFilters={filters}
             loading={loading}
           />
@@ -209,7 +252,7 @@ export default function CarListing() {
                 key={`top-pagination-${totalPages}-${currentPage}`}
                 breakLabel={"..."}
                 nextLabel={"Next"}
-                onPageChange={(selected) => setCurrentPage(selected.selected + 1)}
+                onPageChange={handlePageChange}
                 pageRangeDisplayed={isMobile ? 1 : 2}
                 marginPagesDisplayed={isMobile ? 1 : 2}
                 pageCount={totalPages}
@@ -241,7 +284,7 @@ export default function CarListing() {
               </div>
             ) : cars.length === 0 ? (
               <div className="text-center py-12">
-                <Car className="h-16 w-16 text-gray-400 dark:text-neutral-500 mx-auto mb-4" />
+                <CarIcon className="h-16 w-16 text-gray-400 dark:text-neutral-500 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No cars available</h3>
                 <p className="text-gray-600 dark:text-neutral-400">Try adjusting your filters or check back later.</p>
               </div>
@@ -267,7 +310,7 @@ export default function CarListing() {
                       key={`bottom-pagination-${totalPages}-${currentPage}`}
                       breakLabel={"..."}
                       nextLabel={"Next"}
-                      onPageChange={(selected) => setCurrentPage(selected.selected + 1)}
+                      onPageChange={handlePageChange}
                       pageRangeDisplayed={isMobile ? 1 : 2}
                       marginPagesDisplayed={isMobile ? 1 : 2}
                       pageCount={totalPages}

@@ -1,34 +1,107 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import CarCard from '@/components/car-card';
 import CarFilters from '@/components/car-filters';
 
 export default function CarListings() {
     const { loading } = useAuth();
+    const location = useLocation();
+    const navigate = useNavigate();
+    
+    // Helper to parse query params
+    type DashboardFilters = {
+        brand_id: string;
+        type_id: string;
+        store_id: string;
+        transmission: string;
+        fuel_type: string;
+        min_seats: string;
+        max_price: string;
+        tag_ids: number[];
+    };
+
+    const getFiltersFromQuery = useCallback((search: string): DashboardFilters => {
+        const queryParams = new URLSearchParams(search);
+        return {
+            brand_id: queryParams.get('brand_id') || '',
+            type_id: queryParams.get('type_id') || '',
+            store_id: queryParams.get('store_id') || '',
+            transmission: queryParams.get('transmission') || '',
+            fuel_type: queryParams.get('fuel_type') || '',
+            min_seats: queryParams.get('min_seats') || '',
+            max_price: queryParams.get('max_price') || '',
+            tag_ids: queryParams.get('tag_ids') ? queryParams.get('tag_ids')!.split(',').map(Number) : [],
+        };
+    }, []);
+
+    // State declarations
     const [selectedStore, setSelectedStore] = useState<{ id: number; name: string } | null>(null);
     const [userStores, setUserStores] = useState<Array<{ id: number; name: string }>>([]);
-
-    // Car listing state
     const [cars, setCars] = useState<Array<{ id: string; name: string }>>([]);
     const [carLoading, setCarLoading] = useState(false);
     const [carError, setCarError] = useState<string | null>(null);
-    // Update initial filters state to include store_id
-    const [filters, setFilters] = useState({
-        brand_id: '',
-        type_id: '',
-        store_id: '',
-        transmission: '',
-        fuel_type: '',
-        min_seats: '',
-        max_price: '',
-        city_id: '',
-        tag_ids: [] as number[]
-    });
+    const [filters, setFilters] = useState<DashboardFilters>(() => getFiltersFromQuery(window.location.search));
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPageState, setPerPageState] = useState(9);
 
-    // (No role-based redirects)
+    // Function to update URL parameters
+    const updateURLParams = useCallback((newFilters: DashboardFilters, page: number = 1) => {
+        const params = new URLSearchParams();
+        
+        // Add filters to params
+        Object.entries(newFilters).forEach(([key, value]) => {
+            if (value && value !== '') {
+                if (Array.isArray(value)) {
+                    if (value.length > 0) {
+                        params.set(key, value.join(','));
+                    }
+                } else {
+                    params.set(key, value.toString());
+                }
+            }
+        });
+        
+        // Add pagination params
+        params.set('page', page.toString());
+        params.set('per_page', perPageState.toString());
+        
+        // Update URL without triggering a page reload
+        navigate(`/dashboard/cars?${params.toString()}`, { replace: true });
+    }, [navigate, perPageState]);
+
+    // Sync filters/page with URL on load
+    useEffect(() => {
+        setFilters(getFiltersFromQuery(location.search));
+    }, [location.search, getFiltersFromQuery]);
+
+    // Handle filter changes
+    const handleFilterChange = useCallback((newFilters: Partial<DashboardFilters>) => {
+        const updatedFilters = { ...filters, ...newFilters };
+        setFilters(updatedFilters);
+        setCurrentPage(1);
+        updateURLParams(updatedFilters, 1);
+  }, [filters, updateURLParams]);
+
+  // Handle clear filters
+  const handleClearFilters = useCallback(() => {
+    const defaultFilters: DashboardFilters = {
+      brand_id: '',
+      type_id: '',
+      store_id: '',
+      transmission: '',
+      fuel_type: '',
+      min_seats: '',
+      max_price: '',
+      tag_ids: [],
+    };
+    setFilters(defaultFilters);
+    setCurrentPage(1);
+    updateURLParams(defaultFilters, 1);
+  }, [updateURLParams]);
+
+  // (No role-based redirects)
 
     useEffect(() => {
         // Fetch stores for the user
@@ -129,10 +202,9 @@ export default function CarListings() {
                 <CarFilters
                     filters={filters}
                     setFilters={setFilters}
-                    onFiltersChange={(newFilters) => {
-                        setFilters(newFilters);
-                        setCurrentPage(1); // Reset to first page when filters change
-                    }}
+                    handleSearch={handleFilterChange}
+                    onClearFilters={handleClearFilters}
+                    loading={carLoading}
                 />
             </div>
 
@@ -180,7 +252,7 @@ export default function CarListings() {
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {cars.map((car) => (
-                                    <CarCard key={car.id} car={car} hideBooking={false} showEditButton={true} />
+                                    <CarCard key={car.id} car={car} hideBooking={true} showEditButton={true} />
                                 ))}
                             </div>
 

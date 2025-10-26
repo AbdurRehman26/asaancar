@@ -9,11 +9,12 @@ export type CarFiltersType = {
   fuel_type: string;
   min_seats: string;
   max_price: string;
-  city_id: string;
+  tag_ids: number[];
 };
 
 interface UniversalCarFilterProps {
   onSearch?: (filters: CarFiltersType) => void;
+  onClearFilters?: () => void;
   initialFilters?: CarFiltersType;
   loading?: boolean;
   className?: string;
@@ -28,11 +29,12 @@ const defaultFilters: CarFiltersType = {
   fuel_type: '',
   min_seats: '',
   max_price: '',
-  city_id: '',
+  tag_ids: [],
 };
 
 const UniversalCarFilter: React.FC<UniversalCarFilterProps> = ({
   onSearch,
+  onClearFilters,
   initialFilters = defaultFilters,
   loading = false,
   className = '',
@@ -58,6 +60,7 @@ const UniversalCarFilter: React.FC<UniversalCarFilterProps> = ({
         filters={filters}
         setFilters={setFilters}
         handleSearch={handleSearch}
+        onClearFilters={onClearFilters}
         loading={loading}
       />
     </div>

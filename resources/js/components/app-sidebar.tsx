@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Folder, MessageSquare, Store, BookOpen } from 'lucide-react';
+import { LayoutGrid, Folder, MessageSquare, Store, BookOpen, Mail } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 
@@ -51,7 +51,15 @@ export function AppSidebar() {
                         <SidebarMenuButton size="lg" asChild>
                             <Link to="/dashboard/messages">
                                 <MessageSquare className="mr-2" />
-                                Messages
+                                Chat
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton size="lg" asChild>
+                            <Link to="/dashboard/inquiries">
+                                <Mail className="mr-2" />
+                                Inquiries
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
