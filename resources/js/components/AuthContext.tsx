@@ -7,7 +7,7 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error: string | null }>;
   logout: () => void;
   register: (data: { name: string; email: string; password: string; password_confirmation: string; terms?: boolean }) => Promise<boolean>;
   setUser: (user: User | null) => void;
@@ -60,9 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (!res.ok) {
         const err = await res.json();
-        setError(err.message || 'Login failed');
+        const errorMessage = `${err.message || 'Unknown error'}`;
+        setError(errorMessage);
         setLoading(false);
-        return false;
+        return { success: false, error: errorMessage };
       }
       const data = await res.json();
       localStorage.setItem('token', data.token);
@@ -70,12 +71,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Unwrap .data if present
       setUser(data.user && (data.user.data || data.user));
       setLoading(false);
-      return true;
+      return { success: true, error: null };
     } catch (e) {
-      console.error(e);
-      setError('Network error');
-      setLoading(false);
-      return false;
+        const errorMessage = 'Network error' + (e instanceof Error ? `: ${e.message}` : '');
+        setError(errorMessage);
+        setLoading(false);
+        return { success: false, error: errorMessage };
     }
   };
 

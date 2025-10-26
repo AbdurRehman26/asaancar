@@ -35,9 +35,9 @@ export default function LoginModal({ canResetPassword, onSuccess }: LoginModalPr
         e.preventDefault();
         setProcessing(true);
         setError(null);
-        const success = await login(data.email, data.password);
+        const result = await login(data.email, data.password);
         setProcessing(false);
-        if (success && onSuccess) onSuccess();
+        if (result.success && onSuccess) onSuccess();
     };
 
     return (

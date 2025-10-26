@@ -81,19 +81,19 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   }, [removeToast]);
 
   const success = useCallback((title: string, message?: string, duration?: number) => {
-    addToast({ type: 'success', title, message, duration });
+    addToast({ type: 'success', title, message, duration: duration ?? 3000 });
   }, [addToast]);
 
   const error = useCallback((title: string, message?: string, duration?: number) => {
-    addToast({ type: 'error', title, message, duration });
+    addToast({ type: 'error', title, message, duration: duration ?? 3000 });
   }, [addToast]);
 
   const warning = useCallback((title: string, message?: string, duration?: number) => {
-    addToast({ type: 'warning', title, message, duration });
+    addToast({ type: 'warning', title, message, duration: duration ?? 3000 });
   }, [addToast]);
 
   const info = useCallback((title: string, message?: string, duration?: number) => {
-    addToast({ type: 'info', title, message, duration });
+    addToast({ type: 'info', title, message, duration: duration ?? 3000 });
   }, [addToast]);
 
   const getToastIcon = (type: ToastType) => {

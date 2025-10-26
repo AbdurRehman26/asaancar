@@ -8,6 +8,7 @@ export type CarFiltersType = {
   transmission: string;
   fuel_type: string;
   min_seats: string;
+  min_price: string;
   max_price: string;
   tag_ids: number[];
 };
@@ -28,6 +29,7 @@ const defaultFilters: CarFiltersType = {
   transmission: '',
   fuel_type: '',
   min_seats: '',
+  min_price: '',
   max_price: '',
   tag_ids: [],
 };
@@ -47,8 +49,14 @@ const UniversalCarFilter: React.FC<UniversalCarFilterProps> = ({
     setFilters(initialFilters);
   }, [initialFilters]);
 
-  const handleSearch = () => {
-    if (onSearch) onSearch(filters);
+  const handleSearch = (newFilters?: Partial<CarFiltersType>) => {
+    if (onSearch) {
+      if (newFilters) {
+        onSearch(newFilters as CarFiltersType);
+      } else {
+        onSearch(filters);
+      }
+    }
   };
 
   // Use fullWidth styling when fullWidth is true, otherwise use provided className

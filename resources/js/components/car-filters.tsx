@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
 
 type CarFiltersType = {
   brand_id: string;
@@ -8,6 +7,7 @@ type CarFiltersType = {
   transmission: string;
   fuel_type: string;
   min_seats: string;
+  min_price: string;
   max_price: string;
   tag_ids: number[];
 };
@@ -25,7 +25,7 @@ type CarType = {
 type CarFiltersProps = {
   filters: CarFiltersType;
   setFilters: React.Dispatch<React.SetStateAction<CarFiltersType>>;
-  handleSearch: () => void;
+  handleSearch: (newFilters?: Partial<CarFiltersType>) => void;
   onClearFilters?: () => void;
   loading?: boolean;
 };
@@ -86,7 +86,11 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Brand</label>
             <select
               value={filters.brand_id}
-              onChange={(e) => setFilters({...filters, brand_id: e.target.value})}
+              onChange={(e) => {
+                const newFilters = {...filters, brand_id: e.target.value};
+                setFilters(newFilters);
+                handleSearch(newFilters);
+              }}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
               disabled={brandsLoading}
             >
@@ -102,7 +106,11 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Type</label>
             <select
               value={filters.type_id}
-              onChange={(e) => setFilters({...filters, type_id: e.target.value})}
+              onChange={(e) => {
+                const newFilters = {...filters, type_id: e.target.value};
+                setFilters(newFilters);
+                handleSearch(newFilters);
+              }}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
               disabled={carTypesLoading}
             >
@@ -118,7 +126,11 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Transmission</label>
             <select
               value={filters.transmission}
-              onChange={(e) => setFilters({...filters, transmission: e.target.value})}
+              onChange={(e) => {
+                const newFilters = {...filters, transmission: e.target.value};
+                setFilters(newFilters);
+                handleSearch(newFilters);
+              }}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             >
               <option value="">All</option>
@@ -130,7 +142,11 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Fuel Type</label>
             <select
               value={filters.fuel_type}
-              onChange={(e) => setFilters({...filters, fuel_type: e.target.value})}
+              onChange={(e) => {
+                const newFilters = {...filters, fuel_type: e.target.value};
+                setFilters(newFilters);
+                handleSearch(newFilters);
+              }}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             >
               <option value="">All</option>
@@ -143,7 +159,11 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Min Seats</label>
             <select
               value={filters.min_seats}
-              onChange={(e) => setFilters({...filters, min_seats: e.target.value})}
+              onChange={(e) => {
+                const newFilters = {...filters, min_seats: e.target.value};
+                setFilters(newFilters);
+                handleSearch(newFilters);
+              }}
               className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             >
               <option value="">Any</option>
@@ -154,24 +174,50 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Max Price</label>
-            <input
-              type="number"
-              placeholder="Max price"
-              value={filters.max_price}
-              onChange={(e) => setFilters({...filters, max_price: e.target.value})}
-              className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
-            />
-          </div>
-          <div className="flex items-end gap-2">
-            <button
-              onClick={handleSearch}
-              disabled={loading}
-              className="flex-1 bg-[#7e246c] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#6a1f5c] transition-colors disabled:opacity-50 flex items-center justify-center shadow"
+            <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Min Price</label>
+            <select
+              value={filters.min_price || ''}
+              onChange={(e) => {
+                const newFilters = {...filters, min_price: e.target.value};
+                setFilters(newFilters);
+                handleSearch(newFilters);
+              }}
+              className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white min-w-[140px]"
             >
-              <Search className="h-4 w-4 mr-2" />
-              {loading ? 'Searching...' : 'Filter'}
-            </button>
+              <option value="">Any Price</option>
+              <option value="1000">1,000 PKR</option>
+              <option value="3000">3,000 PKR</option>
+              <option value="5000">5,000 PKR</option>
+              <option value="10000">10,000 PKR</option>
+              <option value="15000">15,000 PKR</option>
+              <option value="20000">20,000 PKR</option>
+              <option value="25000">25,000 PKR</option>
+              <option value="30000">30,000 PKR</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Max Price</label>
+            <select
+              value={filters.max_price}
+              onChange={(e) => {
+                const newFilters = {...filters, max_price: e.target.value};
+                setFilters(newFilters);
+                handleSearch(newFilters);
+              }}
+              className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white min-w-[140px]"
+            >
+              <option value="">Any Price</option>
+              <option value="3000">3,000 PKR</option>
+              <option value="6000">6,000 PKR</option>
+              <option value="10000">10,000 PKR</option>
+              <option value="15000">15,000 PKR</option>
+              <option value="20000">20,000 PKR</option>
+              <option value="25000">25,000 PKR</option>
+              <option value="30000">30,000 PKR</option>
+              <option value="50000">50,000 PKR</option>
+            </select>
+          </div>
+          <div className="flex items-end justify-end gap-2">
             <button
               onClick={() => {
                 if (onClearFilters) {
@@ -185,11 +231,12 @@ const CarFilters: React.FC<CarFiltersProps> = ({
                     transmission: '',
                     fuel_type: '',
                     min_seats: '',
+                    min_price: '',
                     max_price: '',
                     tag_ids: []
                   };
                   setFilters(defaultFilters);
-                  handleSearch();
+                  handleSearch(defaultFilters);
                 }
               }}
               disabled={loading}

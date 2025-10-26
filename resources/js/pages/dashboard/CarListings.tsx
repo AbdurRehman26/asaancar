@@ -17,6 +17,7 @@ export default function CarListings() {
         transmission: string;
         fuel_type: string;
         min_seats: string;
+        min_price: string;
         max_price: string;
         tag_ids: number[];
     };
@@ -30,6 +31,7 @@ export default function CarListings() {
             transmission: queryParams.get('transmission') || '',
             fuel_type: queryParams.get('fuel_type') || '',
             min_seats: queryParams.get('min_seats') || '',
+            min_price: queryParams.get('min_price') || '',
             max_price: queryParams.get('max_price') || '',
             tag_ids: queryParams.get('tag_ids') ? queryParams.get('tag_ids')!.split(',').map(Number) : [],
         };
@@ -77,12 +79,58 @@ export default function CarListings() {
     }, [location.search, getFiltersFromQuery]);
 
     // Handle filter changes
-    const handleFilterChange = useCallback((newFilters: Partial<DashboardFilters>) => {
-        const updatedFilters = { ...filters, ...newFilters };
-        setFilters(updatedFilters);
-        setCurrentPage(1);
-        updateURLParams(updatedFilters, 1);
-  }, [filters, updateURLParams]);
+    const handleFilterChange = useCallback((newFilters?: Partial<DashboardFilters>) => {
+        if (newFilters) {
+            // Use the newFilters directly instead of relying on state
+            setFilters(newFilters as DashboardFilters);
+            setCurrentPage(1);
+            updateURLParams(newFilters as DashboardFilters, 1);
+            
+            // Trigger immediate search with the new filters
+            setCarLoading(true);
+            setCarError(null);
+            const params = new URLSearchParams();
+
+            // Only add store_id if a specific store is selected (not "All Stores")
+            if (selectedStore) {
+                params.append('store_id', selectedStore.id.toString());
+            }
+
+            // Add other filters using the newFilters directly
+            Object.entries(newFilters).forEach(([key, value]) => {
+                if (value && key !== 'store_id') {
+                    if (Array.isArray(value)) {
+                        value.forEach(v => params.append(`${key}[]`, v.toString()));
+                    } else {
+                        params.append(key, value.toString());
+                    }
+                }
+            });
+
+            params.append('page', '1');
+            params.append('per_page', perPageState.toString());
+
+            fetch(`/api/cars?${params.toString()}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setCars(data.data || []);
+                    setTotalPages(data.last_page || 1);
+                    setCarError(null);
+                })
+                .catch(error => {
+                    console.error('Error fetching cars:', error);
+                    setCars([]);
+                    setCarError('Failed to fetch cars. Please try again.');
+                })
+                .finally(() => setCarLoading(false));
+        } else {
+            // Fallback for backward compatibility - this shouldn't happen with instant filtering
+            setCurrentPage(1);
+            // The useEffect will handle the actual filtering when filters state changes
+        }
+    }, [selectedStore, perPageState, updateURLParams]);
 
   // Handle clear filters
   const handleClearFilters = useCallback(() => {
@@ -93,6 +141,7 @@ export default function CarListings() {
       transmission: '',
       fuel_type: '',
       min_seats: '',
+      min_price: '',
       max_price: '',
       tag_ids: [],
     };

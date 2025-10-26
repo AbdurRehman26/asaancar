@@ -27,6 +27,7 @@ export default function AdminDashboard() {
         transmission: string;
         fuel_type: string;
         min_seats: string;
+        min_price: string;
         max_price: string;
     };
 
@@ -39,6 +40,7 @@ export default function AdminDashboard() {
             transmission: queryParams.get('transmission') || '',
             fuel_type: queryParams.get('fuel_type') || '',
             min_seats: queryParams.get('min_seats') || '',
+            min_price: queryParams.get('min_price') || '',
             max_price: queryParams.get('max_price') || '',
         };
     }, []);
@@ -98,11 +100,46 @@ export default function AdminDashboard() {
 
     // Handle filter changes
     const handleFilterChange = useCallback((newFilters: Partial<AdminFilters>) => {
-        const updatedFilters = { ...filters, ...newFilters };
-        setFilters(updatedFilters);
+        // Update state
+        setFilters(newFilters as AdminFilters);
         setCurrentPage(1);
-        updateURLParams(updatedFilters, 1);
-  }, [filters, updateURLParams]);
+        updateURLParams(newFilters as AdminFilters, 1);
+        
+        // Trigger immediate search with the new filters
+        setCarLoading(true);
+        setCarError(null);
+        const params = new URLSearchParams();
+
+        // Add other filters using the newFilters directly
+        Object.entries(newFilters).forEach(([key, value]) => {
+            if (value) {
+                if (Array.isArray(value)) {
+                    value.forEach(v => params.append(`${key}[]`, v.toString()));
+                } else {
+                    params.append(key, value.toString());
+                }
+            }
+        });
+
+        params.append('page', '1');
+        params.append('per_page', perPageState.toString());
+
+        fetch(`/api/admin/cars?${params.toString()}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        })
+            .then(res => res.json())
+            .then(data => {
+                setCars(data.data || []);
+                setTotalPages(data.last_page || 1);
+                setCarError(null);
+            })
+            .catch(error => {
+                console.error('Error fetching cars:', error);
+                setCars([]);
+                setCarError('Failed to fetch cars. Please try again.');
+            })
+            .finally(() => setCarLoading(false));
+  }, [perPageState, updateURLParams]);
 
   // Handle clear filters
   const handleClearFilters = useCallback(() => {
@@ -113,6 +150,7 @@ export default function AdminDashboard() {
       transmission: '',
       fuel_type: '',
       min_seats: '',
+      min_price: '',
       max_price: '',
     };
     setFilters(defaultFilters);

@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login, error: authError } = useAuth();
+  const { login } = useAuth();
   const { success: showSuccess, error: showError } = useToast();
 
   // Check if user just verified their email
@@ -33,14 +33,15 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const success = await login(email, password);
+    const result = await login(email, password);
     setLoading(false);
-    if (success) {
+    if (result.success) {
       showSuccess('Login Successful', 'Welcome back! You have been logged in successfully.');
       navigate('/');
     } else {
-      setError(authError || 'Login failed');
-      showError('Login Failed', authError || 'Invalid email or password. Please try again.');
+      setError(result.error || 'Login failed');
+      // Display the exact backend error in toast
+      showError('Login Failed', result.error || '');
     }
   };
 
@@ -80,7 +81,7 @@ export default function LoginPage() {
 
           <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Welcome Back</h1>
           <p className="text-gray-500 dark:text-gray-300 mb-6">Log in to your account</p>
-          
+
           {searchParams.get('verified') === '1' && (
             <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
               <div className="flex items-center">
@@ -178,9 +179,9 @@ export default function LoginPage() {
           <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Welcome to AsaanCar</h2>
           <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">Your trusted partner for seamless car rental experiences</p>
           <div className="rounded-2xl overflow-hidden shadow-lg">
-            <img 
-              src="/images/car-2.png" 
-              alt="Car rental illustration" 
+            <img
+              src="/images/car-2.png"
+              alt="Car rental illustration"
               className="w-full h-auto object-contain"
             />
           </div>
@@ -188,4 +189,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}

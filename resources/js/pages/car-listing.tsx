@@ -34,6 +34,7 @@ export default function CarListing() {
     transmission: string;
     fuel_type: string;
     min_seats: string;
+    min_price: string;
     max_price: string;
     tag_ids: number[];
     pickup_location?: string;
@@ -52,6 +53,7 @@ export default function CarListing() {
       transmission: queryParams.get('transmission') || '',
       fuel_type: queryParams.get('fuel_type') || '',
       min_seats: queryParams.get('min_seats') || '',
+      min_price: queryParams.get('min_price') || '',
       max_price: queryParams.get('max_price') || '',
       tag_ids: queryParams.get('tag_ids') ? queryParams.get('tag_ids')!.split(',').map(Number) : [],
       pickup_location: queryParams.get('pickup_location') || '',
@@ -145,11 +147,43 @@ export default function CarListing() {
 
   // Handle filter changes
   const handleFilterChange = useCallback((newFilters: Partial<ListingFilters>) => {
-    const updatedFilters = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
+    // Update state
+    setFilters(newFilters as ListingFilters);
     setCurrentPage(1);
-    updateURLParams(updatedFilters, 1);
-  }, [filters, updateURLParams]);
+    updateURLParams(newFilters as ListingFilters, 1);
+    
+    // Trigger immediate search with the new filters
+    setLoading(true);
+    const params = new URLSearchParams();
+
+    // Add other filters using the newFilters directly
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value) {
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            params.append(key, value.join(','));
+          }
+        } else {
+          params.append(key, value.toString());
+        }
+      }
+    });
+
+    params.append('page', '1');
+    params.append('per_page', perPageState.toString());
+
+    fetch(`/api/cars?${params.toString()}`)
+      .then(res => res.json())
+      .then(data => {
+        setCars(data.data || []);
+        setTotalPages(data.last_page || 1);
+      })
+      .catch(error => {
+        console.error('Error fetching cars:', error);
+        setCars([]);
+      })
+      .finally(() => setLoading(false));
+  }, [perPageState, updateURLParams]);
 
   // Handle pagination changes
   const handlePageChange = useCallback((selected: { selected: number }) => {
@@ -167,6 +201,7 @@ export default function CarListing() {
       transmission: '',
       fuel_type: '',
       min_seats: '',
+      min_price: '',
       max_price: '',
       tag_ids: [],
       pickup_location: '',
