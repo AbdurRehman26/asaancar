@@ -23,6 +23,7 @@ class CarModelSeeder extends Seeder
             "Toyota" => [
                 "Corolla",
                 "Corolla X",
+                "Corolla GLI",
                 "Yaris",
                 "Revo",
                 "Rocco",
@@ -34,7 +35,7 @@ class CarModelSeeder extends Seeder
                 "Civic",
                 "Civic X",
                 "Civic RS",
-                "Honda BR-V",
+                "Honda BRV",
             ],
             "Kia" => [
                 "Sportage",
@@ -151,11 +152,14 @@ class CarModelSeeder extends Seeder
 
         // Add some specific mappings for known models
         $specificMappings = [
-            'Honda BR-V' => 'honda-brv',
+            'Honda BRV' => 'brv',
+            'Honda BR-V' => 'brv',
             'Land Cruiser' => 'land-cruiser',
             'WagonR' => 'wagon-r',
             'Corolla X' => 'corolla',
             'XCorolla' => 'corolla',
+            'Corolla GLI' => 'corolla',
+            'Mira', 'mira',
             'A4' => 'audi',
             'A5' => 'audi',
             'A6' => 'audi',

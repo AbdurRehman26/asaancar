@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('seats');
             $table->enum('transmission', ['manual', 'automatic']);
             $table->enum('fuel_type', ['petrol', 'diesel', 'electric', 'hybrid']);
+            $table->integer('priority')->default(0);
             $table->boolean('available')->default(true);
             $table->timestamps();
         });

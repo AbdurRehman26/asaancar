@@ -60,7 +60,7 @@ class AdminCarService
             $query->where('seats', '>=', $filters['min_seats']);
         }
 
-        $query->orderBy('cars.created_at', 'desc');
+        $query->orderBy('cars.priority', 'desc')->orderBy('cars.created_at', 'desc');
 
         $cars = $query->paginate($perPage);
 

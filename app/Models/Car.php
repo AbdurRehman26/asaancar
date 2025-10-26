@@ -52,6 +52,7 @@ class Car extends Model
         'seats',
         'transmission',
         'fuel_type',
+        'priority',
     ];
 
     protected $casts = [
