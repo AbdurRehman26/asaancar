@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use NotificationChannels\WebPush\HasPushSubscriptions;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Traits\HasRoles;
@@ -94,22 +93,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Message::class, 'sender_id');
     }
 
-    /**
-     * Send the email verification notification.
-     *
-     * @return void
-     */
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomEmailVerificationNotification);
     }
 
-    /**
-     * Send the password reset notification.
-     *
-     * @param  string  $token
-     * @return void
-     */
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new CustomPasswordResetNotification($token));
