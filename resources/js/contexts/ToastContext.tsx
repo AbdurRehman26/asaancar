@@ -99,30 +99,30 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const getToastIcon = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
       case 'error':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
       case 'warning':
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+        return <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />;
       case 'info':
-        return <Info className="h-5 w-5 text-blue-500" />;
+        return <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
       default:
-        return <Info className="h-5 w-5 text-blue-500" />;
+        return <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
     }
   };
 
   const getToastStyles = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 border-green-500 dark:bg-green-900/20 dark:border-green-400';
+        return 'bg-green-50 border-green-500 dark:bg-green-900 dark:border-green-400';
       case 'error':
-        return 'bg-red-50 border-red-500 dark:bg-red-900/20 dark:border-red-400';
+        return 'bg-red-50 border-red-500 dark:bg-red-900 dark:border-red-400';
       case 'warning':
-        return 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20 dark:border-yellow-400';
+        return 'bg-yellow-50 border-yellow-500 dark:bg-yellow-900 dark:border-yellow-400';
       case 'info':
-        return 'bg-blue-50 border-blue-500 dark:bg-blue-900/20 dark:border-blue-400';
+        return 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-400';
       default:
-        return 'bg-blue-50 border-blue-500 dark:bg-blue-900/20 dark:border-blue-400';
+        return 'bg-blue-50 border-blue-500 dark:bg-blue-900 dark:border-blue-400';
     }
   };
 
@@ -140,7 +140,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 300, scale: 0.5, transition: { duration: 0.2 } }}
               className={`
-                w-80 min-w-80 max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden border-2
+                w-80 min-w-80 max-w-md shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 dark:ring-white dark:ring-opacity-10 overflow-hidden border-2
                 ${getToastStyles(toast.type)}
               `}
             >
@@ -161,7 +161,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
                   </div>
                   <div className="ml-4 flex-shrink-0 flex">
                     <button
-                      className="bg-white dark:bg-gray-800 rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="rounded-md inline-flex text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       onClick={() => removeToast(toast.id)}
                     >
                       <span className="sr-only">Close</span>
@@ -173,7 +173,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
                 {toast.duration && toast.duration > 0 && (
                   <div className="mt-2 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gray-400 dark:bg-gray-500 transition-all duration-75 ease-linear"
+                      className="h-full bg-gray-400 dark:bg-gray-400 transition-all duration-75 ease-linear"
                       style={{ width: `${progress[toast.id] || 100}%` }}
                     />
                   </div>
