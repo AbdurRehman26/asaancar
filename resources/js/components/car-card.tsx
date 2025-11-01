@@ -1,4 +1,4 @@
-import { Users, Fuel, Settings, Shield, Calendar, Thermometer, Navigation, Key, Car } from 'lucide-react';
+import { Users, Fuel, Settings, Shield, Calendar, Thermometer, Navigation, Key, Car, Building2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
@@ -175,6 +175,28 @@ const CarCard = ({ car, hideBooking, showEditButton }: { car: CarType; hideBooki
           <div className="text-xs text-gray-400 dark:text-gray-300 mt-1">{car.extraInfo}</div>
         )}
       </Link>
+      {/* Store Information */}
+      {car.store && (
+        <div className="w-full mb-4 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <Link
+            to={`/store/${car.store.id}`}
+            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-[#7e246c] dark:hover:text-[#7e246c] transition-colors cursor-pointer group"
+          >
+            <Building2 className="h-4 w-4 text-[#7e246c] dark:text-[#7e246c]" />
+            <span className="font-medium text-gray-800 dark:text-gray-200 group-hover:text-[#7e246c] dark:group-hover:text-[#7e246c] transition-colors">
+              {car.store.name}
+            </span>
+          </Link>
+          {car.store.address && (
+            <Link
+              to={`/store/${car.store.id}`}
+              className="block text-xs text-gray-500 dark:text-gray-400 mt-1 ml-6 hover:text-[#7e246c] dark:hover:text-[#7e246c] transition-colors"
+            >
+              {car.store.address}
+            </Link>
+          )}
+        </div>
+      )}
       {/* Features Grid */}
       <div className="w-full grid grid-cols-2 gap-x-4 gap-y-2 my-4">
         {features.map(

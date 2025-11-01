@@ -79,6 +79,11 @@ Route::get('/car-models/brand/{brandId}', [\App\Http\Controllers\Customer\CarMod
 Route::get('/colors', [\App\Http\Controllers\Customer\ColorController::class, 'index']);
 Route::get('/years', [\App\Http\Controllers\Customer\YearController::class, 'index']);
 
+// Public store routes (no authentication required) - for customer frontend
+Route::prefix('stores')->group(function () {
+    Route::get('/{id}', [StoreController::class, 'showPublic']);
+});
+
 // Public guest booking endpoint
 Route::post('/guest-booking', [BookingController::class, 'guestBooking']);
 

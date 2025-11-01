@@ -257,8 +257,12 @@ class CarService
     /**
      * Format store data
      */
-    private function formatStoreData($store): array
+    private function formatStoreData($store): ?array
     {
+        if (!$store) {
+            return null;
+        }
+        
         return [
             'id' => $store->id,
             'name' => $store->name ?? 'Unknown Store',

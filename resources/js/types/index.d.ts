@@ -74,5 +74,16 @@ export interface Car {
   rental?: number;
   withDriver?: number;
   offer?: { id: number };
+  store?: {
+    id: number;
+    name: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    rating?: number;
+    reviews?: number;
+    description?: string;
+    logo_url?: string;
+  };
   [key: string]: unknown;
 }

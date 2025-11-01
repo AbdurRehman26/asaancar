@@ -124,6 +124,34 @@ class StoreController extends Controller
     }
 
     /**
+     * Public method to get store information (no authentication required)
+     */
+    public function showPublic(string $id)
+    {
+        $store = Store::with('city')->findOrFail($id);
+        
+        // Get car count for this store
+        $carCount = \App\Models\Car::where('store_id', $store->id)->count();
+        
+        return response()->json([
+            'data' => [
+                'id' => $store->id,
+                'name' => $store->name,
+                'store_username' => $store->store_username,
+                'description' => $store->description,
+                'logo_url' => $store->logo_url,
+                'city_id' => $store->city_id,
+                'city' => $store->city ? $store->city->name : null,
+                'contact_phone' => $store->contact_phone,
+                'address' => $store->address,
+                'car_count' => $carCount,
+                'created_at' => $store->created_at,
+                'updated_at' => $store->updated_at,
+            ]
+        ]);
+    }
+
+    /**
      * @OA\Put(
      *     path="/api/customer/stores/{id}",
      *     operationId="updateStore",

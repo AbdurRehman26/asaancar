@@ -28,6 +28,7 @@ import About from './pages/about';
 import Contact from './pages/contact';
 import ResetPassword from './pages/auth/reset-password';
 import EmailVerificationSuccess from './pages/email-verification-success';
+import StoreProfile from './pages/store-profile';
 
 configureEcho({
     broadcaster: 'pusher',
@@ -60,6 +61,7 @@ function App() {
           <Route path="/cars" element={<CarListing />} />
           <Route path="/car-detail/:id" element={<CarDetail />} />
           <Route path="/car-detail/:id/edit" element={<CarDetailWithOffer />} />
+          <Route path="/store/:id" element={<StoreProfile />} />
           <Route path="/bookings" element={
             <ProtectedRoute>
               <Bookings />

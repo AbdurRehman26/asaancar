@@ -136,11 +136,7 @@ class AdminCarService
             'image' => $this->getPrimaryImage($car),
             'images' => $car->image_urls ?? [],
             'price' => $pricing,
-            'store' => [
-                'id' => $car->store->id,
-                'name' => $car->store->name,
-                'address' => $car->store->address,
-            ],
+            'store' => $this->formatStoreData($car->store ?? null),
             'specifications' => [
                 'brand' => $car->carBrand->name ?? 'Unknown',
                 'type' => $car->carType->name ?? 'Not specified',
@@ -233,5 +229,27 @@ class AdminCarService
         }
 
         return $features;
+    }
+
+    /**
+     * Format store data
+     */
+    protected function formatStoreData($store): ?array
+    {
+        if (!$store) {
+            return null;
+        }
+        
+        return [
+            'id' => $store->id,
+            'name' => $store->name ?? 'Unknown Store',
+            'address' => $store->address ?? 'Address not available',
+            'phone' => $store->contact_phone ?? 'Phone not available',
+            'email' => $store->email ?? null,
+            'rating' => 4.5, // You can add this to your store model
+            'reviews' => 50, // You can add this to your store model
+            'description' => $store->description ?? null,
+            'logo_url' => $store->logo_url ?? null,
+        ];
     }
 }
