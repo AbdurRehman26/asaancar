@@ -10,6 +10,7 @@
         "aws/aws-sdk-php": "^3.351",
         "darkaonline/l5-swagger": "^9.0",
         "filament/filament": "^3.3",
+        "ichtrojan/laravel-otp": "^2.0",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel-notification-channels/webpush": "^10.2",
         "laravel/framework": "^12.0",

@@ -68,7 +68,7 @@ export function BookingPrice({ car, rentalType, numberOfDays }: { car: Car; rent
   );
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings, rentalType, setRentalType, numberOfDays, setNumberOfDays, onMessageStore, pickupDate, setPickupDate, pickupTime, setPickupTime, selectedAddress, setSelectedAddress, selectedLatLng, setSelectedLatLng, refillTank }) => {
+const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, success, userBookings, rentalType, numberOfDays, setNumberOfDays, onMessageStore, pickupDate, setPickupDate, pickupTime, setPickupTime, selectedAddress, setSelectedAddress, selectedLatLng, setSelectedLatLng, refillTank }) => {
   const { success: showSuccess, error: showError } = useToast();
   // pickupAddress, pickupTime, pickupDate, selectedAddress, selectedLatLng are now controlled by parent
   const [notes, setNotes] = useState<string>('');
@@ -362,54 +362,17 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
                   />
               </div>
           </div>
-          {/* Rental Type and Days */}
-          <div className="flex flex-col md:flex-row gap-4 mt-6">
-              <div className="flex flex-col gap-2 flex-1">
-                  <label className="font-semibold text-[#7e246c]">Rental Type</label>
-                  <div className="flex gap-4">
-                      {/* Only show Without Driver option if price is available */}
-                      {car && typeof car.rental === 'number' && car.rental > 0 && (
-                          <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                  type="radio"
-                                  name="rentalType"
-                                  value="without_driver"
-                                  checked={rentalType === 'without_driver'}
-                                  onChange={() => setRentalType('without_driver')}
-                                  className="accent-[#7e246c] h-4 w-4"
-                              />
-                              <span className="font-semibold text-gray-700 dark:text-gray-200">Without Driver</span>
-                              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">24 hrs/day</span>
-                          </label>
-                      )}
-                      {/* Only show With Driver option if price is available */}
-                      {car && typeof car.withDriver === 'number' && car.withDriver > 0 && (
-                          <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                  type="radio"
-                                  name="rentalType"
-                                  value="with_driver"
-                                  checked={rentalType === 'with_driver'}
-                                  onChange={() => setRentalType('with_driver')}
-                                  className="accent-[#7e246c] h-4 w-4"
-                              />
-                              <span className="font-semibold text-gray-700 dark:text-gray-200">With Driver</span>
-                              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">10 hrs/day</span>
-                          </label>
-                      )}
-                  </div>
-              </div>
-              <div className="flex flex-col gap-2 flex-1">
-                  <label htmlFor="numberOfDays" className="font-semibold text-[#7e246c]">No. of Days</label>
-                  <input
-                      id="numberOfDays"
-                      type="number"
-                      min={1}
-                      value={numberOfDays}
-                      onChange={e => setNumberOfDays(Number(e.target.value) || 1)}
-                      className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
-                  />
-              </div>
+          {/* Number of Days */}
+          <div className="flex flex-col gap-2 mt-6">
+              <label htmlFor="numberOfDays" className="font-semibold text-[#7e246c]">No. of Days</label>
+              <input
+                  id="numberOfDays"
+                  type="number"
+                  min={1}
+                  value={numberOfDays}
+                  onChange={e => setNumberOfDays(Number(e.target.value) || 1)}
+                  className="w-full rounded-lg border-2 border-[#7e246c] bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] transition"
+              />
           </div>
       </div>
       {/* Price Display - always above the button */}

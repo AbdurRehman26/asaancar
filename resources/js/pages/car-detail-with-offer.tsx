@@ -269,26 +269,27 @@ export default function CarDetailWithOfferPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-[#7e246c] dark:text-white font-semibold border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-left pb-3">Type</th>
                       <th className="pb-3">Hours/Day</th>
                       <th className="text-right pb-3">Amount</th>
                     </tr>
                   </thead>
                   <tbody className="text-gray-700 dark:text-gray-300">
-                    <tr className="border-b border-gray-100 dark:border-gray-800">
-                      <td className="py-3 font-medium">With Driver</td>
-                      <td className="py-3 text-center font-semibold">10 hrs/day</td>
-                      <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                        {car.currency || 'PKR'} {(typeof car.withDriver === 'number' ? car.withDriver.toLocaleString() : 'N/A')}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 font-medium">Without Driver</td>
-                      <td className="py-3 text-center font-semibold">24 hrs/day</td>
-                      <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                        {car.currency || 'PKR'} {(typeof car.rental === 'number' ? car.rental.toLocaleString() : 'N/A')}
-                      </td>
-                    </tr>
+                    {car.withDriver && typeof car.withDriver === 'number' && car.withDriver > 0 && (
+                      <tr className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-3 text-center font-semibold">10 hrs/day</td>
+                        <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
+                          {car.currency || 'PKR'} {car.withDriver.toLocaleString()}
+                        </td>
+                      </tr>
+                    )}
+                    {car.rental && typeof car.rental === 'number' && car.rental > 0 && (
+                      <tr>
+                        <td className="py-3 text-center font-semibold">24 hrs/day</td>
+                        <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
+                          {car.currency || 'PKR'} {car.rental.toLocaleString()}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
                 <div className="mt-4 text-sm font-semibold text-[#7e246c] dark:text-white">

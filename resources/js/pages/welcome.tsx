@@ -339,7 +339,6 @@ const CarCard = ({
                 <div className="text-sm">
                     <span className="font-medium text-[#7e246c]">from {dailyPrice} {currency}</span>
                     <span className="text-neutral-500"> /day</span>
-                    <div className="text-xs text-[#7e246c] font-medium">With driver</div>
                 </div>
             </div>
             <div className="mt-4 flex items-center justify-between">
