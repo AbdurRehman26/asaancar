@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Users, Search, Filter, ArrowRight, Clock, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Calendar, Users, Search, Filter, ArrowRight, Clock, Plus, ChevronDown, ChevronUp, X } from 'lucide-react';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/components/AuthContext';
@@ -57,13 +57,19 @@ export default function PickAndDropListing() {
         driver_gender: '',
         min_spaces: '',
         departure_date: '',
+        departure_time: '',
     });
+    const [startAreaId, setStartAreaId] = useState<number | undefined>(undefined);
+    const [endAreaId, setEndAreaId] = useState<number | undefined>(undefined);
     const [showFilters, setShowFilters] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(12);
     const [total, setTotal] = useState(0);
     const [expandedStops, setExpandedStops] = useState<Set<number>>(new Set());
+    const [karachiCityId, setKarachiCityId] = useState<number | undefined>(undefined);
+    const [karachiAreas, setKarachiAreas] = useState<{ id: number; name: string }[]>([]);
+    const areasByCity = karachiCityId ? { [karachiCityId]: karachiAreas } : {};
 
     useEffect(() => {
         setCurrentPage(1); // Reset to page 1 when filters change
@@ -91,6 +97,9 @@ export default function PickAndDropListing() {
             }
             if (filters.departure_date) {
                 params.append('departure_date', filters.departure_date);
+            }
+            if (filters.departure_time) {
+                params.append('departure_time', filters.departure_time);
             }
 
             const response = await apiFetch(`/api/pick-and-drop?${params.toString()}`);
@@ -164,6 +173,43 @@ export default function PickAndDropListing() {
         fetchServices();
     }, [fetchServices]);
 
+    // Fetch Karachi city and areas
+    useEffect(() => {
+        const fetchKarachiAreas = async () => {
+            try {
+                const citiesRes = await apiFetch('/api/cities');
+                if (citiesRes.ok) {
+                    const citiesData = await citiesRes.json();
+                    const cities = citiesData.data || citiesData;
+                    const karachi = cities.find((c: { name: string }) => c.name === 'Karachi');
+                    if (karachi) {
+                        setKarachiCityId(karachi.id);
+                        const areasRes = await apiFetch(`/api/areas?city_id=${karachi.id}`);
+                        if (areasRes.ok) {
+                            const areasData = await areasRes.json();
+                            const areas = (areasData.data || areasData).filter((a: { is_active?: boolean }) => a.is_active !== false);
+                            setKarachiAreas(areas);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to fetch Karachi areas:', err);
+            }
+        };
+        fetchKarachiAreas();
+    }, []);
+
+    // Update filters when area selections change
+    useEffect(() => {
+        const startArea = startAreaId ? karachiAreas.find(a => a.id === startAreaId) : null;
+        const endArea = endAreaId ? karachiAreas.find(a => a.id === endAreaId) : null;
+        setFilters(prev => ({
+            ...prev,
+            start_location: startArea ? startArea.name : '',
+            end_location: endArea ? endArea.name : '',
+        }));
+    }, [startAreaId, endAreaId, karachiAreas]);
+
     const formatDateTime = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleString('en-US', {
@@ -181,7 +227,7 @@ export default function PickAndDropListing() {
             end_location: '',
             driver_gender: '',
             min_spaces: '',
-            departure_date: '',
+            departure_time: '',
         });
         setSearchTerm('');
     };
@@ -247,31 +293,144 @@ export default function PickAndDropListing() {
                         </div>
 
                         {showFilters && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Start Location
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={filters.start_location}
-                                        onChange={(e) => setFilters({ ...filters, start_location: e.target.value })}
-                                        placeholder="From..."
-                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        End Location
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={filters.end_location}
-                                        onChange={(e) => setFilters({ ...filters, end_location: e.target.value })}
-                                        placeholder="To..."
-                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
-                                    />
-                                </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                {(() => {
+                                    const SearchableAreaSelect = ({ 
+                                        value, 
+                                        onChange, 
+                                        cityId, 
+                                        areas, 
+                                        label, 
+                                        placeholder = "Search or select area..."
+                                    }: { 
+                                        value: number | undefined; 
+                                        onChange: (areaId: number | undefined) => void; 
+                                        cityId: number | undefined; 
+                                        areas: { [cityId: number]: { id: number; name: string }[] };
+                                        label: string;
+                                        placeholder?: string;
+                                    }) => {
+                                        const [isOpen, setIsOpen] = useState(false);
+                                        const [searchTerm, setSearchTerm] = useState('');
+                                        const dropdownRef = useRef<HTMLDivElement>(null);
+
+                                        const availableAreas = cityId ? (areas[cityId] || []) : [];
+                                        const selectedArea = value ? availableAreas.find(a => a.id === value) : null;
+
+                                        useEffect(() => {
+                                            function handleClickOutside(event: MouseEvent) {
+                                                if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                                                    setIsOpen(false);
+                                                }
+                                            }
+                                            document.addEventListener('mousedown', handleClickOutside);
+                                            return () => document.removeEventListener('mousedown', handleClickOutside);
+                                        }, []);
+
+                                        const filteredAreas = availableAreas.filter(area =>
+                                            area.name.toLowerCase().includes(searchTerm.toLowerCase())
+                                        );
+
+                                        const handleSelect = (areaId: number) => {
+                                            onChange(areaId);
+                                            setIsOpen(false);
+                                            setSearchTerm('');
+                                        };
+
+                                        const handleClear = () => {
+                                            onChange(undefined);
+                                            setSearchTerm('');
+                                        };
+
+                                        return (
+                                            <div className="relative" ref={dropdownRef}>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    {label}
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        value={selectedArea ? selectedArea.name : searchTerm}
+                                                        onChange={(e) => {
+                                                            setSearchTerm(e.target.value);
+                                                            setIsOpen(true);
+                                                            if (!e.target.value) {
+                                                                onChange(undefined);
+                                                            }
+                                                        }}
+                                                        onFocus={() => {
+                                                            if (cityId) {
+                                                                setIsOpen(true);
+                                                            }
+                                                        }}
+                                                        placeholder={placeholder}
+                                                        disabled={!cityId}
+                                                        className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    />
+                                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                                        {selectedArea && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleClear();
+                                                                }}
+                                                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                                            >
+                                                                <X className="h-4 w-4" />
+                                                            </button>
+                                                        )}
+                                                        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                                    </div>
+                                                </div>
+
+                                                {isOpen && cityId && availableAreas.length > 0 && (
+                                                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                                                        {filteredAreas.length > 0 ? (
+                                                            filteredAreas.map((area) => (
+                                                                <button
+                                                                    key={area.id}
+                                                                    type="button"
+                                                                    onClick={() => handleSelect(area.id)}
+                                                                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white ${
+                                                                        value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
+                                                                    }`}
+                                                                >
+                                                                    {area.name}
+                                                                </button>
+                                                            ))
+                                                        ) : (
+                                                            <div className="px-3 py-2 text-gray-500 dark:text-gray-400">
+                                                                No areas found
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    };
+
+                                    return (
+                                        <>
+                                            <SearchableAreaSelect
+                                                value={startAreaId}
+                                                onChange={setStartAreaId}
+                                                cityId={karachiCityId}
+                                                areas={areasByCity}
+                                                label="Start Location"
+                                                placeholder="From..."
+                                            />
+                                            <SearchableAreaSelect
+                                                value={endAreaId}
+                                                onChange={setEndAreaId}
+                                                cityId={karachiCityId}
+                                                areas={areasByCity}
+                                                label="End Location"
+                                                placeholder="To..."
+                                            />
+                                        </>
+                                    );
+                                })()}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Driver Gender
@@ -287,6 +446,30 @@ export default function PickAndDropListing() {
                                     </select>
                                 </div>
                                 <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-gray-500" />
+                                        Departure Time
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="time"
+                                            value={filters.departure_time}
+                                            onChange={(e) => setFilters({ ...filters, departure_time: e.target.value })}
+                                            className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                        />
+                                        {filters.departure_time && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setFilters({ ...filters, departure_time: '' })}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                                title="Clear time filter"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Departure Date
                                     </label>
@@ -300,7 +483,7 @@ export default function PickAndDropListing() {
                             </div>
                         )}
 
-                        {(filters.start_location || filters.end_location || filters.driver_gender || filters.departure_date) && (
+                        {(filters.start_location || filters.end_location || filters.driver_gender || filters.departure_date || filters.departure_time) && (
                             <div className="mt-4 flex items-center gap-2">
                                 <button
                                     onClick={clearFilters}

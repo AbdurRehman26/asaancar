@@ -45,6 +45,56 @@ class PickAndDropController extends Controller
             $query->whereDate('departure_time', $request->departure_date);
         }
 
+        // Filter by departure time (show services 1 hour before and after selected time)
+        if ($request->has('departure_time')) {
+            $selectedTime = $request->departure_time; // Format: HH:MM
+            try {
+                // Parse the time
+                $timeParts = explode(':', $selectedTime);
+                if (count($timeParts) === 2) {
+                    $hour = (int)$timeParts[0];
+                    $minute = (int)$timeParts[1];
+                    
+                    // Calculate 1 hour before and after
+                    $oneHourBeforeHour = $hour - 1;
+                    $oneHourBeforeMinute = $minute;
+                    $oneHourAfterHour = $hour + 1;
+                    $oneHourAfterMinute = $minute;
+                    
+                    // Handle hour wraparound (before midnight)
+                    if ($oneHourBeforeHour < 0) {
+                        $oneHourBeforeHour = 23;
+                    }
+                    
+                    // Handle hour wraparound (after midnight)
+                    if ($oneHourAfterHour > 23) {
+                        $oneHourAfterHour = 0;
+                    }
+                    
+                    $oneHourBefore = sprintf('%02d:%02d:00', $oneHourBeforeHour, $oneHourBeforeMinute);
+                    $oneHourAfter = sprintf('%02d:%02d:00', $oneHourAfterHour, $oneHourAfterMinute);
+                    
+                    // If the window crosses midnight (e.g., 23:00 to 01:00), we need special handling
+                    if ($oneHourBeforeHour > $oneHourAfterHour) {
+                        // Window crosses midnight - use OR condition
+                        $query->where(function($q) use ($oneHourBefore, $oneHourAfter) {
+                            $q->whereTime('departure_time', '>=', $oneHourBefore)
+                              ->orWhereTime('departure_time', '<=', $oneHourAfter);
+                        });
+                    } else {
+                        // Normal case - time window within same day
+                        $query->where(function($q) use ($oneHourBefore, $oneHourAfter) {
+                            $q->whereTime('departure_time', '>=', $oneHourBefore)
+                              ->whereTime('departure_time', '<=', $oneHourAfter);
+                        });
+                    }
+                }
+            } catch (\Exception $e) {
+                // If time parsing fails, fall back to simple time comparison
+                $query->whereTime('departure_time', '>=', $selectedTime);
+            }
+        }
+
         $perPage = $request->input('per_page', 15);
         $services = $query->orderBy('departure_time', 'asc')->paginate($perPage);
 
@@ -234,6 +284,56 @@ class PickAndDropController extends Controller
         // Filter by departure date
         if ($request->has('departure_date')) {
             $query->whereDate('departure_time', $request->departure_date);
+        }
+
+        // Filter by departure time (show services 1 hour before and after selected time)
+        if ($request->has('departure_time')) {
+            $selectedTime = $request->departure_time; // Format: HH:MM
+            try {
+                // Parse the time
+                $timeParts = explode(':', $selectedTime);
+                if (count($timeParts) === 2) {
+                    $hour = (int)$timeParts[0];
+                    $minute = (int)$timeParts[1];
+                    
+                    // Calculate 1 hour before and after
+                    $oneHourBeforeHour = $hour - 1;
+                    $oneHourBeforeMinute = $minute;
+                    $oneHourAfterHour = $hour + 1;
+                    $oneHourAfterMinute = $minute;
+                    
+                    // Handle hour wraparound (before midnight)
+                    if ($oneHourBeforeHour < 0) {
+                        $oneHourBeforeHour = 23;
+                    }
+                    
+                    // Handle hour wraparound (after midnight)
+                    if ($oneHourAfterHour > 23) {
+                        $oneHourAfterHour = 0;
+                    }
+                    
+                    $oneHourBefore = sprintf('%02d:%02d:00', $oneHourBeforeHour, $oneHourBeforeMinute);
+                    $oneHourAfter = sprintf('%02d:%02d:00', $oneHourAfterHour, $oneHourAfterMinute);
+                    
+                    // If the window crosses midnight (e.g., 23:00 to 01:00), we need special handling
+                    if ($oneHourBeforeHour > $oneHourAfterHour) {
+                        // Window crosses midnight - use OR condition
+                        $query->where(function($q) use ($oneHourBefore, $oneHourAfter) {
+                            $q->whereTime('departure_time', '>=', $oneHourBefore)
+                              ->orWhereTime('departure_time', '<=', $oneHourAfter);
+                        });
+                    } else {
+                        // Normal case - time window within same day
+                        $query->where(function($q) use ($oneHourBefore, $oneHourAfter) {
+                            $q->whereTime('departure_time', '>=', $oneHourBefore)
+                              ->whereTime('departure_time', '<=', $oneHourAfter);
+                        });
+                    }
+                }
+            } catch (\Exception $e) {
+                // If time parsing fails, fall back to simple time comparison
+                $query->whereTime('departure_time', '>=', $selectedTime);
+            }
         }
 
         $perPage = $request->input('per_page', 15);
