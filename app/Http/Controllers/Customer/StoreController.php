@@ -87,6 +87,12 @@ class StoreController extends Controller
         // Ensure user_id is set
         $validated['user_id'] = $user->id;
         
+        // Update user's phone number if contact_phone is provided
+        if (isset($validated['contact_phone']) && !empty($validated['contact_phone'])) {
+            $user->phone_number = $validated['contact_phone'];
+            $user->save();
+        }
+        
         $store = Store::create($validated);
         $store->users()->attach($user->id);
         return new StoreResource($store);

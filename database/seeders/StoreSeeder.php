@@ -118,6 +118,13 @@ class StoreSeeder extends Seeder
             $user = User::find($storeData['user_id']);
             if ($user) {
                 $user->stores()->attach($store->id);
+                
+                // Update user's phone number with store's contact phone
+                if (isset($storeData['contact_phone']) && !empty($storeData['contact_phone'])) {
+                    $user->phone_number = $storeData['contact_phone'];
+                    $user->save();
+                }
+                
                 echo "Created store: {$store->name} (ID: {$store->id}) - Owner: {$user->name} (ID: {$user->id})\n";
             }
         }

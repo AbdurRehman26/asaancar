@@ -148,6 +148,7 @@ export default function CreateStoreForm() {
               value={phone}
               onChange={e => setPhone(e.target.value)}
               className="w-full border rounded px-3 py-2"
+              required
             />
           </div>
           <div className="md:col-span-2">
