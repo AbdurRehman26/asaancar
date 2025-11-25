@@ -11,6 +11,8 @@ const Footer: React.FC = () => (
         <div className="flex gap-6">
           <a href="/cars" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">Cars</a>
           <a href="/" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">Home</a>
+          <a href="/about" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">About Us</a>
+          <a href="/contact" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">Contact Us</a>
         </div>
         <div className="text-sm text-[#7e246c]">
           © {new Date().getFullYear()} AsaanCar. All rights reserved.

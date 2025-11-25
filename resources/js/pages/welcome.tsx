@@ -1,4 +1,4 @@
-import { ChevronDown, Shield, Star, Clock, Award } from 'lucide-react';
+import { ChevronDown, Shield, Star, Clock, Award, MapPin, ArrowRight, Users, DollarSign } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
@@ -366,13 +366,21 @@ export default function Welcome() {
     const [carTypesLoading, setCarTypesLoading] = useState(true);
     const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
     const [carBrandsLoading, setCarBrandsLoading] = useState(true);
+    interface PickAndDropService {
+        id: number;
+        start_location: string;
+        end_location: string;
+        [key: string]: unknown;
+    }
+    const [pickAndDropServices, setPickAndDropServices] = useState<PickAndDropService[]>([]);
+    const [pickAndDropLoading, setPickAndDropLoading] = useState(true);
     const navigate = useNavigate();
 
     // Fetch latest cars
     useEffect(() => {
         const fetchLatestCars = async () => {
             try {
-                const response = await fetch('/api/cars?per_page=6&page=1');
+                const response = await fetch('/api/cars?per_page=3&page=1');
                 const data = await response.json();
                 setLatestCars(data.data || []);
             } catch (error) {
@@ -420,6 +428,32 @@ export default function Welcome() {
         };
 
         fetchCarBrands();
+    }, []);
+
+    // Fetch pick and drop services
+    useEffect(() => {
+        const fetchPickAndDrop = async () => {
+            try {
+                const response = await fetch('/api/pick-and-drop?per_page=6');
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Pick and Drop API Response:', result);
+                    // Handle paginated response - Laravel returns { data: [...], links: {...}, meta: {...} }
+                    const services = result.data || (Array.isArray(result) ? result : []);
+                    console.log('Extracted services:', services);
+                    setPickAndDropServices((services as PickAndDropService[]).slice(0, 6));
+                } else {
+                    const errorText = await response.text();
+                    console.error('Failed to fetch pick and drop services:', response.status, errorText);
+                }
+            } catch (error) {
+                console.error('Error fetching pick and drop services:', error);
+            } finally {
+                setPickAndDropLoading(false);
+            }
+        };
+
+        fetchPickAndDrop();
     }, []);
 
     // Map car types to display data
@@ -549,7 +583,7 @@ export default function Welcome() {
                             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
                                 Find the perfect car for your journey with AsaanCar - <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted car rental service</span>.
                             </p>
-                            
+
                             {/* Karachi Availability Notice */}
                             <div className="mt-4 inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 ring-1 ring-blue-700/20 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-300/20">
                                 <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -602,12 +636,103 @@ export default function Welcome() {
                     </div>
                 </section>
 
+                {/* Pick & Drop Services Section */}
+                <section className="bg-gray-50 py-16 dark:bg-gray-800">
+                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                        <div className="mx-auto max-w-2xl text-center flex flex-col items-center">
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+                                Pick & Drop Services
+                            </h2>
+                            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                                Share rides or find passengers for your journey. Multiple stops available.
+                            </p>
+                        </div>
+                        {pickAndDropLoading ? (
+                            <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                                {Array.from({ length: 6 }).map((_, index) => (
+                                    <div key={index} className="animate-pulse bg-white dark:bg-gray-700 rounded-lg p-6 h-64"></div>
+                                ))}
+                            </div>
+                        ) : pickAndDropServices.length > 0 ? (
+                            <>
+                                <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                                    {pickAndDropServices.map((service) => (
+                                        <div
+                                            key={service.id}
+                                            className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+                                            onClick={() => navigate(`/pick-and-drop/${service.id}`)}
+                                        >
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <MapPin className="h-5 w-5 text-[#7e246c]" />
+                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                    {service.start_location}
+                                                </h3>
+                                                <ArrowRight className="h-4 w-4 text-gray-400" />
+                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                    {service.end_location}
+                                                </h3>
+                                            </div>
+                                            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="h-4 w-4" />
+                                                    {new Date(service.departure_time).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                    })}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Users className="h-4 w-4" />
+                                                    {service.available_spaces} space{service.available_spaces !== 1 ? 's' : ''} available
+                                                </div>
+                                                {service.price_per_person && (
+                                                    <div className="flex items-center gap-2">
+                                                        <DollarSign className="h-4 w-4" />
+                                                        {service.currency} {service.price_per_person.toLocaleString()} per person
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {service.stops && service.stops.length > 0 && (
+                                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                        {service.stops.length} stop{service.stops.length !== 1 ? 's' : ''} along the way
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-8 text-center">
+                                    <button
+                                        onClick={() => navigate('/pick-and-drop')}
+                                        className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] transition-colors"
+                                    >
+                                        View All Pick & Drop Services
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="mt-12 text-center py-12 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                                <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                <p className="text-gray-600 dark:text-gray-400">No pick and drop services available at the moment.</p>
+                                <button
+                                    onClick={() => navigate('/pick-and-drop')}
+                                    className="mt-4 rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] transition-colors"
+                                >
+                                    Browse All Services
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
                 {/* Car Categories Section */}
                 <section className="bg-white py-16 dark:bg-gray-900">
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center flex flex-col items-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-                                What type of car are you looking for?
+                                Rent Your Perfect Car
                             </h2>
                             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                                 Browse our diverse collection of car types to find the perfect match for your needs
@@ -644,6 +769,54 @@ export default function Welcome() {
                                 </div>
                             )}
                         </div>
+                    </div>
+                </section>
+
+                {/* Latest Cars Section */}
+                <section className="bg-white py-16 dark:bg-gray-900">
+                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                        <div className="mx-auto max-w-2xl text-center">
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+                                Latest Rental Cars
+                            </h2>
+                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+                                Choose from our selection of iconic and premium cars. From boardroom to bar, there's a car for every occasion.
+                            </p>
+                        </div>
+                        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                            {carsLoading ? (
+                                // Loading skeleton
+                                Array.from({ length: 3 }).map((_, index) => (
+                                    <div key={index} className="animate-pulse">
+                                        <div className="h-48 rounded-lg bg-gray-200 dark:bg-gray-700 mb-4"></div>
+                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-4 w-3/4"></div>
+                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                                    </div>
+                                ))
+                            ) : latestCars.length > 0 ? (
+                                latestCars.map((car, index) => (
+                                    <CarCard key={car.id || index} car={car} navigate={navigate} />
+                                ))
+                            ) : (
+                                <div className="col-span-3 text-center py-12">
+                                    <div className="text-6xl mb-4">🚗</div>
+                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No cars available</h3>
+                                    <p className="text-neutral-600 dark:text-neutral-400">Check back later for new additions to our fleet.</p>
+                                </div>
+                            )}
+                        </div>
+                        {latestCars.length > 0 && (
+                            <div className="mt-12 text-center">
+                                <button
+                                    onClick={() => navigate('/cars')}
+                                    className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] transition-colors"
+                                >
+                                    View All Cars
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -695,54 +868,6 @@ export default function Welcome() {
                                 </div>
                             )}
                         </div>
-                    </div>
-                </section>
-
-                {/* Latest Cars Section */}
-                <section className="bg-white py-16 dark:bg-gray-900">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                        <div className="mx-auto max-w-2xl text-center">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-                                Latest cars available
-                            </h2>
-                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                Choose from our selection of iconic and premium cars. From boardroom to bar, there's a car for every occasion.
-                            </p>
-                        </div>
-                        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                            {carsLoading ? (
-                                // Loading skeleton
-                                Array.from({ length: 6 }).map((_, index) => (
-                                    <div key={index} className="animate-pulse">
-                                        <div className="h-48 rounded-lg bg-gray-200 dark:bg-gray-700 mb-4"></div>
-                                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-4 w-3/4"></div>
-                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                                    </div>
-                                ))
-                            ) : latestCars.length > 0 ? (
-                                latestCars.map((car, index) => (
-                                    <CarCard key={car.id || index} car={car} navigate={navigate} />
-                                ))
-                            ) : (
-                                <div className="col-span-3 text-center py-12">
-                                    <div className="text-6xl mb-4">🚗</div>
-                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No cars available</h3>
-                                    <p className="text-neutral-600 dark:text-neutral-400">Check back later for new additions to our fleet.</p>
-                                </div>
-                            )}
-                        </div>
-                        {latestCars.length > 0 && (
-                            <div className="mt-12 text-center">
-                                <button
-                                    onClick={() => navigate('/cars')}
-                                    className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] transition-colors"
-                                >
-                                    View All Cars
-                                </button>
-                            </div>
-                        )}
                     </div>
                 </section>
 

@@ -12,6 +12,7 @@ test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
     $response = $this->postJson('/api/login', [
+        'login_method' => 'password',
         'email' => $user->email,
         'password' => 'password',
     ]);
@@ -24,6 +25,7 @@ test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
     $response = $this->postJson('/api/login', [
+        'login_method' => 'password',
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);

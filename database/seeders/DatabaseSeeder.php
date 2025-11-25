@@ -50,6 +50,8 @@ class DatabaseSeeder extends Seeder
             CarOfferSeeder::class,
             StoreOfferSeeder::class,
             CitySeeder::class,
+            AreaSeeder::class,
+            PickAndDropSeeder::class,
         ]);
     }
 }

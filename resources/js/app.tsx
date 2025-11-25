@@ -29,6 +29,12 @@ import Contact from './pages/contact';
 import ResetPassword from './pages/auth/reset-password';
 import EmailVerificationSuccess from './pages/email-verification-success';
 import StoreProfile from './pages/store-profile';
+import PickAndDropPage from './pages/dashboard/PickAndDrop';
+import PickAndDropForm from './pages/dashboard/PickAndDropForm';
+import PickAndDropListing from './pages/pick-and-drop-listing';
+import PickAndDropDetail from './pages/pick-and-drop-detail';
+import RentalChat from './pages/dashboard/RentalChat';
+import PickAndDropChat from './pages/dashboard/PickAndDropChat';
 
 configureEcho({
     broadcaster: 'pusher',
@@ -62,6 +68,8 @@ function App() {
           <Route path="/car-detail/:id" element={<CarDetail />} />
           <Route path="/car-detail/:id/edit" element={<CarDetailWithOffer />} />
           <Route path="/store/:id" element={<StoreProfile />} />
+          <Route path="/pick-and-drop" element={<PickAndDropListing />} />
+          <Route path="/pick-and-drop/:id" element={<PickAndDropDetail />} />
           <Route path="/bookings" element={
             <ProtectedRoute>
               <Bookings />
@@ -80,11 +88,16 @@ function App() {
             <Route index element={<Dashboard.Home />} />
             <Route path="cars" element={<Dashboard.CarListings />} />
             <Route path="messages" element={<Dashboard.Messages />} />
+            <Route path="rental-chat" element={<RentalChat />} />
+            <Route path="pick-and-drop-chat" element={<PickAndDropChat />} />
             <Route path="inquiries" element={<Dashboard.Inquiries />} />
             <Route path="stores" element={<DashboardStoresPage />} />
             <Route path="create-store" element={<CreateStoreForm />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="store-bookings" element={<Dashboard.StoreBookings />} />
+            <Route path="pick-and-drop" element={<PickAndDropPage />} />
+            <Route path="pick-and-drop/create" element={<PickAndDropForm />} />
+            <Route path="pick-and-drop/:id/edit" element={<PickAndDropForm />} />
           </Route>
           <Route path="/admin-dashboard" element={
             <ProtectedRoute>

@@ -30,27 +30,61 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'email' => 'nullable|string|lowercase|email|max:255|unique:'.User::class,
+            'phone_number' => 'nullable|string|unique:'.User::class,
             'role' => 'required|in:user,store_owner',
         ]);
 
-        $user = User::create([
+        if (!$request->email && !$request->phone_number) {
+            return response()->json(['message' => 'Email or phone number is required'], 422);
+        }
+
+        // Check if OTP was verified
+        $identifier = $request->email ?? $request->phone_number;
+        $cacheKey = 'signup_otp_' . md5($identifier);
+        $otpData = \Illuminate\Support\Facades\Cache::get($cacheKey);
+
+        if (!$otpData || !isset($otpData['verified']) || !$otpData['verified']) {
+            return response()->json(['message' => 'Please verify your OTP first'], 422);
+        }
+
+        $userData = [
             'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+            'is_verified' => true,
+            'email_verified_at' => now(),
+        ];
+
+        if ($request->email) {
+            $userData['email'] = $request->email;
+        }
+        if ($request->phone_number) {
+            $userData['phone_number'] = $request->phone_number;
+        }
+
+        // Password is optional - can be set later
+        if ($request->password) {
+            $userData['password'] = Hash::make($request->password);
+        }
+
+        $user = User::create($userData);
 
         // Assign role using Spatie
         $user->assignRole($request->role);
 
-        event(new Registered($user));
+        // Clear OTP cache
+        \Illuminate\Support\Facades\Cache::forget($cacheKey);
 
-        // Do not log in immediately; require email verification first
+        // Auto-login if password was set
+        $token = null;
+        if ($request->password) {
+            $token = $user->createToken('api-token')->plainTextToken;
+        }
 
         return response()->json([
             'success' => true,
             'user' => $user,
+            'token' => $token,
+            'password_set' => !empty($request->password),
         ]);
     }
 }

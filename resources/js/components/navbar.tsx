@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Car, Calendar, User, Menu, X } from 'lucide-react';
+import { Car, Calendar, User, Menu, X, MapPin } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -34,29 +34,19 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
         onClick={() => setMobileMenuOpen(false)}
       >
         <Car className="h-4 w-4" />
-        Car Listing
+        Rental Cars
       </Link>
       <Link
-        to="/about"
+        to="/pick-and-drop"
         className={`flex items-center gap-2 text-sm font-semibold transition ${
-          currentPage === 'about'
+          currentPage === 'pick-and-drop'
             ? 'text-[#7e246c] dark:text-white'
             : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
-        About Us
-      </Link>
-      <Link
-        to="/contact"
-        className={`flex items-center gap-2 text-sm font-semibold transition ${
-          currentPage === 'contact'
-            ? 'text-[#7e246c] dark:text-white'
-            : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
-        }`}
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        Contact Us
+        <MapPin className="h-4 w-4" />
+        Pick & Drop
       </Link>
       {user && (
         <Link
@@ -150,29 +140,19 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             onClick={() => setMobileMenuOpen(false)}
           >
             <Car className="h-4 w-4" />
-            Car Listing
+            Rental Cars
           </Link>
           <Link
-            to="/about"
+            to="/pick-and-drop"
             className={`flex items-center gap-2 text-sm font-semibold transition ${
-              currentPage === 'about'
+              currentPage === 'pick-and-drop'
                 ? 'text-[#7e246c] dark:text-white'
                 : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
             }`}
             onClick={() => setMobileMenuOpen(false)}
           >
-            About Us
-          </Link>
-          <Link
-            to="/contact"
-            className={`flex items-center gap-2 text-sm font-semibold transition ${
-              currentPage === 'contact'
-                ? 'text-[#7e246c] dark:text-white'
-                : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
-            }`}
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Contact Us
+            <MapPin className="h-4 w-4" />
+            Pick & Drop
           </Link>
           {user && (
             <Link

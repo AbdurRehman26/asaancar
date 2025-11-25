@@ -6,11 +6,14 @@ import { apiFetch } from '@/lib/utils';
 import Navbar from '../components/navbar';
 
 type LoginMethod = 'email' | 'phone';
+type AuthMethod = 'otp' | 'password';
 
 export default function LoginPage() {
   const [method, setMethod] = useState<LoginMethod>('email');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('otp');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -41,21 +44,46 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const res = await apiFetch('/api/login', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: method === 'email' ? email : null,
-          phone_number: method === 'phone' ? phoneNumber : null,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || 'Login failed');
-        showError('Login Failed', data.message || '');
+      if (authMethod === 'otp') {
+        // OTP login flow
+        const res = await apiFetch('/api/send-login-otp', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: method === 'email' ? email : null,
+            phone_number: method === 'phone' ? phoneNumber : null,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.message || 'Failed to send OTP');
+          showError('OTP Failed', data.message || '');
+        } else {
+          setOtpSent(true);
+          setIdentifier(data.identifier);
+          setIsEmail(data.is_email);
+        }
       } else {
-        setOtpSent(true);
-        setIdentifier(data.identifier);
-        setIsEmail(data.is_email);
+        // Password login flow
+        const res = await apiFetch('/api/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            login_method: 'password',
+            email: method === 'email' ? email : null,
+            phone_number: method === 'phone' ? phoneNumber : null,
+            password: password,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.message || 'Login failed');
+          showError('Login Failed', data.message || '');
+        } else {
+          localStorage.setItem('token', data.token);
+          setToken(data.token);
+          setUser(data.user?.data || data.user);
+          showSuccess('Login Successful', 'Welcome back!');
+          navigate('/');
+        }
       }
     } catch (e) {
       console.error(e);
@@ -238,6 +266,33 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Authentication method</label>
+                  <div className="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setAuthMethod('otp')}
+                      className={`flex-1 px-4 py-2 rounded-lg border transition ${
+                        authMethod === 'otp'
+                          ? 'bg-[#7e246c] text-white border-[#7e246c]'
+                          : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      OTP
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthMethod('password')}
+                      className={`flex-1 px-4 py-2 rounded-lg border transition ${
+                        authMethod === 'password'
+                          ? 'bg-[#7e246c] text-white border-[#7e246c]'
+                          : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      Password
+                    </button>
+                  </div>
+                </div>
                 {method === 'email' ? (
                   <div>
                     <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Email</label>
@@ -263,6 +318,19 @@ export default function LoginPage() {
                     />
                   </div>
                 )}
+                {authMethod === 'password' && (
+                  <div>
+                    <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Password</label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base"
+                      placeholder="Enter your password"
+                    />
+                  </div>
+                )}
                 {error && <div className="mt-3 text-red-600 text-center text-sm">{error}</div>}
                 <button
                   type="submit"
@@ -270,10 +338,13 @@ export default function LoginPage() {
                   disabled={loading}
                   style={{ pointerEvents: loading ? 'none' : 'auto' }}
                 >
-                  {loading ? 'Sending OTP...' : 'Send OTP'}
+                  {loading 
+                    ? (authMethod === 'otp' ? 'Sending OTP...' : 'Logging in...')
+                    : (authMethod === 'otp' ? 'Send OTP' : 'Login')
+                  }
                 </button>
               </form>
-              {method === 'email' && (
+              {method === 'email' && authMethod === 'password' && (
                 <div className="mt-2 text-right">
                   <button
                     type="button"

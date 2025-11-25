@@ -21,6 +21,8 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Customer\CityController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\ImageUploadController;
+use App\Http\Controllers\Api\PickAndDropController;
+use App\Http\Controllers\Api\AreaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +47,13 @@ Route::post('/reset-password', [NewPasswordController::class, 'store']);
 Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store']);
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 Route::post('/contact', [ContactMessageController::class, 'store']);
+
+// OTP endpoints
+Route::post('/send-login-otp', [\App\Http\Controllers\Auth\OtpController::class, 'sendLoginOtp']);
+Route::post('/verify-login-otp', [\App\Http\Controllers\Auth\OtpController::class, 'verifyLoginOtp']);
+Route::post('/send-signup-otp', [\App\Http\Controllers\Auth\OtpController::class, 'sendSignupOtp']);
+Route::post('/verify-signup-otp', [\App\Http\Controllers\Auth\OtpController::class, 'verifySignupOtp']);
+Route::post('/set-password', [\App\Http\Controllers\Auth\OtpController::class, 'setPassword']);
 
 // Image Upload API Routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -86,6 +95,12 @@ Route::prefix('stores')->group(function () {
 
 // Public guest booking endpoint
 Route::post('/guest-booking', [BookingController::class, 'guestBooking']);
+
+// Public pick and drop services routes
+Route::prefix('pick-and-drop')->group(function () {
+    Route::get('/', [PickAndDropController::class, 'index']);
+    Route::get('/{id}', [PickAndDropController::class, 'show']);
+});
 
 // User information endpoint
 Route::get('/user', [\App\Http\Controllers\Api\UserController::class, 'me'])->middleware('auth:sanctum');
@@ -130,6 +145,9 @@ Route::middleware('auth:sanctum')->group(function () {
 // Cities API
 Route::get('/cities', [CityController::class, 'index']);
 
+// Areas API
+Route::get('/areas', [AreaController::class, 'index']);
+
 // Customer API Routes
 Route::prefix('customer')->middleware(['auth:sanctum'])->group(function () {
     // Car Management Routes
@@ -155,6 +173,14 @@ Route::prefix('customer')->middleware(['auth:sanctum'])->group(function () {
 
     // Car Offer Management Routes
     Route::apiResource('car-offers', CarOfferController::class);
+
+    // Pick and Drop Management Routes
+    Route::prefix('pick-and-drop')->group(function () {
+        Route::get('/my-services', [PickAndDropController::class, 'myServices']);
+        Route::post('/', [PickAndDropController::class, 'store']);
+        Route::put('/{id}', [PickAndDropController::class, 'update']);
+        Route::delete('/{id}', [PickAndDropController::class, 'destroy']);
+    });
 });
 
 // Admin API Routes

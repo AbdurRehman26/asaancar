@@ -16,12 +16,24 @@ class ChatController extends Controller
     {
         $user = Auth::user();
         $storeId = $request->get('store_id');
+        $type = $request->get('type'); // Filter by conversation type
         
-        $query = $user->conversations()->with(['lastMessage', 'booking', 'store']);
+        $query = $user->conversations()->with(['lastMessage', 'booking', 'store', 'recipientUser', 'pickAndDropService']);
         
         // Filter by store if provided
         if ($storeId) {
             $query->where('store_id', $storeId);
+        }
+        
+        // Filter by type if provided
+        if ($type) {
+            if ($type === 'rental') {
+                // Rental includes booking and store types
+                $query->whereIn('type', ['booking', 'store']);
+            } else {
+                // Specific type (e.g., 'pick_and_drop', 'booking', 'store')
+                $query->where('type', $type);
+            }
         }
         
         $conversations = $query->latest('updated_at')->get();
@@ -58,13 +70,15 @@ class ChatController extends Controller
         return response()->json($message->load('sender'));
     }
 
-    // Create a conversation for a booking or store if it doesn't exist
+    // Create a conversation for a booking, store, or user if it doesn't exist
     public function store(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:booking,store',
+            'type' => 'required|in:booking,store,user,pick_and_drop',
             'booking_id' => 'required_if:type,booking|nullable|integer',
             'store_id' => 'required_if:type,store|nullable|integer',
+            'recipient_user_id' => 'required_if:type,user|nullable|integer|exists:users,id',
+            'pick_and_drop_service_id' => 'required_if:type,pick_and_drop|nullable|integer|exists:pick_and_drop_services,id',
         ]);
 
         $query = [
@@ -72,6 +86,8 @@ class ChatController extends Controller
             'type' => $request->type,
             'booking_id' => $request->type === 'booking' ? $request->booking_id : null,
             'store_id' => $request->type === 'store' ? $request->store_id : null,
+            'recipient_user_id' => $request->type === 'user' ? $request->recipient_user_id : null,
+            'pick_and_drop_service_id' => $request->type === 'pick_and_drop' ? $request->pick_and_drop_service_id : null,
         ];
 
         $conversation = \App\Models\Conversation::firstOrCreate($query);
