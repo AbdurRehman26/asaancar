@@ -8,6 +8,7 @@ use App\Notifications\OtpNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Twilio\Rest\Client;
 
 class OtpController extends Controller
 {
@@ -36,16 +37,47 @@ class OtpController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        // Generate 6-digit OTP
-        $otp = str_pad((string) rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        
-        // Store OTP in user record
-        $user->otp_code = Hash::make($otp);
-        $user->otp_expires_at = now()->addMinutes(10);
-        $user->save();
+        if ($isEmail) {
+            // For email, use the existing notification system
+            $otp = str_pad((string) rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $user->otp_code = Hash::make($otp);
+            $user->otp_expires_at = now()->addMinutes(10);
+            $user->save();
+            $user->notify(new OtpNotification($otp, true));
+        } else {
+            // For SMS, use Twilio Verify API
+            try {
+                $accountSid = config('services.twilio.account_sid');
+                $authToken = config('services.twilio.auth_token');
+                $verifyServiceSid = config('services.twilio.verify_service_sid');
 
-        // Send OTP notification
-        $user->notify(new OtpNotification($otp, $isEmail));
+                if (!$accountSid || !$authToken || !$verifyServiceSid) {
+                    return response()->json(['message' => 'Twilio configuration is missing'], 500);
+                }
+
+                $client = new Client($accountSid, $authToken);
+                $verification = $client->verify->v2->services($verifyServiceSid)
+                    ->verifications
+                    ->create($request->phone_number, 'sms');
+
+                // Store verification SID for later verification
+                $user->otp_code = $verification->sid; // Store verification SID instead of hashed OTP
+                $user->otp_expires_at = now()->addMinutes(10);
+                $user->save();
+
+                \Log::info('Twilio Verify OTP sent', [
+                    'verification_sid' => $verification->sid,
+                    'phone_number' => $request->phone_number,
+                    'status' => $verification->status,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send Twilio Verify OTP', [
+                    'error' => $e->getMessage(),
+                    'phone_number' => $request->phone_number,
+                ]);
+                return response()->json(['message' => 'Failed to send OTP. Please try again.'], 500);
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -73,14 +105,57 @@ class OtpController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        // Check if OTP exists and is not expired
-        if (!$user->otp_code || !$user->otp_expires_at || $user->otp_expires_at->isPast()) {
-            return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
-        }
+        $isEmail = !empty($user->email) && $user->email === $request->identifier;
 
-        // Verify OTP
-        if (!Hash::check($request->otp, $user->otp_code)) {
-            return response()->json(['message' => 'Invalid OTP'], 400);
+        if ($isEmail) {
+            // For email, use the existing verification
+            if (!$user->otp_code || !$user->otp_expires_at || $user->otp_expires_at->isPast()) {
+                return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
+            }
+
+            if (!Hash::check($request->otp, $user->otp_code)) {
+                return response()->json(['message' => 'Invalid OTP'], 400);
+            }
+        } else {
+            // For SMS, use Twilio Verify API
+            try {
+                $accountSid = config('services.twilio.account_sid');
+                $authToken = config('services.twilio.auth_token');
+                $verifyServiceSid = config('services.twilio.verify_service_sid');
+
+                if (!$accountSid || !$authToken || !$verifyServiceSid) {
+                    return response()->json(['message' => 'Twilio configuration is missing'], 500);
+                }
+
+                // Check if verification was initiated
+                if (!$user->otp_code || !$user->otp_expires_at || $user->otp_expires_at->isPast()) {
+                    return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
+                }
+
+                $client = new Client($accountSid, $authToken);
+                $verificationCheck = $client->verify->v2->services($verifyServiceSid)
+                    ->verificationChecks
+                    ->create([
+                        'to' => $request->identifier,
+                        'code' => $request->otp
+                    ]);
+
+                if ($verificationCheck->status !== 'approved') {
+                    return response()->json(['message' => 'Invalid OTP'], 400);
+                }
+
+                \Log::info('Twilio Verify OTP verified', [
+                    'verification_sid' => $verificationCheck->sid,
+                    'phone_number' => $request->identifier,
+                    'status' => $verificationCheck->status,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to verify Twilio Verify OTP', [
+                    'error' => $e->getMessage(),
+                    'phone_number' => $request->identifier,
+                ]);
+                return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
+            }
         }
 
         // Clear OTP
@@ -119,27 +194,58 @@ class OtpController extends Controller
         $isEmail = !empty($request->email);
         $identifier = $isEmail ? $request->email : $request->phone_number;
 
-        // Generate 6-digit OTP
-        $otp = str_pad((string) rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        
-        // Store OTP in session or cache (we'll use a temporary approach)
-        // For production, use cache with identifier as key
-        $cacheKey = 'signup_otp_' . md5($identifier);
-        \Illuminate\Support\Facades\Cache::put($cacheKey, [
-            'otp' => Hash::make($otp),
-            'expires_at' => now()->addMinutes(10),
-            'identifier' => $identifier,
-            'is_email' => $isEmail,
-        ], now()->addMinutes(10));
-
-        // Create temporary user to send notification (or use a service)
-        $tempUser = new User();
         if ($isEmail) {
+            // For email, use the existing notification system
+            $otp = str_pad((string) rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $cacheKey = 'signup_otp_' . md5($identifier);
+            \Illuminate\Support\Facades\Cache::put($cacheKey, [
+                'otp' => Hash::make($otp),
+                'expires_at' => now()->addMinutes(10),
+                'identifier' => $identifier,
+                'is_email' => $isEmail,
+            ], now()->addMinutes(10));
+
+            $tempUser = new User();
             $tempUser->email = $request->email;
+            $tempUser->notify(new OtpNotification($otp, true));
         } else {
-            $tempUser->phone_number = $request->phone_number;
+            // For SMS, use Twilio Verify API
+            try {
+                $accountSid = config('services.twilio.account_sid');
+                $authToken = config('services.twilio.auth_token');
+                $verifyServiceSid = config('services.twilio.verify_service_sid');
+
+                if (!$accountSid || !$authToken || !$verifyServiceSid) {
+                    return response()->json(['message' => 'Twilio configuration is missing'], 500);
+                }
+
+                $client = new Client($accountSid, $authToken);
+                $verification = $client->verify->v2->services($verifyServiceSid)
+                    ->verifications
+                    ->create($request->phone_number, 'sms');
+
+                // Store verification SID in cache
+                $cacheKey = 'signup_otp_' . md5($identifier);
+                \Illuminate\Support\Facades\Cache::put($cacheKey, [
+                    'verification_sid' => $verification->sid,
+                    'expires_at' => now()->addMinutes(10),
+                    'identifier' => $identifier,
+                    'is_email' => $isEmail,
+                ], now()->addMinutes(10));
+
+                \Log::info('Twilio Verify OTP sent for signup', [
+                    'verification_sid' => $verification->sid,
+                    'phone_number' => $request->phone_number,
+                    'status' => $verification->status,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send Twilio Verify OTP for signup', [
+                    'error' => $e->getMessage(),
+                    'phone_number' => $request->phone_number,
+                ]);
+                return response()->json(['message' => 'Failed to send OTP. Please try again.'], 500);
+            }
         }
-        $tempUser->notify(new OtpNotification($otp, $isEmail));
 
         return response()->json([
             'success' => true,
@@ -171,9 +277,46 @@ class OtpController extends Controller
             return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
         }
 
-        // Verify OTP
-        if (!Hash::check($request->otp, $otpData['otp'])) {
-            return response()->json(['message' => 'Invalid OTP'], 400);
+        if ($otpData['is_email']) {
+            // For email, verify using hashed OTP
+            if (!Hash::check($request->otp, $otpData['otp'])) {
+                return response()->json(['message' => 'Invalid OTP'], 400);
+            }
+        } else {
+            // For SMS, use Twilio Verify API
+            try {
+                $accountSid = config('services.twilio.account_sid');
+                $authToken = config('services.twilio.auth_token');
+                $verifyServiceSid = config('services.twilio.verify_service_sid');
+
+                if (!$accountSid || !$authToken || !$verifyServiceSid) {
+                    return response()->json(['message' => 'Twilio configuration is missing'], 500);
+                }
+
+                $client = new Client($accountSid, $authToken);
+                $verificationCheck = $client->verify->v2->services($verifyServiceSid)
+                    ->verificationChecks
+                    ->create([
+                        'to' => $request->identifier,
+                        'code' => $request->otp
+                    ]);
+
+                if ($verificationCheck->status !== 'approved') {
+                    return response()->json(['message' => 'Invalid OTP'], 400);
+                }
+
+                \Log::info('Twilio Verify OTP verified for signup', [
+                    'verification_sid' => $verificationCheck->sid,
+                    'phone_number' => $request->identifier,
+                    'status' => $verificationCheck->status,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to verify Twilio Verify OTP for signup', [
+                    'error' => $e->getMessage(),
+                    'phone_number' => $request->identifier,
+                ]);
+                return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
+            }
         }
 
         // Clear OTP from cache

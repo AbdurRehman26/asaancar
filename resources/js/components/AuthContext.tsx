@@ -33,17 +33,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const userData = await res.json();
             // Unwrap .data if present
             setUser(userData.data || userData);
-          } else {
+          } else if (res.status === 401) {
+            // Only remove token on 401 Unauthorized (invalid/expired token)
             setUser(null);
             localStorage.removeItem('token');
             setToken(null);
+          } else {
+            // For other errors (500, network, etc.), keep the token but don't set user
+            // This prevents logout on temporary server issues
+            console.warn('Failed to fetch user, but keeping token:', res.status);
+            setUser(null);
           }
         })
         .catch((error) => {
-            console.error('Failed to fetch user:', error);
+            // Network errors or other exceptions - don't remove token
+            // The token might still be valid, just the request failed
+            console.error('Failed to fetch user (network error):', error);
+            // Keep the token in localStorage - don't remove it on network errors
             setUser(null);
-            localStorage.removeItem('token');
-            setToken(null);
         })
         .finally(() => setLoading(false));
     } else {
