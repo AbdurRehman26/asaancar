@@ -48,11 +48,15 @@ class PickAndDropSeeder extends Seeder
         $stopsCreated = 0;
 
         // Create 35+ services with area-to-area routes within Karachi
-        $totalServices = 35;
+        // Mix of everyday services and date-specific services
+        $totalServices = 40;
+        $everydayServicesCount = 0;
         
         for ($i = 0; $i < $totalServices; $i++) {
             $user = $users->random();
-            $departureTime = Carbon::now()->addDays(rand(1, 30))->addHours(rand(6, 20))->addMinutes(rand(0, 59));
+            
+            // Randomly decide if this is an everyday service (about 35% chance)
+            $isEveryday = rand(1, 100) <= 35;
             
             // Select random pickup and dropoff areas (ensure they're different)
             $pickupArea = $karachiAreas->random();
@@ -63,6 +67,17 @@ class PickAndDropSeeder extends Seeder
             while ($pickupArea->id === $dropoffArea->id && $attempts < 10) {
                 $dropoffArea = $karachiAreas->random();
                 $attempts++;
+            }
+
+            // For everyday services, use placeholder date (2000-01-01) with random time
+            // For date-specific services, use a future date
+            if ($isEveryday) {
+                $departureHour = rand(6, 20);
+                $departureMinute = rand(0, 59);
+                $departureTime = Carbon::create(2000, 1, 1, $departureHour, $departureMinute, 0);
+                $everydayServicesCount++;
+            } else {
+                $departureTime = Carbon::now()->addDays(rand(1, 30))->addHours(rand(6, 20))->addMinutes(rand(0, 59));
             }
 
             $service = PickAndDrop::create([
@@ -87,6 +102,7 @@ class PickAndDropSeeder extends Seeder
                 'price_per_person' => rand(200, 2000), // Lower price for within-city routes
                 'currency' => 'PKR',
                 'is_active' => true,
+                'is_everyday' => $isEveryday,
             ]);
 
             $servicesCreated++;
@@ -110,7 +126,14 @@ class PickAndDropSeeder extends Seeder
                 
                 // Calculate stop time (30-90 minutes between stops for within-city)
                 $minutesToAdd = rand(30, 90);
-                $stopTime = $currentTime->copy()->addMinutes($minutesToAdd);
+                
+                // For everyday services, use placeholder date with calculated time
+                // For date-specific services, add minutes to the departure time
+                if ($isEveryday) {
+                    $stopTime = Carbon::create(2000, 1, 1, $currentTime->hour, $currentTime->minute, 0)->addMinutes($minutesToAdd);
+                } else {
+                    $stopTime = $currentTime->copy()->addMinutes($minutesToAdd);
+                }
                 
                 PickAndDropStop::create([
                     'pick_and_drop_service_id' => $service->id,
@@ -127,7 +150,8 @@ class PickAndDropSeeder extends Seeder
             }
         }
 
-        $this->command->info("Created {$servicesCreated} pick and drop services with {$stopsCreated} stops.");
+        $this->command->info("Created {$servicesCreated} pick and drop services ({$everydayServicesCount} everyday, " . ($servicesCreated - $everydayServicesCount) . " date-specific) with {$stopsCreated} stops.");
+
     }
 
     /**

@@ -357,9 +357,6 @@ export default function CarDetailWithOfferPage() {
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white disabled:opacity-50"
                     >
                       <option value="PKR">PKR</option>
-                      <option value="USD">USD</option>
-                      <option value="EUR">EUR</option>
-                      <option value="GBP">GBP</option>
                     </select>
                   </div>
 

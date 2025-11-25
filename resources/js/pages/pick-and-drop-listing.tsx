@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Users, Search, Filter, ArrowRight, Clock, Plus, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { MapPin, Calendar, Users, Search, Filter, Clock, Plus, ChevronDown, ChevronUp, X, Navigation } from 'lucide-react';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/components/AuthContext';
@@ -41,6 +41,7 @@ interface PickAndDropService {
     price_per_person?: number;
     currency: string;
     is_active: boolean;
+    is_everyday?: boolean;
     stops?: PickAndDropStop[];
 }
 
@@ -210,7 +211,15 @@ export default function PickAndDropListing() {
         }));
     }, [startAreaId, endAreaId, karachiAreas]);
 
-    const formatDateTime = (dateString: string) => {
+    const formatDateTime = (dateString: string, isEveryday: boolean = false) => {
+        if (isEveryday) {
+            // For everyday services, just show the time
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+            });
+        }
         const date = new Date(dateString);
         return date.toLocaleString('en-US', {
             month: 'short',
@@ -295,17 +304,17 @@ export default function PickAndDropListing() {
                         {showFilters && (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 {(() => {
-                                    const SearchableAreaSelect = ({ 
-                                        value, 
-                                        onChange, 
-                                        cityId, 
-                                        areas, 
-                                        label, 
+                                    const SearchableAreaSelect = ({
+                                        value,
+                                        onChange,
+                                        cityId,
+                                        areas,
+                                        label,
                                         placeholder = "Search or select area..."
-                                    }: { 
-                                        value: number | undefined; 
-                                        onChange: (areaId: number | undefined) => void; 
-                                        cityId: number | undefined; 
+                                    }: {
+                                        value: number | undefined;
+                                        onChange: (areaId: number | undefined) => void;
+                                        cityId: number | undefined;
                                         areas: { [cityId: number]: { id: number; name: string }[] };
                                         label: string;
                                         placeholder?: string;
@@ -532,7 +541,7 @@ export default function PickAndDropListing() {
                                         } else {
                                             pageNum = currentPage - 3 + i;
                                         }
-                                        
+
                                         return (
                                             <button
                                                 key={pageNum}
@@ -581,15 +590,19 @@ export default function PickAndDropListing() {
                                     className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow flex flex-col"
                                 >
                                     <div className="mb-4">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <MapPin className="h-5 w-5 text-[#7e246c]" />
-                                            <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white">
-                                                {service.start_location}
-                                            </h3>
-                                            <ArrowRight className="h-4 w-4 text-gray-400" />
-                                            <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white">
-                                                {service.end_location}
-                                            </h3>
+                                        <div className="space-y-2 mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <MapPin className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                                <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white">
+                                                    {service.start_location}
+                                                </h3>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Navigation className="h-5 w-5 text-red-600 dark:text-red-400" />
+                                                <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white">
+                                                    {service.end_location}
+                                                </h3>
+                                            </div>
                                         </div>
                                         <div className="text-sm text-gray-500 dark:text-gray-400">
                                             <p>by {service.user.name}</p>
@@ -602,9 +615,19 @@ export default function PickAndDropListing() {
                                     </div>
 
                                     <div className="space-y-2 mb-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                            <Calendar className="h-4 w-4" />
-                                            {formatDateTime(service.departure_time)}
+                                        <div className="flex items-center gap-2">
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                                                service.is_everyday
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                            }`}>
+                                                <Calendar className="h-3 w-3" />
+                                                {service.is_everyday ? (
+                                                    <span>Everyday at {formatDateTime(service.departure_time, true)}</span>
+                                                ) : (
+                                                    formatDateTime(service.departure_time)
+                                                )}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                             <Users className="h-4 w-4" />
@@ -662,7 +685,7 @@ export default function PickAndDropListing() {
                                                     {service.stops.map((stop) => (
                                                         <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
                                                             <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
-                                                            {stop.location} ({formatDateTime(stop.stop_time)})
+                                                            {stop.location} ({service.is_everyday ? formatDateTime(stop.stop_time, true) : formatDateTime(stop.stop_time)})
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -671,7 +694,7 @@ export default function PickAndDropListing() {
                                                     {service.stops.slice(0, 2).map((stop) => (
                                                         <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
                                                             <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
-                                                            {stop.location} ({formatDateTime(stop.stop_time)})
+                                                            {stop.location} ({service.is_everyday ? formatDateTime(stop.stop_time, true) : formatDateTime(stop.stop_time)})
                                                         </li>
                                                     ))}
                                                     {service.stops.length > 2 && (

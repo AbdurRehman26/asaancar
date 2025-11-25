@@ -367,6 +367,7 @@ export default function Welcome() {
     const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
     const [carBrandsLoading, setCarBrandsLoading] = useState(true);
     interface PickAndDropService {
+        is_everyday?: boolean;
         id: number;
         start_location: string;
         end_location: string;
@@ -675,12 +676,16 @@ export default function Welcome() {
                                             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                                                 <div className="flex items-center gap-2">
                                                     <Clock className="h-4 w-4" />
-                                                    {new Date(service.departure_time).toLocaleDateString('en-US', {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        hour: 'numeric',
-                                                        minute: '2-digit',
-                                                    })}
+                                                    {service.is_everyday ? (
+                                                        <span>Everyday at {new Date(service.departure_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</span>
+                                                    ) : (
+                                                        new Date(service.departure_time).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            hour: 'numeric',
+                                                            minute: '2-digit',
+                                                        })
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <Users className="h-4 w-4" />

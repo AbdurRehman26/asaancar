@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, MapPin, Calendar, Users, DollarSign, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, MapPin, Calendar, Users, Edit, Trash2, Search } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { apiFetch } from '@/lib/utils';
 import { Link } from 'react-router-dom';
@@ -311,7 +311,6 @@ export default function PickAndDropPage() {
                                 </div>
                                 {service.price_per_person && (
                                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                        <DollarSign className="h-4 w-4" />
                                         {service.currency} {service.price_per_person} per person
                                     </div>
                                 )}

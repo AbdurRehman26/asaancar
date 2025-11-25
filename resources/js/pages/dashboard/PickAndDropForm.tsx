@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Users, DollarSign, Plus, X, Save, ChevronDown } from 'lucide-react';
+import { MapPin, Calendar, Users, Plus, X, Save, ChevronDown } from 'lucide-react';
 import { apiFetch } from '@/lib/utils';
 
 interface Stop {
     location?: string;
     city_id?: number;
     area_id?: number;
+    stop_date: string;
     stop_time: string;
     order: number;
     notes?: string;
@@ -24,7 +25,9 @@ export default function PickAndDropForm() {
         end_location: '',
         dropoff_city_id: undefined as number | undefined,
         dropoff_area_id: undefined as number | undefined,
+        departure_date: '',
         departure_time: '',
+        is_everyday: false,
         available_spaces: 1,
         driver_gender: 'male' as 'male' | 'female',
         car_brand: '',
@@ -92,7 +95,9 @@ export default function PickAndDropForm() {
                 end_location: service.end_location || '',
                 dropoff_city_id: service.dropoff_city_id || undefined,
                 dropoff_area_id: service.dropoff_area_id || undefined,
-                departure_time: service.departure_time ? new Date(service.departure_time).toISOString().slice(0, 16) : '',
+                departure_date: service.departure_time ? new Date(service.departure_time).toISOString().slice(0, 10) : '',
+                departure_time: service.departure_time ? new Date(service.departure_time).toISOString().slice(11, 16) : '',
+                is_everyday: service.is_everyday || false,
                 available_spaces: service.available_spaces || 1,
                 driver_gender: service.driver_gender || 'male',
                 car_brand: service.car_brand || '',
@@ -127,11 +132,13 @@ export default function PickAndDropForm() {
                     order?: number;
                     notes?: string;
                 }
+                const departureDate = service.departure_time ? new Date(service.departure_time).toISOString().slice(0, 10) : '';
                 setStops(service.stops.map((stop: StopData) => ({
                     location: stop.location || '',
                     city_id: karachi?.id || stop.city_id || undefined, // Force Karachi
                     area_id: stop.area_id || undefined,
-                    stop_time: stop.stop_time ? new Date(stop.stop_time).toISOString().slice(0, 16) : '',
+                    stop_date: stop.stop_time ? new Date(stop.stop_time).toISOString().slice(0, 10) : departureDate,
+                    stop_time: stop.stop_time ? new Date(stop.stop_time).toISOString().slice(11, 16) : '',
                     order: stop.order || 0,
                     notes: stop.notes || '',
                 })));
@@ -188,6 +195,13 @@ export default function PickAndDropForm() {
                 pickup_area_id: formData.pickup_area_id || null,
                 dropoff_city_id: dropoffCityId,
                 dropoff_area_id: formData.dropoff_area_id || null,
+                departure_time: !formData.is_everyday && formData.departure_date && formData.departure_time 
+                    ? `${formData.departure_date}T${formData.departure_time}:00` 
+                    : formData.is_everyday && formData.departure_time
+                    ? `2000-01-01T${formData.departure_time}:00` // Use a placeholder date for everyday services
+                    : formData.departure_time,
+                departure_date: undefined, // Remove from payload
+                is_everyday: formData.is_everyday,
                 available_spaces: parseInt(formData.available_spaces.toString()),
                 car_seats: formData.car_seats ? parseInt(formData.car_seats) : null,
                 price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null,
@@ -209,7 +223,11 @@ export default function PickAndDropForm() {
                         location: stopLocation || null,
                         city_id: stopCityId || null,
                         area_id: stop.area_id || null,
-                        stop_time: stop.stop_time,
+                        stop_time: !formData.is_everyday && stop.stop_date && stop.stop_time 
+                            ? `${stop.stop_date}T${stop.stop_time}:00` 
+                            : formData.is_everyday && stop.stop_time
+                            ? `2000-01-01T${stop.stop_time}:00` // Use a placeholder date for everyday services
+                            : stop.stop_time,
                         order: stop.order || index,
                         notes: stop.notes || null,
                     };
@@ -270,6 +288,7 @@ export default function PickAndDropForm() {
                 location: '',
                 city_id: karachi.id, // Auto-set to Karachi
                 area_id: undefined,
+                stop_date: formData.is_everyday ? '' : (formData.departure_date || ''), // Default to departure date if not everyday
                 stop_time: '',
                 order: stops.length,
                 notes: '',
@@ -474,12 +493,53 @@ export default function PickAndDropForm() {
                             disabled={!formData.dropoff_city_id}
                         />
                         <div className="md:col-span-2">
+                            <label className="flex items-center gap-2 mb-2">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.is_everyday}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, is_everyday: e.target.checked });
+                                        if (e.target.checked) {
+                                            // Clear departure date when everyday is selected
+                                            setFormData(prev => ({ ...prev, departure_date: '' }));
+                                            // Clear stop dates when everyday is selected
+                                            setStops(stops.map(stop => ({ ...stop, stop_date: '' })));
+                                        }
+                                    }}
+                                    className="w-4 h-4 text-[#7e246c] border-gray-300 rounded focus:ring-[#7e246c]"
+                                />
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Everyday Service (No specific date)
+                                </span>
+                            </label>
+                        </div>
+                        {!formData.is_everyday && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                    <Calendar className="h-4 w-4" />
+                                    Departure Date *
+                                </label>
+                                <input
+                                    type="date"
+                                    required={!formData.is_everyday}
+                                    value={formData.departure_date}
+                                    onChange={(e) => {
+                                        const newDate = e.target.value;
+                                        setFormData({ ...formData, departure_date: newDate });
+                                        // Update all stop dates to match departure date
+                                        setStops(stops.map(stop => ({ ...stop, stop_date: newDate })));
+                                    }}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                        )}
+                        <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
                                 <Calendar className="h-4 w-4" />
                                 Departure Time *
                             </label>
                             <input
-                                type="datetime-local"
+                                type="time"
                                 required
                                 value={formData.departure_time}
                                 onChange={(e) => setFormData({ ...formData, departure_time: e.target.value })}
@@ -524,8 +584,7 @@ export default function PickAndDropForm() {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
-                                <DollarSign className="h-4 w-4" />
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Price Per Person
                             </label>
                             <div className="flex gap-2">
@@ -542,8 +601,6 @@ export default function PickAndDropForm() {
                                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
                                 >
                                     <option value="PKR">PKR</option>
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
                                 </select>
                             </div>
                         </div>
@@ -702,12 +759,26 @@ export default function PickAndDropForm() {
                                         disabled={!stop.city_id}
                                     />
                                 </div>
+                                {!formData.is_everyday && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Stop Date *
+                                        </label>
+                                        <input
+                                            type="date"
+                                            required={!formData.is_everyday}
+                                            value={stop.stop_date}
+                                            onChange={(e) => updateStop(index, 'stop_date', e.target.value)}
+                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                        />
+                                    </div>
+                                )}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Stop Time *
                                     </label>
                                     <input
-                                        type="datetime-local"
+                                        type="time"
                                         required
                                         value={stop.stop_time}
                                         onChange={(e) => updateStop(index, 'stop_time', e.target.value)}

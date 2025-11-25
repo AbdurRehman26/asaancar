@@ -35,12 +35,14 @@ class PickAndDrop extends Model
         'price_per_person',
         'currency',
         'is_active',
+        'is_everyday',
     ];
 
     protected $casts = [
         'departure_time' => 'datetime',
         'price_per_person' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_everyday' => 'boolean',
         'available_spaces' => 'integer',
         'car_seats' => 'integer',
     ];

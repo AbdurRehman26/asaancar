@@ -55,6 +55,7 @@ interface PickAndDropService {
     price_per_person?: number;
     currency: string;
     is_active: boolean;
+    is_everyday?: boolean;
     stops?: PickAndDropStop[];
 }
 
@@ -146,7 +147,15 @@ export default function PickAndDropDetail() {
         }
     };
 
-    const formatDateTime = (dateString: string) => {
+    const formatDateTime = (dateString: string, isEveryday: boolean = false) => {
+        if (isEveryday) {
+            // For everyday services, just show the time
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+            });
+        }
         const date = new Date(dateString);
         return date.toLocaleString('en-US', {
             weekday: 'short',
@@ -310,7 +319,7 @@ export default function PickAndDropDetail() {
                                                                                 )}
                                                                                 <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">
                                                                                     <Clock className="h-3 w-3 inline mr-1" />
-                                                                                    {formatDateTime(stop.stop_time)}
+                                                                                    {service.is_everyday ? formatDateTime(stop.stop_time, true) : formatDateTime(stop.stop_time)}
                                                                                 </p>
                                                                                 {stop.notes && (
                                                                                     <p className="text-xs text-gray-500 dark:text-gray-400 ml-5 mt-1 italic">{stop.notes}</p>
@@ -350,7 +359,13 @@ export default function PickAndDropDetail() {
                                                     <Calendar className="h-4 w-4" />
                                                     <span className="text-sm font-medium">Departure Time</span>
                                                 </div>
-                                                <p className="text-gray-900 dark:text-white font-semibold">{formatDateTime(service.departure_time)}</p>
+                                                <p className="text-gray-900 dark:text-white font-semibold">
+                                                    {service.is_everyday ? (
+                                                        <span>Everyday at {formatDateTime(service.departure_time, true)}</span>
+                                                    ) : (
+                                                        formatDateTime(service.departure_time)
+                                                    )}
+                                                </p>
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
