@@ -1,4 +1,4 @@
-import { ChevronDown, Shield, Star, Clock, Award, MapPin, ArrowRight, Users, DollarSign } from 'lucide-react';
+import { ChevronDown, Shield, Star, Clock, Award, MapPin, ArrowRight, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
@@ -688,7 +688,6 @@ export default function Welcome() {
                                                 </div>
                                                 {service.price_per_person && (
                                                     <div className="flex items-center gap-2">
-                                                        <DollarSign className="h-4 w-4" />
                                                         {service.currency} {service.price_per_person.toLocaleString()} per person
                                                     </div>
                                                 )}

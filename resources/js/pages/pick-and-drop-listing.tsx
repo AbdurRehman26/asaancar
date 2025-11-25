@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Users, DollarSign, Search, Filter, ArrowRight, Clock, Plus } from 'lucide-react';
+import { MapPin, Calendar, Users, Search, Filter, ArrowRight, Clock, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/components/AuthContext';
@@ -20,6 +20,7 @@ interface PickAndDropService {
         id: number;
         name: string;
         email: string;
+        phone_number?: string;
     };
     car?: {
         id: number;
@@ -57,11 +58,12 @@ export default function PickAndDropListing() {
         min_spaces: '',
         departure_date: '',
     });
-    const [showFilters, setShowFilters] = useState(false);
+    const [showFilters, setShowFilters] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(12);
     const [total, setTotal] = useState(0);
+    const [expandedStops, setExpandedStops] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         setCurrentPage(1); // Reset to page 1 when filters change
@@ -102,18 +104,37 @@ export default function PickAndDropListing() {
             if (data.data && Array.isArray(data.data)) {
                 setServices(data.data);
                 // Check for pagination metadata in meta object (Laravel Resource collection format)
-                if (data.meta && typeof data.meta === 'object' && data.meta.last_page !== undefined) {
-                    setTotalPages(Number(data.meta.last_page) || 1);
-                    setTotal(Number(data.meta.total) || 0);
+                if (data.meta && typeof data.meta === 'object') {
+                    // Handle case where meta values might be arrays (extract first value)
+                    const lastPage = Array.isArray(data.meta.last_page)
+                        ? data.meta.last_page[0]
+                        : data.meta.last_page;
+                    const total = Array.isArray(data.meta.total)
+                        ? data.meta.total[0]
+                        : data.meta.total;
+
+                    if (lastPage !== undefined) {
+                        setTotalPages(Number(lastPage) || 1);
+                        setTotal(Number(total) || 0);
+                    } else {
+                        // If no pagination metadata, check if we got a full page
+                        if (data.data.length === perPage) {
+                            setTotalPages(2);
+                            setTotal(data.data.length);
+                        } else {
+                            setTotalPages(1);
+                            setTotal(data.data.length);
+                        }
+                    }
                 } else if (data.last_page !== undefined) {
                     // Fallback: check if pagination data is at root level
-                    setTotalPages(Number(data.last_page) || 1);
-                    setTotal(Number(data.total) || 0);
+                    const lastPage = Array.isArray(data.last_page) ? data.last_page[0] : data.last_page;
+                    const total = Array.isArray(data.total) ? data.total[0] : data.total;
+                    setTotalPages(Number(lastPage) || 1);
+                    setTotal(Number(total) || 0);
                 } else {
                     // If no pagination metadata, check if we got a full page
-                    // If we got exactly perPage items, there might be more pages
                     if (data.data.length === perPage) {
-                        // Assume there might be more pages - set to at least 2
                         setTotalPages(2);
                         setTotal(data.data.length);
                     } else {
@@ -297,6 +318,68 @@ export default function PickAndDropListing() {
                         </div>
                     )}
 
+                    {/* Pagination - Top */}
+                    {!loading && services.length > 0 && totalPages > 1 && (
+                        <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-lg">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                {total > 0 ? (
+                                    <>Showing {((currentPage - 1) * perPage) + 1} to {Math.min(currentPage * perPage, total)} of {total} services</>
+                                ) : (
+                                    <>Showing {services.length} service{services.length !== 1 ? 's' : ''}</>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="px-4 py-2 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed dark:border-neutral-800 dark:text-[#7e246c] transition-colors"
+                                >
+                                    Previous
+                                </button>
+
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                                        let pageNum;
+                                        if (totalPages <= 7) {
+                                            pageNum = i + 1;
+                                        } else if (currentPage <= 4) {
+                                            pageNum = i + 1;
+                                        } else if (currentPage >= totalPages - 3) {
+                                            pageNum = totalPages - 6 + i;
+                                        } else {
+                                            pageNum = currentPage - 3 + i;
+                                        }
+                                        
+                                        return (
+                                            <button
+                                                key={pageNum}
+                                                onClick={() => setCurrentPage(pageNum)}
+                                                className={`px-3 py-1 rounded font-semibold border transition-colors ${
+                                                    pageNum === currentPage
+                                                        ? 'bg-[#7e246c] text-white border-[#7e246c]'
+                                                        : 'border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]'
+                                                }`}
+                                            >
+                                                {pageNum}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <button
+                                    onClick={() => setCurrentPage(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="px-4 py-2 rounded border border-[#7e246c] text-[#7e246c] font-semibold bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed dark:border-neutral-800 dark:text-[#7e246c] transition-colors"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                Page {currentPage} of {totalPages}
+                            </div>
+                        </div>
+                    )}
+
                     {loading ? (
                         <div className="text-center py-12">
                             <div className="inline-block w-8 h-8 border-2 border-[#7e246c] border-t-transparent rounded-full animate-spin"></div>
@@ -325,9 +408,14 @@ export default function PickAndDropListing() {
                                                 {service.end_location}
                                             </h3>
                                         </div>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            by {service.user.name}
-                                        </p>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                                            <p>by {service.user.name}</p>
+                                            {user && service.user.phone_number && (
+                                                <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                                                    📞 {service.user.phone_number}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2 mb-4">
@@ -341,7 +429,6 @@ export default function PickAndDropListing() {
                                         </div>
                                         {service.price_per_person && (
                                             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                                <DollarSign className="h-4 w-4" />
                                                 {service.currency} {service.price_per_person.toLocaleString()} per person
                                             </div>
                                         )}
@@ -365,18 +452,52 @@ export default function PickAndDropListing() {
 
                                     {service.stops && service.stops.length > 0 && (
                                         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                                                <Clock className="h-4 w-4" />
-                                                Stops ({service.stops.length})
-                                            </p>
-                                            <ul className="space-y-1">
-                                                {service.stops.map((stop) => (
-                                                    <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                                                        <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
-                                                        {stop.location} ({formatDateTime(stop.stop_time)})
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                            <button
+                                                onClick={() => {
+                                                    const newExpanded = new Set(expandedStops);
+                                                    if (newExpanded.has(service.id)) {
+                                                        newExpanded.delete(service.id);
+                                                    } else {
+                                                        newExpanded.add(service.id);
+                                                    }
+                                                    setExpandedStops(newExpanded);
+                                                }}
+                                                className="w-full text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between gap-2 hover:text-[#7e246c] transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="h-4 w-4" />
+                                                    Stops ({service.stops.length})
+                                                </div>
+                                                {expandedStops.has(service.id) ? (
+                                                    <ChevronUp className="h-4 w-4" />
+                                                ) : (
+                                                    <ChevronDown className="h-4 w-4" />
+                                                )}
+                                            </button>
+                                            {expandedStops.has(service.id) ? (
+                                                <ul className="space-y-1">
+                                                    {service.stops.map((stop) => (
+                                                        <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                                                            <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
+                                                            {stop.location} ({formatDateTime(stop.stop_time)})
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <ul className="space-y-1">
+                                                    {service.stops.slice(0, 2).map((stop) => (
+                                                        <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                                                            <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
+                                                            {stop.location} ({formatDateTime(stop.stop_time)})
+                                                        </li>
+                                                    ))}
+                                                    {service.stops.length > 2 && (
+                                                        <li className="text-xs text-gray-500 dark:text-gray-500 italic">
+                                                            ... and {service.stops.length - 2} more stop{service.stops.length - 2 !== 1 ? 's' : ''}
+                                                        </li>
+                                                    )}
+                                                </ul>
+                                            )}
                                         </div>
                                     )}
 

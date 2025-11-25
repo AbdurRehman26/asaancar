@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Users, DollarSign, Clock, ArrowRight, Phone, MessageSquare, User as UserIcon, Car, Navigation } from 'lucide-react';
+import { Calendar, Users, Clock, ArrowRight, Phone, MessageSquare, User as UserIcon, Car, Navigation, ChevronDown, ChevronUp } from 'lucide-react';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/components/AuthContext';
@@ -69,6 +69,7 @@ export default function PickAndDropDetail() {
     const [showChat, setShowChat] = useState(false);
     const [conversationId, setConversationId] = useState<number | null>(null);
     const [chatError, setChatError] = useState<string | null>(null);
+    const [showStops, setShowStops] = useState(false);
 
     useEffect(() => {
         fetchService();
@@ -263,47 +264,63 @@ export default function PickAndDropDetail() {
                                                 </div>
                                             </div>
                                             {service.stops && service.stops.length > 0 && (
-                                                <div className="ml-5 space-y-3">
-                                                    {service.stops
-                                                        .sort((a, b) => (a.order || 0) - (b.order || 0))
-                                                        .map((stop, index) => {
-                                                            // Determine stop location display
-                                                            let stopLocation = stop.location;
-                                                            if (!stopLocation) {
-                                                                if (stop.area) {
-                                                                    stopLocation = stop.area.name;
-                                                                } else if (stop.city) {
-                                                                    stopLocation = stop.city.name;
-                                                                } else {
-                                                                    stopLocation = 'Location not specified';
-                                                                }
-                                                            }
-                                                            
-                                                            return (
-                                                                <div key={stop.id} className="flex items-start gap-4">
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center gap-2 mb-1">
-                                                                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                                                                            <span className="font-semibold text-gray-700 dark:text-gray-300">Stop {index + 1}</span>
+                                                <div className="ml-5">
+                                                    <button
+                                                        onClick={() => setShowStops(!showStops)}
+                                                        className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-[#7e246c] transition-colors mb-2"
+                                                    >
+                                                        <Clock className="h-4 w-4" />
+                                                        <span>Stops ({service.stops.length})</span>
+                                                        {showStops ? (
+                                                            <ChevronUp className="h-4 w-4" />
+                                                        ) : (
+                                                            <ChevronDown className="h-4 w-4" />
+                                                        )}
+                                                    </button>
+                                                    {showStops && (
+                                                        <div className="space-y-3">
+                                                            {service.stops
+                                                                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                                                                .map((stop, index) => {
+                                                                    // Determine stop location display
+                                                                    let stopLocation = stop.location;
+                                                                    if (!stopLocation) {
+                                                                        if (stop.area) {
+                                                                            stopLocation = stop.area.name;
+                                                                        } else if (stop.city) {
+                                                                            stopLocation = stop.city.name;
+                                                                        } else {
+                                                                            stopLocation = 'Location not specified';
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    return (
+                                                                        <div key={stop.id} className="flex items-start gap-4">
+                                                                            <div className="flex-1">
+                                                                                <div className="flex items-center gap-2 mb-1">
+                                                                                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                                                                    <span className="font-semibold text-gray-700 dark:text-gray-300">Stop {index + 1}</span>
+                                                                                </div>
+                                                                                <p className="text-gray-900 dark:text-white ml-5 font-medium">{stopLocation}</p>
+                                                                                {stop.city && (
+                                                                                    <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">City: {stop.city.name}</p>
+                                                                                )}
+                                                                                {stop.area && (
+                                                                                    <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">Area: {stop.area.name}</p>
+                                                                                )}
+                                                                                <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">
+                                                                                    <Clock className="h-3 w-3 inline mr-1" />
+                                                                                    {formatDateTime(stop.stop_time)}
+                                                                                </p>
+                                                                                {stop.notes && (
+                                                                                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-5 mt-1 italic">{stop.notes}</p>
+                                                                                )}
+                                                                            </div>
                                                                         </div>
-                                                                        <p className="text-gray-900 dark:text-white ml-5 font-medium">{stopLocation}</p>
-                                                                        {stop.city && (
-                                                                            <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">City: {stop.city.name}</p>
-                                                                        )}
-                                                                        {stop.area && (
-                                                                            <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">Area: {stop.area.name}</p>
-                                                                        )}
-                                                                        <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">
-                                                                            <Clock className="h-3 w-3 inline mr-1" />
-                                                                            {formatDateTime(stop.stop_time)}
-                                                                        </p>
-                                                                        {stop.notes && (
-                                                                            <p className="text-xs text-gray-500 dark:text-gray-400 ml-5 mt-1 italic">{stop.notes}</p>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })}
+                                                                    );
+                                                                })}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                             <div className="flex items-start gap-4">
@@ -345,7 +362,6 @@ export default function PickAndDropDetail() {
                                             {service.price_per_person && (
                                                 <div>
                                                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-1">
-                                                        <DollarSign className="h-4 w-4" />
                                                         <span className="text-sm font-medium">Price Per Person</span>
                                                     </div>
                                                     <p className="text-gray-900 dark:text-white font-semibold">
@@ -426,16 +442,26 @@ export default function PickAndDropDetail() {
                                                 <span className="text-sm text-gray-600 dark:text-gray-400">Name</span>
                                                 <p className="text-gray-900 dark:text-white font-semibold">{service.user.name}</p>
                                             </div>
-                                            {service.user.email && (
+                                            {user && service.user.email && (
                                                 <div>
                                                     <span className="text-sm text-gray-600 dark:text-gray-400">Email</span>
                                                     <p className="text-gray-900 dark:text-white">{service.user.email}</p>
                                                 </div>
                                             )}
-                                            {service.user.phone_number && (
+                                            {user && service.user.phone_number && (
                                                 <div>
                                                     <span className="text-sm text-gray-600 dark:text-gray-400">Phone</span>
                                                     <p className="text-gray-900 dark:text-white">{service.user.phone_number}</p>
+                                                </div>
+                                            )}
+                                            {user && !service.user.email && !service.user.phone_number && (
+                                                <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                                                    Contact information not available
+                                                </div>
+                                            )}
+                                            {!user && (
+                                                <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                                                    Please log in to view contact information
                                                 </div>
                                             )}
                                         </div>
