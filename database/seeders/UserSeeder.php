@@ -95,6 +95,16 @@ class UserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'id' => 9,
+                'name' => 'Rahimah Hussain',
+                'email' => 'rahimahussain94@gmail.com',
+                'phone_number' => '+923212205546',
+                'password' => Hash::make('1234Om@m@5678'),
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ];
 
         // Clear existing users
@@ -115,7 +125,7 @@ class UserSeeder extends Seeder
         }
 
         // Assign store_owner role to other users
-        for ($i = 2; $i <= 8; $i++) {
+        for ($i = 2; $i <= 9; $i++) {
             $user = User::find($i);
             if ($user) {
                 $user->assignRole('store_owner');

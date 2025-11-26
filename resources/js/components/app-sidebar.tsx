@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Folder, MessageSquare, Store, BookOpen, Mail, MapPin, Calendar } from 'lucide-react';
+import { LayoutGrid, Folder, MessageSquare, Store, BookOpen, Mail, MapPin } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 
@@ -83,14 +83,6 @@ export function AppSidebar() {
                                 <Link to="/dashboard/pick-and-drop">
                                     <MapPin className="mr-2" />
                                     Pick & Drop Services
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton size="lg" asChild>
-                                <Link to="/dashboard/pick-and-drop-bookings">
-                                    <Calendar className="mr-2" />
-                                    Pick & Drop Bookings
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
