@@ -17,10 +17,11 @@ class PickAndDropSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::all();
+        // Only use Rahima (ID 9) and Kazmi (ID 1) users
+        $users = User::whereIn('id', [1, 9])->get();
         
         if ($users->count() === 0) {
-            $this->command->warn('No users found. Please seed users first.');
+            $this->command->warn('Rahima or Kazmi users not found. Please seed users first.');
             return;
         }
 
@@ -47,9 +48,9 @@ class PickAndDropSeeder extends Seeder
         $servicesCreated = 0;
         $stopsCreated = 0;
 
-        // Create 35+ services with area-to-area routes within Karachi
+        // Create 5 services with area-to-area routes within Karachi
         // Mix of everyday services and date-specific services
-        $totalServices = 40;
+        $totalServices = 5;
         $everydayServicesCount = 0;
         
         for ($i = 0; $i < $totalServices; $i++) {
