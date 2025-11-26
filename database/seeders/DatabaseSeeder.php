@@ -28,10 +28,16 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Syed Abdul Rehman',
                 'email' => 'sydabdrehman@gmail.com',
+                'phone_number' => '+923202095051',
                 'password' => bcrypt('sydabdrehman@gmail.com'),
                 'email_verified_at' => now(),
             ]
         );
+        // Update phone number if user already exists
+        if ($specificUser->phone_number !== '+923202095051') {
+            $specificUser->phone_number = '+923202095051';
+            $specificUser->save();
+        }
         $specificUser->assignRole('admin');
 
         // 3. Seed car brands, types, engines

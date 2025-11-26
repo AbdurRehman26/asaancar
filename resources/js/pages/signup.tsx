@@ -37,7 +37,7 @@ export default function SignupPage() {
       const res = await apiFetch('/api/send-signup-otp', {
         method: 'POST',
         body: JSON.stringify({
-          phone_number: phoneNumber,
+          phone_number: '+92' + phoneNumber,
         }),
       });
       if (!res.ok) {
@@ -121,7 +121,7 @@ export default function SignupPage() {
         method: 'POST',
         body: JSON.stringify({
           name,
-          phone_number: phoneNumber,
+          phone_number: '+92' + phoneNumber,
           password: hasPassword ? password : null,
           password_confirmation: hasPassword ? passwordConfirmation : null,
           role,

@@ -40,7 +40,7 @@ export default function LoginPage() {
         const res = await apiFetch('/api/send-login-otp', {
           method: 'POST',
           body: JSON.stringify({
-            phone_number: phoneNumber,
+            phone_number: '+92' + phoneNumber,
           }),
         });
         const data = await res.json();
@@ -57,7 +57,7 @@ export default function LoginPage() {
           method: 'POST',
           body: JSON.stringify({
             login_method: 'password',
-            phone_number: phoneNumber,
+            phone_number: '+92' + phoneNumber,
             password: password,
           }),
         });

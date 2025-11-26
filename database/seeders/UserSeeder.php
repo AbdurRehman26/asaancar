@@ -26,6 +26,7 @@ class UserSeeder extends Seeder
                 'id' => 1,
                 'name' => 'Syed Abdul Rehman',
                 'email' => 'sydabdrehman@gmail.com',
+                'phone_number' => '+923202095051',
                 'password' => Hash::make('sydabdrehman@gmail.com'),
                 'email_verified_at' => now(),
                 'created_at' => now(),
