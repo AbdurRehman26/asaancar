@@ -22,7 +22,10 @@ export default function ChangePassword() {
 
   const validate = () => {
     const errs: Record<string, string> = {};
-    if (!form.current_password) errs.current_password = 'Current password is required.';
+    // current_password is required only if user has a password
+    if (user?.has_password && !form.current_password) {
+      errs.current_password = 'Current password is required.';
+    }
     if (!form.new_password) errs.new_password = 'New password is required.';
     if (form.new_password.length < 8) errs.new_password = 'Password must be at least 8 characters.';
     if (form.new_password !== form.confirm_password) errs.confirm_password = 'Passwords do not match.';
@@ -96,20 +99,22 @@ export default function ChangePassword() {
       <Navbar auth={{ user }} />
       <main className="bg-neutral-50 dark:bg-gray-900 min-h-screen">
         <section className="max-w-lg mx-auto px-6 py-20">
-          <h1 className="text-4xl font-bold text-[#7e246c] mb-6">Change Password</h1>
+          <h1 className="text-4xl font-bold text-[#7e246c] mb-6">{user?.has_password ? 'Change Password' : 'Set Password'}</h1>
           <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800/80 p-8 rounded-xl shadow border border-neutral-200 dark:border-neutral-700">
-            <div>
-              <label htmlFor="current_password" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">Current Password</label>
-              <div className="relative">
-                <input
-                  type={showCurrent ? 'text' : 'password'}
-                  id="current_password"
-                  name="current_password"
-                  value={form.current_password}
-                  onChange={handleChange}
-                  className="w-full border border-[#7e246c] rounded-lg px-4 py-2 pr-10 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
-                  required
-                />
+            {user?.has_password && (
+              <div>
+                <label htmlFor="current_password" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">Current Password</label>
+                <div className="relative">
+                  <input
+                    type={showCurrent ? 'text' : 'password'}
+                    id="current_password"
+                    name="current_password"
+                    value={form.current_password}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-[#7e246c] rounded-lg px-4 py-2 pr-10 bg-gray-50 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c]"
+                    placeholder="Enter your current password"
+                  />
                 <button
                   type="button"
                   tabIndex={-1}
@@ -118,9 +123,10 @@ export default function ChangePassword() {
                 >
                   {showCurrent ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
+                </div>
+                {errors.current_password && <p className="text-red-500 text-xs mt-1">{errors.current_password}</p>}
               </div>
-              {errors.current_password && <p className="text-red-500 text-xs mt-1">{errors.current_password}</p>}
-            </div>
+            )}
             <div>
               <label htmlFor="new_password" className="block text-sm font-semibold mb-1 text-gray-900 dark:text-white">New Password</label>
               <div className="relative">

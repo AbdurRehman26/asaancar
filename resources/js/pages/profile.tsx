@@ -5,9 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 import Navbar from '@/components/navbar';
+import { apiFetch } from '@/lib/utils';
 
 export default function ProfilePage() {
-  const { user, setUser, token } = useAuth();
+  const { user, setUser } = useAuth();
   const [profile, setProfile] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -31,12 +32,8 @@ export default function ProfilePage() {
     setProfileSuccess(false);
     setProfileError(null);
     try {
-      const res = await fetch('/api/settings/profile', {
+      const res = await apiFetch('/api/settings/profile', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify(profile),
       });
       if (!res.ok) {
@@ -61,17 +58,19 @@ export default function ProfilePage() {
     setPasswordSuccess(false);
     setPasswordError(null);
     try {
-      const res = await fetch('/api/settings/password', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await apiFetch('/api/settings/password', {
+        method: 'PUT',
         body: JSON.stringify(passwords),
       });
       if (!res.ok) {
         const err = await res.json();
-        setPasswordError(err.message || 'Password update failed');
+        // Handle validation errors
+        if (err.errors) {
+          const errorMessages = Object.values(err.errors).flat();
+          setPasswordError(errorMessages[0] || 'Password update failed');
+        } else {
+          setPasswordError(err.message || 'Password update failed');
+        }
       } else {
         setPasswordSuccess(true);
         setPasswords({ current_password: '', password: '', password_confirmation: '' });
@@ -111,19 +110,21 @@ export default function ProfilePage() {
         </form>
         {/* Password form */}
         <form onSubmit={handlePasswordSubmit} className="space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-          <h2 className="text-lg font-semibold mb-2">Change Password</h2>
-          <div className="grid gap-2">
-            <Label htmlFor="current_password">Current Password</Label>
-            <Input
-              id="current_password"
-              type="password"
-              value={passwords.current_password}
-              onChange={e => setPasswords({ ...passwords, current_password: e.target.value })}
-              required
-              autoComplete="current-password"
-              placeholder="Current password"
-            />
-          </div>
+          <h2 className="text-lg font-semibold mb-2">{user?.has_password ? 'Change Password' : 'Set Password'}</h2>
+          {user?.has_password && (
+            <div className="grid gap-2">
+              <Label htmlFor="current_password">Current Password</Label>
+              <Input
+                id="current_password"
+                type="password"
+                value={passwords.current_password}
+                onChange={e => setPasswords({ ...passwords, current_password: e.target.value })}
+                required
+                autoComplete="current-password"
+                placeholder="Enter your current password"
+              />
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="password">New Password</Label>
             <Input

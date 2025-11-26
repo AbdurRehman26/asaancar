@@ -40,21 +40,32 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Password login
-        $credentials = $request->only('email', 'phone_number', 'password');
+        $email = $request->input('email');
+        $phoneNumber = $request->input('phone_number');
+        $password = $request->input('password');
         
-        if (!$credentials['email'] && !$credentials['phone_number']) {
+        if (!$email && !$phoneNumber) {
             return response()->json(['message' => 'Email or phone number is required'], 422);
         }
 
-        if (!$credentials['password']) {
+        if (!$password) {
             return response()->json(['message' => 'Password is required'], 422);
         }
 
-        $user = $credentials['email'] 
-            ? \App\Models\User::where('email', $credentials['email'])->first()
-            : \App\Models\User::where('phone_number', $credentials['phone_number'])->first();
+        $user = $email 
+            ? \App\Models\User::where('email', $email)->first()
+            : \App\Models\User::where('phone_number', $phoneNumber)->first();
 
-        if (! $user || ! \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+        if (! $user) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        // Check if user has a password set
+        if (!$user->password) {
+            return response()->json(['message' => 'Password not set. Please use OTP login or set a password first.'], 401);
+        }
+
+        if (! \Illuminate\Support\Facades\Hash::check($password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 

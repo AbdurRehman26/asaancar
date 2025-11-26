@@ -74,15 +74,12 @@ class RegisteredUserController extends Controller
         // Clear OTP cache
         \Illuminate\Support\Facades\Cache::forget($cacheKey);
 
-        // Auto-login if password was set
-        $token = null;
-        if ($request->password) {
-            $token = $user->createToken('api-token')->plainTextToken;
-        }
+        // Auto-login user after successful registration
+        $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'user' => $user,
+            'user' => new \App\Http\Resources\UserResource($user),
             'token' => $token,
             'password_set' => !empty($request->password),
         ]);

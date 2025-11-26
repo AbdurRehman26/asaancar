@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiFetch } from '@/lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/components/AuthContext';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,6 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Password() {
+    const { user } = useAuth();
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
     const [data, setData] = useState({
@@ -64,21 +66,23 @@ export default function Password() {
             <Head title="Password settings" />
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
+                    <HeadingSmall title={user?.has_password ? "Update password" : "Set password"} description={user?.has_password ? "Ensure your account is using a long, random password to stay secure" : "Set a password for your account to enable password-based login"} />
                     <form onSubmit={updatePassword} className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="current_password">Current password</Label>
-                            <div className="relative">
-                                <Input
-                                    id="current_password"
-                                    ref={currentPasswordInput}
-                                    value={data.current_password}
-                                    onChange={(e) => setData({ ...data, current_password: e.target.value })}
-                                    type={showCurrent ? 'text' : 'password'}
-                                    className="mt-1 block w-full pr-10"
-                                    autoComplete="current-password"
-                                    placeholder="Current password"
-                                />
+                        {user?.has_password && (
+                            <div className="grid gap-2">
+                                <Label htmlFor="current_password">Current password</Label>
+                                <div className="relative">
+                                    <Input
+                                        id="current_password"
+                                        ref={currentPasswordInput}
+                                        value={data.current_password}
+                                        onChange={(e) => setData({ ...data, current_password: e.target.value })}
+                                        type={showCurrent ? 'text' : 'password'}
+                                        className="mt-1 block w-full pr-10"
+                                        autoComplete="current-password"
+                                        placeholder="Enter your current password"
+                                        required
+                                    />
                                 <button
                                     type="button"
                                     tabIndex={-1}
@@ -89,6 +93,7 @@ export default function Password() {
                                 </button>
                             </div>
                         </div>
+                        )}
                         <div className="grid gap-2">
                             <Label htmlFor="password">New password</Label>
                             <div className="relative">

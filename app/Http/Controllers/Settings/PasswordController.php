@@ -23,13 +23,28 @@ class PasswordController extends Controller
      */
     public function update(Request $request)
     {
-        $validated = $request->validate([
-            'current_password' => ['required', 'current_password'],
+        $user = $request->user();
+        
+        // If user has a password, require current_password validation
+        // If user doesn't have a password (OTP user), current_password is optional
+        $rules = [
             'password' => ['required', Password::defaults(), 'confirmed'],
-        ]);
-        $request->user()->update([
+        ];
+        
+        if ($user->password) {
+            // User has a password, so current_password is required
+            $rules['current_password'] = ['required', 'current_password'];
+        } else {
+            // User doesn't have a password, current_password is optional
+            $rules['current_password'] = ['nullable'];
+        }
+        
+        $validated = $request->validate($rules);
+        
+        $user->update([
             'password' => Hash::make($validated['password']),
         ]);
+        
         return response()->json(['message' => 'Password updated successfully.']);
     }
 }
