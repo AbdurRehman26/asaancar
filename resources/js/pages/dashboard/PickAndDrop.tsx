@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Plus, MapPin, Calendar, Users, Edit, Trash2, Search } from 'lucide-react';
+import { Plus, MapPin, Calendar, Users, Edit, Trash2, Search, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { apiFetch } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/contexts/ToastContext';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface PickAndDropStop {
     id: number;
@@ -43,6 +53,7 @@ interface PickAndDropService {
 
 export default function PickAndDropPage() {
     const { user } = useAuth();
+    const { success: showSuccess, error: showError } = useToast();
     const [services, setServices] = useState<PickAndDropService[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -55,6 +66,9 @@ export default function PickAndDropPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(12);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [serviceToDelete, setServiceToDelete] = useState<number | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         fetchServices();
@@ -135,19 +149,31 @@ export default function PickAndDropPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm('Are you sure you want to delete this service?')) return;
+    const handleDeleteClick = (id: number) => {
+        setServiceToDelete(id);
+        setDeleteDialogOpen(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        if (!serviceToDelete) return;
+
+        setDeleting(true);
         try {
-            const response = await apiFetch(`/api/customer/pick-and-drop/${id}`, {
+            const response = await apiFetch(`/api/customer/pick-and-drop/${serviceToDelete}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {
-                throw new Error('Failed to delete service');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to delete service');
             }
-            setServices(services.filter(s => s.id !== id));
+            setServices(services.filter(s => s.id !== serviceToDelete));
+            setDeleteDialogOpen(false);
+            setServiceToDelete(null);
+            showSuccess('Service Deleted', 'The pick & drop service has been successfully deleted.');
         } catch (err) {
-            alert(err instanceof Error ? err.message : 'Failed to delete service');
+            showError('Delete Failed', err instanceof Error ? err.message : 'Failed to delete service');
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -289,7 +315,7 @@ export default function PickAndDropPage() {
                                                     <Edit className="h-4 w-4" />
                                                 </Link>
                                                 <button
-                                                    onClick={() => handleDelete(service.id)}
+                                                    onClick={() => handleDeleteClick(service.id)}
                                                     className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                                                     title="Delete"
                                                 >
@@ -388,6 +414,46 @@ export default function PickAndDropPage() {
                     </button>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                            </div>
+                            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                                Delete Pick & Drop Service
+                            </DialogTitle>
+                        </div>
+                        <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
+                            Are you sure you want to delete this pick & drop service? This action cannot be undone and will permanently remove the service from the system.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-6">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setDeleteDialogOpen(false);
+                                setServiceToDelete(null);
+                            }}
+                            disabled={deleting}
+                            className="border-gray-300 dark:border-gray-600"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDeleteConfirm}
+                            disabled={deleting}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {deleting ? 'Deleting...' : 'Delete Service'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
