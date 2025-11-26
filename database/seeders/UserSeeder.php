@@ -97,7 +97,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'id' => 9,
-                'name' => 'Rahimah Hussain',
+                'name' => 'Rahima Hussain',
                 'email' => 'rahimahussain94@gmail.com',
                 'phone_number' => '+923212205546',
                 'password' => Hash::make('1234Om@m@5678'),
