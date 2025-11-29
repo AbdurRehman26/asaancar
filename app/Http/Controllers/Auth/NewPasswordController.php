@@ -15,6 +15,12 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * @OA\Tag(
+ *     name="Authentication",
+ *     description="API Endpoints for user authentication"
+ * )
+ */
 class NewPasswordController extends Controller
 {
     /**
@@ -29,6 +35,31 @@ class NewPasswordController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/reset-password",
+     *     operationId="resetPassword",
+     *     tags={"Authentication"},
+     *     summary="Reset password",
+     *     description="Reset user password using the reset token",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"token", "email", "password"},
+     *             @OA\Property(property="token", type="string", example="reset-token-from-email"),
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="newpassword123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="newpassword123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password reset successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Password reset successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error or invalid token")
+     * )
      * Handle an incoming new password request.
      *
      * @throws \Illuminate\Validation\ValidationException

@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
+/**
+ * @OA\Tag(
+ *     name="Authentication",
+ *     description="API Endpoints for user authentication"
+ * )
+ */
 class RegisteredUserController extends Controller
 {
     /**
@@ -22,6 +24,35 @@ class RegisteredUserController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/register",
+     *     operationId="register",
+     *     tags={"Authentication"},
+     *     summary="Register new user",
+     *     description="Register a new user account. OTP must be verified first using /api/verify-signup-otp",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "role"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com", nullable=true),
+     *             @OA\Property(property="phone_number", type="string", example="+923001234567", nullable=true),
+     *             @OA\Property(property="password", type="string", format="password", example="password123", nullable=true),
+     *             @OA\Property(property="role", type="string", enum={"user", "store_owner"}, example="user")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Registration successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="user", ref="#/components/schemas/User"),
+     *             @OA\Property(property="token", type="string", example="1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+     *             @OA\Property(property="password_set", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error or OTP not verified")
+     * )
      * Handle an incoming registration request.
      *
      * @throws \Illuminate\Validation\ValidationException

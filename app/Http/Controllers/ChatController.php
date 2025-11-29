@@ -9,9 +9,34 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @OA\Tag(
+ *     name="Chat",
+ *     description="API Endpoints for chat and messaging"
+ * )
+ */
 class ChatController extends Controller
 {
-    // List conversations for the authenticated user
+    /**
+     * @OA\Get(
+     *     path="/api/chat/conversations",
+     *     operationId="getConversations",
+     *     tags={"Chat"},
+     *     summary="List conversations",
+     *     description="Get a list of conversations for the authenticated user",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="store_id", in="query", description="Filter by store ID", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="type", in="query", description="Filter by conversation type (rental, booking, store, pick_and_drop)", required=false, @OA\Schema(type="string")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     * List conversations for the authenticated user
+     */
     public function conversations(Request $request)
     {
         $user = Auth::user();
@@ -46,7 +71,25 @@ class ChatController extends Controller
         return response()->json($conversations);
     }
 
-    // List messages for a conversation
+    /**
+     * @OA\Get(
+     *     path="/api/chat/conversations/{conversation}/messages",
+     *     operationId="getMessages",
+     *     tags={"Chat"},
+     *     summary="Get conversation messages",
+     *     description="Get all messages for a conversation and mark them as read",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="conversation", in="path", required=true, description="Conversation ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
+     * List messages for a conversation
+     */
     public function messages(Conversation $conversation)
     {
         $user = Auth::user();
@@ -56,7 +99,31 @@ class ChatController extends Controller
         return response()->json($messages);
     }
 
-    // Send a message in a conversation
+    /**
+     * @OA\Post(
+     *     path="/api/chat/conversations/{conversation}/messages",
+     *     operationId="sendMessage",
+     *     tags={"Chat"},
+     *     summary="Send message",
+     *     description="Send a message in a conversation",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="conversation", in="path", required=true, description="Conversation ID", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"message"},
+     *             @OA\Property(property="message", type="string", example="Hello, I'm interested in this car", maxLength=2000)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Message sent successfully",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     * Send a message in a conversation
+     */
     public function sendMessage(Request $request, Conversation $conversation)
     {
         $request->validate([
@@ -70,7 +137,34 @@ class ChatController extends Controller
         return response()->json($message->load('sender'));
     }
 
-    // Create a conversation for a booking, store, or user if it doesn't exist
+    /**
+     * @OA\Post(
+     *     path="/api/chat/conversations",
+     *     operationId="createConversation",
+     *     tags={"Chat"},
+     *     summary="Create conversation",
+     *     description="Create a new conversation for a booking, store, user, or pick and drop service",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"type"},
+     *             @OA\Property(property="type", type="string", enum={"booking", "store", "user", "pick_and_drop"}, example="booking"),
+     *             @OA\Property(property="booking_id", type="integer", example=1, nullable=true, description="Required if type is booking"),
+     *             @OA\Property(property="store_id", type="integer", example=1, nullable=true, description="Required if type is store"),
+     *             @OA\Property(property="recipient_user_id", type="integer", example=2, nullable=true, description="Required if type is user"),
+     *             @OA\Property(property="pick_and_drop_service_id", type="integer", example=1, nullable=true, description="Required if type is pick_and_drop")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Conversation created or retrieved successfully",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     * Create a conversation for a booking, store, or user if it doesn't exist
+     */
     public function store(Request $request)
     {
         $request->validate([

@@ -9,6 +9,12 @@ use App\Http\Requests\Booking\CreateBookingRequest;
 use App\Http\Requests\Booking\UpdateBookingRequest;
 use Illuminate\Http\Request;
 
+/**
+ * @OA\Tag(
+ *     name="Bookings",
+ *     description="API Endpoints for booking management"
+ * )
+ */
 class BookingController extends Controller
 {
     protected $bookingService;
@@ -19,6 +25,29 @@ class BookingController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/bookings",
+     *     operationId="getBookings",
+     *     tags={"Bookings"},
+     *     summary="List bookings",
+     *     description="Get a paginated list of bookings for the authenticated user",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="status", in="query", description="Filter by status", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="date_from", in="query", description="Filter from date", required=false, @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="date_to", in="query", description="Filter to date", required=false, @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=10)),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Booking")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer"),
+     *             @OA\Property(property="last_page", type="integer")
+     *         )
+     *     )
+     * )
      * Display a listing of the resource.
      */
     public function index(Request $request)
@@ -44,6 +73,29 @@ class BookingController extends Controller
     // Removed: create() method (Inertia only)
 
     /**
+     * @OA\Post(
+     *     path="/api/bookings",
+     *     operationId="createBooking",
+     *     tags={"Bookings"},
+     *     summary="Create booking",
+     *     description="Create a new booking",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/BookingRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Booking created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Booking"),
+     *             @OA\Property(property="message", type="string", example="Booking created successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Booking creation failed"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Store a newly created resource in storage.
      */
     public function store(CreateBookingRequest $request)
@@ -68,6 +120,24 @@ class BookingController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/bookings/{id}",
+     *     operationId="getBooking",
+     *     tags={"Bookings"},
+     *     summary="Get booking details",
+     *     description="Get detailed information about a specific booking",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Booking ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", ref="#/components/schemas/Booking")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Unauthorized - not the owner"),
+     *     @OA\Response(response=404, description="Booking not found")
+     * )
      * Display the specified resource.
      */
     public function show($id)
@@ -88,6 +158,30 @@ class BookingController extends Controller
     // Removed: edit() method (Inertia only)
 
     /**
+     * @OA\Put(
+     *     path="/api/bookings/{id}",
+     *     operationId="updateBooking",
+     *     tags={"Bookings"},
+     *     summary="Update booking",
+     *     description="Update booking status and notes (only owner can update)",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Booking ID", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *             @OA\Property(property="status", type="string", example="confirmed"),
+     *             @OA\Property(property="notes", type="string", example="Additional notes", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Booking updated successfully",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(response=403, description="Unauthorized - not the owner"),
+     *     @OA\Response(response=404, description="Booking not found")
+     * )
      * Update the specified resource in storage.
      */
     public function update(UpdateBookingRequest $request, $id)
@@ -119,6 +213,22 @@ class BookingController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *     path="/api/bookings/{id}",
+     *     operationId="cancelBooking",
+     *     tags={"Bookings"},
+     *     summary="Cancel booking",
+     *     description="Cancel a booking (only owner can cancel)",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Booking ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Booking cancelled successfully",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(response=403, description="Unauthorized - not the owner"),
+     *     @OA\Response(response=404, description="Booking not found")
+     * )
      * Remove the specified resource from storage.
      */
     public function destroy($id)
@@ -129,6 +239,22 @@ class BookingController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/bookings/stats",
+     *     operationId="getBookingStats",
+     *     tags={"Bookings"},
+     *     summary="Get booking statistics",
+     *     description="Get booking statistics for user's stores",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="store_id", in="query", description="Filter by store ID", required=false, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="count", type="integer", example=50)
+     *         )
+     *     )
+     * )
      * Get booking statistics
      */
     public function stats(Request $request)
@@ -152,6 +278,34 @@ class BookingController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/bookings/check-availability",
+     *     operationId="checkCarAvailability",
+     *     tags={"Bookings"},
+     *     summary="Check car availability",
+     *     description="Check if a car is available for the specified date range",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"car_id", "start_date", "end_date"},
+     *             @OA\Property(property="car_id", type="integer", example=1),
+     *             @OA\Property(property="start_date", type="string", format="date-time", example="2024-01-15 10:00:00"),
+     *             @OA\Property(property="end_date", type="string", format="date-time", example="2024-01-20 10:00:00")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="available", type="boolean", example=true)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Check car availability
      */
     public function checkAvailability(Request $request)
@@ -177,6 +331,36 @@ class BookingController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/bookings/calculate-price",
+     *     operationId="calculateBookingPrice",
+     *     tags={"Bookings"},
+     *     summary="Calculate booking price",
+     *     description="Calculate the total price for a booking based on car, dates, and duration type",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"car_id", "start_date", "end_date", "duration_type"},
+     *             @OA\Property(property="car_id", type="integer", example=1),
+     *             @OA\Property(property="start_date", type="string", format="date-time", example="2024-01-15 10:00:00"),
+     *             @OA\Property(property="end_date", type="string", format="date-time", example="2024-01-20 10:00:00"),
+     *             @OA\Property(property="duration_type", type="string", enum={"hourly", "daily", "weekly"}, example="daily")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Price calculated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="total_price", type="number", format="float", example=5000.00)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Calculation failed"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Calculate booking price
      */
     public function calculatePrice(Request $request)
@@ -224,6 +408,42 @@ class BookingController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/guest-booking",
+     *     operationId="createGuestBooking",
+     *     tags={"Bookings"},
+     *     summary="Create guest booking",
+     *     description="Create a booking for an unauthenticated guest user",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"car_id", "guest_name", "guest_phone"},
+     *             @OA\Property(property="car_id", type="integer", example=1),
+     *             @OA\Property(property="guest_name", type="string", example="John Doe"),
+     *             @OA\Property(property="guest_phone", type="string", example="+923001234567"),
+     *             @OA\Property(property="pickup_location", type="string", example="Karachi Airport", nullable=true),
+     *             @OA\Property(property="pickup_time", type="string", example="10:00 AM", nullable=true),
+     *             @OA\Property(property="pickup_date", type="string", example="2024-01-15", nullable=true),
+     *             @OA\Property(property="notes", type="string", nullable=true),
+     *             @OA\Property(property="rental_type", type="string", nullable=true),
+     *             @OA\Property(property="number_of_days", type="integer", nullable=true),
+     *             @OA\Property(property="total_price", type="number", format="float", nullable=true),
+     *             @OA\Property(property="car_offer_id", type="integer", nullable=true),
+     *             @OA\Property(property="refill_tank", type="boolean", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Guest booking created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", ref="#/components/schemas/Booking"),
+     *             @OA\Property(property="message", type="string", example="Booking created successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Booking creation failed"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Store a guest booking (unauthenticated).
      */
     public function guestBooking(Request $request)

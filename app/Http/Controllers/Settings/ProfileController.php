@@ -5,10 +5,14 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
+/**
+ * @OA\Tag(
+ *     name="Settings",
+ *     description="API Endpoints for user settings"
+ * )
+ */
 class ProfileController extends Controller
 {
     /**
@@ -24,6 +28,29 @@ class ProfileController extends Controller
     }
 
     /**
+     * @OA\Patch(
+     *     path="/api/settings/profile",
+     *     operationId="updateProfile",
+     *     tags={"Settings"},
+     *     summary="Update user profile",
+     *     description="Update the authenticated user's profile information",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Update the user's profile settings.
      */
     public function update(ProfileUpdateRequest $request)
@@ -43,6 +70,29 @@ class ProfileController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *     path="/api/settings/profile",
+     *     operationId="deleteProfile",
+     *     tags={"Settings"},
+     *     summary="Delete user account",
+     *     description="Delete the authenticated user's account",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"password"},
+     *             @OA\Property(property="password", type="string", format="password", example="currentpassword")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Account deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Delete the user's account.
      */
     public function destroy(Request $request)

@@ -8,8 +8,38 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\ContactMessage;
 use App\Models\Store;
 
+/**
+ * @OA\Tag(
+ *     name="Contact Messages",
+ *     description="API Endpoints for contact messages"
+ * )
+ */
 class ContactMessageController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/admin/contact-messages",
+     *     operationId="getContactMessages",
+     *     tags={"Contact Messages"},
+     *     summary="List contact messages",
+     *     description="Get a paginated list of contact messages (admin only)",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="store_id", in="query", description="Filter by store ID", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=10)),
+     *     @OA\Parameter(name="page", in="query", description="Page number", required=false, @OA\Schema(type="integer", default=1)),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="last_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer")
+     *         )
+     *     )
+     * )
+     */
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 10);
@@ -37,6 +67,34 @@ class ContactMessageController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/contact",
+     *     operationId="createContactMessage",
+     *     tags={"Contact Messages"},
+     *     summary="Create contact message",
+     *     description="Submit a new contact message",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "contact_info", "message"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="contact_info", type="string", example="john@example.com"),
+     *             @OA\Property(property="message", type="string", example="I would like to inquire about..."),
+     *             @OA\Property(property="store_id", type="integer", example=1, nullable=true),
+     *             @OA\Property(property="car_details", type="object", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Message created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Thank you for contacting us!")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -59,6 +117,25 @@ class ContactMessageController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/admin/contact-messages/stats",
+     *     operationId="getContactMessageStats",
+     *     tags={"Contact Messages"},
+     *     summary="Get contact message statistics",
+     *     description="Get statistics for contact messages (admin only)",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="store_id", in="query", description="Filter by store ID", required=false, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="total_inquiries", type="integer", example=150),
+     *             @OA\Property(property="today_inquiries", type="integer", example=5),
+     *             @OA\Property(property="this_week_inquiries", type="integer", example=25),
+     *             @OA\Property(property="this_month_inquiries", type="integer", example=100)
+     *         )
+     *     )
+     * )
      * Get contact message statistics for admin dashboard
      */
     public function stats(Request $request)

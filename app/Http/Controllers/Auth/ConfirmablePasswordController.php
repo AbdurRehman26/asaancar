@@ -10,6 +10,12 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * @OA\Tag(
+ *     name="Authentication",
+ *     description="API Endpoints for user authentication"
+ * )
+ */
 class ConfirmablePasswordController extends Controller
 {
     /**
@@ -21,6 +27,29 @@ class ConfirmablePasswordController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/confirm-password",
+     *     operationId="confirmPassword",
+     *     tags={"Authentication"},
+     *     summary="Confirm password",
+     *     description="Confirm the user's password before sensitive operations",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"password"},
+     *             @OA\Property(property="password", type="string", format="password", example="currentpassword")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password confirmed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Password confirmed.")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Invalid password")
+     * )
      * Confirm the user's password.
      */
     public function store(Request $request)

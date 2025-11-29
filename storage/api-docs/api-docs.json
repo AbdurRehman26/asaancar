@@ -1,18 +1,2416 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "My First API",
-        "version": "0.1"
+        "title": "Asaancar API Documentation",
+        "description": "API documentation for Asaancar - Car rental and pick & drop service platform",
+        "version": "1.0.0"
     },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "API Server"
+        }
+    ],
     "paths": {
-        "/api/customer/bookings": {
+        "/api/admin/cars": {
+            "get": {
+                "tags": [
+                    "Admin - Cars"
+                ],
+                "summary": "Get all cars (admin)",
+                "description": "Get a paginated list of all cars for admin (no store filtering)",
+                "operationId": "adminGetCars",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 9
+                        }
+                    },
+                    {
+                        "name": "brand_id",
+                        "in": "query",
+                        "description": "Filter by brand ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type_id",
+                        "in": "query",
+                        "description": "Filter by type ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "store_id",
+                        "in": "query",
+                        "description": "Filter by store ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "transmission",
+                        "in": "query",
+                        "description": "Filter by transmission",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fuel_type",
+                        "in": "query",
+                        "description": "Filter by fuel type",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_seats",
+                        "in": "query",
+                        "description": "Minimum seats",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "max_price",
+                        "in": "query",
+                        "description": "Maximum price",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/cars/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Cars"
+                ],
+                "summary": "Get car details (admin)",
+                "description": "Get detailed information about a specific car for admin",
+                "operationId": "adminGetCar",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Car ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Car"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Car not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/cars/stats": {
+            "get": {
+                "tags": [
+                    "Admin - Cars"
+                ],
+                "summary": "Get car statistics (admin)",
+                "description": "Get car statistics for admin dashboard",
+                "operationId": "adminGetCarStats",
+                "parameters": [
+                    {
+                        "name": "store_id",
+                        "in": "query",
+                        "description": "Filter by store ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_cars": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "active_cars": {
+                                            "type": "integer",
+                                            "example": 450
+                                        },
+                                        "inactive_cars": {
+                                            "type": "integer",
+                                            "example": 50
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/cars/filters": {
+            "get": {
+                "tags": [
+                    "Admin - Cars"
+                ],
+                "summary": "Get car filters (admin)",
+                "description": "Get all available filters for cars (brands, types, stores) for admin",
+                "operationId": "adminGetCarFilters",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "brands": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "types": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "stores": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/areas": {
+            "get": {
+                "tags": [
+                    "Areas"
+                ],
+                "summary": "List areas",
+                "description": "Get a list of active areas, optionally filtered by city",
+                "operationId": "getAreas",
+                "parameters": [
+                    {
+                        "name": "city_id",
+                        "in": "query",
+                        "description": "Filter by city ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "city_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Clifton"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "clifton"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/contact-messages": {
+            "get": {
+                "tags": [
+                    "Contact Messages"
+                ],
+                "summary": "List contact messages",
+                "description": "Get a paginated list of contact messages (admin only)",
+                "operationId": "getContactMessages",
+                "parameters": [
+                    {
+                        "name": "store_id",
+                        "in": "query",
+                        "description": "Filter by store ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer"
+                                        },
+                                        "last_page": {
+                                            "type": "integer"
+                                        },
+                                        "per_page": {
+                                            "type": "integer"
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/contact": {
+            "post": {
+                "tags": [
+                    "Contact Messages"
+                ],
+                "summary": "Create contact message",
+                "description": "Submit a new contact message",
+                "operationId": "createContactMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "contact_info",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "contact_info": {
+                                        "type": "string",
+                                        "example": "john@example.com"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "I would like to inquire about..."
+                                    },
+                                    "store_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "car_details": {
+                                        "type": "object",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Message created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Thank you for contacting us!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/admin/contact-messages/stats": {
+            "get": {
+                "tags": [
+                    "Contact Messages"
+                ],
+                "summary": "Get contact message statistics",
+                "description": "Get statistics for contact messages (admin only)",
+                "operationId": "getContactMessageStats",
+                "parameters": [
+                    {
+                        "name": "store_id",
+                        "in": "query",
+                        "description": "Filter by store ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_inquiries": {
+                                            "type": "integer",
+                                            "example": 150
+                                        },
+                                        "today_inquiries": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "this_week_inquiries": {
+                                            "type": "integer",
+                                            "example": 25
+                                        },
+                                        "this_month_inquiries": {
+                                            "type": "integer",
+                                            "example": 100
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/upload/image": {
+            "post": {
+                "tags": [
+                    "Image Upload"
+                ],
+                "summary": "Upload single image",
+                "description": "Upload a single image to S3 storage",
+                "operationId": "uploadSingleImage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "image"
+                                ],
+                                "properties": {
+                                    "image": {
+                                        "description": "Image file (jpeg, png, jpg, gif, webp, max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "directory": {
+                                        "description": "Directory path in S3",
+                                        "type": "string",
+                                        "example": "uploads"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Image uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Image uploaded successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "url": {
+                                                    "type": "string",
+                                                    "example": "https://s3.amazonaws.com/bucket/path/image.jpg"
+                                                },
+                                                "filename": {
+                                                    "type": "string",
+                                                    "example": "image.jpg"
+                                                },
+                                                "size": {
+                                                    "type": "integer",
+                                                    "example": 102400
+                                                },
+                                                "mime_type": {
+                                                    "type": "string",
+                                                    "example": "image/jpeg"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Upload failed"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Image Upload"
+                ],
+                "summary": "Delete image",
+                "description": "Delete an image from S3 storage",
+                "operationId": "deleteImage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "url"
+                                ],
+                                "properties": {
+                                    "url": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "https://s3.amazonaws.com/bucket/path/image.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Image deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Image deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/upload/images": {
+            "post": {
+                "tags": [
+                    "Image Upload"
+                ],
+                "summary": "Upload multiple images",
+                "description": "Upload multiple images to S3 storage (max 10 images)",
+                "operationId": "uploadMultipleImages",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "images"
+                                ],
+                                "properties": {
+                                    "images": {
+                                        "description": "Image files (1-10 images)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "directory": {
+                                        "description": "Directory path in S3",
+                                        "type": "string",
+                                        "example": "uploads"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "All images uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "All images uploaded successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "uploaded": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "failed": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "207": {
+                        "description": "Partial success - some images failed"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "All uploads failed"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pick-and-drop": {
+            "get": {
+                "tags": [
+                    "Pick & Drop"
+                ],
+                "summary": "List pick and drop services",
+                "description": "Get a paginated list of active pick and drop services with optional filters",
+                "operationId": "getPickAndDropServices",
+                "parameters": [
+                    {
+                        "name": "start_location",
+                        "in": "query",
+                        "description": "Filter by start location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "end_location",
+                        "in": "query",
+                        "description": "Filter by end location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "driver_gender",
+                        "in": "query",
+                        "description": "Filter by driver gender",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "male",
+                                "female"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "min_spaces",
+                        "in": "query",
+                        "description": "Minimum available spaces",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "departure_date",
+                        "in": "query",
+                        "description": "Filter by departure date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "departure_time",
+                        "in": "query",
+                        "description": "Filter by departure time (HH:MM)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PickAndDrop"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/customer/pick-and-drop": {
+            "post": {
+                "tags": [
+                    "Pick & Drop"
+                ],
+                "summary": "Create pick and drop service",
+                "description": "Create a new pick and drop service",
+                "operationId": "createPickAndDropService",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "start_location",
+                                    "end_location",
+                                    "pickup_city_id",
+                                    "pickup_area_id",
+                                    "dropoff_city_id",
+                                    "dropoff_area_id",
+                                    "departure_time",
+                                    "available_spaces",
+                                    "driver_gender"
+                                ],
+                                "properties": {
+                                    "start_location": {
+                                        "type": "string",
+                                        "example": "Karachi Airport"
+                                    },
+                                    "end_location": {
+                                        "type": "string",
+                                        "example": "Clifton Beach"
+                                    },
+                                    "pickup_city_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "pickup_area_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "dropoff_city_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "dropoff_area_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "departure_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15 10:00:00"
+                                    },
+                                    "available_spaces": {
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "driver_gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "stops": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "location": {
+                                                    "type": "string"
+                                                },
+                                                "city_id": {
+                                                    "type": "integer"
+                                                },
+                                                "area_id": {
+                                                    "type": "integer"
+                                                },
+                                                "stop_time": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "order": {
+                                                    "type": "integer"
+                                                },
+                                                "notes": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Service created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PickAndDrop"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/pick-and-drop/{id}": {
+            "get": {
+                "tags": [
+                    "Pick & Drop"
+                ],
+                "summary": "Get pick and drop service details",
+                "description": "Get detailed information about a specific pick and drop service",
+                "operationId": "getPickAndDropService",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Service ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PickAndDrop"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Service not found"
+                    }
+                }
+            }
+        },
+        "/api/customer/pick-and-drop/{id}": {
+            "put": {
+                "tags": [
+                    "Pick & Drop"
+                ],
+                "summary": "Update pick and drop service",
+                "description": "Update an existing pick and drop service (only owner can update)",
+                "operationId": "updatePickAndDropService",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Service ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "start_location": {
+                                        "type": "string",
+                                        "example": "Karachi Airport"
+                                    },
+                                    "end_location": {
+                                        "type": "string",
+                                        "example": "Clifton Beach"
+                                    },
+                                    "pickup_city_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "pickup_area_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "dropoff_city_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "dropoff_area_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "departure_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15 10:00:00"
+                                    },
+                                    "available_spaces": {
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "driver_gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "stops": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Service updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PickAndDrop"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized - not the owner"
+                    },
+                    "404": {
+                        "description": "Service not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Pick & Drop"
+                ],
+                "summary": "Delete pick and drop service",
+                "description": "Delete a pick and drop service (only owner can delete)",
+                "operationId": "deletePickAndDropService",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Service ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Service deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized - not the owner"
+                    },
+                    "404": {
+                        "description": "Service not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/customer/pick-and-drop/my-services": {
+            "get": {
+                "tags": [
+                    "Pick & Drop"
+                ],
+                "summary": "Get user's pick and drop services",
+                "description": "Get a paginated list of the authenticated user's pick and drop services",
+                "operationId": "getMyPickAndDropServices",
+                "parameters": [
+                    {
+                        "name": "start_location",
+                        "in": "query",
+                        "description": "Filter by start location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "end_location",
+                        "in": "query",
+                        "description": "Filter by end location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "driver_gender",
+                        "in": "query",
+                        "description": "Filter by driver gender",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "male",
+                                "female"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "min_spaces",
+                        "in": "query",
+                        "description": "Minimum available spaces",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "departure_date",
+                        "in": "query",
+                        "description": "Filter by departure date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PickAndDrop"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get current user",
+                "description": "Get the authenticated user's information",
+                "operationId": "getCurrentUser",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/stats": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user statistics",
+                "description": "Get user statistics for admin dashboard",
+                "operationId": "getUserStats",
+                "parameters": [
+                    {
+                        "name": "store_id",
+                        "in": "query",
+                        "description": "Filter by store ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_users": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "verified_users": {
+                                            "type": "integer",
+                                            "example": 450
+                                        },
+                                        "unverified_users": {
+                                            "type": "integer",
+                                            "example": 50
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user",
+                "description": "Authenticate user with email/phone and password",
+                "operationId": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "login_method"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com",
+                                        "nullable": true
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+923001234567",
+                                        "nullable": true
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123",
+                                        "nullable": true
+                                    },
+                                    "login_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "password",
+                                            "otp"
+                                        ],
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "description": "Destroy the authenticated session and revoke the access token",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/confirm-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Confirm password",
+                "description": "Confirm the user's password before sensitive operations",
+                "operationId": "confirmPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "currentpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password confirmed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password confirmed."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid password"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/reset-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset password",
+                "description": "Reset user password using the reset token",
+                "operationId": "resetPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "example": "reset-token-from-email"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password reset successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or invalid token"
+                    }
+                }
+            }
+        },
+        "/api/send-login-otp": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Send OTP for login",
+                "description": "Send OTP via email or SMS for user login",
+                "operationId": "sendLoginOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com",
+                                        "nullable": true
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+923001234567",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent successfully"
+                                        },
+                                        "identifier": {
+                                            "type": "string",
+                                            "example": "+923001234567"
+                                        },
+                                        "is_email": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Failed to send OTP"
+                    }
+                }
+            }
+        },
+        "/api/verify-login-otp": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Verify OTP for login",
+                "description": "Verify OTP and authenticate user",
+                "operationId": "verifyLoginOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "description": "Email or phone number",
+                                        "type": "string",
+                                        "example": "+923001234567"
+                                    },
+                                    "otp": {
+                                        "description": "6-digit OTP code",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified and login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Failed to verify OTP"
+                    }
+                }
+            }
+        },
+        "/api/send-signup-otp": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Send OTP for signup",
+                "description": "Send OTP via email or SMS for new user registration",
+                "operationId": "sendSignupOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "newuser@example.com",
+                                        "nullable": true
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+923001234567",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent successfully"
+                                        },
+                                        "identifier": {
+                                            "type": "string",
+                                            "example": "+923001234567"
+                                        },
+                                        "is_email": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error (email/phone already exists)"
+                    },
+                    "500": {
+                        "description": "Failed to send OTP"
+                    }
+                }
+            }
+        },
+        "/api/verify-signup-otp": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Verify OTP for signup",
+                "description": "Verify OTP for new user registration. Must be called before /api/register",
+                "operationId": "verifySignupOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "description": "Email or phone number",
+                                        "type": "string",
+                                        "example": "+923001234567"
+                                    },
+                                    "otp": {
+                                        "description": "6-digit OTP code",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP verified successfully"
+                                        },
+                                        "identifier": {
+                                            "type": "string",
+                                            "example": "+923001234567"
+                                        },
+                                        "is_email": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP"
+                    },
+                    "500": {
+                        "description": "Failed to verify OTP"
+                    }
+                }
+            }
+        },
+        "/api/set-password": {
+            "post": {
+                "tags": [
+                    "OTP"
+                ],
+                "summary": "Set password for user",
+                "description": "Set or update password for a user (optional, can be done after OTP login)",
+                "operationId": "setPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "description": "Email or phone number",
+                                        "type": "string",
+                                        "example": "+923001234567"
+                                    },
+                                    "password": {
+                                        "description": "New password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password set successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password set successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Request password reset",
+                "description": "Send a password reset link to the user's email",
+                "operationId": "forgotPassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reset link sent if account exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A reset link will be sent if the account exists."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register new user",
+                "description": "Register a new user account. OTP must be verified first using /api/verify-signup-otp",
+                "operationId": "register",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com",
+                                        "nullable": true
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "+923001234567",
+                                        "nullable": true
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123",
+                                        "nullable": true
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "user",
+                                            "store_owner"
+                                        ],
+                                        "example": "user"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Registration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                        },
+                                        "password_set": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error or OTP not verified"
+                    }
+                }
+            }
+        },
+        "/api/chat/conversations": {
+            "get": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "List conversations",
+                "description": "Get a list of conversations for the authenticated user",
+                "operationId": "getConversations",
+                "parameters": [
+                    {
+                        "name": "store_id",
+                        "in": "query",
+                        "description": "Filter by store ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter by conversation type (rental, booking, store, pick_and_drop)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Create conversation",
+                "description": "Create a new conversation for a booking, store, user, or pick and drop service",
+                "operationId": "createConversation",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "booking",
+                                            "store",
+                                            "user",
+                                            "pick_and_drop"
+                                        ],
+                                        "example": "booking"
+                                    },
+                                    "booking_id": {
+                                        "description": "Required if type is booking",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "store_id": {
+                                        "description": "Required if type is store",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "recipient_user_id": {
+                                        "description": "Required if type is user",
+                                        "type": "integer",
+                                        "example": 2,
+                                        "nullable": true
+                                    },
+                                    "pick_and_drop_service_id": {
+                                        "description": "Required if type is pick_and_drop",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Conversation created or retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/chat/conversations/{conversation}/messages": {
+            "get": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Get conversation messages",
+                "description": "Get all messages for a conversation and mark them as read",
+                "operationId": "getMessages",
+                "parameters": [
+                    {
+                        "name": "conversation",
+                        "in": "path",
+                        "description": "Conversation ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Send message",
+                "description": "Send a message in a conversation",
+                "operationId": "sendMessage",
+                "parameters": [
+                    {
+                        "name": "conversation",
+                        "in": "path",
+                        "description": "Conversation ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message"
+                                ],
+                                "properties": {
+                                    "message": {
+                                        "type": "string",
+                                        "maxLength": 2000,
+                                        "example": "Hello, I'm interested in this car"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Message sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/bookings": {
             "get": {
                 "tags": [
                     "Bookings"
                 ],
-                "summary": "Get list of bookings",
-                "description": "Returns list of bookings with pagination",
-                "operationId": "getBookingsList",
+                "summary": "List bookings",
+                "description": "Get a paginated list of bookings for the authenticated user",
+                "operationId": "getBookings",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Filter from date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "Filter to date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -34,6 +2432,9 @@
                                         },
                                         "total": {
                                             "type": "integer"
+                                        },
+                                        "last_page": {
+                                            "type": "integer"
                                         }
                                     },
                                     "type": "object"
@@ -41,15 +2442,20 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
                     "Bookings"
                 ],
-                "summary": "Store a new booking",
-                "description": "Creates a new booking record",
-                "operationId": "storeBooking",
+                "summary": "Create booking",
+                "description": "Create a new booking",
+                "operationId": "createBooking",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -61,30 +2467,51 @@
                     }
                 },
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Booking created successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Booking"
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Booking"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Booking created successfully"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "400": {
+                        "description": "Booking creation failed"
+                    },
                     "422": {
                         "description": "Validation error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         },
-        "/api/customer/bookings/{id}": {
+        "/api/bookings/{id}": {
             "get": {
                 "tags": [
                     "Bookings"
                 ],
-                "summary": "Get booking information",
-                "description": "Returns booking data by ID",
-                "operationId": "getBookingById",
+                "summary": "Get booking details",
+                "description": "Get detailed information about a specific booking",
+                "operationId": "getBooking",
                 "parameters": [
                     {
                         "name": "id",
@@ -102,22 +2529,35 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Booking"
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Booking"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "403": {
+                        "description": "Unauthorized - not the owner"
+                    },
                     "404": {
                         "description": "Booking not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
                     "Bookings"
                 ],
-                "summary": "Update booking information",
-                "description": "Updates booking data by ID",
+                "summary": "Update booking",
+                "description": "Update booking status and notes (only owner can update)",
                 "operationId": "updateBooking",
                 "parameters": [
                     {
@@ -135,7 +2575,21 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/BookingRequest"
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "confirmed"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Additional notes",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -146,26 +2600,31 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Booking"
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "403": {
+                        "description": "Unauthorized - not the owner"
+                    },
                     "404": {
                         "description": "Booking not found"
-                    },
-                    "422": {
-                        "description": "Validation error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
                     "Bookings"
                 ],
-                "summary": "Delete booking",
-                "description": "Deletes booking by ID",
-                "operationId": "deleteBooking",
+                "summary": "Cancel booking",
+                "description": "Cancel a booking (only owner can cancel)",
+                "operationId": "cancelBooking",
                 "parameters": [
                     {
                         "name": "id",
@@ -179,14 +2638,131 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Booking deleted successfully",
+                        "description": "Booking cancelled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized - not the owner"
+                    },
+                    "404": {
+                        "description": "Booking not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/bookings/stats": {
+            "get": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Get booking statistics",
+                "description": "Get booking statistics for user's stores",
+                "operationId": "getBookingStats",
+                "parameters": [
+                    {
+                        "name": "store_id",
+                        "in": "query",
+                        "description": "Filter by store ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Booking deleted successfully"
+                                        "count": {
+                                            "type": "integer",
+                                            "example": 50
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/bookings/check-availability": {
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Check car availability",
+                "description": "Check if a car is available for the specified date range",
+                "operationId": "checkCarAvailability",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "car_id",
+                                    "start_date",
+                                    "end_date"
+                                ],
+                                "properties": {
+                                    "car_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15 10:00:00"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-20 10:00:00"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "available": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -194,8 +2770,213 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Booking not found"
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/bookings/calculate-price": {
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Calculate booking price",
+                "description": "Calculate the total price for a booking based on car, dates, and duration type",
+                "operationId": "calculateBookingPrice",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "car_id",
+                                    "start_date",
+                                    "end_date",
+                                    "duration_type"
+                                ],
+                                "properties": {
+                                    "car_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-15 10:00:00"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-01-20 10:00:00"
+                                    },
+                                    "duration_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "hourly",
+                                            "daily",
+                                            "weekly"
+                                        ],
+                                        "example": "daily"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Price calculated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "total_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 5000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Calculation failed"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/guest-booking": {
+            "post": {
+                "tags": [
+                    "Bookings"
+                ],
+                "summary": "Create guest booking",
+                "description": "Create a booking for an unauthenticated guest user",
+                "operationId": "createGuestBooking",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "car_id",
+                                    "guest_name",
+                                    "guest_phone"
+                                ],
+                                "properties": {
+                                    "car_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "guest_name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "guest_phone": {
+                                        "type": "string",
+                                        "example": "+923001234567"
+                                    },
+                                    "pickup_location": {
+                                        "type": "string",
+                                        "example": "Karachi Airport",
+                                        "nullable": true
+                                    },
+                                    "pickup_time": {
+                                        "type": "string",
+                                        "example": "10:00 AM",
+                                        "nullable": true
+                                    },
+                                    "pickup_date": {
+                                        "type": "string",
+                                        "example": "2024-01-15",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "rental_type": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "number_of_days": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "total_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "nullable": true
+                                    },
+                                    "car_offer_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "refill_tank": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Guest booking created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Booking"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Booking created successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Booking creation failed"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 }
             }
@@ -434,14 +3215,25 @@
                 }
             }
         },
-        "/api/customer/car-engines": {
+        "/api/cars/{id}/with-offer-form": {
             "get": {
                 "tags": [
-                    "Car Engines"
+                    "Cars"
                 ],
-                "summary": "Get list of car engines",
-                "description": "Returns list of car engines with pagination",
-                "operationId": "getCarEnginesList",
+                "summary": "Get car information with offer form data",
+                "description": "Returns car data by ID with additional data needed for offer form",
+                "operationId": "getCarWithOfferForm",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Car ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -450,19 +3242,153 @@
                                 "schema": {
                                     "properties": {
                                         "data": {
+                                            "$ref": "#/components/schemas/Car"
+                                        },
+                                        "offer_form_data": {
+                                            "properties": {
+                                                "currencies": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "existing_offers": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/CarOffer"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Car not found"
+                    }
+                }
+            }
+        },
+        "/api/car-models": {
+            "get": {
+                "tags": [
+                    "Car Models"
+                ],
+                "summary": "List car models",
+                "description": "Get a list of car models, optionally filtered by brand",
+                "operationId": "getCarModels",
+                "parameters": [
+                    {
+                        "name": "brand_id",
+                        "in": "query",
+                        "description": "Filter by brand ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/CarEngine"
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Civic"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "civic"
+                                                    },
+                                                    "car_brand_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "brand_name": {
+                                                        "type": "string",
+                                                        "example": "Honda"
+                                                    }
+                                                },
+                                                "type": "object"
                                             }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/car-models/brand/{brandId}": {
+            "get": {
+                "tags": [
+                    "Car Models"
+                ],
+                "summary": "Get car models by brand",
+                "description": "Get a list of car models for a specific brand",
+                "operationId": "getCarModelsByBrand",
+                "parameters": [
+                    {
+                        "name": "brandId",
+                        "in": "path",
+                        "description": "Brand ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "current_page": {
-                                            "type": "integer"
-                                        },
-                                        "per_page": {
-                                            "type": "integer"
-                                        },
-                                        "total": {
-                                            "type": "integer"
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Civic"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "civic"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -707,6 +3633,88 @@
                 }
             }
         },
+        "/api/cities": {
+            "get": {
+                "tags": [
+                    "Cities"
+                ],
+                "summary": "List cities",
+                "description": "Get a list of all cities",
+                "operationId": "getCities",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/City"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/colors": {
+            "get": {
+                "tags": [
+                    "Colors"
+                ],
+                "summary": "List colors",
+                "description": "Get a list of active colors",
+                "operationId": "getColors",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Red"
+                                                    },
+                                                    "hex_code": {
+                                                        "type": "string",
+                                                        "example": "#FF0000"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "example": "red"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/customer/stores": {
             "get": {
                 "tags": [
@@ -901,6 +3909,315 @@
                     }
                 }
             }
+        },
+        "/api/years": {
+            "get": {
+                "tags": [
+                    "Years"
+                ],
+                "summary": "List years",
+                "description": "Get a list of active years",
+                "operationId": "getYears",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "year": {
+                                                        "type": "integer",
+                                                        "example": 2024
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/settings/password": {
+            "put": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Update user password",
+                "description": "Update the authenticated user's password. Current password is required only if user has a password set.",
+                "operationId": "updatePassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "description": "Required only if user has a password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "oldpassword",
+                                        "nullable": true
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "newpassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password updated successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/settings/profile": {
+            "delete": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Delete user account",
+                "description": "Delete the authenticated user's account",
+                "operationId": "deleteProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "currentpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Account deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Update user profile",
+                "description": "Update the authenticated user's profile information",
+                "operationId": "updateProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/webpush/public-key": {
+            "get": {
+                "tags": [
+                    "WebPush"
+                ],
+                "summary": "Get VAPID public key",
+                "description": "Get the VAPID public key for web push notification subscription",
+                "operationId": "getWebPushPublicKey",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "public_key": {
+                                            "type": "string",
+                                            "example": "BEl62iUYgUivxIkv69yViEuiBIa40HI..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/webpush/subscribe": {
+            "post": {
+                "tags": [
+                    "WebPush"
+                ],
+                "summary": "Subscribe to web push notifications",
+                "description": "Store the push subscription for the authenticated user",
+                "operationId": "subscribeWebPush",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "subscription"
+                                ],
+                                "properties": {
+                                    "subscription": {
+                                        "description": "Push subscription object from browser",
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subscription stored successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1043,7 +4360,6 @@
                 "description": "Car offer request data",
                 "required": [
                     "car_id",
-                    "title",
                     "discount_percentage",
                     "start_date",
                     "end_date"
@@ -1054,22 +4370,16 @@
                         "type": "integer",
                         "example": 1
                     },
-                    "title": {
-                        "description": "Offer title",
-                        "type": "string",
-                        "example": "Summer Sale"
-                    },
-                    "description": {
-                        "description": "Offer description",
-                        "type": "string",
-                        "example": "Get 20% off on all cars this summer",
-                        "nullable": true
-                    },
                     "discount_percentage": {
                         "description": "Discount percentage (0-100)",
                         "type": "number",
                         "format": "float",
                         "example": 20
+                    },
+                    "currency": {
+                        "description": "Currency code (3 characters)",
+                        "type": "string",
+                        "example": "PKR"
                     },
                     "start_date": {
                         "description": "Offer start date",
@@ -1255,9 +4565,6 @@
                     "car_type": {
                         "$ref": "#/components/schemas/CarType"
                     },
-                    "car_engine": {
-                        "$ref": "#/components/schemas/CarEngine"
-                    },
                     "store": {
                         "$ref": "#/components/schemas/Store"
                     }
@@ -1286,28 +4593,6 @@
                 },
                 "type": "object"
             },
-            "CarEngine": {
-                "title": "Car Engine",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "1.5L Turbo"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "type": "object"
-            },
             "CarOffer": {
                 "title": "Car Offer",
                 "description": "Car offer model",
@@ -1316,26 +4601,19 @@
                         "type": "integer",
                         "example": 1
                     },
-                    "store_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
                     "car_id": {
                         "type": "integer",
                         "example": 1
-                    },
-                    "title": {
-                        "type": "string",
-                        "example": "Summer Sale"
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "Get 20% off on all cars this summer"
                     },
                     "discount_percentage": {
                         "type": "number",
                         "format": "float",
                         "example": 20
+                    },
+                    "currency": {
+                        "description": "Currency code (3 characters)",
+                        "type": "string",
+                        "example": "PKR"
                     },
                     "start_date": {
                         "type": "string",
@@ -1376,6 +4654,10 @@
                         "type": "string",
                         "example": "Sedan"
                     },
+                    "image": {
+                        "type": "string",
+                        "example": "car-type-sedan.jpg"
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time"
@@ -1383,6 +4665,169 @@
                     "updated_at": {
                         "type": "string",
                         "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "City": {
+                "title": "City",
+                "description": "City model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Karachi"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "karachi"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "PickAndDrop": {
+                "title": "Pick and Drop Service",
+                "description": "Pick and drop service model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "car_id": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "start_location": {
+                        "type": "string",
+                        "example": "Karachi Airport"
+                    },
+                    "end_location": {
+                        "type": "string",
+                        "example": "Clifton Beach"
+                    },
+                    "pickup_city_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "dropoff_city_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "pickup_area_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "dropoff_area_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "available_spaces": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "driver_gender": {
+                        "type": "string",
+                        "enum": [
+                            "male",
+                            "female"
+                        ],
+                        "example": "male"
+                    },
+                    "car_brand": {
+                        "type": "string",
+                        "example": "Toyota",
+                        "nullable": true
+                    },
+                    "car_model": {
+                        "type": "string",
+                        "example": "Corolla",
+                        "nullable": true
+                    },
+                    "car_color": {
+                        "type": "string",
+                        "example": "White",
+                        "nullable": true
+                    },
+                    "car_seats": {
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "car_transmission": {
+                        "type": "string",
+                        "example": "automatic",
+                        "nullable": true
+                    },
+                    "car_fuel_type": {
+                        "type": "string",
+                        "example": "petrol",
+                        "nullable": true
+                    },
+                    "departure_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:00:00Z"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Comfortable ride with AC",
+                        "nullable": true
+                    },
+                    "price_per_person": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 500
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "PKR"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "is_everyday": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "user": {
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "car": {
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "stops": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -1470,9 +4915,53 @@
                 },
                 "type": "object"
             }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "Enter token in format (Bearer <token>). Get your token from /api/login or /api/register endpoints."
+            }
         }
     },
     "tags": [
+        {
+            "name": "Admin - Cars",
+            "description": "API Endpoints for admin car management"
+        },
+        {
+            "name": "Areas",
+            "description": "API Endpoints for area management"
+        },
+        {
+            "name": "Contact Messages",
+            "description": "API Endpoints for contact messages"
+        },
+        {
+            "name": "Image Upload",
+            "description": "API Endpoints for image upload and management"
+        },
+        {
+            "name": "Pick & Drop",
+            "description": "API Endpoints for pick and drop services"
+        },
+        {
+            "name": "Users",
+            "description": "API Endpoints for user management"
+        },
+        {
+            "name": "Authentication",
+            "description": "API Endpoints for user authentication"
+        },
+        {
+            "name": "OTP",
+            "description": "API Endpoints for OTP (One-Time Password) authentication"
+        },
+        {
+            "name": "Chat",
+            "description": "API Endpoints for chat and messaging"
+        },
         {
             "name": "Bookings",
             "description": "API Endpoints for booking management"
@@ -1486,8 +4975,8 @@
             "description": "API Endpoints for car management"
         },
         {
-            "name": "Car Engines",
-            "description": "API Endpoints for car engine management"
+            "name": "Car Models",
+            "description": "API Endpoints for car model management"
         },
         {
             "name": "Car Offers",
@@ -1498,8 +4987,28 @@
             "description": "API Endpoints for car type management"
         },
         {
+            "name": "Cities",
+            "description": "API Endpoints for city management"
+        },
+        {
+            "name": "Colors",
+            "description": "API Endpoints for color management"
+        },
+        {
             "name": "Stores",
             "description": "API Endpoints for store management"
+        },
+        {
+            "name": "Years",
+            "description": "API Endpoints for year management"
+        },
+        {
+            "name": "Settings",
+            "description": "API Endpoints for user settings"
+        },
+        {
+            "name": "WebPush",
+            "description": "API Endpoints for web push notifications"
         }
     ]
 }

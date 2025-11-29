@@ -10,9 +10,42 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Twilio\Rest\Client;
 
+/**
+ * @OA\Tag(
+ *     name="OTP",
+ *     description="API Endpoints for OTP (One-Time Password) authentication"
+ * )
+ */
 class OtpController extends Controller
 {
     /**
+     * @OA\Post(
+     *     path="/api/send-login-otp",
+     *     operationId="sendLoginOtp",
+     *     tags={"OTP"},
+     *     summary="Send OTP for login",
+     *     description="Send OTP via email or SMS for user login",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com", nullable=true),
+     *             @OA\Property(property="phone_number", type="string", example="+923001234567", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="OTP sent successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="OTP sent successfully"),
+     *             @OA\Property(property="identifier", type="string", example="+923001234567"),
+     *             @OA\Property(property="is_email", type="boolean", example=false)
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="User not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Failed to send OTP")
+     * )
      * Send OTP for login
      */
     public function sendLoginOtp(Request $request)
@@ -88,6 +121,33 @@ class OtpController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/verify-login-otp",
+     *     operationId="verifyLoginOtp",
+     *     tags={"OTP"},
+     *     summary="Verify OTP for login",
+     *     description="Verify OTP and authenticate user",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"identifier", "otp"},
+     *             @OA\Property(property="identifier", type="string", example="+923001234567", description="Email or phone number"),
+     *             @OA\Property(property="otp", type="string", example="123456", description="6-digit OTP code")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="OTP verified and login successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="token", type="string", example="1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+     *             @OA\Property(property="user", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Invalid or expired OTP"),
+     *     @OA\Response(response=404, description="User not found"),
+     *     @OA\Response(response=500, description="Failed to verify OTP")
+     * )
      * Verify OTP for login
      */
     public function verifyLoginOtp(Request $request)
@@ -178,6 +238,32 @@ class OtpController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/send-signup-otp",
+     *     operationId="sendSignupOtp",
+     *     tags={"OTP"},
+     *     summary="Send OTP for signup",
+     *     description="Send OTP via email or SMS for new user registration",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email", example="newuser@example.com", nullable=true),
+     *             @OA\Property(property="phone_number", type="string", example="+923001234567", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="OTP sent successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="OTP sent successfully"),
+     *             @OA\Property(property="identifier", type="string", example="+923001234567"),
+     *             @OA\Property(property="is_email", type="boolean", example=false)
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error (email/phone already exists)"),
+     *     @OA\Response(response=500, description="Failed to send OTP")
+     * )
      * Send OTP for signup
      */
     public function sendSignupOtp(Request $request)
@@ -256,6 +342,33 @@ class OtpController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/verify-signup-otp",
+     *     operationId="verifySignupOtp",
+     *     tags={"OTP"},
+     *     summary="Verify OTP for signup",
+     *     description="Verify OTP for new user registration. Must be called before /api/register",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"identifier", "otp"},
+     *             @OA\Property(property="identifier", type="string", example="+923001234567", description="Email or phone number"),
+     *             @OA\Property(property="otp", type="string", example="123456", description="6-digit OTP code")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="OTP verified successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="OTP verified successfully"),
+     *             @OA\Property(property="identifier", type="string", example="+923001234567"),
+     *             @OA\Property(property="is_email", type="boolean", example=false)
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Invalid or expired OTP"),
+     *     @OA\Response(response=500, description="Failed to verify OTP")
+     * )
      * Verify OTP for signup
      */
     public function verifySignupOtp(Request $request)
@@ -335,6 +448,33 @@ class OtpController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/set-password",
+     *     operationId="setPassword",
+     *     tags={"OTP"},
+     *     summary="Set password for user",
+     *     description="Set or update password for a user (optional, can be done after OTP login)",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"identifier", "password"},
+     *             @OA\Property(property="identifier", type="string", example="+923001234567", description="Email or phone number"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123", description="New password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password set successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Password set successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="User not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Set password after OTP verification (optional)
      */
     public function setPassword(Request $request)

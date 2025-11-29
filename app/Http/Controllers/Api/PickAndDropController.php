@@ -10,9 +10,42 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Pick & Drop",
+ *     description="API Endpoints for pick and drop services"
+ * )
+ */
 class PickAndDropController extends Controller
 {
     /**
+     * @OA\Get(
+     *     path="/api/pick-and-drop",
+     *     operationId="getPickAndDropServices",
+     *     tags={"Pick & Drop"},
+     *     summary="List pick and drop services",
+     *     description="Get a paginated list of active pick and drop services with optional filters",
+     *     @OA\Parameter(name="start_location", in="query", description="Filter by start location", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="end_location", in="query", description="Filter by end location", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="driver_gender", in="query", description="Filter by driver gender", required=false, @OA\Schema(type="string", enum={"male", "female"})),
+     *     @OA\Parameter(name="min_spaces", in="query", description="Minimum available spaces", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="departure_date", in="query", description="Filter by departure date (YYYY-MM-DD)", required=false, @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="departure_time", in="query", description="Filter by departure time (HH:MM)", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PickAndDrop")),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer"),
+     *                 @OA\Property(property="last_page", type="integer"),
+     *                 @OA\Property(property="per_page", type="integer"),
+     *                 @OA\Property(property="total", type="integer")
+     *             )
+     *         )
+     *     )
+     * )
      * Display a listing of the resource.
      */
     public function index(Request $request)
@@ -112,6 +145,43 @@ class PickAndDropController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/customer/pick-and-drop",
+     *     operationId="createPickAndDropService",
+     *     tags={"Pick & Drop"},
+     *     summary="Create pick and drop service",
+     *     description="Create a new pick and drop service",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"start_location", "end_location", "pickup_city_id", "pickup_area_id", "dropoff_city_id", "dropoff_area_id", "departure_time", "available_spaces", "driver_gender"},
+     *             @OA\Property(property="start_location", type="string", example="Karachi Airport"),
+     *             @OA\Property(property="end_location", type="string", example="Clifton Beach"),
+     *             @OA\Property(property="pickup_city_id", type="integer", example=1),
+     *             @OA\Property(property="pickup_area_id", type="integer", example=1),
+     *             @OA\Property(property="dropoff_city_id", type="integer", example=1),
+     *             @OA\Property(property="dropoff_area_id", type="integer", example=2),
+     *             @OA\Property(property="departure_time", type="string", format="date-time", example="2024-01-15 10:00:00"),
+     *             @OA\Property(property="available_spaces", type="integer", example=4),
+     *             @OA\Property(property="driver_gender", type="string", enum={"male", "female"}, example="male"),
+     *             @OA\Property(property="stops", type="array", @OA\Items(type="object",
+     *                 @OA\Property(property="location", type="string"),
+     *                 @OA\Property(property="city_id", type="integer"),
+     *                 @OA\Property(property="area_id", type="integer"),
+     *                 @OA\Property(property="stop_time", type="string", format="date-time"),
+     *                 @OA\Property(property="order", type="integer"),
+     *                 @OA\Property(property="notes", type="string", nullable=true)
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Service created successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/PickAndDrop")
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -165,6 +235,20 @@ class PickAndDropController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/pick-and-drop/{id}",
+     *     operationId="getPickAndDropService",
+     *     tags={"Pick & Drop"},
+     *     summary="Get pick and drop service details",
+     *     description="Get detailed information about a specific pick and drop service",
+     *     @OA\Parameter(name="id", in="path", required=true, description="Service ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(ref="#/components/schemas/PickAndDrop")
+     *     ),
+     *     @OA\Response(response=404, description="Service not found")
+     * )
      * Display the specified resource.
      */
     public function show(string $id)
@@ -174,6 +258,38 @@ class PickAndDropController extends Controller
     }
 
     /**
+     * @OA\Put(
+     *     path="/api/customer/pick-and-drop/{id}",
+     *     operationId="updatePickAndDropService",
+     *     tags={"Pick & Drop"},
+     *     summary="Update pick and drop service",
+     *     description="Update an existing pick and drop service (only owner can update)",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Service ID", @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="start_location", type="string", example="Karachi Airport"),
+     *             @OA\Property(property="end_location", type="string", example="Clifton Beach"),
+     *             @OA\Property(property="pickup_city_id", type="integer", example=1),
+     *             @OA\Property(property="pickup_area_id", type="integer", example=1),
+     *             @OA\Property(property="dropoff_city_id", type="integer", example=1),
+     *             @OA\Property(property="dropoff_area_id", type="integer", example=2),
+     *             @OA\Property(property="departure_time", type="string", format="date-time", example="2024-01-15 10:00:00"),
+     *             @OA\Property(property="available_spaces", type="integer", example=4),
+     *             @OA\Property(property="driver_gender", type="string", enum={"male", "female"}, example="male"),
+     *             @OA\Property(property="stops", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Service updated successfully",
+     *         @OA\JsonContent(ref="#/components/schemas/PickAndDrop")
+     *     ),
+     *     @OA\Response(response=403, description="Unauthorized - not the owner"),
+     *     @OA\Response(response=404, description="Service not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
@@ -237,6 +353,24 @@ class PickAndDropController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *     path="/api/customer/pick-and-drop/{id}",
+     *     operationId="deletePickAndDropService",
+     *     tags={"Pick & Drop"},
+     *     summary="Delete pick and drop service",
+     *     description="Delete a pick and drop service (only owner can delete)",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Service ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Service deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Service deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Unauthorized - not the owner"),
+     *     @OA\Response(response=404, description="Service not found")
+     * )
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
@@ -254,6 +388,33 @@ class PickAndDropController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/customer/pick-and-drop/my-services",
+     *     operationId="getMyPickAndDropServices",
+     *     tags={"Pick & Drop"},
+     *     summary="Get user's pick and drop services",
+     *     description="Get a paginated list of the authenticated user's pick and drop services",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="start_location", in="query", description="Filter by start location", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="end_location", in="query", description="Filter by end location", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="driver_gender", in="query", description="Filter by driver gender", required=false, @OA\Schema(type="string", enum={"male", "female"})),
+     *     @OA\Parameter(name="min_spaces", in="query", description="Minimum available spaces", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="departure_date", in="query", description="Filter by departure date", required=false, @OA\Schema(type="string", format="date")),
+     *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=15)),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PickAndDrop")),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer"),
+     *                 @OA\Property(property="last_page", type="integer"),
+     *                 @OA\Property(property="per_page", type="integer"),
+     *                 @OA\Property(property="total", type="integer")
+     *             )
+     *         )
+     *     )
+     * )
      * Get user's own pick and drop services
      */
     public function myServices(Request $request)

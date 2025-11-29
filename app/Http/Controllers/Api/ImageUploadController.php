@@ -10,6 +10,12 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Response;
 
+/**
+ * @OA\Tag(
+ *     name="Image Upload",
+ *     description="API Endpoints for image upload and management"
+ * )
+ */
 class ImageUploadController extends Controller
 {
     protected $s3Service;
@@ -20,6 +26,41 @@ class ImageUploadController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/upload/image",
+     *     operationId="uploadSingleImage",
+     *     tags={"Image Upload"},
+     *     summary="Upload single image",
+     *     description="Upload a single image to S3 storage",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"image"},
+     *                 @OA\Property(property="image", type="string", format="binary", description="Image file (jpeg, png, jpg, gif, webp, max 2MB)"),
+     *                 @OA\Property(property="directory", type="string", example="uploads", description="Directory path in S3")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Image uploaded successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Image uploaded successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="url", type="string", example="https://s3.amazonaws.com/bucket/path/image.jpg"),
+     *                 @OA\Property(property="filename", type="string", example="image.jpg"),
+     *                 @OA\Property(property="size", type="integer", example=102400),
+     *                 @OA\Property(property="mime_type", type="string", example="image/jpeg")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Upload failed")
+     * )
      * Upload a single image
      */
     public function uploadSingle(Request $request): JsonResponse
@@ -54,6 +95,40 @@ class ImageUploadController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/upload/images",
+     *     operationId="uploadMultipleImages",
+     *     tags={"Image Upload"},
+     *     summary="Upload multiple images",
+     *     description="Upload multiple images to S3 storage (max 10 images)",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"images"},
+     *                 @OA\Property(property="images", type="array", @OA\Items(type="string", format="binary"), description="Image files (1-10 images)"),
+     *                 @OA\Property(property="directory", type="string", example="uploads", description="Directory path in S3")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="All images uploaded successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="All images uploaded successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="uploaded", type="array", @OA\Items(type="object")),
+     *                 @OA\Property(property="failed", type="array", @OA\Items(type="object"))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=207, description="Partial success - some images failed"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="All uploads failed")
+     * )
      * Upload multiple images
      */
     public function uploadMultiple(Request $request): JsonResponse
@@ -125,6 +200,30 @@ class ImageUploadController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     *     path="/api/upload/image",
+     *     operationId="deleteImage",
+     *     tags={"Image Upload"},
+     *     summary="Delete image",
+     *     description="Delete an image from S3 storage",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"url"},
+     *             @OA\Property(property="url", type="string", format="url", example="https://s3.amazonaws.com/bucket/path/image.jpg")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Image deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Image deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Delete an image
      */
     public function delete(Request $request): JsonResponse

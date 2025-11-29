@@ -7,6 +7,41 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @OA\Schema(
+ *     schema="PickAndDrop",
+ *     title="Pick and Drop Service",
+ *     description="Pick and drop service model",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="user_id", type="integer", example=1),
+ *     @OA\Property(property="car_id", type="integer", nullable=true, example=1),
+ *     @OA\Property(property="start_location", type="string", example="Karachi Airport"),
+ *     @OA\Property(property="end_location", type="string", example="Clifton Beach"),
+ *     @OA\Property(property="pickup_city_id", type="integer", example=1),
+ *     @OA\Property(property="dropoff_city_id", type="integer", example=1),
+ *     @OA\Property(property="pickup_area_id", type="integer", example=1),
+ *     @OA\Property(property="dropoff_area_id", type="integer", example=2),
+ *     @OA\Property(property="available_spaces", type="integer", example=4),
+ *     @OA\Property(property="driver_gender", type="string", enum={"male", "female"}, example="male"),
+ *     @OA\Property(property="car_brand", type="string", nullable=true, example="Toyota"),
+ *     @OA\Property(property="car_model", type="string", nullable=true, example="Corolla"),
+ *     @OA\Property(property="car_color", type="string", nullable=true, example="White"),
+ *     @OA\Property(property="car_seats", type="integer", nullable=true, example=5),
+ *     @OA\Property(property="car_transmission", type="string", nullable=true, example="automatic"),
+ *     @OA\Property(property="car_fuel_type", type="string", nullable=true, example="petrol"),
+ *     @OA\Property(property="departure_time", type="string", format="date-time", example="2024-01-15T10:00:00Z"),
+ *     @OA\Property(property="description", type="string", nullable=true, example="Comfortable ride with AC"),
+ *     @OA\Property(property="price_per_person", type="number", format="float", example=500.00),
+ *     @OA\Property(property="currency", type="string", example="PKR"),
+ *     @OA\Property(property="is_active", type="boolean", example=true),
+ *     @OA\Property(property="is_everyday", type="boolean", example=false),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time"),
+ *     @OA\Property(property="user", type="object", nullable=true),
+ *     @OA\Property(property="car", type="object", nullable=true),
+ *     @OA\Property(property="stops", type="array", @OA\Items(type="object"), nullable=true)
+ * )
+ */
 class PickAndDrop extends Model
 {
     use HasFactory;

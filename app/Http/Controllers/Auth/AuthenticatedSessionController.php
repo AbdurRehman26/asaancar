@@ -9,6 +9,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+/**
+ * @OA\Tag(
+ *     name="Authentication",
+ *     description="API Endpoints for user authentication"
+ * )
+ */
 class AuthenticatedSessionController extends Controller
 {
     /**
@@ -23,6 +29,33 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/login",
+     *     operationId="login",
+     *     tags={"Authentication"},
+     *     summary="Login user",
+     *     description="Authenticate user with email/phone and password",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"login_method"},
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com", nullable=true),
+     *             @OA\Property(property="phone_number", type="string", example="+923001234567", nullable=true),
+     *             @OA\Property(property="password", type="string", format="password", example="password123", nullable=true),
+     *             @OA\Property(property="login_method", type="string", enum={"password", "otp"}, example="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+     *             @OA\Property(property="user", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Invalid credentials"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
      * Handle an incoming authentication request (API login).
      */
     public function store(Request $request)
@@ -82,6 +115,22 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     operationId="logout",
+     *     tags={"Authentication"},
+     *     summary="Logout user",
+     *     description="Destroy the authenticated session and revoke the access token",
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Logout successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      * Destroy an authenticated session.
      */
     public function destroy(Request $request)
