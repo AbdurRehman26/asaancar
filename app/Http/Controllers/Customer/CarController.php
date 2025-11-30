@@ -455,4 +455,161 @@ class CarController extends Controller
 
         return response()->json(['message' => 'Car deleted successfully']);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/my-cars",
+     *     operationId="getMyCars",
+     *     tags={"Cars"},
+     *     summary="Get my cars only",
+     *     description="Returns cars belonging to authenticated user's stores only",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Car")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer"),
+     *             @OA\Property(property="last_page", type="integer")
+     *         )
+     *     )
+     * )
+     */
+    public function myCars(Request $request)
+    {
+        $user = $request->user();
+        $perPage = $request->input('per_page', 15);
+        
+        // Get all store IDs for this user
+        $storeIds = $user->stores()->pluck('stores.id');
+        
+        if ($storeIds->isEmpty()) {
+            return response()->json([
+                'data' => [],
+                'current_page' => 1,
+                'per_page' => $perPage,
+                'total' => 0,
+                'last_page' => 1
+            ]);
+        }
+        
+        $cars = Car::with(['carBrand', 'carModel', 'carType', 'store', 'carOffers' => function($query) {
+            $query->where('is_active', true)
+                  ->where(function($q) {
+                      $q->where(function($subQ) {
+                          $subQ->whereNotNull('start_date')
+                               ->whereNotNull('end_date')
+                               ->where('start_date', '<=', now())
+                               ->where('end_date', '>=', now());
+                      })->orWhere(function($subQ) {
+                          $subQ->whereNull('start_date')
+                               ->whereNull('end_date');
+                      });
+                  });
+        }])
+        ->whereIn('store_id', $storeIds)
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage);
+        
+        return response()->json([
+            'data' => CarResource::collection($cars->items()),
+            'current_page' => $cars->currentPage(),
+            'per_page' => $cars->perPage(),
+            'total' => $cars->total(),
+            'last_page' => $cars->lastPage()
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/all-cars",
+     *     operationId="getAllCars",
+     *     tags={"Cars"},
+     *     summary="Get cars from all stores",
+     *     description="Returns cars from all stores (public endpoint)",
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="store_id",
+     *         in="query",
+     *         description="Filter by store ID",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Car")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer"),
+     *             @OA\Property(property="last_page", type="integer")
+     *         )
+     *     )
+     * )
+     */
+    public function allCars(Request $request)
+    {
+        $perPage = $request->input('per_page', 15);
+        $storeId = $request->input('store_id');
+        
+        $query = Car::with(['carBrand', 'carModel', 'carType', 'store', 'carOffers' => function($query) {
+            $query->where('is_active', true)
+                  ->where(function($q) {
+                      $q->where(function($subQ) {
+                          $subQ->whereNotNull('start_date')
+                               ->whereNotNull('end_date')
+                               ->where('start_date', '<=', now())
+                               ->where('end_date', '>=', now());
+                      })->orWhere(function($subQ) {
+                          $subQ->whereNull('start_date')
+                               ->whereNull('end_date');
+                      });
+                  });
+        }])
+        ->whereHas('store');
+        
+        if ($storeId) {
+            $query->where('store_id', $storeId);
+        }
+        
+        $cars = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        
+        return response()->json([
+            'data' => CarResource::collection($cars->items()),
+            'current_page' => $cars->currentPage(),
+            'per_page' => $cars->perPage(),
+            'total' => $cars->total(),
+            'last_page' => $cars->lastPage()
+        ]);
+    }
 }

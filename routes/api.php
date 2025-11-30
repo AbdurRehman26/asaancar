@@ -101,6 +101,15 @@ Route::prefix('pick-and-drop')->group(function () {
 // User information endpoint
 Route::get('/user', [\App\Http\Controllers\Api\UserController::class, 'me'])->middleware('auth:sanctum');
 
+// My resources endpoints (authenticated)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/my-cars', [CarController::class, 'myCars']);
+    Route::get('/my-stores', [StoreController::class, 'myStores']);
+});
+
+// All cars endpoint (public)
+Route::get('/all-cars', [CarController::class, 'allCars']);
+
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', function (Request $request) {

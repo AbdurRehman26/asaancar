@@ -8,6 +8,7 @@ use App\Http\Requests\Store\UpdateStoreRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StoreResource;
 use App\Models\City;
+use Illuminate\Http\Request;
 
 /**
  * @OA\Tag(
@@ -232,5 +233,59 @@ class StoreController extends Controller
         $store->delete();
 
         return response()->json(['message' => 'Store deleted successfully']);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/my-stores",
+     *     operationId="getMyStores",
+     *     tags={"Stores"},
+     *     summary="Get all my stores",
+     *     description="Returns all stores belonging to authenticated user",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Store")),
+     *             @OA\Property(property="current_page", type="integer"),
+     *             @OA\Property(property="per_page", type="integer"),
+     *             @OA\Property(property="total", type="integer"),
+     *             @OA\Property(property="last_page", type="integer")
+     *         )
+     *     )
+     * )
+     */
+    public function myStores(Request $request)
+    {
+        $user = $request->user();
+        $perPage = $request->input('per_page', 15);
+        
+        $stores = $user->stores()
+            ->with(['city', 'users'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+        
+        return response()->json([
+            'data' => StoreResource::collection($stores->items()),
+            'current_page' => $stores->currentPage(),
+            'per_page' => $stores->perPage(),
+            'total' => $stores->total(),
+            'last_page' => $stores->lastPage()
+        ]);
     }
 }
