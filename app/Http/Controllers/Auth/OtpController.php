@@ -62,6 +62,34 @@ class OtpController extends Controller
         $isEmail = !empty($request->email);
         $identifier = $isEmail ? $request->email : $request->phone_number;
 
+        // Demo login: If phone number is +923202095051, automatically log in without OTP
+        $demoPhoneNumber = '+923202095051';
+        if (!$isEmail && $request->phone_number === $demoPhoneNumber) {
+            $user = User::where('phone_number', $demoPhoneNumber)->first();
+            
+            if (!$user) {
+                return response()->json(['message' => 'Demo user not found'], 404);
+            }
+
+            // Automatically verify and log in demo user
+            $user->is_verified = true;
+            if (!$user->email_verified_at) {
+                $user->email_verified_at = now();
+            }
+            $user->save();
+
+            // Create token and return immediately
+            $token = $user->createToken('demo-api-token')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+                'user' => new \App\Http\Resources\UserResource($user),
+                'message' => 'Demo login successful',
+            ]);
+        }
+
+        // Regular OTP flow for non-demo users
         $user = $isEmail 
             ? User::where('email', $request->email)->first()
             : User::where('phone_number', $request->phone_number)->first();

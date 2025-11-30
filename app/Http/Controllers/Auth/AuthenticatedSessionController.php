@@ -81,26 +81,6 @@ class AuthenticatedSessionController extends Controller
             return response()->json(['message' => 'Email or phone number is required'], 422);
         }
 
-        // Demo login: If phone number is +923202095051, automatically log in without password
-        $demoPhoneNumber = '+923202095051';
-        if ($phoneNumber === $demoPhoneNumber) {
-            $user = \App\Models\User::where('phone_number', $demoPhoneNumber)->first();
-            
-            if (!$user) {
-                return response()->json(['message' => 'Demo user not found'], 404);
-            }
-
-            // Automatically log in demo user
-            $token = $user->createToken('demo-api-token')->plainTextToken;
-
-            return response()->json([
-                'token' => $token,
-                'user' => new \App\Http\Resources\UserResource($user),
-                'message' => 'Demo login successful',
-            ]);
-        }
-
-        // Regular password login flow
         if (!$password) {
             return response()->json(['message' => 'Password is required'], 422);
         }
