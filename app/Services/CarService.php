@@ -468,13 +468,29 @@ class CarService
             });
         }
 
-        return [
+        // Base Laravel-style pagination payload
+        $response = [
             'data' => $formatted->values(),
             'current_page' => $cars->currentPage(),
+            'from' => $cars->firstItem(),
             'last_page' => $cars->lastPage(),
-            'total' => $formatted->count(),
             'per_page' => $cars->perPage(),
+            'to' => $cars->lastItem(),
+            // Use paginator total (total matching records) instead of current-page count
+            'total' => $cars->total(),
         ];
+
+        // Add nested meta block similar to Pick & Drop API
+        $response['meta'] = [
+            'current_page' => $response['current_page'],
+            'last_page' => $response['last_page'],
+            'per_page' => $response['per_page'],
+            'total' => $cars->total(),
+            'from' => $response['from'],
+            'to' => $response['to'],
+        ];
+
+        return $response;
     }
 
 

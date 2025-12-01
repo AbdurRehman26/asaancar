@@ -43,15 +43,22 @@ class CarController extends Controller
      *     operationId="getCarsList",
      *     tags={"Cars"},
      *     summary="Get list of cars",
-     *     description="Returns list of cars with pagination",
+     *     description="Returns list of cars with pagination (response format similar to Pick & Drop API)",
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
      *         @OA\JsonContent(
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Car")),
-     *             @OA\Property(property="current_page", type="integer"),
-     *             @OA\Property(property="per_page", type="integer"),
-     *             @OA\Property(property="total", type="integer")
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer"),
+     *                 @OA\Property(property="last_page", type="integer"),
+     *                 @OA\Property(property="per_page", type="integer"),
+     *                 @OA\Property(property="total", type="integer"),
+     *                 @OA\Property(property="from", type="integer", nullable=true),
+     *                 @OA\Property(property="to", type="integer", nullable=true),
+     *             )
      *         )
      *     )
      * )
@@ -65,9 +72,28 @@ class CarController extends Controller
         ]);
         
         $user = $request->user();
-        
+
         $paginated = $this->carService->getPaginatedCarsForListing($perPage, $filters, $user);
-        return response()->json($paginated);
+
+        // Shape response similar to Pick & Drop API: data + meta, while keeping
+        // top-level pagination keys for backward compatibility with existing frontend.
+        return response()->json([
+            'data' => $paginated['data'] ?? [],
+            'meta' => $paginated['meta'] ?? [
+                'current_page' => $paginated['current_page'] ?? 1,
+                'last_page' => $paginated['last_page'] ?? 1,
+                'per_page' => $paginated['per_page'] ?? $perPage,
+                'total' => $paginated['total'] ?? 0,
+                'from' => $paginated['from'] ?? null,
+                'to' => $paginated['to'] ?? null,
+            ],
+            'current_page' => $paginated['current_page'] ?? 1,
+            'last_page' => $paginated['last_page'] ?? 1,
+            'per_page' => $paginated['per_page'] ?? $perPage,
+            'total' => $paginated['total'] ?? 0,
+            'from' => $paginated['from'] ?? null,
+            'to' => $paginated['to'] ?? null,
+        ]);
     }
 
     /**
@@ -483,10 +509,16 @@ class CarController extends Controller
      *         description="Successful operation",
      *         @OA\JsonContent(
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Car")),
-     *             @OA\Property(property="current_page", type="integer"),
-     *             @OA\Property(property="per_page", type="integer"),
-     *             @OA\Property(property="total", type="integer"),
-     *             @OA\Property(property="last_page", type="integer")
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer"),
+     *                 @OA\Property(property="last_page", type="integer"),
+     *                 @OA\Property(property="per_page", type="integer"),
+     *                 @OA\Property(property="total", type="integer"),
+     *                 @OA\Property(property="from", type="integer", nullable=true),
+     *                 @OA\Property(property="to", type="integer", nullable=true),
+     *             )
      *         )
      *     )
      * )
@@ -502,10 +534,20 @@ class CarController extends Controller
         if ($storeIds->isEmpty()) {
             return response()->json([
                 'data' => [],
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'per_page' => $perPage,
+                    'total' => 0,
+                    'from' => null,
+                    'to' => null,
+                ],
                 'current_page' => 1,
+                'last_page' => 1,
                 'per_page' => $perPage,
                 'total' => 0,
-                'last_page' => 1
+                'from' => null,
+                'to' => null,
             ]);
         }
         
@@ -526,13 +568,24 @@ class CarController extends Controller
         ->whereIn('store_id', $storeIds)
         ->orderBy('created_at', 'desc')
         ->paginate($perPage);
-        
+
+        // Shape response similar to Pick & Drop API: data + meta
         return response()->json([
             'data' => CarResource::collection($cars->items()),
+            'meta' => [
+                'current_page' => $cars->currentPage(),
+                'last_page' => $cars->lastPage(),
+                'per_page' => $cars->perPage(),
+                'total' => $cars->total(),
+                'from' => $cars->firstItem(),
+                'to' => $cars->lastItem(),
+            ],
             'current_page' => $cars->currentPage(),
+            'last_page' => $cars->lastPage(),
             'per_page' => $cars->perPage(),
             'total' => $cars->total(),
-            'last_page' => $cars->lastPage()
+            'from' => $cars->firstItem(),
+            'to' => $cars->lastItem(),
         ]);
     }
 
@@ -569,10 +622,16 @@ class CarController extends Controller
      *         description="Successful operation",
      *         @OA\JsonContent(
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Car")),
-     *             @OA\Property(property="current_page", type="integer"),
-     *             @OA\Property(property="per_page", type="integer"),
-     *             @OA\Property(property="total", type="integer"),
-     *             @OA\Property(property="last_page", type="integer")
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer"),
+     *                 @OA\Property(property="last_page", type="integer"),
+     *                 @OA\Property(property="per_page", type="integer"),
+     *                 @OA\Property(property="total", type="integer"),
+     *                 @OA\Property(property="from", type="integer", nullable=true),
+     *                 @OA\Property(property="to", type="integer", nullable=true),
+     *             )
      *         )
      *     )
      * )
@@ -601,15 +660,26 @@ class CarController extends Controller
         if ($storeId) {
             $query->where('store_id', $storeId);
         }
-        
+
         $cars = $query->orderBy('created_at', 'desc')->paginate($perPage);
-        
+
+        // Shape response similar to Pick & Drop API: data + meta
         return response()->json([
             'data' => CarResource::collection($cars->items()),
+            'meta' => [
+                'current_page' => $cars->currentPage(),
+                'last_page' => $cars->lastPage(),
+                'per_page' => $cars->perPage(),
+                'total' => $cars->total(),
+                'from' => $cars->firstItem(),
+                'to' => $cars->lastItem(),
+            ],
             'current_page' => $cars->currentPage(),
+            'last_page' => $cars->lastPage(),
             'per_page' => $cars->perPage(),
             'total' => $cars->total(),
-            'last_page' => $cars->lastPage()
+            'from' => $cars->firstItem(),
+            'to' => $cars->lastItem(),
         ]);
     }
 }
