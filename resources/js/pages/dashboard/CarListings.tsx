@@ -3,12 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import CarCard from '@/components/car-card';
 import CarFilters from '@/components/car-filters';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function CarListings() {
     const { loading } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
-    
+
     // Helper to parse query params
     type DashboardFilters = {
         brand_id: string;
@@ -51,7 +53,7 @@ export default function CarListings() {
     // Function to update URL parameters
     const updateURLParams = useCallback((newFilters: DashboardFilters, page: number = 1) => {
         const params = new URLSearchParams();
-        
+
         // Add filters to params
         Object.entries(newFilters).forEach(([key, value]) => {
             if (value && value !== '') {
@@ -64,11 +66,11 @@ export default function CarListings() {
                 }
             }
         });
-        
+
         // Add pagination params
         params.set('page', page.toString());
         params.set('per_page', perPageState.toString());
-        
+
         // Update URL without triggering a page reload
         navigate(`/dashboard/cars?${params.toString()}`, { replace: true });
     }, [navigate, perPageState]);
@@ -85,7 +87,7 @@ export default function CarListings() {
             setFilters(newFilters as DashboardFilters);
             setCurrentPage(1);
             updateURLParams(newFilters as DashboardFilters, 1);
-            
+
             // Trigger immediate search with the new filters
             setCarLoading(true);
             setCarError(null);
@@ -217,6 +219,17 @@ export default function CarListings() {
 
     return (
         <div className="max-w-7xl sm:px-8 lg:px-12 py-6">
+            {/* Add New Car Button - Above everything */}
+            <div className="mb-6">
+                <Button
+                    onClick={() => navigate('/create-car')}
+                    className="bg-[#7e246c] hover:bg-[#6a1f5a] text-white"
+                >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Car
+                </Button>
+            </div>
+
             {/* Store Selection Dropdown */}
             {userStores.length > 0 && (
                 <div className="mb-6">
