@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Booking;
 use App\Models\Car;
 use App\Models\User;
+use App\Notifications\BookingCreatedNotification;
+use App\Notifications\BookingStatusChangedNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -47,6 +49,17 @@ class BookingService
                 'notes' => $bookingData['notes'] ?? null,
                 'refill_amount_per_km' => 40,
             ]);
+
+            // Load relationships for notification
+            $booking->load(['car', 'user', 'store']);
+
+            // Notify store owners about the new booking
+            if ($booking->store) {
+                $storeUsers = $booking->store->users;
+                foreach ($storeUsers as $storeUser) {
+                    $storeUser->notify(new BookingCreatedNotification($booking));
+                }
+            }
 
             DB::commit();
 
@@ -254,10 +267,20 @@ class BookingService
                 throw new Exception('Booking not found');
             }
 
+            $oldStatus = $booking->status;
+
             $booking->update([
                 'status' => $status,
                 'notes' => $notes ?? $booking->notes,
             ]);
+
+            // Load relationships for notification
+            $booking->load(['car', 'user']);
+
+            // Notify the customer about status change
+            if ($booking->user && $oldStatus !== $status) {
+                $booking->user->notify(new BookingStatusChangedNotification($booking, $oldStatus));
+            }
 
             return [
                 'success' => true,

@@ -35,6 +35,7 @@ import PickAndDropListing from './pages/pick-and-drop-listing';
 import PickAndDropDetail from './pages/pick-and-drop-detail';
 import RentalChat from './pages/dashboard/RentalChat';
 import PickAndDropChat from './pages/dashboard/PickAndDropChat';
+import NotificationsPage from './pages/notifications';
 
 configureEcho({
     broadcaster: 'pusher',
@@ -73,6 +74,11 @@ function App() {
           <Route path="/bookings" element={
             <ProtectedRoute>
               <Bookings />
+            </ProtectedRoute>
+          } />
+          <Route path="/notifications" element={
+            <ProtectedRoute>
+              <NotificationsPage />
             </ProtectedRoute>
           } />
           <Route path="/chat" element={

@@ -8,6 +8,7 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { useAuth } from '@/components/AuthContext';
 import DarkModeToggle from './ui/dark-mode-toggle';
+import { NotificationBell } from './notification-bell';
 
 type NavbarProps = {
   currentPage?: string;
@@ -98,6 +99,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
       ) : (
         <div className="flex items-center space-x-2">
           <DarkModeToggle />
+          <NotificationBell />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="size-10 rounded-full p-1">
@@ -205,6 +207,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
         ) : (
           <div className="flex items-center space-x-2">
             <DarkModeToggle />
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="size-10 rounded-full p-1">

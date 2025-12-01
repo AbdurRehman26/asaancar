@@ -27,7 +27,19 @@ class CarOfferNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $channels = ['database'];
+        
+        // Add mail if user has email
+        if ($notifiable->email) {
+            $channels[] = 'mail';
+        }
+        
+        // Add web push if user has subscriptions
+        if ($notifiable->pushSubscriptions()->exists()) {
+            $channels[] = 'webpush';
+        }
+        
+        return $channels;
     }
 
     /**
@@ -60,7 +72,8 @@ class CarOfferNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'type' => 'car_offer',
+            'message' => 'A new car offer is available.',
         ];
     }
 }

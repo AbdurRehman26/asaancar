@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\MessageSent;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Notifications\MessageReceivedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -133,6 +134,53 @@ class ChatController extends Controller
             'sender_id' => Auth::id(),
             'message' => $request->message,
         ]);
+        
+        // Load sender relationship
+        $message->load('sender');
+        
+        // Notify the recipient(s) about the new message
+        $conversation->load(['user', 'store', 'recipientUser']);
+        
+        // Determine who should be notified
+        $recipients = [];
+        
+        if ($conversation->type === 'user' && $conversation->recipientUser) {
+            // Direct user-to-user conversation
+            if ($conversation->recipientUser->id !== Auth::id()) {
+                $recipients[] = $conversation->recipientUser;
+            }
+            if ($conversation->user_id !== Auth::id() && $conversation->user) {
+                $recipients[] = $conversation->user;
+            }
+        } elseif ($conversation->type === 'store' && $conversation->store) {
+            // Store conversation - notify all store users except sender
+            $storeUsers = $conversation->store->users()->where('users.id', '!=', Auth::id())->get();
+            $recipients = $storeUsers->all();
+        } elseif ($conversation->type === 'booking' && $conversation->booking) {
+            // Booking conversation - notify booking owner and store users
+            if ($conversation->booking->user_id !== Auth::id() && $conversation->booking->user) {
+                $recipients[] = $conversation->booking->user;
+            }
+            if ($conversation->booking->store) {
+                $storeUsers = $conversation->booking->store->users()->where('users.id', '!=', Auth::id())->get();
+                $recipients = array_merge($recipients, $storeUsers->all());
+            }
+        } elseif ($conversation->type === 'pick_and_drop' && $conversation->pickAndDropService) {
+            // Pick and drop conversation
+            if ($conversation->pickAndDropService->user_id !== Auth::id() && $conversation->pickAndDropService->user) {
+                $recipients[] = $conversation->pickAndDropService->user;
+            }
+        }
+        
+        // Send notifications to unique recipients
+        $notifiedUserIds = [];
+        foreach ($recipients as $recipient) {
+            if (!in_array($recipient->id, $notifiedUserIds)) {
+                $recipient->notify(new MessageReceivedNotification($message, $conversation));
+                $notifiedUserIds[] = $recipient->id;
+            }
+        }
+        
         broadcast(new MessageSent($message))->toOthers();
         return response()->json($message->load('sender'));
     }
