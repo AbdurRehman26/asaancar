@@ -290,7 +290,7 @@ export default function Bookings() {
           </div>
         </DialogContent>
       </Dialog>
-      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 mt-28">
+      <div className="min-h-screen bg-neutral-50 dark:bg-gray-900 pt-20">
         {/* Navbar */}
         <Navbar
           currentPage="bookings"
@@ -300,7 +300,7 @@ export default function Bookings() {
         {/* Page Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-1">
           <div className="flex flex-col items-start gap-2">
-            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">My Bookings</h1>
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight mt-6">My Bookings</h1>
             <p className="text-base text-gray-500 dark:text-gray-300 font-medium">View and manage your car rental bookings.</p>
           </div>
         </div>

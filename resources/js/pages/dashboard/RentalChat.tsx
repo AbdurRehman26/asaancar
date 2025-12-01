@@ -14,6 +14,7 @@ interface RawConversation {
     unread_count?: number;
     last_message?: string | object;
     updated_at?: string | object;
+    formatted_time?: string;
 }
 
 export default function RentalChat() {
@@ -154,8 +155,19 @@ export default function RentalChat() {
                                                     </div>
                                                 </div>
                                                 {/* Time */}
-                                                <div className="ml-2 text-xs text-gray-400 whitespace-nowrap">
-                                                    {new Date(typeof conv.updated_at === 'string' ? conv.updated_at : new Date().toISOString()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                <div 
+                                                    className="ml-2 text-xs text-gray-400 whitespace-nowrap"
+                                                    title={new Date(typeof conv.updated_at === 'string' ? conv.updated_at : new Date().toISOString()).toLocaleString('en-US', {
+                                                        weekday: 'long',
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                        hour12: true,
+                                                    })}
+                                                >
+                                                    {conv.formatted_time || new Date(typeof conv.updated_at === 'string' ? conv.updated_at : new Date().toISOString()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             </button>
                                         );

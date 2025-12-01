@@ -15,6 +15,7 @@ interface Message {
     is_read: boolean;
     created_at: string | object;
     updated_at: string | object;
+    formatted_time?: string;
     sender?: User; // Optional sender object for when it's populated
 }
 
@@ -52,7 +53,7 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 } else {
                     const messagesData = await res.json();
                     // Ensure all message properties are properly formatted
-                    const formattedMessages = messagesData.map((msg: RawMessage) => {
+                    const formattedMessages = messagesData.map((msg: RawMessage & { formatted_time?: string }) => {
                         return {
                             id: Number(msg.id) || 0,
                             conversation_id: Number(msg.conversation_id) || 0,
@@ -60,7 +61,8 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                             message: String(msg.message || ''),
                             is_read: Boolean(msg.is_read),
                             created_at: String(msg.created_at || new Date().toISOString()),
-                            updated_at: String(msg.updated_at || new Date().toISOString())
+                            updated_at: String(msg.updated_at || new Date().toISOString()),
+                            formatted_time: msg.formatted_time
                         };
                     });
                     setMessages(formattedMessages);
@@ -82,7 +84,8 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 message: String(message.message || ''),
                 is_read: Boolean(message.is_read),
                 created_at: String(message.created_at || new Date().toISOString()),
-                updated_at: String(message.updated_at || new Date().toISOString())
+                updated_at: String(message.updated_at || new Date().toISOString()),
+                formatted_time: (message as { formatted_time?: string }).formatted_time
             };
             // Only add if not sent by current user and not already present
             setMessages((prev) => {
@@ -119,7 +122,8 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 message: String(msg.message || ''),
                 is_read: Boolean(msg.is_read),
                 created_at: String(msg.created_at || new Date().toISOString()),
-                updated_at: String(msg.updated_at || new Date().toISOString())
+                updated_at: String(msg.updated_at || new Date().toISOString()),
+                formatted_time: (msg as { formatted_time?: string }).formatted_time
             };
             // Only add if not already present
             setMessages((prev) => {
@@ -161,7 +165,20 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                                     <span className="block text-xs font-semibold mb-1">{senderName}</span>
                                     <span>{typeof msg.message === 'string' ? msg.message : JSON.stringify(msg.message)}</span>
                                 </div>
-                                <span className="text-xs text-gray-400 mt-1">{new Date(typeof msg.created_at === 'string' ? msg.created_at : JSON.stringify(msg.created_at)).toLocaleTimeString()}</span>
+                                <span 
+                                    className="text-xs text-gray-400 mt-1"
+                                    title={new Date(typeof msg.created_at === 'string' ? msg.created_at : JSON.stringify(msg.created_at)).toLocaleString('en-US', {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true,
+                                    })}
+                                >
+                                    {msg.formatted_time || new Date(typeof msg.created_at === 'string' ? msg.created_at : JSON.stringify(msg.created_at)).toLocaleTimeString()}
+                                </span>
                             </div>
                         );
                     })

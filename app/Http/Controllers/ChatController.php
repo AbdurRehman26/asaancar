@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
+use App\Http\Resources\ConversationResource;
+use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Notifications\MessageReceivedNotification;
@@ -69,7 +71,7 @@ class ChatController extends Controller
             $conv->unread_count = $conv->messages()->where('is_read', false)->where('sender_id', '!=', $user->id)->count();
             return $conv;
         });
-        return response()->json($conversations);
+        return response()->json(ConversationResource::collection($conversations));
     }
 
     /**
@@ -97,7 +99,7 @@ class ChatController extends Controller
         // Mark all unread messages as read for this user
         $conversation->messages()->where('is_read', false)->where('sender_id', '!=', $user->id)->update(['is_read' => true]);
         $messages = $conversation->messages()->with('sender')->orderBy('created_at')->get();
-        return response()->json($messages);
+        return response()->json(MessageResource::collection($messages));
     }
 
     /**
@@ -182,7 +184,7 @@ class ChatController extends Controller
         }
         
         broadcast(new MessageSent($message))->toOthers();
-        return response()->json($message->load('sender'));
+        return response()->json(new MessageResource($message->load('sender')));
     }
 
     /**

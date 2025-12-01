@@ -250,7 +250,7 @@ export default function PickAndDropListing() {
                     {/* Header */}
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
                         <div className="text-center md:text-left">
-                            <h1 className="text-4xl font-bold text-[#7e246c] dark:text-white mb-4">
+                            <h1 className="text-4xl font-bold text-[#7e246c] dark:text-white mb-4 mt-8">
                                 Pick & Drop Services
                             </h1>
                             <p className="text-lg text-gray-600 dark:text-gray-300">

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Carbon\Carbon;
 
-class NotificationResource extends JsonResource
+class ConversationResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,18 +18,32 @@ class NotificationResource extends JsonResource
         return [
             'id' => $this->id,
             'type' => $this->type,
-            'data' => $this->data,
-            'read_at' => $this->read_at ? $this->read_at->toISOString() : null,
-            'created_at' => $this->created_at->toISOString(),
-            'updated_at' => $this->updated_at->toISOString(),
-            'formatted_time' => $this->formatNotificationTime($this->created_at),
+            'user_id' => $this->user_id,
+            'store_id' => $this->store_id,
+            'booking_id' => $this->booking_id,
+            'recipient_user_id' => $this->recipient_user_id,
+            'pick_and_drop_service_id' => $this->pick_and_drop_service_id,
+            'last_message' => $this->lastMessage ? $this->lastMessage->message : null,
+            'unread_count' => $this->unread_count ?? 0,
+            'created_at' => $this->created_at ? $this->created_at->toISOString() : null,
+            'updated_at' => $this->updated_at ? $this->updated_at->toISOString() : null,
+            'formatted_time' => $this->updated_at ? $this->formatConversationTime($this->updated_at) : null,
+            'store' => $this->whenLoaded('store', function () {
+                return [
+                    'id' => $this->store->id,
+                    'name' => $this->store->name,
+                ];
+            }),
+            'booking' => $this->whenLoaded('booking'),
+            'recipientUser' => $this->whenLoaded('recipientUser'),
+            'pickAndDropService' => $this->whenLoaded('pickAndDropService'),
         ];
     }
 
     /**
-     * Format notification time to show relative time (e.g., "2 hours ago", "yesterday", "Monday at 3:00 PM")
+     * Format conversation time to show relative time (e.g., "2 hours ago", "yesterday", "Monday at 3:00 PM")
      */
-    private function formatNotificationTime(Carbon $date): string
+    private function formatConversationTime(Carbon $date): string
     {
         $now = Carbon::now();
         $diffSeconds = $now->diffInSeconds($date);

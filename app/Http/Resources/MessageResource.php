@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Carbon\Carbon;
 
-class NotificationResource extends JsonResource
+class MessageResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,19 +17,26 @@ class NotificationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'type' => $this->type,
-            'data' => $this->data,
-            'read_at' => $this->read_at ? $this->read_at->toISOString() : null,
+            'conversation_id' => $this->conversation_id,
+            'sender_id' => $this->sender_id,
+            'message' => $this->message,
+            'is_read' => $this->is_read,
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
-            'formatted_time' => $this->formatNotificationTime($this->created_at),
+            'formatted_time' => $this->formatMessageTime($this->created_at),
+            'sender' => $this->whenLoaded('sender', function () {
+                return [
+                    'id' => $this->sender->id,
+                    'name' => $this->sender->name,
+                ];
+            }),
         ];
     }
 
     /**
-     * Format notification time to show relative time (e.g., "2 hours ago", "yesterday", "Monday at 3:00 PM")
+     * Format message time to show relative time (e.g., "2 hours ago", "yesterday", "Monday at 3:00 PM")
      */
-    private function formatNotificationTime(Carbon $date): string
+    private function formatMessageTime(Carbon $date): string
     {
         $now = Carbon::now();
         $diffSeconds = $now->diffInSeconds($date);
