@@ -65,7 +65,7 @@ class PickAndDropResource extends JsonResource
             'car_seats' => $this->car_seats,
             'car_transmission' => $this->car_transmission,
             'car_fuel_type' => $this->car_fuel_type,
-            'departure_time' => $this->isEveryDay ? Carbon::parse($this->departure_time)->format('g:i A') : Carbon::parse($this->departure_time)->format('jS F, g:i A'),
+            'departure_time' => $this->is_everyday ? Carbon::parse($this->departure_time)->format('g:i A') : Carbon::parse($this->departure_time)->format('jS F, g:i A'),
             'description' => $this->description,
             'price_per_person' => $this->price_per_person,
             'currency' => $this->currency,
