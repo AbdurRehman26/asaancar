@@ -86,14 +86,14 @@ class PickAndDropResource extends JsonResource
                             'id' => $stop->area->id,
                             'name' => $stop->area->name,
                         ] : null,
-                        'stop_time' => Carbon::parse($stop->stop_time)->toDateTime(),
+                        'stop_time' => Carbon::parse($stop->stop_time)->toDateTimeString(),
                         'order' => $stop->order,
                         'notes' => $stop->notes,
                     ];
                 });
             }),
-            'created_at' => Carbon::parse($this->created_at)->toDateTime(),
-            'updated_at' => Carbon::parse($this->updated_at)->toDateTime(),
+            'created_at' => Carbon::parse($this->created_at)->toDateTimeString(),
+            'updated_at' => Carbon::parse($this->updated_at)->toDateTimeString(),
         ];
     }
 }
