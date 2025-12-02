@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -85,14 +86,14 @@ class PickAndDropResource extends JsonResource
                             'id' => $stop->area->id,
                             'name' => $stop->area->name,
                         ] : null,
-                        'stop_time' => $stop->stop_time?->toIso8601String(),
+                        'stop_time' => Carbon::parse($stop->stop_time)->toDateTime(),
                         'order' => $stop->order,
                         'notes' => $stop->notes,
                     ];
                 });
             }),
-            'created_at' => $this->created_at?->toIso8601String(),
-            'updated_at' => $this->updated_at?->toIso8601String(),
+            'created_at' => Carbon::parse($this->created_at)->toDateTime(),
+            'updated_at' => Carbon::parse($this->updated_at)->toDateTime(),
         ];
     }
 }
