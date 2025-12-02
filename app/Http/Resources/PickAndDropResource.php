@@ -65,7 +65,7 @@ class PickAndDropResource extends JsonResource
             'car_seats' => $this->car_seats,
             'car_transmission' => $this->car_transmission,
             'car_fuel_type' => $this->car_fuel_type,
-            'departure_time' => $this->departure_time?->toIso8601String(),
+            'departure_time' => $this->isEveryDay ? Carbon::parse($this->departure_time)->toTimeString() : Carbon::parse($this->departure_time)->toDateTimeString(),
             'description' => $this->description,
             'price_per_person' => $this->price_per_person,
             'currency' => $this->currency,
@@ -86,7 +86,7 @@ class PickAndDropResource extends JsonResource
                             'id' => $stop->area->id,
                             'name' => $stop->area->name,
                         ] : null,
-                        'stop_time' => Carbon::parse($stop->stop_time)->toDateTimeString(),
+                        'stop_time' => $this->is_everyday ? Carbon::parse($stop->stop_time)->toTimeString() : Carbon::parse($stop->stop_time)->toDateTimeString(),
                         'order' => $stop->order,
                         'notes' => $stop->notes,
                     ];
