@@ -65,7 +65,7 @@ class PickAndDropResource extends JsonResource
             'car_seats' => $this->car_seats,
             'car_transmission' => $this->car_transmission,
             'car_fuel_type' => $this->car_fuel_type,
-            'departure_time' => $this->isEveryDay ? Carbon::parse($this->departure_time)->toTimeString() : Carbon::parse($this->departure_time)->toDateTimeString(),
+            'departure_time' => $this->isEveryDay ? Carbon::parse($this->departure_time)->format('g:i A') : Carbon::parse($this->departure_time)->format('jS F, g:i A'),
             'description' => $this->description,
             'price_per_person' => $this->price_per_person,
             'currency' => $this->currency,
@@ -86,13 +86,13 @@ class PickAndDropResource extends JsonResource
                             'id' => $stop->area->id,
                             'name' => $stop->area->name,
                         ] : null,
-                        'stop_time' => $this->is_everyday ? Carbon::parse($stop->stop_time)->toTimeString() : Carbon::parse($stop->stop_time)->toDateTimeString(),
+                        'stop_time' => $this->is_everyday ? Carbon::parse($stop->stop_time)->format('g:i A') : Carbon::parse($stop->stop_time)->format('jS F, g:i A'),
                         'order' => $stop->order,
                         'notes' => $stop->notes,
                     ];
                 });
             }),
-            'created_at' => Carbon::parse($this->created_at)->toDateTimeString(),
+            'created_at' => Carbon::parse($this->created_at)->format('jS F, g:i A'),
             'updated_at' => Carbon::parse($this->updated_at)->toDateTimeString(),
         ];
     }
