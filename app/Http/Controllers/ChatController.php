@@ -168,9 +168,12 @@ class ChatController extends Controller
                 $recipients = array_merge($recipients, $storeUsers->all());
             }
         } elseif ($conversation->type === 'pick_and_drop' && $conversation->pickAndDropService) {
-            // Pick and drop conversation
+            // Pick and drop conversation - notify service owner and recipient user
             if ($conversation->pickAndDropService->user_id !== Auth::id() && $conversation->pickAndDropService->user) {
                 $recipients[] = $conversation->pickAndDropService->user;
+            }
+            if ($conversation->recipient_user_id && $conversation->recipient_user_id !== Auth::id() && $conversation->recipientUser) {
+                $recipients[] = $conversation->recipientUser;
             }
         }
         
@@ -200,10 +203,10 @@ class ChatController extends Controller
      *         @OA\JsonContent(
      *             required={"type"},
      *             @OA\Property(property="type", type="string", enum={"booking", "store", "user", "pick_and_drop"}, example="booking"),
-     *             @OA\Property(property="booking_id", type="integer", example=1, nullable=true, description="Required if type is booking"),
-     *             @OA\Property(property="store_id", type="integer", example=1, nullable=true, description="Required if type is store"),
-     *             @OA\Property(property="recipient_user_id", type="integer", example=2, nullable=true, description="Required if type is user"),
-     *             @OA\Property(property="pick_and_drop_service_id", type="integer", example=1, nullable=true, description="Required if type is pick_and_drop")
+             *             @OA\Property(property="booking_id", type="integer", example=1, nullable=true, description="Required if type is booking"),
+             *             @OA\Property(property="store_id", type="integer", example=1, nullable=true, description="Required if type is store"),
+             *             @OA\Property(property="recipient_user_id", type="integer", example=2, nullable=true, description="Required if type is user or pick_and_drop"),
+             *             @OA\Property(property="pick_and_drop_service_id", type="integer", example=1, nullable=true, description="Required if type is pick_and_drop")
      *         )
      *     ),
      *     @OA\Response(
@@ -221,7 +224,7 @@ class ChatController extends Controller
             'type' => 'required|in:booking,store,user,pick_and_drop',
             'booking_id' => 'required_if:type,booking|nullable|integer',
             'store_id' => 'required_if:type,store|nullable|integer',
-            'recipient_user_id' => 'required_if:type,user|nullable|integer|exists:users,id',
+            'recipient_user_id' => 'required_if:type,user|required_if:type,pick_and_drop|nullable|integer|exists:users,id',
             'pick_and_drop_service_id' => 'required_if:type,pick_and_drop|nullable|integer|exists:pick_and_drop_services,id',
         ]);
 
@@ -230,7 +233,7 @@ class ChatController extends Controller
             'type' => $request->type,
             'booking_id' => $request->type === 'booking' ? $request->booking_id : null,
             'store_id' => $request->type === 'store' ? $request->store_id : null,
-            'recipient_user_id' => $request->type === 'user' ? $request->recipient_user_id : null,
+            'recipient_user_id' => in_array($request->type, ['user', 'pick_and_drop']) ? $request->recipient_user_id : null,
             'pick_and_drop_service_id' => $request->type === 'pick_and_drop' ? $request->pick_and_drop_service_id : null,
         ];
 
