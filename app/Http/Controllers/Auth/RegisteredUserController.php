@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * @OA\Tag(
@@ -33,12 +35,11 @@ class RegisteredUserController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name", "role"},
+     *             required={"name"},
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="user@example.com", nullable=true),
      *             @OA\Property(property="phone_number", type="string", example="+923001234567", nullable=true),
-     *             @OA\Property(property="password", type="string", format="password", example="password123", nullable=true),
-     *             @OA\Property(property="role", type="string", enum={"user", "store_owner"}, example="user")
+     *             @OA\Property(property="password", type="string", format="password", example="password123", nullable=true)
      *         )
      *     ),
      *     @OA\Response(
@@ -61,17 +62,30 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|string|lowercase|email|max:255|unique:'.User::class,
-            'phone_number' => 'nullable|string|unique:'.User::class,
-            'role' => 'required|in:user,store_owner',
+            'phone_number' => 'nullable|string',
         ]);
 
-        if (!$request->email && !$request->phone_number) {
+        if (!$request->phone_number) {
             return response()->json(['message' => 'Email or phone number is required'], 422);
         }
 
+        // Check if user already exists
+        $identifier = $request->phone_number;
+        $existingUser = User::where('phone_number', $request->phone_number)->first();
+
+        if ($existingUser) {
+            // User already exists - they should have been logged in during OTP verification
+            // But if they reach here, log them in anyway
+            $token = $existingUser->createToken('api-token')->plainTextToken;
+            return response()->json([
+                'success' => true,
+                'user' => new \App\Http\Resources\UserResource($existingUser),
+                'token' => $token,
+                'password_set' => !empty($existingUser->password),
+            ]);
+        }
+
         // Check if OTP was verified
-        $identifier = $request->email ?? $request->phone_number;
         $cacheKey = 'signup_otp_' . md5($identifier);
         $otpData = \Illuminate\Support\Facades\Cache::get($cacheKey);
 
@@ -99,8 +113,42 @@ class RegisteredUserController extends Controller
 
         $user = User::create($userData);
 
-        // Assign role using Spatie
-        $user->assignRole($request->role);
+        // Create default store for the user
+        $storeName = $user->name . "'s Store";
+        $baseUsername = Str::slug($user->name);
+
+        // Fallback if slug is empty (e.g., name contains only special characters)
+        if (empty($baseUsername)) {
+            $baseUsername = 'store_' . $user->id;
+        }
+
+        $storeUsername = $baseUsername;
+
+        // Ensure unique store username
+        $counter = 1;
+        while (Store::where('store_username', $storeUsername)->exists()) {
+            $storeUsername = $baseUsername . '_' . $counter;
+            $counter++;
+        }
+
+        // Ensure unique store name
+        $counter = 1;
+        $finalStoreName = $storeName;
+        while (Store::where('name', $finalStoreName)->exists()) {
+            $finalStoreName = $storeName . ' ' . $counter;
+            $counter++;
+        }
+
+        $store = Store::create([
+            'user_id' => $user->id,
+            'name' => $finalStoreName,
+            'store_username' => $storeUsername,
+            'contact_phone' => $user->phone_number,
+            'description' => 'Default store for ' . $user->name,
+        ]);
+
+        // Attach store to user using many-to-many relationship
+        $user->stores()->attach($store->id);
 
         // Clear OTP cache
         \Illuminate\Support\Facades\Cache::forget($cacheKey);

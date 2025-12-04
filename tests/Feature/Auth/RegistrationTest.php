@@ -6,19 +6,19 @@ test('new users can register', function () {
     Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
     
     // Set up OTP verification in cache (required by the registration controller)
-    $email = 'test@example.com';
-    $cacheKey = 'signup_otp_' . md5($email);
+    $phoneNumber = '+923001234567';
+    $cacheKey = 'signup_otp_' . md5($phoneNumber);
     \Illuminate\Support\Facades\Cache::put($cacheKey, [
         'verified' => true,
-        'identifier' => $email,
+        'identifier' => $phoneNumber,
+        'is_email' => false,
     ], now()->addMinutes(10));
     
     $response = $this->postJson('/api/register', [
         'name' => 'Test User',
-        'email' => $email,
+        'phone_number' => $phoneNumber,
         'password' => 'password',
         'password_confirmation' => 'password',
-        'role' => 'user',
     ]);
 
     $response->assertStatus(200);

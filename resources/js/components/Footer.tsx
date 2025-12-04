@@ -14,8 +14,13 @@ const Footer: React.FC = () => (
           <a href="/about" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">About Us</a>
           <a href="/contact" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">Contact Us</a>
         </div>
-        <div className="text-sm text-[#7e246c]">
-          © {new Date().getFullYear()} AsaanCar. All rights reserved.
+        <div className="flex flex-col items-center gap-2 md:items-end">
+          <div className="text-sm text-[#7e246c]">
+            © {new Date().getFullYear()} AsaanCar. All rights reserved.
+          </div>
+          <a href="/privacy-policy" className="text-xs text-[#7e246c] hover:text-[#6a1f5c] hover:underline">
+            Privacy Policy
+          </a>
         </div>
       </div>
     </div>

@@ -5,11 +5,6 @@ import Navbar from '../components/navbar';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 
-const roles = [
-  { value: 'user', label: 'User' },
-  { value: 'store_owner', label: 'Store Owner' },
-];
-
 type SignupStep = 'info' | 'otp' | 'password' | 'complete';
 
 export default function SignupPage() {
@@ -19,7 +14,6 @@ export default function SignupPage() {
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
-  const [role, setRole] = useState('user');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -72,7 +66,17 @@ export default function SignupPage() {
         const err = await res.json();
         setError(err.message || 'OTP verification failed');
       } else {
-        setStep('password');
+        const data = await res.json();
+        // If user already exists, they're logged in - redirect to home
+        if (data.is_existing_user && data.token && data.user) {
+          localStorage.setItem('token', data.token);
+          setToken(data.token);
+          setUser(data.user);
+          navigate('/');
+        } else {
+          // New user - proceed to password step
+          setStep('password');
+        }
       }
     } catch (e) {
       console.error(e);
@@ -124,7 +128,6 @@ export default function SignupPage() {
           phone_number: '+92' + phoneNumber,
           password: hasPassword ? password : null,
           password_confirmation: hasPassword ? passwordConfirmation : null,
-          role,
         }),
       });
       if (!res.ok) {
@@ -335,12 +338,6 @@ export default function SignupPage() {
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Enter your 10-digit phone number without the country code</p>
-              </div>
-              <div>
-                <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Role</label>
-                <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base">
-                  {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-                </select>
               </div>
               <button
                 type="submit"

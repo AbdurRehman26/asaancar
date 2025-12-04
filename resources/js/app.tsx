@@ -26,6 +26,7 @@ import StoreEditPage from './pages/stores-[id]-edit';
 import { configureEcho } from '@laravel/echo-react';
 import About from './pages/about';
 import Contact from './pages/contact';
+import PrivacyPolicy from './pages/privacy-policy';
 import ResetPassword from './pages/auth/reset-password';
 import EmailVerificationSuccess from './pages/email-verification-success';
 import StoreProfile from './pages/store-profile';
@@ -65,6 +66,7 @@ function App() {
           <Route path="/" element={<Welcome />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/cars" element={<CarListing />} />
           <Route path="/car-detail/:id" element={<CarDetail />} />
           <Route path="/car-detail/:id/edit" element={<CarDetailWithOffer />} />

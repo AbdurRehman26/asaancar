@@ -4,6 +4,7 @@ import { useAuth } from '@/components/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { apiFetch } from '@/lib/utils';
 import Navbar from '../components/navbar';
+import { Eye, EyeOff } from 'lucide-react';
 
 type AuthMethod = 'otp' | 'password';
 
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
   const [otp, setOtp] = useState('');
   const [verifying, setVerifying] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setUser, setToken } = useAuth();
@@ -246,14 +248,24 @@ export default function LoginPage() {
             {authMethod === 'password' && (
               <div>
                 <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base"
-                  placeholder="Enter your password"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base pr-12"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#7e246c] focus:outline-none"
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
             )}
             {error && <div className="mt-3 text-red-600 text-center text-sm">{error}</div>}
