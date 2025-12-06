@@ -26,13 +26,18 @@ class InjectSEOMetaTags
 
         // Only process HTML responses
         $contentType = $response->headers->get('Content-Type', '');
-        if (!str_contains($contentType, 'text/html')) {
+        if (!str_contains($contentType, 'text/html') && !str_contains($contentType, 'text/plain')) {
             return $response;
         }
 
         // Get content and check if it's valid HTML
         $content = $response->getContent();
         if (empty($content) || !is_string($content)) {
+            return $response;
+        }
+        
+        // Check if content looks like HTML
+        if (stripos($content, '<html') === false && stripos($content, '<!DOCTYPE') === false) {
             return $response;
         }
         
