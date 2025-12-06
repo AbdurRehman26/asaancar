@@ -18,7 +18,7 @@ class InjectSEOMetaTags
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
-        
+
         // Only inject meta tags for bots/crawlers
         if (!$this->isBot($request)) {
             return $response;
@@ -26,6 +26,7 @@ class InjectSEOMetaTags
 
         // Only process HTML responses
         $contentType = $response->headers->get('Content-Type', '');
+
         if (!str_contains($contentType, 'text/html') && !str_contains($contentType, 'text/plain')) {
             return $response;
         }
@@ -35,17 +36,17 @@ class InjectSEOMetaTags
         if (empty($content) || !is_string($content)) {
             return $response;
         }
-        
+
         // Check if content looks like HTML
         if (stripos($content, '<html') === false && stripos($content, '<!DOCTYPE') === false) {
             return $response;
         }
-        
+
         // Handle pick-and-drop detail pages
         if (preg_match('#^pick-and-drop/(\d+)$#', $request->path(), $matches)) {
             $serviceId = (int) $matches[1];
             $metaTags = $this->getPickAndDropMetaTags($serviceId, $request);
-            
+
             if ($metaTags) {
                 $content = $this->injectMetaTags($content, $metaTags);
                 $response->setContent($content);
@@ -67,7 +68,7 @@ class InjectSEOMetaTags
     private function isBot(Request $request): bool
     {
         $userAgent = $request->userAgent() ?? '';
-        
+
         $botPatterns = [
             'facebookexternalhit',
             'Facebot',
@@ -137,7 +138,7 @@ class InjectSEOMetaTags
             $service->available_spaces,
             $service->available_spaces !== 1 ? 's' : ''
         );
-        
+
         if ($service->price_per_person) {
             $descriptionParts[] = sprintf(
                 '💰 %s %s per person',
@@ -193,24 +194,24 @@ class InjectSEOMetaTags
     private function injectMetaTags(string $content, array $metaTags): string
     {
         $metaHtml = $this->generateMetaTagsHtml($metaTags);
-        
+
         // Replace existing title with the new one
         $newTitle = sprintf('<title>%s</title>', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8'));
         $content = preg_replace('/<title.*?>.*?<\/title>/is', $newTitle, $content);
-        
+
         // Remove the title from metaHtml since we already replaced it
         $metaHtmlWithoutTitle = preg_replace('/<title>.*?<\/title>\n?/is', '', $metaHtml);
-        
+
         // Try to inject before </head>
         if (strpos($content, '</head>') !== false) {
             return str_replace('</head>', $metaHtmlWithoutTitle . '</head>', $content);
         }
-        
+
         // Fallback: inject after <head>
         if (strpos($content, '<head>') !== false) {
             return str_replace('<head>', '<head>' . $metaHtmlWithoutTitle, $content);
         }
-        
+
         // Last resort: inject at the beginning
         return $metaHtmlWithoutTitle . $content;
     }
@@ -221,17 +222,17 @@ class InjectSEOMetaTags
     private function generateMetaTagsHtml(array $metaTags): string
     {
         $html = "\n";
-        
+
         // Title
         $html .= sprintf('<title>%s</title>', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
-        
+
         // Basic meta tags
         $html .= sprintf('<meta name="title" content="%s">', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta name="description" content="%s">', htmlspecialchars($metaTags['description'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= '<meta name="keywords" content="pick and drop, ride sharing, carpool, transportation, Pakistan, Karachi, ride booking, shared rides, daily commute">' . "\n";
         $html .= '<meta name="robots" content="index, follow">' . "\n";
         $html .= sprintf('<meta name="author" content="%s">', htmlspecialchars($metaTags['site_name'], ENT_QUOTES, 'UTF-8')) . "\n";
-        
+
         // Open Graph meta tags (Facebook)
         $html .= sprintf('<meta property="og:title" content="%s">', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta property="og:description" content="%s">', htmlspecialchars($metaTags['description'], ENT_QUOTES, 'UTF-8')) . "\n";
@@ -244,17 +245,17 @@ class InjectSEOMetaTags
         $html .= sprintf('<meta property="og:type" content="%s">', htmlspecialchars($metaTags['type'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta property="og:site_name" content="%s">', htmlspecialchars($metaTags['site_name'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= '<meta property="og:locale" content="en_US">' . "\n";
-        
+
         // Twitter Card meta tags
         $html .= '<meta name="twitter:card" content="summary_large_image">' . "\n";
         $html .= sprintf('<meta name="twitter:title" content="%s">', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta name="twitter:description" content="%s">', htmlspecialchars($metaTags['description'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta name="twitter:image" content="%s">', htmlspecialchars($metaTags['image'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta name="twitter:image:alt" content="%s">', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
-        
+
         // Canonical URL
         $html .= sprintf('<link rel="canonical" href="%s">', htmlspecialchars($metaTags['url'], ENT_QUOTES, 'UTF-8')) . "\n";
-        
+
         return $html;
     }
 }

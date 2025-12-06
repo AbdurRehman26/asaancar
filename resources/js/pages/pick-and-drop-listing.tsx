@@ -227,7 +227,7 @@ export default function PickAndDropListing() {
 
     // Get the base URL for Open Graph image
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    const ogImage = `${baseUrl}/icon.png`;
+    const ogImage = `${baseUrl}/pick-n-drop.png`;
 
     return (
         <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">

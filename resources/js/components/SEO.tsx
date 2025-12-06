@@ -30,7 +30,7 @@ export default function SEO({
         const updateMetaTag = (property: string, content: string, isProperty = false) => {
             const attribute = isProperty ? 'property' : 'name';
             let element = document.querySelector(`meta[${attribute}="${property}"]`) as HTMLMetaElement;
-            
+
             if (!element) {
                 element = document.createElement('meta');
                 element.setAttribute(attribute, property);
