@@ -50,6 +50,8 @@ class PickAndDrop extends Model
 
     protected $fillable = [
         'user_id',
+        'name',
+        'contact',
         'car_id',
         'start_location',
         'end_location',

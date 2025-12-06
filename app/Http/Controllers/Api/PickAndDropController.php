@@ -211,6 +211,8 @@ class PickAndDropController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'contact' => 'nullable|string|max:255',
             'start_location' => 'required|string|max:255',
             'end_location' => 'required|string|max:255',
             'pickup_city_id' => 'required|integer|exists:cities,id',
@@ -326,6 +328,8 @@ class PickAndDropController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'contact' => 'nullable|string|max:255',
             'start_location' => 'sometimes|string|max:255',
             'end_location' => 'sometimes|string|max:255',
             'pickup_city_id' => 'required|integer|exists:cities,id',

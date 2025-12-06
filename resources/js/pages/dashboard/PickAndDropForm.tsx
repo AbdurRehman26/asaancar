@@ -19,6 +19,8 @@ export default function PickAndDropForm() {
     const isEditing = !!id;
 
     const [formData, setFormData] = useState({
+        name: '',
+        contact: '',
         start_location: '',
         pickup_city_id: undefined as number | undefined,
         pickup_area_id: undefined as number | undefined,
@@ -90,6 +92,8 @@ export default function PickAndDropForm() {
             const service = data.data || data;
 
             setFormData({
+                name: service.name || '',
+                contact: service.contact || '',
                 start_location: service.start_location || '',
                 pickup_city_id: service.pickup_city_id || undefined,
                 pickup_area_id: service.pickup_area_id || undefined,
@@ -634,6 +638,43 @@ export default function PickAndDropForm() {
                                 required
                                 value={formData.departure_time}
                                 onChange={(e) => setFormData({ ...formData, departure_time: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white mb-4 flex items-center gap-2">
+                        <Users className="h-5 w-5" />
+                        Contact Information (Optional)
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        If provided, these will be used as contact information. Otherwise, your account information will be used.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Contact Name
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="Enter contact name (optional)"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Contact Number
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.contact}
+                                onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                                placeholder="Enter contact number (optional)"
                                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
                             />
                         </div>

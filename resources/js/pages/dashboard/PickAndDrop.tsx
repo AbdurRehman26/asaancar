@@ -48,6 +48,7 @@ interface PickAndDropService {
     price_per_person?: number;
     currency: string;
     is_active: boolean;
+    is_everyday?: boolean;
     stops?: PickAndDropStop[];
 }
 
@@ -177,16 +178,6 @@ export default function PickAndDropPage() {
         }
     };
 
-    const formatDateTime = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-        });
-    };
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -329,7 +320,7 @@ export default function PickAndDropPage() {
                             <div className="space-y-2 mb-4">
                                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Calendar className="h-4 w-4" />
-                                    {formatDateTime(service.departure_time)}
+                                    {service.is_everyday ? `Everyday at ${service.departure_time}` : service.departure_time}
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Users className="h-4 w-4" />
@@ -363,7 +354,7 @@ export default function PickAndDropPage() {
                                     <ul className="space-y-1">
                                         {service.stops.map((stop) => (
                                             <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400">
-                                                • {stop.location} ({formatDateTime(stop.stop_time)})
+                                                • {stop.location} ({stop.stop_time})
                                             </li>
                                         ))}
                                     </ul>

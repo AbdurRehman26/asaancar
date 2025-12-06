@@ -601,10 +601,10 @@ export default function PickAndDropListing() {
                                             </div>
                                         </div>
                                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                                            <p>by {service.user.name}</p>
-                                            {user && service.user.phone_number && (
+                                            <p>by {service.name || service.user.name}</p>
+                                            {(service.contact || (user && service.user.phone_number)) && (
                                                 <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                                                    📞 {service.user.phone_number}
+                                                    📞 {service.contact || (user ? service.user.phone_number : '')}
                                                 </p>
                                             )}
                                         </div>

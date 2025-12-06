@@ -141,18 +141,20 @@ export default function PickAndDropDetail() {
     };
 
     const handleCall = () => {
-        if (service?.user?.phone_number) {
-            window.location.href = `tel:${service.user.phone_number}`;
+        const phoneNumber = service?.contact || service?.user?.phone_number;
+        if (phoneNumber) {
+            window.location.href = `tel:${phoneNumber}`;
         } else {
             showError('Phone Number', 'Phone number not available for this service provider.');
         }
     };
 
     const handleWhatsAppCall = () => {
-        if (service?.user?.phone_number) {
+        const phoneNumber = service?.contact || service?.user?.phone_number;
+        if (phoneNumber) {
             // Remove any non-digit characters except + for WhatsApp
-            const phoneNumber = service.user.phone_number.replace(/[^\d+]/g, '');
-            window.open(`https://wa.me/${phoneNumber}`, '_blank');
+            const cleanPhoneNumber = phoneNumber.replace(/[^\d+]/g, '');
+            window.open(`https://wa.me/${cleanPhoneNumber}`, '_blank');
         } else {
             showError('Phone Number', 'Phone number not available for this service provider.');
         }
@@ -443,26 +445,30 @@ export default function PickAndDropDetail() {
                                         <div className="space-y-3">
                                             <div>
                                                 <span className="text-sm text-gray-600 dark:text-gray-400">Name</span>
-                                                <p className="text-gray-900 dark:text-white font-semibold">{service.user.name}</p>
+                                                <p className="text-gray-900 dark:text-white font-semibold">
+                                                    {service.name || service.user.name}
+                                                </p>
                                             </div>
-                                            {user && service.user.email && (
+                                            {(service.contact || (user && service.user.phone_number)) && (
+                                                <div>
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">Phone</span>
+                                                    <p className="text-gray-900 dark:text-white">
+                                                        {service.contact || (user ? service.user.phone_number : '')}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {user && service.user.email && !service.contact && (
                                                 <div>
                                                     <span className="text-sm text-gray-600 dark:text-gray-400">Email</span>
                                                     <p className="text-gray-900 dark:text-white">{service.user.email}</p>
                                                 </div>
                                             )}
-                                            {user && service.user.phone_number && (
-                                                <div>
-                                                    <span className="text-sm text-gray-600 dark:text-gray-400">Phone</span>
-                                                    <p className="text-gray-900 dark:text-white">{service.user.phone_number}</p>
-                                                </div>
-                                            )}
-                                            {user && !service.user.email && !service.user.phone_number && (
+                                            {!service.name && !service.contact && user && !service.user.email && !service.user.phone_number && (
                                                 <div className="text-sm text-gray-500 dark:text-gray-400 italic">
                                                     Contact information not available
                                                 </div>
                                             )}
-                                            {!user && (
+                                            {!service.name && !service.contact && !user && (
                                                 <div className="text-sm text-gray-500 dark:text-gray-400 italic">
                                                     Please log in to view contact information
                                                 </div>
@@ -474,7 +480,7 @@ export default function PickAndDropDetail() {
                                     {user && (
                                         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 space-y-3">
                                             <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white mb-4">Contact Provider</h2>
-                                            {service.user.phone_number && (
+                                            {(service.contact || service.user.phone_number) && (
                                                 <>
                                                     <button
                                                         onClick={handleCall}

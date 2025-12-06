@@ -17,6 +17,8 @@ class PickAndDropResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'name' => $this->name,
+            'contact' => $this->contact,
             'user' => [
                 'id' => $this->user->id,
                 'name' => $this->user->name,
