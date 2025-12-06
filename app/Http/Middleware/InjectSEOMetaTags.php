@@ -104,7 +104,7 @@ class InjectSEOMetaTags
             return null;
         }
 
-        $baseUrl = $request->scheme() . '://' . $request->getHttpHost();
+        $baseUrl = $request->getScheme() . '://' . $request->getHttpHost();
         $pageUrl = $baseUrl . $request->getPathInfo();
         // Use logo or icon - prefer logo if available, fallback to icon
         $imageUrl = $baseUrl . (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png');
@@ -172,7 +172,7 @@ class InjectSEOMetaTags
      */
     private function getPickAndDropListingMetaTags(Request $request): array
     {
-        $baseUrl = $request->scheme() . '://' . $request->getHttpHost();
+        $baseUrl = $request->getScheme() . '://' . $request->getHttpHost();
         $pageUrl = $baseUrl . $request->getPathInfo();
         // Use logo or icon - prefer logo if available, fallback to icon
         $imageUrl = $baseUrl . (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png');

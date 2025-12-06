@@ -32,10 +32,9 @@
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Asaancar') }}</title>
-
         {{-- SEO Meta Tags for Bots --}}
         @php
+            $metaTags = null;
             $userAgent = request()->header('User-Agent', '');
             $isBot = $userAgent && (
                 str_contains(strtolower($userAgent), 'facebookexternalhit') ||
@@ -50,17 +49,15 @@
                 str_contains(strtolower($userAgent), 'applebot')
             );
             
-            $metaTags = null;
-            
             if ($isBot) {
                 try {
-                    $path = request()->path();
+                    $path = trim(request()->path(), '/');
                     $baseUrl = request()->scheme() . '://' . request()->getHttpHost();
                     $pageUrl = $baseUrl . request()->getPathInfo();
                     $imageUrl = $baseUrl . (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png');
                     
                     // Handle pick-and-drop detail pages
-                    if (preg_match('#^pick-and-drop/(\d+)$#', $path, $matches)) {
+                    if (preg_match('/^pick-and-drop\/(\d+)$/', $path, $matches)) {
                         $serviceId = (int) $matches[1];
                         $service = \App\Models\PickAndDrop::with(['user', 'stops'])
                             ->where('id', $serviceId)
@@ -70,18 +67,18 @@
                         if ($service) {
                             $title = sprintf(
                                 '%s → %s | Pick & Drop Service - Asaancar',
-                                $service->start_location,
-                                $service->end_location
+                                htmlspecialchars($service->start_location ?? '', ENT_QUOTES, 'UTF-8'),
+                                htmlspecialchars($service->end_location ?? '', ENT_QUOTES, 'UTF-8')
                             );
                             
                             $descriptionParts = [];
-                            $descriptionParts[] = sprintf('🚗 %s Driver Available', ucfirst($service->driver_gender));
-                            $descriptionParts[] = sprintf('📍 Route: %s → %s', $service->start_location, $service->end_location);
-                            $descriptionParts[] = sprintf('⏰ %s at %s', $service->is_everyday ? 'Everyday' : 'Scheduled', $service->departure_time);
-                            $descriptionParts[] = sprintf('👥 %d Space%s Available', $service->available_spaces, $service->available_spaces !== 1 ? 's' : '');
+                            $descriptionParts[] = sprintf('🚗 %s Driver Available', ucfirst($service->driver_gender ?? ''));
+                            $descriptionParts[] = sprintf('📍 Route: %s → %s', htmlspecialchars($service->start_location ?? '', ENT_QUOTES, 'UTF-8'), htmlspecialchars($service->end_location ?? '', ENT_QUOTES, 'UTF-8'));
+                            $descriptionParts[] = sprintf('⏰ %s at %s', ($service->is_everyday ?? false) ? 'Everyday' : 'Scheduled', htmlspecialchars($service->departure_time ?? '', ENT_QUOTES, 'UTF-8'));
+                            $descriptionParts[] = sprintf('👥 %d Space%s Available', $service->available_spaces ?? 0, ($service->available_spaces ?? 0) !== 1 ? 's' : '');
                             
-                            if ($service->price_per_person) {
-                                $descriptionParts[] = sprintf('💰 %s %s per person', $service->currency, number_format($service->price_per_person, 0));
+                            if (!empty($service->price_per_person)) {
+                                $descriptionParts[] = sprintf('💰 %s %s per person', htmlspecialchars($service->currency ?? 'PKR', ENT_QUOTES, 'UTF-8'), number_format($service->price_per_person, 0));
                             }
                             
                             if ($service->stops && $service->stops->count() > 0) {
@@ -102,7 +99,7 @@
                         }
                     }
                     // Handle pick-and-drop listing page
-                    elseif (in_array($path, ['pick-and-drop', 'pick-and-drop/'], true)) {
+                    elseif ($path === 'pick-and-drop') {
                         $metaTags = [
                             'title' => 'Pick & Drop Services - Find Rides with Multiple Stops | Asaancar',
                             'description' => '🚗 Find convenient pick and drop services from location A to location B with multiple stops. 👥 Book rides with male or female drivers. 🔍 Search by start location, end location, departure time, and driver gender. 📍 Available in Karachi and across Pakistan. | Asaancar - Pakistan\'s trusted ride sharing platform.',
@@ -118,34 +115,36 @@
                 }
             }
         @endphp
+        
+        @if($metaTags)
+            <title>{{ $metaTags['title'] }}</title>
+            <meta name="title" content="{{ $metaTags['title'] }}">
+            <meta name="description" content="{{ $metaTags['description'] }}">
+            <meta name="keywords" content="pick and drop, ride sharing, carpool, transportation, Pakistan, Karachi, ride booking, shared rides, daily commute">
+            <meta name="robots" content="index, follow">
+            <meta name="author" content="{{ $metaTags['site_name'] }}">
             
-            @if($metaTags)
-                <title>{{ $metaTags['title'] }}</title>
-                <meta name="title" content="{{ $metaTags['title'] }}">
-                <meta name="description" content="{{ $metaTags['description'] }}">
-                <meta name="keywords" content="pick and drop, ride sharing, carpool, transportation, Pakistan, Karachi, ride booking, shared rides, daily commute">
-                <meta name="robots" content="index, follow">
-                <meta name="author" content="{{ $metaTags['site_name'] }}">
-                
-                <meta property="og:title" content="{{ $metaTags['title'] }}">
-                <meta property="og:description" content="{{ $metaTags['description'] }}">
-                <meta property="og:image" content="{{ $metaTags['image'] }}">
-                <meta property="og:image:width" content="1200">
-                <meta property="og:image:height" content="630">
-                <meta property="og:image:alt" content="{{ $metaTags['title'] }}">
-                <meta property="og:url" content="{{ $metaTags['url'] }}">
-                <meta property="og:type" content="{{ $metaTags['type'] }}">
-                <meta property="og:site_name" content="{{ $metaTags['site_name'] }}">
-                <meta property="og:locale" content="en_US">
-                
-                <meta name="twitter:card" content="summary_large_image">
-                <meta name="twitter:title" content="{{ $metaTags['title'] }}">
-                <meta name="twitter:description" content="{{ $metaTags['description'] }}">
-                <meta name="twitter:image" content="{{ $metaTags['image'] }}">
-                <meta name="twitter:image:alt" content="{{ $metaTags['title'] }}">
-                
-                <link rel="canonical" href="{{ $metaTags['url'] }}">
-            @endif
+            <meta property="og:title" content="{{ $metaTags['title'] }}">
+            <meta property="og:description" content="{{ $metaTags['description'] }}">
+            <meta property="og:image" content="{{ $metaTags['image'] }}">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
+            <meta property="og:image:alt" content="{{ $metaTags['title'] }}">
+            <meta property="og:url" content="{{ $metaTags['url'] }}">
+            <meta property="og:type" content="{{ $metaTags['type'] }}">
+            <meta property="og:site_name" content="{{ $metaTags['site_name'] }}">
+            <meta property="og:locale" content="en_US">
+            
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:title" content="{{ $metaTags['title'] }}">
+            <meta name="twitter:description" content="{{ $metaTags['description'] }}">
+            <meta name="twitter:image" content="{{ $metaTags['image'] }}">
+            <meta name="twitter:image:alt" content="{{ $metaTags['title'] }}">
+            
+            <link rel="canonical" href="{{ $metaTags['url'] }}">
+        @else
+            <title inertia>{{ config('app.name', 'Asaancar') }}</title>
+        @endif
 
         <link rel="icon" href="/icon.png?v=2" sizes="any">
         <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
