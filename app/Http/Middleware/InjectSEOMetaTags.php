@@ -101,42 +101,56 @@ class InjectSEOMetaTags
 
         $baseUrl = $request->scheme() . '://' . $request->getHttpHost();
         $pageUrl = $baseUrl . $request->getPathInfo();
-        $imageUrl = $baseUrl . '/icon.png';
+        // Use logo or icon - prefer logo if available, fallback to icon
+        $imageUrl = $baseUrl . (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png');
 
+        // Create a more compelling title for Facebook preview
         $title = sprintf(
-            '%s → %s - Pick & Drop Service | Asaancar',
+            '%s → %s | Pick & Drop Service - Asaancar',
             $service->start_location,
             $service->end_location
         );
 
-        $description = sprintf(
-            'Book a %s driver pick & drop service from %s to %s. %s at %s. %d space%s available.',
-            $service->driver_gender === 'female' ? 'female' : 'male',
+        // Create a more detailed and formatted description for better Facebook preview
+        $descriptionParts = [];
+        $descriptionParts[] = sprintf(
+            '🚗 %s Driver Available',
+            ucfirst($service->driver_gender)
+        );
+        $descriptionParts[] = sprintf(
+            '📍 Route: %s → %s',
             $service->start_location,
-            $service->end_location,
-            $service->is_everyday ? 'Available everyday' : 'Scheduled service',
-            $service->departure_time,
+            $service->end_location
+        );
+        $descriptionParts[] = sprintf(
+            '⏰ %s at %s',
+            $service->is_everyday ? 'Everyday' : 'Scheduled',
+            $service->departure_time
+        );
+        $descriptionParts[] = sprintf(
+            '👥 %d Space%s Available',
             $service->available_spaces,
             $service->available_spaces !== 1 ? 's' : ''
         );
-
+        
         if ($service->price_per_person) {
-            $description .= sprintf(
-                ' Price: %s %s per person.',
+            $descriptionParts[] = sprintf(
+                '💰 %s %s per person',
                 $service->currency,
                 number_format($service->price_per_person, 0)
             );
         }
 
         if ($service->stops && $service->stops->count() > 0) {
-            $description .= sprintf(
-                ' Includes %d stop%s.',
+            $descriptionParts[] = sprintf(
+                '🛑 %d Stop%s Included',
                 $service->stops->count(),
                 $service->stops->count() !== 1 ? 's' : ''
             );
         }
 
-        $description .= ' Book your ride on Asaancar.';
+        $description = implode(' • ', $descriptionParts);
+        $description .= ' | Book your ride on Asaancar - Pakistan\'s trusted ride sharing platform.';
 
         return [
             'title' => $title,
@@ -155,11 +169,12 @@ class InjectSEOMetaTags
     {
         $baseUrl = $request->scheme() . '://' . $request->getHttpHost();
         $pageUrl = $baseUrl . $request->getPathInfo();
-        $imageUrl = $baseUrl . '/icon.png';
+        // Use logo or icon - prefer logo if available, fallback to icon
+        $imageUrl = $baseUrl . (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png');
 
         return [
             'title' => 'Pick & Drop Services - Find Rides with Multiple Stops | Asaancar',
-            'description' => 'Find convenient pick and drop services from location A to location B with multiple stops. Book rides with male or female drivers. Search by start location, end location, departure time, and driver gender. Available in Karachi and across Pakistan.',
+            'description' => '🚗 Find convenient pick and drop services from location A to location B with multiple stops. 👥 Book rides with male or female drivers. 🔍 Search by start location, end location, departure time, and driver gender. 📍 Available in Karachi and across Pakistan. | Asaancar - Pakistan\'s trusted ride sharing platform.',
             'image' => $imageUrl,
             'url' => $pageUrl,
             'type' => 'website',
@@ -205,10 +220,14 @@ class InjectSEOMetaTags
         $html .= '<meta name="robots" content="index, follow">' . "\n";
         $html .= sprintf('<meta name="author" content="%s">', htmlspecialchars($metaTags['site_name'], ENT_QUOTES, 'UTF-8')) . "\n";
         
-        // Open Graph meta tags
+        // Open Graph meta tags (Facebook)
         $html .= sprintf('<meta property="og:title" content="%s">', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta property="og:description" content="%s">', htmlspecialchars($metaTags['description'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta property="og:image" content="%s">', htmlspecialchars($metaTags['image'], ENT_QUOTES, 'UTF-8')) . "\n";
+        // Facebook recommends 1200x630px for optimal display
+        $html .= '<meta property="og:image:width" content="1200">' . "\n";
+        $html .= '<meta property="og:image:height" content="630">' . "\n";
+        $html .= sprintf('<meta property="og:image:alt" content="%s">', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta property="og:url" content="%s">', htmlspecialchars($metaTags['url'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta property="og:type" content="%s">', htmlspecialchars($metaTags['type'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta property="og:site_name" content="%s">', htmlspecialchars($metaTags['site_name'], ENT_QUOTES, 'UTF-8')) . "\n";
@@ -219,6 +238,7 @@ class InjectSEOMetaTags
         $html .= sprintf('<meta name="twitter:title" content="%s">', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta name="twitter:description" content="%s">', htmlspecialchars($metaTags['description'], ENT_QUOTES, 'UTF-8')) . "\n";
         $html .= sprintf('<meta name="twitter:image" content="%s">', htmlspecialchars($metaTags['image'], ENT_QUOTES, 'UTF-8')) . "\n";
+        $html .= sprintf('<meta name="twitter:image:alt" content="%s">', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8')) . "\n";
         
         // Canonical URL
         $html .= sprintf('<link rel="canonical" href="%s">', htmlspecialchars($metaTags['url'], ENT_QUOTES, 'UTF-8')) . "\n";
