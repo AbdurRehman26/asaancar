@@ -407,7 +407,7 @@ export default function CarDetailPage() {
                                           <tr className="border-b border-gray-100 dark:border-gray-800">
                                               <td className="py-3 text-center font-semibold">10 hrs/day</td>
                                               <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                                                  {car.currency || 'PKR'} {car.withDriver.toLocaleString()}
+                                                  {car.currency || 'PKR'} {Math.round(car.withDriver).toLocaleString()}
                                               </td>
                                           </tr>
                                       )}
@@ -415,7 +415,7 @@ export default function CarDetailPage() {
                                           <tr>
                                               <td className="py-3 text-center font-semibold">24 hrs/day</td>
                                               <td className="py-3 text-right font-bold text-[#7e246c] dark:text-white">
-                                                  {car.currency || 'PKR'} {car.rental.toLocaleString()}
+                                                  {car.currency || 'PKR'} {Math.round(car.rental).toLocaleString()}
                                               </td>
                                           </tr>
                                       )}

@@ -53,14 +53,38 @@ class PickAndDropController extends Controller
         $query = PickAndDrop::with(['user', 'car', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('is_active', true);
 
-        // Filter by start location
+        // Filter by start location (including stops, stop areas, and stop cities)
         if ($request->has('start_location')) {
-            $query->where('start_location', 'like', '%' . $request->start_location . '%');
+            $searchTerm = $request->start_location;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('start_location', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('stops', function($stopQuery) use ($searchTerm) {
+                      $stopQuery->where('location', 'like', '%' . $searchTerm . '%')
+                                ->orWhereHas('area', function($areaQuery) use ($searchTerm) {
+                                    $areaQuery->where('name', 'like', '%' . $searchTerm . '%');
+                                })
+                                ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
+                                    $cityQuery->where('name', 'like', '%' . $searchTerm . '%');
+                                });
+                  });
+            });
         }
 
-        // Filter by end location
+        // Filter by end location (including stops, stop areas, and stop cities)
         if ($request->has('end_location')) {
-            $query->where('end_location', 'like', '%' . $request->end_location . '%');
+            $searchTerm = $request->end_location;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('end_location', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('stops', function($stopQuery) use ($searchTerm) {
+                      $stopQuery->where('location', 'like', '%' . $searchTerm . '%')
+                                ->orWhereHas('area', function($areaQuery) use ($searchTerm) {
+                                    $areaQuery->where('name', 'like', '%' . $searchTerm . '%');
+                                })
+                                ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
+                                    $cityQuery->where('name', 'like', '%' . $searchTerm . '%');
+                                });
+                  });
+            });
         }
 
         // Filter by driver gender
@@ -422,14 +446,38 @@ class PickAndDropController extends Controller
         $query = PickAndDrop::with(['user', 'car', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('user_id', Auth::id());
 
-        // Filter by start location
+        // Filter by start location (including stops, stop areas, and stop cities)
         if ($request->has('start_location')) {
-            $query->where('start_location', 'like', '%' . $request->start_location . '%');
+            $searchTerm = $request->start_location;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('start_location', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('stops', function($stopQuery) use ($searchTerm) {
+                      $stopQuery->where('location', 'like', '%' . $searchTerm . '%')
+                                ->orWhereHas('area', function($areaQuery) use ($searchTerm) {
+                                    $areaQuery->where('name', 'like', '%' . $searchTerm . '%');
+                                })
+                                ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
+                                    $cityQuery->where('name', 'like', '%' . $searchTerm . '%');
+                                });
+                  });
+            });
         }
 
-        // Filter by end location
+        // Filter by end location (including stops, stop areas, and stop cities)
         if ($request->has('end_location')) {
-            $query->where('end_location', 'like', '%' . $request->end_location . '%');
+            $searchTerm = $request->end_location;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('end_location', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('stops', function($stopQuery) use ($searchTerm) {
+                      $stopQuery->where('location', 'like', '%' . $searchTerm . '%')
+                                ->orWhereHas('area', function($areaQuery) use ($searchTerm) {
+                                    $areaQuery->where('name', 'like', '%' . $searchTerm . '%');
+                                })
+                                ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
+                                    $cityQuery->where('name', 'like', '%' . $searchTerm . '%');
+                                });
+                  });
+            });
         }
 
         // Filter by driver gender

@@ -63,7 +63,7 @@ export function BookingPrice({ car, rentalType, numberOfDays }: { car: Car; rent
   return (
     <div className="mt-6 bg-gradient-to-r from-[#7e246c]/10 to-purple-500/10 dark:from-[#7e246c]/20 dark:to-purple-500/20 rounded-xl p-6 border border-[#7e246c]/20">
       <div className="text-lg font-bold text-[#7e246c] dark:text-white mb-2">Total Amount</div>
-      <div className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {totalAmount.toLocaleString()}</div>
+      <div className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {Math.round(totalAmount).toLocaleString()}</div>
     </div>
   );
 }
@@ -380,7 +380,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ car, user, onBooking, error, 
           className="mt-2 bg-gradient-to-r from-[#7e246c]/10 to-purple-500/10 dark:from-[#7e246c]/20 dark:to-purple-500/20 rounded-xl p-6 border border-[#7e246c]/20">
           <div className="text-lg font-bold text-[#7e246c] dark:text-white mb-2">Total Amount</div>
           <div
-              className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {totalAmount.toLocaleString()}</div>
+              className="text-4xl font-black text-[#7e246c] dark:text-white">{car.currency} {Math.round(totalAmount).toLocaleString()}</div>
       </div>
 
 

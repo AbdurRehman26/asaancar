@@ -279,9 +279,6 @@ export default function CarListing() {
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   Page {currentPage} of {totalPages}
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Showing {cars.length} cars
-                </div>
               </div>
               <ReactPaginate
                 key={`top-pagination-${totalPages}-${currentPage}`}
@@ -336,9 +333,6 @@ export default function CarListing() {
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         Page {currentPage} of {totalPages}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Showing {cars.length} cars
                       </div>
                     </div>
                     <ReactPaginate

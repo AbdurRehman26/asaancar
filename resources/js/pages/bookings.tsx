@@ -403,7 +403,7 @@ export default function Bookings() {
                       {/* Actions and total above rate details */}
                       <div className="flex flex-col items-end gap-2 mt-4">
                         <div className="text-lg font-bold text-[#7e246c] dark:text-white">
-                          {booking.total_price ? `${Number(booking.total_price).toFixed(2)} ${booking.currency || 'PKR'}` : 'N/A'}
+                          {booking.total_price ? `${Math.round(Number(booking.total_price))} ${booking.currency || 'PKR'}` : 'N/A'}
                         </div>
                         <div className="flex gap-2 mt-2">
                           <a
@@ -445,13 +445,13 @@ export default function Bookings() {
                             {booking.rental_type === 'with_driver' ? (
                               <>
                                 Rental Type: <span className="font-bold">With Driver</span> (
-                                {booking.currency || 'PKR'} {booking.car?.withDriver ? booking.car.withDriver.toLocaleString() : 'N/A'}
+                                {booking.currency || 'PKR'} {booking.car?.withDriver ? Math.round(booking.car.withDriver).toLocaleString() : 'N/A'}
                                 ) <span className="text-xs">10 hrs/day</span>
                               </>
                             ) : booking.rental_type === 'without_driver' ? (
                               <>
                                 Rental Type: <span className="font-bold">Without Driver</span> (
-                                {booking.currency || 'PKR'} {booking.car?.rental ? booking.car.rental.toLocaleString() : 'N/A'}
+                                {booking.currency || 'PKR'} {booking.car?.rental ? Math.round(booking.car.rental).toLocaleString() : 'N/A'}
                                 ) <span className="text-xs">24 hrs/day</span>
                               </>
                             ) : (

@@ -166,9 +166,9 @@ const CarCard = ({ car, hideBooking, showEditButton }: { car: CarType; hideBooki
       </Link>
       {/* Price */}
       <Link to={`/car-detail/${car.id}`} className="w-full text-center mb-2 hover:opacity-80 transition-opacity">
-        <div className="text-2xl font-extrabold text-[#7e246c] dark:text-white cursor-pointer hover:underline">{car.price?.currency || 'PKR'} {car.price?.perDay?.withDriver ?? '--'}<span className="text-base font-medium text-[#7e246c] dark:text-white">/day</span></div>
+        <div className="text-2xl font-extrabold text-[#7e246c] dark:text-white cursor-pointer hover:underline">{car.price?.currency || 'PKR'} {car.price?.perDay?.withDriver ? Math.round(car.price.perDay.withDriver).toLocaleString() : '--'}<span className="text-base font-medium text-[#7e246c] dark:text-white">/day</span></div>
         {car.price?.perDay?.withoutDriver && (
-          <div className="text-xs text-gray-500 dark:text-gray-400">Without driver: {car.price.currency || 'PKR'} {car.price.perDay.withoutDriver}/day</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Without driver: {car.price.currency || 'PKR'} {Math.round(car.price.perDay.withoutDriver).toLocaleString()}/day</div>
         )}
         {car.extraInfo && (
           <div className="text-xs text-gray-400 dark:text-gray-300 mt-1">{car.extraInfo}</div>

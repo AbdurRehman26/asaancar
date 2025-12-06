@@ -113,6 +113,13 @@ Route::get('/all-cars', [CarController::class, 'allCars']);
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', function (Request $request) {
+        $user = $request->user();
+        
+        // Check if user has admin or store_owner role
+        if (!$user->hasAnyRole(['admin', 'store_owner'])) {
+            return response()->json(['message' => 'Unauthorized. Only store owners and admins can access the dashboard.'], 403);
+        }
+        
         return response()->json(['message' => 'Welcome to the dashboard!']);
     });
     Route::patch('/settings/profile', [\App\Http\Controllers\Settings\ProfileController::class, 'update']);

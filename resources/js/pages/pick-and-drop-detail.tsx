@@ -147,25 +147,16 @@ export default function PickAndDropDetail() {
         }
     };
 
-    const formatDateTime = (dateString: string, isEveryday: boolean = false) => {
-        if (isEveryday) {
-            // For everyday services, just show the time
-            const date = new Date(dateString);
-            return date.toLocaleString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-            });
+    const handleWhatsAppCall = () => {
+        if (service?.user?.phone_number) {
+            // Remove any non-digit characters except + for WhatsApp
+            const phoneNumber = service.user.phone_number.replace(/[^\d+]/g, '');
+            window.open(`https://wa.me/${phoneNumber}`, '_blank');
+        } else {
+            showError('Phone Number', 'Phone number not available for this service provider.');
         }
-        const date = new Date(dateString);
-        return date.toLocaleString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-        });
     };
+
 
     if (loading) {
         return (
@@ -218,30 +209,20 @@ export default function PickAndDropDetail() {
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
                         {/* Header Section */}
                         <div className="bg-gradient-to-r from-[#7e246c] to-purple-600 p-8 text-white">
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div className="flex flex-col gap-4">
                                 <div>
                                     <h1 className="text-3xl font-bold mb-2">
                                         {service.start_location} → {service.end_location}
                                     </h1>
-                                    {service.pickup_city && service.dropoff_city && (
-                                        <p className="text-purple-100">
-                                            {service.pickup_city.name} to {service.dropoff_city.name}
-                                        </p>
-                                    )}
-                                    {service.pickup_area && service.dropoff_area && (
-                                        <p className="text-sm text-purple-200 mt-1">
-                                            {service.pickup_area.name} → {service.dropoff_area.name}
-                                        </p>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                                        service.driver_gender === 'female'
-                                            ? 'bg-pink-500/20 text-pink-100'
-                                            : 'bg-blue-500/20 text-blue-100'
-                                    }`}>
-                                        {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender === 'female' ? 'Female' : 'Male'} Driver
-                                    </span>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                                            service.driver_gender === 'female'
+                                                ? 'bg-pink-500/40 text-white border-2 border-pink-300/60'
+                                                : 'bg-cyan-500/40 text-white border-2 border-cyan-300/60'
+                                        }`}>
+                                            {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender === 'female' ? 'Female' : 'Male'} Driver
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -264,12 +245,6 @@ export default function PickAndDropDetail() {
                                                         <span className="font-semibold text-gray-700 dark:text-gray-300">Pickup Location</span>
                                                     </div>
                                                     <p className="text-lg font-bold text-gray-900 dark:text-white ml-5">{service.start_location}</p>
-                                                    {service.pickup_city && (
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">{service.pickup_city.name}</p>
-                                                    )}
-                                                    {service.pickup_area && (
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">Area: {service.pickup_area.name}</p>
-                                                    )}
                                                 </div>
                                             </div>
                                             {service.stops && service.stops.length > 0 && (
@@ -311,15 +286,12 @@ export default function PickAndDropDetail() {
                                                                                     <span className="font-semibold text-gray-700 dark:text-gray-300">Stop {index + 1}</span>
                                                                                 </div>
                                                                                 <p className="text-gray-900 dark:text-white ml-5 font-medium">{stopLocation}</p>
-                                                                                {stop.city && (
-                                                                                    <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">City: {stop.city.name}</p>
-                                                                                )}
                                                                                 {stop.area && (
                                                                                     <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">Area: {stop.area.name}</p>
                                                                                 )}
                                                                                 <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">
                                                                                     <Clock className="h-3 w-3 inline mr-1" />
-                                                                                    {service.is_everyday ? formatDateTime(stop.stop_time, true) : formatDateTime(stop.stop_time)}
+                                                                                    {stop.stop_time}
                                                                                 </p>
                                                                                 {stop.notes && (
                                                                                     <p className="text-xs text-gray-500 dark:text-gray-400 ml-5 mt-1 italic">{stop.notes}</p>
@@ -339,12 +311,6 @@ export default function PickAndDropDetail() {
                                                         <span className="font-semibold text-gray-700 dark:text-gray-300">Dropoff Location</span>
                                                     </div>
                                                     <p className="text-lg font-bold text-gray-900 dark:text-white ml-5">{service.end_location}</p>
-                                                    {service.dropoff_city && (
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">{service.dropoff_city.name}</p>
-                                                    )}
-                                                    {service.dropoff_area && (
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 ml-5">Area: {service.dropoff_area.name}</p>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -361,9 +327,9 @@ export default function PickAndDropDetail() {
                                                 </div>
                                                 <p className="text-gray-900 dark:text-white font-semibold">
                                                     {service.is_everyday ? (
-                                                        <span>Everyday at {formatDateTime(service.departure_time, true)}</span>
+                                                        <span>Everyday at {service.departure_time}</span>
                                                     ) : (
-                                                        formatDateTime(service.departure_time)
+                                                        service.departure_time
                                                     )}
                                                 </p>
                                             </div>
@@ -380,7 +346,7 @@ export default function PickAndDropDetail() {
                                                         <span className="text-sm font-medium">Price Per Person</span>
                                                     </div>
                                                     <p className="text-gray-900 dark:text-white font-semibold">
-                                                        {service.currency} {service.price_per_person.toLocaleString()}
+                                                        {service.currency} {Math.round(service.price_per_person).toLocaleString()}
                                                     </p>
                                                 </div>
                                             )}
@@ -487,13 +453,24 @@ export default function PickAndDropDetail() {
                                         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 space-y-3">
                                             <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white mb-4">Contact Provider</h2>
                                             {service.user.phone_number && (
-                                                <button
-                                                    onClick={handleCall}
-                                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
-                                                >
-                                                    <Phone className="h-5 w-5" />
-                                                    Call Now
-                                                </button>
+                                                <>
+                                                    <button
+                                                        onClick={handleCall}
+                                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                                                    >
+                                                        <Phone className="h-5 w-5" />
+                                                        Call Now
+                                                    </button>
+                                                    <button
+                                                        onClick={handleWhatsAppCall}
+                                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#25D366] text-white rounded-lg hover:bg-[#20BA5A] transition-colors font-semibold"
+                                                    >
+                                                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.239-.375a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                                        </svg>
+                                                        WhatsApp
+                                                    </button>
+                                                </>
                                             )}
                                             <button
                                                 onClick={handleMessageUser}

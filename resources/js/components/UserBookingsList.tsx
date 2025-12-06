@@ -38,7 +38,7 @@ const UserBookingsList: React.FC<UserBookingsListProps> = ({ userBookings, car }
           <div className="text-sm text-gray-700 dark:text-gray-200">Number of Days: <span className="font-bold">{userBooking.number_of_days || 1}</span></div>
           <div className="text-sm text-gray-700 dark:text-gray-200">Rental Type: <span className="font-bold">{userBooking.rental_type === 'with_driver' ? 'With Driver' : 'Without Driver'}</span></div>
           <div className="text-sm text-gray-700 dark:text-gray-200">Refill: <span className="font-bold">{userBooking.refill_tank ? 'Refill included' : '40 PKR / Km'}</span></div>
-          <div className="text-sm text-gray-700 dark:text-gray-200">Total: <span className="font-bold">{typeof userBooking.total_price === 'number' ? userBooking.total_price.toLocaleString() : userBooking.total_price} {car.currency}</span></div>
+          <div className="text-sm text-gray-700 dark:text-gray-200">Total: <span className="font-bold">{typeof userBooking.total_price === 'number' ? Math.round(userBooking.total_price).toLocaleString() : userBooking.total_price} {car.currency}</span></div>
           <div className="text-sm text-gray-700 dark:text-gray-200">Notes: <span className="font-normal">{userBooking.notes ? userBooking.notes : 'None'}</span></div>
           <div className="text-xs text-gray-500 dark:text-gray-400">Booking ID: {userBooking.id}</div>
         </div>

@@ -79,9 +79,9 @@ const CarFilters: React.FC<CarFiltersProps> = ({
   }, []);
 
   return (
-    <div className="bg-white dark:bg-gray-800/80 border-2 border-[#7e246c] rounded-lg mx-0 my-4 w-full max-w-none">
+    <div className="bg-white dark:bg-gray-800/80 border-2 border-[#7e246c] rounded-lg mx-0 my-4 w-full max-w-none relative">
       <div className="px-4 py-4 w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 w-full">
           <div>
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Brand</label>
             <select
@@ -173,7 +173,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
               <option value="7">7+</option>
             </select>
           </div>
-          <div>
+          <div className="sm:col-span-1 pr-2">
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Min Price</label>
             <select
               value={filters.min_price || ''}
@@ -182,7 +182,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
-              className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white min-w-[140px]"
+              className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             >
               <option value="">Any Price</option>
               <option value="1000">1,000 PKR</option>
@@ -195,7 +195,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
               <option value="30000">30,000 PKR</option>
             </select>
           </div>
-          <div>
+          <div className="sm:col-span-1 pl-2">
             <label className="block text-sm font-bold text-[#7e246c] dark:text-white mb-1">Max Price</label>
             <select
               value={filters.max_price}
@@ -204,7 +204,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
-              className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white min-w-[140px]"
+              className="w-full border border-[#7e246c] bg-gray-100 dark:bg-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e246c] placeholder-black dark:placeholder-white"
             >
               <option value="">Any Price</option>
               <option value="3000">3,000 PKR</option>
@@ -217,36 +217,36 @@ const CarFilters: React.FC<CarFiltersProps> = ({
               <option value="50000">50,000 PKR</option>
             </select>
           </div>
-          <div className="flex items-end justify-end gap-2">
-            <button
-              onClick={() => {
-                if (onClearFilters) {
-                  onClearFilters();
-                } else {
-                  // Fallback: clear filters locally and trigger search
-                  const defaultFilters = {
-                    brand_id: '',
-                    type_id: '',
-                    store_id: '',
-                    transmission: '',
-                    fuel_type: '',
-                    min_seats: '',
-                    min_price: '',
-                    max_price: '',
-                    tag_ids: []
-                  };
-                  setFilters(defaultFilters);
-                  handleSearch(defaultFilters);
-                }
-              }}
-              disabled={loading}
-              className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 flex items-center justify-center shadow"
-              title="Clear all filters"
-            >
-              Clear
-            </button>
-          </div>
         </div>
+      </div>
+      <div className="absolute bottom-4 right-4">
+        <button
+          onClick={() => {
+            if (onClearFilters) {
+              onClearFilters();
+            } else {
+              // Fallback: clear filters locally and trigger search
+              const defaultFilters = {
+                brand_id: '',
+                type_id: '',
+                store_id: '',
+                transmission: '',
+                fuel_type: '',
+                min_seats: '',
+                min_price: '',
+                max_price: '',
+                tag_ids: []
+              };
+              setFilters(defaultFilters);
+              handleSearch(defaultFilters);
+            }
+          }}
+          disabled={loading}
+          className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 flex items-center justify-center shadow"
+          title="Clear all filters"
+        >
+          Clear
+        </button>
       </div>
     </div>
   );

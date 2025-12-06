@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from '
 import { AuthProvider } from '@/components/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import RoleProtectedRoute from '@/components/RoleProtectedRoute';
 import { initializeTheme } from '@/hooks/use-appearance';
 import CarListing from './pages/car-listing';
 import CarDetail from './pages/car-detail';
@@ -89,9 +90,9 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/dashboard" element={
-            <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['admin', 'store_owner']}>
               <Dashboard />
-            </ProtectedRoute>
+            </RoleProtectedRoute>
           }>
             <Route index element={<Dashboard.Home />} />
             <Route path="cars" element={<Dashboard.CarListings />} />

@@ -47,6 +47,7 @@ export default function PickAndDropForm() {
     const [error, setError] = useState<string | null>(null);
     const [cities, setCities] = useState<{ id: number; name: string }[]>([]);
     const [areas, setAreas] = useState<{ [cityId: number]: { id: number; name: string }[] }>({});
+    const [openDropdowns, setOpenDropdowns] = useState<{ [key: number]: boolean }>({});
 
     useEffect(() => {
         // Fetch cities
@@ -321,6 +322,96 @@ export default function PickAndDropForm() {
         
         newStops[index] = { ...newStops[index], [field]: value };
         setStops(newStops);
+    };
+
+    // Stop Location Input Component with dropdown
+    const StopLocationInput = ({
+        value,
+        onChange,
+        onAreaSelect,
+        cities,
+        areas,
+        index,
+        openDropdowns,
+        setOpenDropdowns
+    }: {
+        value: string;
+        onChange: (location: string) => void;
+        onAreaSelect: (areaId: number, areaName: string) => void;
+        cities: { id: number; name: string }[];
+        areas: { [cityId: number]: { id: number; name: string }[] };
+        index: number;
+        openDropdowns: { [key: number]: boolean };
+        setOpenDropdowns: (updater: (prev: { [key: number]: boolean }) => { [key: number]: boolean }) => void;
+    }) => {
+        const dropdownRef = useRef<HTMLDivElement>(null);
+        const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+        const availableAreas = karachi && areas[karachi.id] ? areas[karachi.id] : [];
+        const filteredAreas = availableAreas.filter(area => 
+            !value || area.name.toLowerCase().includes(value.toLowerCase())
+        );
+
+        useEffect(() => {
+            function handleClickOutside(event: MouseEvent) {
+                if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                    setOpenDropdowns(prev => ({ ...prev, [index]: false }));
+                }
+            }
+
+            if (openDropdowns[index]) {
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }
+        }, [openDropdowns, index, setOpenDropdowns]);
+
+        return (
+            <div className="relative" ref={dropdownRef}>
+                <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => {
+                        onChange(e.target.value);
+                        // Show dropdown when typing if areas are available
+                        if (availableAreas.length > 0) {
+                            setOpenDropdowns(prev => ({ ...prev, [index]: true }));
+                        }
+                    }}
+                    onFocus={() => {
+                        // Show dropdown if areas are available
+                        if (availableAreas.length > 0) {
+                            setOpenDropdowns(prev => ({ ...prev, [index]: true }));
+                        }
+                    }}
+                    placeholder="Enter stop location or select from dropdown"
+                    required
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                />
+                {availableAreas.length > 0 && (
+                    <>
+                        <ChevronDown 
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" 
+                        />
+                        {openDropdowns[index] && filteredAreas.length > 0 && (
+                            <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                                {filteredAreas.map((area) => (
+                                    <button
+                                        key={area.id}
+                                        type="button"
+                                        onClick={() => {
+                                            onAreaSelect(area.id, area.name);
+                                            setOpenDropdowns(prev => ({ ...prev, [index]: false }));
+                                        }}
+                                        className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white"
+                                    >
+                                        {area.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        );
     };
 
     // Searchable Area Selector Component
@@ -737,26 +828,39 @@ export default function PickAndDropForm() {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <SearchableAreaSelect
-                                        value={stop.area_id}
-                                        onChange={(areaId) => {
-                                            updateStop(index, 'area_id', areaId);
-                                            // Auto-populate location from area name
-                                            if (areaId) {
-                                                const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
-                                                const area = karachi && areas[karachi.id]?.find(a => a.id === areaId);
-                                                if (area) {
-                                                    updateStop(index, 'location', area.name);
-                                                }
-                                            } else {
-                                                updateStop(index, 'location', '');
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Stop Location *
+                                    </label>
+                                    <StopLocationInput
+                                        value={stop.location || ''}
+                                        onChange={(location) => {
+                                            updateStop(index, 'location', location);
+                                            // Clear area_id when manually typing
+                                            if (location !== stop.location) {
+                                                updateStop(index, 'area_id', undefined);
                                             }
                                         }}
-                                        cityId={stop.city_id}
+                                        onAreaSelect={(areaId, areaName) => {
+                                            // Update both location and area_id together in a single state update
+                                            const newStops = stops.map((s, i) => {
+                                                if (i === index) {
+                                                    const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+                                                    return {
+                                                        ...s,
+                                                        location: areaName,
+                                                        area_id: areaId,
+                                                        city_id: karachi?.id || s.city_id
+                                                    };
+                                                }
+                                                return s;
+                                            });
+                                            setStops(newStops);
+                                        }}
+                                        cities={cities}
                                         areas={areas}
-                                        label="Stop Location *"
-                                        required={true}
-                                        disabled={!stop.city_id}
+                                        index={index}
+                                        openDropdowns={openDropdowns}
+                                        setOpenDropdowns={setOpenDropdowns}
                                     />
                                 </div>
                                 {!formData.is_everyday && (

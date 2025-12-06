@@ -106,9 +106,12 @@ class RegisteredUserController extends Controller
             $userData['phone_number'] = $request->phone_number;
         }
 
-        // Password is optional - can be set later
+        // Password can come from request or from cache (if set during password step)
         if ($request->password) {
             $userData['password'] = Hash::make($request->password);
+        } elseif (isset($otpData['password'])) {
+            // Password was set during the password step and stored in cache
+            $userData['password'] = $otpData['password'];
         }
 
         $user = User::create($userData);
@@ -149,6 +152,9 @@ class RegisteredUserController extends Controller
 
         // Attach store to user using many-to-many relationship
         $user->stores()->attach($store->id);
+
+        // Assign store_owner role to the user since they have a store
+        $user->assignRole('store_owner');
 
         // Clear OTP cache
         \Illuminate\Support\Facades\Cache::forget($cacheKey);

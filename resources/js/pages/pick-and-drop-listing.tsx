@@ -211,24 +211,6 @@ export default function PickAndDropListing() {
         }));
     }, [startAreaId, endAreaId, karachiAreas]);
 
-    const formatDateTime = (dateString: string, isEveryday: boolean = false) => {
-        if (isEveryday) {
-            // For everyday services, just show the time
-            const date = new Date(dateString);
-            return date.toLocaleString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-            });
-        }
-        const date = new Date(dateString);
-        return date.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-        });
-    };
 
     const clearFilters = () => {
         setFilters({
@@ -623,9 +605,9 @@ export default function PickAndDropListing() {
                                             }`}>
                                                 <Calendar className="h-3 w-3" />
                                                 {service.is_everyday ? (
-                                                    <span>Everyday at {formatDateTime(service.departure_time, true)}</span>
+                                                    <span>Everyday at {service.departure_time}</span>
                                                 ) : (
-                                                    formatDateTime(service.departure_time)
+                                                    service.departure_time
                                                 )}
                                             </span>
                                         </div>
@@ -634,8 +616,8 @@ export default function PickAndDropListing() {
                                             {service.available_spaces} space{service.available_spaces !== 1 ? 's' : ''} available
                                         </div>
                                         {service.price_per_person && (
-                                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                                {service.currency} {service.price_per_person.toLocaleString()} per person
+                                            <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
+                                                {service.currency} {Math.round(service.price_per_person).toLocaleString()} per person
                                             </div>
                                         )}
                                         <div className="flex items-center gap-2">
@@ -685,7 +667,7 @@ export default function PickAndDropListing() {
                                                     {service.stops.map((stop) => (
                                                         <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
                                                             <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
-                                                            {stop.location} ({service.is_everyday ? formatDateTime(stop.stop_time, true) : formatDateTime(stop.stop_time)})
+                                                            {stop.location} ({service.is_everyday ? stop.stop_time : stop.stop_time})
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -694,7 +676,7 @@ export default function PickAndDropListing() {
                                                     {service.stops.slice(0, 2).map((stop) => (
                                                         <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
                                                             <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
-                                                            {stop.location} ({service.is_everyday ? formatDateTime(stop.stop_time, true) : formatDateTime(stop.stop_time)})
+                                                            {stop.location} ({service.is_everyday ? stop.stop_time : stop.stop_time})
                                                         </li>
                                                     ))}
                                                     {service.stops.length > 2 && (

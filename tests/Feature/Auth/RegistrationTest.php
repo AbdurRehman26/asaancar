@@ -3,7 +3,8 @@
 use Spatie\Permission\Models\Role;
 
 test('new users can register', function () {
-    Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
+    // Create the store_owner role (required by the registration controller)
+    Role::firstOrCreate(['name' => 'store_owner', 'guard_name' => 'web']);
     
     // Set up OTP verification in cache (required by the registration controller)
     $phoneNumber = '+923001234567';

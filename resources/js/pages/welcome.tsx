@@ -693,7 +693,7 @@ export default function Welcome() {
                                                 </div>
                                                 {service.price_per_person && (
                                                     <div className="flex items-center gap-2">
-                                                        {service.currency} {service.price_per_person.toLocaleString()} per person
+                                                        {service.currency} {Math.round(service.price_per_person).toLocaleString()} per person
                                                     </div>
                                                 )}
                                             </div>
