@@ -7,6 +7,7 @@ import { useAuth } from '@/components/AuthContext';
 import { apiFetch } from '@/lib/utils';
 import Chat from '@/components/chat';
 import { useToast } from '@/contexts/ToastContext';
+import SEO from '@/components/SEO';
 
 interface PickAndDropStop {
     id: number;
@@ -191,8 +192,29 @@ export default function PickAndDropDetail() {
         );
     }
 
+    // Get the base URL for Open Graph image
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const ogImage = `${baseUrl}/icon.png`;
+    
+    // Generate SEO content based on service data
+    const seoTitle = service 
+        ? `${service.start_location} → ${service.end_location} - Pick & Drop Service | Asaancar`
+        : 'Pick & Drop Service Details | Asaancar';
+    
+    const seoDescription = service
+        ? `Book a ${service.driver_gender === 'female' ? 'female' : 'male'} driver pick & drop service from ${service.start_location} to ${service.end_location}. ${service.is_everyday ? 'Available everyday' : 'Scheduled service'} at ${service.departure_time}. ${service.available_spaces} space${service.available_spaces !== 1 ? 's' : ''} available.${service.price_per_person ? ` Price: ${service.currency} ${Math.round(service.price_per_person).toLocaleString()} per person.` : ''}${service.stops && service.stops.length > 0 ? ` Includes ${service.stops.length} stop${service.stops.length !== 1 ? 's' : ''}.` : ''} Book your ride on Asaancar.`
+        : 'View pick & drop service details on Asaancar. Find convenient rides with multiple stops.';
+
     return (
         <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+            <SEO
+                title={seoTitle}
+                description={seoDescription}
+                image={ogImage}
+                url={typeof window !== 'undefined' ? window.location.href : ''}
+                type="website"
+                siteName="Asaancar"
+            />
             <Navbar auth={{ user }} />
             
             <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">

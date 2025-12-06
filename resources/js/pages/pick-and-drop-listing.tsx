@@ -5,6 +5,7 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/components/AuthContext';
 import { apiFetch } from '@/lib/utils';
+import SEO from '@/components/SEO';
 
 interface PickAndDropStop {
     id: number;
@@ -218,13 +219,26 @@ export default function PickAndDropListing() {
             end_location: '',
             driver_gender: '',
             min_spaces: '',
+            departure_date: '',
             departure_time: '',
         });
         setSearchTerm('');
     };
 
+    // Get the base URL for Open Graph image
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const ogImage = `${baseUrl}/icon.png`;
+
     return (
         <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+            <SEO
+                title="Pick & Drop Services - Find Rides with Multiple Stops | Asaancar"
+                description="Find convenient pick and drop services from location A to location B with multiple stops. Book rides with male or female drivers. Search by start location, end location, departure time, and driver gender. Available in Karachi and across Pakistan."
+                image={ogImage}
+                url={typeof window !== 'undefined' ? window.location.href : ''}
+                type="website"
+                siteName="Asaancar"
+            />
             <Navbar auth={{ user }} />
 
             <div className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
