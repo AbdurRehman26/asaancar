@@ -194,18 +194,25 @@ class InjectSEOMetaTags
     {
         $metaHtml = $this->generateMetaTagsHtml($metaTags);
         
+        // Replace existing title with the new one
+        $newTitle = sprintf('<title>%s</title>', htmlspecialchars($metaTags['title'], ENT_QUOTES, 'UTF-8'));
+        $content = preg_replace('/<title.*?>.*?<\/title>/is', $newTitle, $content);
+        
+        // Remove the title from metaHtml since we already replaced it
+        $metaHtmlWithoutTitle = preg_replace('/<title>.*?<\/title>\n?/is', '', $metaHtml);
+        
         // Try to inject before </head>
         if (strpos($content, '</head>') !== false) {
-            return str_replace('</head>', $metaHtml . '</head>', $content);
+            return str_replace('</head>', $metaHtmlWithoutTitle . '</head>', $content);
         }
         
         // Fallback: inject after <head>
         if (strpos($content, '<head>') !== false) {
-            return str_replace('<head>', '<head>' . $metaHtml, $content);
+            return str_replace('<head>', '<head>' . $metaHtmlWithoutTitle, $content);
         }
         
         // Last resort: inject at the beginning
-        return $metaHtml . $content;
+        return $metaHtmlWithoutTitle . $content;
     }
 
     /**
