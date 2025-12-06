@@ -106,8 +106,8 @@ class InjectSEOMetaTags
 
         $baseUrl = $request->getScheme() . '://' . $request->getHttpHost();
         $pageUrl = $baseUrl . $request->getPathInfo();
-        // Use logo or icon - prefer logo if available, fallback to icon
-        $imageUrl = $baseUrl . (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png');
+        // Use feature image (image.png) if available, otherwise fallback to logo or icon
+        $imageUrl = $baseUrl . (file_exists(public_path('image.png')) ? '/image.png' : (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png'));
 
         // Create a more compelling title for Facebook preview
         $title = sprintf(
@@ -174,8 +174,8 @@ class InjectSEOMetaTags
     {
         $baseUrl = $request->getScheme() . '://' . $request->getHttpHost();
         $pageUrl = $baseUrl . $request->getPathInfo();
-        // Use logo or icon - prefer logo if available, fallback to icon
-        $imageUrl = $baseUrl . (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png');
+        // Use feature image (image.png) if available, otherwise fallback to logo or icon
+        $imageUrl = $baseUrl . (file_exists(public_path('image.png')) ? '/image.png' : (file_exists(public_path('logo.svg')) ? '/logo.svg' : '/icon.png'));
 
         return [
             'title' => 'Pick & Drop Services - Find Rides with Multiple Stops | Asaancar',
