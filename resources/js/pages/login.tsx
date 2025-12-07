@@ -295,13 +295,26 @@ export default function LoginPage() {
         <div className="max-w-lg w-full text-center">
           <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Welcome to AsaanCar</h2>
           <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">Your trusted partner for seamless car rental experiences</p>
-          <div className="rounded-2xl overflow-hidden shadow-lg">
+          <div className="rounded-2xl overflow-hidden shadow-lg mb-8">
             <img
               src="/images/car-2.png"
               alt="Car rental illustration"
               className="w-full h-auto object-contain"
             />
           </div>
+          {/* Play Store Download Button */}
+          <a
+            href="https://play.google.com/store/apps/details?id=com.asaancar.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
+          >
+            <img
+              src="/google-play-download-android-app-logo.svg"
+              alt="Get it on Google Play"
+              className="h-40 w-auto sm:h-48"
+            />
+          </a>
         </div>
       </div>
     </div>

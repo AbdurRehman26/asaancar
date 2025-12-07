@@ -592,6 +592,22 @@ export default function Welcome() {
                                 </svg>
                                 Currently available in Karachi only. We'll be expanding to other cities soon!
                             </div>
+
+                            {/* Play Store Download Button */}
+                            <div className="mt-6 flex items-center justify-center">
+                                <a
+                                    href="https://play.google.com/store/apps/details?id=com.asaancar.app"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-block transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
+                                >
+                                    <img
+                                        src="/google-play-download-android-app-logo.svg"
+                                        alt="Get it on Google Play"
+                                        className="h-40 w-auto sm:h-48"
+                                    />
+                                </a>
+                            </div>
                         </div>
 
                         {/* Search Filter - Full Screen */}

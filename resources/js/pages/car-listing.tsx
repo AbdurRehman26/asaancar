@@ -4,6 +4,7 @@ import { Car as CarIcon } from 'lucide-react';
 import CarCard from '../components/car-card';
 import UniversalCarFilter from '../components/universal-car-filter';
 import Navbar from '../components/navbar';
+import Footer from '../components/Footer';
 import { apiFetch } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/pages/auth/login-modal';
@@ -394,6 +395,7 @@ export default function CarListing() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

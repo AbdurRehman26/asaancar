@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '@/components/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import Navbar from '../components/navbar';
+import Footer from '../components/Footer';
 import { apiFetch } from '@/lib/utils';
 import Chat from '../components/chat';
 import BookingForm from '../components/BookingForm';
@@ -631,6 +632,7 @@ export default function CarDetailPage() {
             images={allImages}
             carName={car?.name || 'Car'}
           />
+      <Footer />
       </>
   );
 }
