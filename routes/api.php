@@ -150,6 +150,7 @@ Route::middleware('auth:sanctum')->post('/webpush/subscribe', [\App\Http\Control
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/conversations', [\App\Http\Controllers\ChatController::class, 'conversations']);
     Route::post('/chat/conversations', [\App\Http\Controllers\ChatController::class, 'store']);
+    Route::delete('/chat/conversations/{conversation}', [\App\Http\Controllers\ChatController::class, 'destroy']);
     Route::get('/chat/conversations/{conversation}/messages', [\App\Http\Controllers\ChatController::class, 'messages']);
     Route::post('/chat/conversations/{conversation}/messages', [\App\Http\Controllers\ChatController::class, 'sendMessage']);
 });

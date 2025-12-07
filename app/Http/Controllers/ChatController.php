@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Notifications\MessageReceivedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -64,6 +65,36 @@ class ChatController extends Controller
             }
         }
         
+        // Exclude conversations that the user has deleted, but only if there are no new messages after deletion
+        $deletedConversations = DB::table('conversation_user_deletes')
+            ->where('user_id', $user->id)
+            ->get()
+            ->keyBy('conversation_id');
+        
+        if ($deletedConversations->isNotEmpty()) {
+            $conversationIds = $deletedConversations->keys()->toArray();
+            
+            // For each deleted conversation, check if there are messages after deletion
+            $conversationsWithNewMessages = [];
+            foreach ($deletedConversations as $conversationId => $deleteRecord) {
+                $hasNewMessages = DB::table('messages')
+                    ->where('conversation_id', $conversationId)
+                    ->where('created_at', '>', $deleteRecord->deleted_at)
+                    ->exists();
+                
+                if ($hasNewMessages) {
+                    $conversationsWithNewMessages[] = $conversationId;
+                }
+            }
+            
+            // Exclude deleted conversations that don't have new messages
+            $conversationsToExclude = array_diff($conversationIds, $conversationsWithNewMessages);
+            
+            if (!empty($conversationsToExclude)) {
+                $query->whereNotIn('conversations.id', $conversationsToExclude);
+            }
+        }
+        
         $conversations = $query->latest('updated_at')->get();
         
         // Add unread count for each conversation
@@ -96,9 +127,25 @@ class ChatController extends Controller
     public function messages(Conversation $conversation)
     {
         $user = Auth::user();
+        
+        // Check if user has deleted this conversation and get the deletion timestamp
+        $deletedAt = DB::table('conversation_user_deletes')
+            ->where('user_id', $user->id)
+            ->where('conversation_id', $conversation->id)
+            ->value('deleted_at');
+        
         // Mark all unread messages as read for this user
         $conversation->messages()->where('is_read', false)->where('sender_id', '!=', $user->id)->update(['is_read' => true]);
-        $messages = $conversation->messages()->with('sender')->orderBy('created_at')->get();
+        
+        // Get messages, but exclude messages that were sent before the user deleted the conversation
+        $messagesQuery = $conversation->messages()->with('sender')->orderBy('created_at');
+        
+        if ($deletedAt) {
+            // Only show messages sent after the user deleted the conversation
+            $messagesQuery->where('created_at', '>', $deletedAt);
+        }
+        
+        $messages = $messagesQuery->get();
         return response()->json(MessageResource::collection($messages));
     }
 
@@ -132,8 +179,26 @@ class ChatController extends Controller
         $request->validate([
             'message' => 'required|string|max:2000',
         ]);
+        
+        $user = Auth::user();
+        
+        // If user had previously deleted this conversation, update the deletion timestamp
+        // This restores the conversation in their list but keeps old messages hidden
+        $deletedRecord = DB::table('conversation_user_deletes')
+            ->where('user_id', $user->id)
+            ->where('conversation_id', $conversation->id)
+            ->first();
+        
+        if ($deletedRecord) {
+            // Update deletion timestamp to now, so only messages from now onwards are visible
+            DB::table('conversation_user_deletes')
+                ->where('user_id', $user->id)
+                ->where('conversation_id', $conversation->id)
+                ->update(['deleted_at' => now()]);
+        }
+        
         $message = $conversation->messages()->create([
-            'sender_id' => Auth::id(),
+            'sender_id' => $user->id,
             'message' => $request->message,
         ]);
         
@@ -228,8 +293,10 @@ class ChatController extends Controller
             'pick_and_drop_service_id' => 'required_if:type,pick_and_drop|nullable|integer|exists:pick_and_drop_services,id',
         ]);
 
+        $user = auth()->user();
+        
         $query = [
-            'user_id' => auth()->user()->id,
+            'user_id' => $user->id,
             'type' => $request->type,
             'booking_id' => $request->type === 'booking' ? $request->booking_id : null,
             'store_id' => $request->type === 'store' ? $request->store_id : null,
@@ -238,7 +305,81 @@ class ChatController extends Controller
         ];
 
         $conversation = \App\Models\Conversation::firstOrCreate($query);
+        
+        // If user had previously deleted this conversation, update the deletion timestamp
+        // This restores the conversation in their list but keeps old messages hidden
+        $deletedRecord = DB::table('conversation_user_deletes')
+            ->where('user_id', $user->id)
+            ->where('conversation_id', $conversation->id)
+            ->first();
+        
+        if ($deletedRecord) {
+            // Update deletion timestamp to now, so only messages from now onwards are visible
+            DB::table('conversation_user_deletes')
+                ->where('user_id', $user->id)
+                ->where('conversation_id', $conversation->id)
+                ->update(['deleted_at' => now()]);
+        }
 
         return response()->json($conversation);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/chat/conversations/{conversation}",
+     *     operationId="deleteConversation",
+     *     tags={"Chat"},
+     *     summary="Delete conversation",
+     *     description="Delete a conversation for the current user only (soft delete). The conversation will remain visible to other participants. If the user sends a new message, the conversation will be restored but old messages will remain hidden.",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(name="conversation", in="path", required=true, description="Conversation ID", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Conversation deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Conversation deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Unauthorized to delete this conversation"),
+     *     @OA\Response(response=404, description="Conversation not found")
+     * )
+     * Delete a conversation (soft delete per user)
+     */
+    public function destroy(Conversation $conversation)
+    {
+        $user = Auth::user();
+
+        // Check if user is authorized to delete this conversation
+        // User can delete if:
+        // 1. They are the conversation owner (user_id)
+        // 2. They are the recipient (recipient_user_id) for user/pick_and_drop conversations
+        // 3. They are a participant (have sent messages in this conversation)
+        $isOwner = $conversation->user_id === $user->id;
+        $isRecipient = $conversation->recipient_user_id === $user->id;
+        $isParticipant = $conversation->messages()->where('sender_id', $user->id)->exists();
+
+        if (!$isOwner && !$isRecipient && !$isParticipant) {
+            return response()->json([
+                'message' => 'Unauthorized to delete this conversation'
+            ], 403);
+        }
+
+        // Soft delete: Mark conversation as deleted for this user only
+        // Use updateOrInsert to handle the case where the record might already exist
+        DB::table('conversation_user_deletes')->updateOrInsert(
+            [
+                'user_id' => $user->id,
+                'conversation_id' => $conversation->id,
+            ],
+            [
+                'deleted_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Conversation deleted successfully'
+        ], 200);
     }
 }

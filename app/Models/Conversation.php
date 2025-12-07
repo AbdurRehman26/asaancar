@@ -52,4 +52,11 @@ class Conversation extends Model
     {
         return $this->hasOne(Message::class)->orderBy('created_at', 'desc');
     }
+
+    public function deletedBy()
+    {
+        return $this->belongsToMany(User::class, 'conversation_user_deletes', 'conversation_id', 'user_id')
+            ->withPivot('deleted_at')
+            ->withTimestamps();
+    }
 }
