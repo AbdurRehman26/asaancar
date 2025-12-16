@@ -29,7 +29,10 @@ export default function PickAndDropForm() {
         dropoff_area_id: undefined as number | undefined,
         departure_date: '',
         departure_time: '',
-        is_everyday: false,
+        schedule_type: 'once', // once, everyday, weekdays, weekends, custom
+        selected_days: [] as string[],
+        is_roundtrip: false,
+        return_time: '',
         available_spaces: 1,
         driver_gender: 'male' as 'male' | 'female',
         car_brand: '',
@@ -58,7 +61,7 @@ export default function PickAndDropForm() {
             .then(data => {
                 const allCities = data.data || data;
                 setCities(Array.isArray(allCities) ? allCities : []);
-                
+
                 // Set Karachi as default for both pickup and dropoff
                 const karachi = Array.isArray(allCities) ? allCities.find(c => c.name.toLowerCase() === 'karachi') : null;
                 if (karachi && !isEditing) {
@@ -72,7 +75,7 @@ export default function PickAndDropForm() {
                 }
             })
             .catch(() => setCities([]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -102,7 +105,10 @@ export default function PickAndDropForm() {
                 dropoff_area_id: service.dropoff_area_id || undefined,
                 departure_date: service.departure_time ? new Date(service.departure_time).toISOString().slice(0, 10) : '',
                 departure_time: service.departure_time ? new Date(service.departure_time).toISOString().slice(11, 16) : '',
-                is_everyday: service.is_everyday || false,
+                schedule_type: service.schedule_type || (service.is_everyday ? 'everyday' : 'once'),
+                selected_days: service.selected_days || [],
+                is_roundtrip: service.is_roundtrip || false,
+                return_time: service.return_time ? service.return_time.slice(0, 5) : '',
                 available_spaces: service.available_spaces || 1,
                 driver_gender: service.driver_gender || 'male',
                 car_brand: service.car_brand || '',
@@ -128,7 +134,7 @@ export default function PickAndDropForm() {
             if (service.stops && Array.isArray(service.stops)) {
                 // Find Karachi to ensure all stops use Karachi
                 const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
-                
+
                 interface StopData {
                     location?: string;
                     city_id?: number;
@@ -147,7 +153,7 @@ export default function PickAndDropForm() {
                     order: stop.order || 0,
                     notes: stop.notes || '',
                 })));
-                
+
                 // Fetch areas for Karachi if not already fetched
                 if (karachi && !areas[karachi.id]) {
                     fetchAreasForCity(karachi.id);
@@ -169,29 +175,29 @@ export default function PickAndDropForm() {
             if (!karachi) {
                 throw new Error('Karachi city not found. Please refresh the page.');
             }
-            
+
             // Force Karachi for both pickup and dropoff
             const pickupCityId = karachi.id;
             const dropoffCityId = karachi.id;
-            
+
             // Auto-populate start_location and end_location from selected areas
             let startLocation = formData.start_location;
             let endLocation = formData.end_location;
-            
+
             if (formData.pickup_area_id) {
                 const pickupArea = areas[pickupCityId]?.find(a => a.id === formData.pickup_area_id);
                 if (pickupArea) {
                     startLocation = pickupArea.name;
                 }
             }
-            
+
             if (formData.dropoff_area_id) {
                 const dropoffArea = areas[dropoffCityId]?.find(a => a.id === formData.dropoff_area_id);
                 if (dropoffArea) {
                     endLocation = dropoffArea.name;
                 }
             }
-            
+
             const payload = {
                 ...formData,
                 start_location: startLocation,
@@ -200,13 +206,16 @@ export default function PickAndDropForm() {
                 pickup_area_id: formData.pickup_area_id || null,
                 dropoff_city_id: dropoffCityId,
                 dropoff_area_id: formData.dropoff_area_id || null,
-                departure_time: !formData.is_everyday && formData.departure_date && formData.departure_time 
-                    ? `${formData.departure_date}T${formData.departure_time}:00` 
-                    : formData.is_everyday && formData.departure_time
-                    ? `2000-01-01T${formData.departure_time}:00` // Use a placeholder date for everyday services
-                    : formData.departure_time,
-                departure_date: undefined, // Remove from payload
-                is_everyday: formData.is_everyday,
+                departure_time: formData.schedule_type === 'once' && formData.departure_date && formData.departure_time
+                    ? `${formData.departure_date}T${formData.departure_time}:00`
+                    : formData.schedule_type !== 'once' && formData.departure_time
+                        ? `2000-01-01T${formData.departure_time}:00` // Use a placeholder date for recurring services
+                        : formData.departure_time,
+                schedule_type: formData.schedule_type,
+                selected_days: formData.schedule_type === 'custom' ? formData.selected_days : null,
+                is_roundtrip: formData.is_roundtrip,
+                return_time: formData.is_roundtrip && formData.return_time ? formData.return_time : null,
+                is_everyday: formData.schedule_type === 'everyday', // Keep for backward compatibility if needed
                 available_spaces: parseInt(formData.available_spaces.toString()),
                 car_seats: formData.car_seats ? parseInt(formData.car_seats) : null,
                 price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null,
@@ -214,7 +223,7 @@ export default function PickAndDropForm() {
                     // Ensure Karachi is always set for stops
                     const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
                     const stopCityId = karachi?.id || stop.city_id;
-                    
+
                     // Auto-populate location from area if not set
                     let stopLocation = stop.location;
                     if (!stopLocation && stop.area_id && karachi) {
@@ -223,16 +232,16 @@ export default function PickAndDropForm() {
                             stopLocation = area.name;
                         }
                     }
-                    
+
                     return {
                         location: stopLocation || null,
                         city_id: stopCityId || null,
                         area_id: stop.area_id || null,
-                        stop_time: !formData.is_everyday && stop.stop_date && stop.stop_time 
-                            ? `${stop.stop_date}T${stop.stop_time}:00` 
-                            : formData.is_everyday && stop.stop_time
-                            ? `2000-01-01T${stop.stop_time}:00` // Use a placeholder date for everyday services
-                            : stop.stop_time,
+                        stop_time: formData.schedule_type === 'once' && stop.stop_date && stop.stop_time
+                            ? `${stop.stop_date}T${stop.stop_time}:00`
+                            : formData.schedule_type !== 'once' && stop.stop_time
+                                ? `2000-01-01T${stop.stop_time}:00` // Use a placeholder date for recurring services
+                                : stop.stop_time,
                         order: stop.order || index,
                         notes: stop.notes || null,
                     };
@@ -264,7 +273,7 @@ export default function PickAndDropForm() {
 
     const fetchAreasForCity = async (cityId: number): Promise<void> => {
         if (areas[cityId]) return Promise.resolve(); // Already fetched
-        
+
         try {
             const response = await fetch(`/api/areas?city_id=${cityId}`);
             const data = await response.json();
@@ -286,20 +295,20 @@ export default function PickAndDropForm() {
             setError('Karachi city not found. Please refresh the page.');
             return;
         }
-        
+
         setStops([
             ...stops,
             {
                 location: '',
                 city_id: karachi.id, // Auto-set to Karachi
                 area_id: undefined,
-                stop_date: formData.is_everyday ? '' : (formData.departure_date || ''), // Default to departure date if not everyday
+                stop_date: formData.schedule_type === 'once' ? (formData.departure_date || '') : '', // Default to departure date if once
                 stop_time: '',
                 order: stops.length,
                 notes: '',
             },
         ]);
-        
+
         // Fetch areas for Karachi if not already fetched
         if (!areas[karachi.id]) {
             fetchAreasForCity(karachi.id);
@@ -312,18 +321,18 @@ export default function PickAndDropForm() {
 
     const updateStop = (index: number, field: keyof Stop, value: string | number | undefined) => {
         const newStops = [...stops];
-        
+
         // Ensure city_id is always Karachi for stops
         const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
         if (karachi) {
             newStops[index].city_id = karachi.id;
-            
+
             // Fetch areas for Karachi if not already fetched
             if (!areas[karachi.id]) {
                 fetchAreasForCity(karachi.id);
             }
         }
-        
+
         newStops[index] = { ...newStops[index], [field]: value };
         setStops(newStops);
     };
@@ -351,7 +360,7 @@ export default function PickAndDropForm() {
         const dropdownRef = useRef<HTMLDivElement>(null);
         const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
         const availableAreas = karachi && areas[karachi.id] ? areas[karachi.id] : [];
-        const filteredAreas = availableAreas.filter(area => 
+        const filteredAreas = availableAreas.filter(area =>
             !value || area.name.toLowerCase().includes(value.toLowerCase())
         );
 
@@ -392,8 +401,8 @@ export default function PickAndDropForm() {
                 />
                 {availableAreas.length > 0 && (
                     <>
-                        <ChevronDown 
-                            className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" 
+                        <ChevronDown
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
                         />
                         {openDropdowns[index] && filteredAreas.length > 0 && (
                             <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
@@ -419,18 +428,18 @@ export default function PickAndDropForm() {
     };
 
     // Searchable Area Selector Component
-    const SearchableAreaSelect = ({ 
-        value, 
-        onChange, 
-        cityId, 
-        areas, 
-        label, 
+    const SearchableAreaSelect = ({
+        value,
+        onChange,
+        cityId,
+        areas,
+        label,
         required = false,
-        disabled = false 
-    }: { 
-        value: number | undefined; 
-        onChange: (areaId: number | undefined) => void; 
-        cityId: number | undefined; 
+        disabled = false
+    }: {
+        value: number | undefined;
+        onChange: (areaId: number | undefined) => void;
+        cityId: number | undefined;
         areas: { [cityId: number]: { id: number; name: string }[] };
         label: string;
         required?: boolean;
@@ -523,9 +532,8 @@ export default function PickAndDropForm() {
                                     key={area.id}
                                     type="button"
                                     onClick={() => handleSelect(area.id)}
-                                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white ${
-                                        value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
-                                    }`}
+                                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white ${value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
+                                        }`}
                                 >
                                     {area.name}
                                 </button>
@@ -587,28 +595,83 @@ export default function PickAndDropForm() {
                             required={true}
                             disabled={!formData.dropoff_city_id}
                         />
-                        <div className="md:col-span-2">
-                            <label className="flex items-center gap-2 mb-2">
+                        <div className="md:col-span-2 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Schedule Type
+                                </label>
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                    {[
+                                        { id: 'once', label: 'One-time' },
+                                        { id: 'everyday', label: 'Everyday' },
+                                        { id: 'weekdays', label: 'Weekdays' },
+                                        { id: 'weekends', label: 'Weekends' },
+                                        { id: 'custom', label: 'Custom' }
+                                    ].map((type) => (
+                                        <button
+                                            key={type.id}
+                                            type="button"
+                                            onClick={() => {
+                                                setFormData({ ...formData, schedule_type: type.id });
+                                                if (type.id !== 'once') {
+                                                    setFormData(prev => ({ ...prev, departure_date: '' }));
+                                                    // Clear stop dates for recurring
+                                                    setStops(stops.map(stop => ({ ...stop, stop_date: '' })));
+                                                }
+                                            }}
+                                            className={`px-3 py-2 text-sm font-medium rounded-lg border ${formData.schedule_type === type.id
+                                                ? 'bg-[#7e246c] text-white border-[#7e246c]'
+                                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                                }`}
+                                        >
+                                            {type.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {formData.schedule_type === 'custom' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Select Days
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                                            <button
+                                                key={day}
+                                                type="button"
+                                                onClick={() => {
+                                                    const currentDays = formData.selected_days || [];
+                                                    const newDays = currentDays.includes(day)
+                                                        ? currentDays.filter(d => d !== day)
+                                                        : [...currentDays, day];
+                                                    setFormData({ ...formData, selected_days: newDays });
+                                                }}
+                                                className={`px-3 py-1 text-xs font-medium rounded-full border ${formData.selected_days?.includes(day)
+                                                    ? 'bg-[#7e246c] text-white border-[#7e246c]'
+                                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'
+                                                    }`}
+                                            >
+                                                {day}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
-                                    checked={formData.is_everyday}
-                                    onChange={(e) => {
-                                        setFormData({ ...formData, is_everyday: e.target.checked });
-                                        if (e.target.checked) {
-                                            // Clear departure date when everyday is selected
-                                            setFormData(prev => ({ ...prev, departure_date: '' }));
-                                            // Clear stop dates when everyday is selected
-                                            setStops(stops.map(stop => ({ ...stop, stop_date: '' })));
-                                        }
-                                    }}
+                                    checked={formData.is_roundtrip}
+                                    onChange={(e) => setFormData({ ...formData, is_roundtrip: e.target.checked })}
                                     className="w-4 h-4 text-[#7e246c] border-gray-300 rounded focus:ring-[#7e246c]"
                                 />
                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Everyday Service (No specific date)
+                                    Round Trip (Return on the same day/schedule)
                                 </span>
-                            </label>
+                            </div>
                         </div>
-                        {!formData.is_everyday && (
+                        {formData.schedule_type === 'once' && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
                                     <Calendar className="h-4 w-4" />
@@ -616,7 +679,7 @@ export default function PickAndDropForm() {
                                 </label>
                                 <input
                                     type="date"
-                                    required={!formData.is_everyday}
+                                    required={formData.schedule_type === 'once'}
                                     value={formData.departure_date}
                                     onChange={(e) => {
                                         const newDate = e.target.value;
@@ -628,18 +691,36 @@ export default function PickAndDropForm() {
                                 />
                             </div>
                         )}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                Departure Time *
-                            </label>
-                            <input
-                                type="time"
-                                required
-                                value={formData.departure_time}
-                                onChange={(e) => setFormData({ ...formData, departure_time: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-1 md:col-span-2">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                    <Calendar className="h-4 w-4" />
+                                    Departure Time *
+                                </label>
+                                <input
+                                    type="time"
+                                    required
+                                    value={formData.departure_time}
+                                    onChange={(e) => setFormData({ ...formData, departure_time: e.target.value })}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+
+                            {formData.is_roundtrip && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                        <Calendar className="h-4 w-4" />
+                                        Return Time *
+                                    </label>
+                                    <input
+                                        type="time"
+                                        required={formData.is_roundtrip}
+                                        value={formData.return_time}
+                                        onChange={(e) => setFormData({ ...formData, return_time: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -904,14 +985,14 @@ export default function PickAndDropForm() {
                                         setOpenDropdowns={setOpenDropdowns}
                                     />
                                 </div>
-                                {!formData.is_everyday && (
+                                {formData.schedule_type === 'once' && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Stop Date *
                                         </label>
                                         <input
                                             type="date"
-                                            required={!formData.is_everyday}
+                                            required={formData.schedule_type === 'once'}
                                             value={stop.stop_date}
                                             onChange={(e) => updateStop(index, 'stop_date', e.target.value)}
                                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"

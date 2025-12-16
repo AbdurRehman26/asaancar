@@ -1,11 +1,11 @@
-import { ChevronDown, Shield, Star, Clock, Award, MapPin, ArrowRight, Users } from 'lucide-react';
+import { ChevronDown, Shield, Star, Clock, Award, MapPin } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import UniversalCarFilter from '../components/universal-car-filter';
-
+import PickAndDropCard, { PickAndDropService } from '@/components/PickAndDropCard';
 // Animation utility for reveal on scroll
 const useRevealOnScroll = () => {
     useEffect(() => {
@@ -366,13 +366,7 @@ export default function Welcome() {
     const [carTypesLoading, setCarTypesLoading] = useState(true);
     const [carBrands, setCarBrands] = useState<CarBrand[]>([]);
     const [carBrandsLoading, setCarBrandsLoading] = useState(true);
-    interface PickAndDropService {
-        is_everyday?: boolean;
-        id: number;
-        start_location: string;
-        end_location: string;
-        [key: string]: unknown;
-    }
+
     const [pickAndDropServices, setPickAndDropServices] = useState<PickAndDropService[]>([]);
     const [pickAndDropLoading, setPickAndDropLoading] = useState(true);
     const navigate = useNavigate();
@@ -674,44 +668,11 @@ export default function Welcome() {
                             <>
                                 <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                                     {pickAndDropServices.map((service) => (
-                                        <div
+                                        <PickAndDropCard
                                             key={service.id}
-                                            className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+                                            service={service}
                                             onClick={() => navigate(`/pick-and-drop/${service.id}`)}
-                                        >
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <MapPin className="h-5 w-5 text-[#7e246c]" />
-                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                    {service.start_location}
-                                                </h3>
-                                                <ArrowRight className="h-4 w-4 text-gray-400" />
-                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                    {service.end_location}
-                                                </h3>
-                                            </div>
-                                            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-4 w-4" />
-                                                    {service.is_everyday ? `Everyday at ${service.departure_time}` : service.departure_time}
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Users className="h-4 w-4" />
-                                                    {service.available_spaces} space{service.available_spaces !== 1 ? 's' : ''} available
-                                                </div>
-                                                {service.price_per_person && (
-                                                    <div className="flex items-center gap-2">
-                                                        {service.currency} {Math.round(service.price_per_person).toLocaleString()} per person
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {service.stops && service.stops.length > 0 && (
-                                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                        {service.stops.length} stop{service.stops.length !== 1 ? 's' : ''} along the way
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
+                                        />
                                     ))}
                                 </div>
                                 <div className="mt-8 text-center">

@@ -73,6 +73,10 @@ class PickAndDrop extends Model
         'currency',
         'is_active',
         'is_everyday',
+        'is_roundtrip',
+        'return_time',
+        'schedule_type',
+        'selected_days',
     ];
 
     protected $casts = [
@@ -80,6 +84,8 @@ class PickAndDrop extends Model
         'price_per_person' => 'decimal:2',
         'is_active' => 'boolean',
         'is_everyday' => 'boolean',
+        'is_roundtrip' => 'boolean',
+        'selected_days' => 'array',
         'available_spaces' => 'integer',
         'car_seats' => 'integer',
     ];

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Users, Search, Filter, Clock, Plus, ChevronDown, ChevronUp, X, Navigation } from 'lucide-react';
+import { MapPin, Search, Filter, Clock, Plus, ChevronDown, X } from 'lucide-react';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/components/AuthContext';
 import { apiFetch } from '@/lib/utils';
 import SEO from '@/components/SEO';
-
+import PickAndDropCard from '@/components/PickAndDropCard';
 interface PickAndDropStop {
     id: number;
     location: string;
@@ -44,6 +44,8 @@ interface PickAndDropService {
     is_active: boolean;
     is_everyday?: boolean;
     stops?: PickAndDropStop[];
+    schedule_type: 'once' | 'everyday' | 'custom' | 'weekend' | 'weekdays';
+    selected_days?: string;
 }
 
 export default function PickAndDropListing() {
@@ -68,7 +70,7 @@ export default function PickAndDropListing() {
     const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(12);
     const [total, setTotal] = useState(0);
-    const [expandedStops, setExpandedStops] = useState<Set<number>>(new Set());
+
     const [karachiCityId, setKarachiCityId] = useState<number | undefined>(undefined);
     const [karachiAreas, setKarachiAreas] = useState<{ id: number; name: string }[]>([]);
     const areasByCity = karachiCityId ? { [karachiCityId]: karachiAreas } : {};
@@ -397,9 +399,8 @@ export default function PickAndDropListing() {
                                                                     key={area.id}
                                                                     type="button"
                                                                     onClick={() => handleSelect(area.id)}
-                                                                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white ${
-                                                                        value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
-                                                                    }`}
+                                                                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white ${value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
+                                                                        }`}
                                                                 >
                                                                     {area.name}
                                                                 </button>
@@ -542,11 +543,10 @@ export default function PickAndDropListing() {
                                             <button
                                                 key={pageNum}
                                                 onClick={() => setCurrentPage(pageNum)}
-                                                className={`px-3 py-1 rounded font-semibold border transition-colors ${
-                                                    pageNum === currentPage
-                                                        ? 'bg-[#7e246c] text-white border-[#7e246c]'
-                                                        : 'border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]'
-                                                }`}
+                                                className={`px-3 py-1 rounded font-semibold border transition-colors ${pageNum === currentPage
+                                                    ? 'bg-[#7e246c] text-white border-[#7e246c]'
+                                                    : 'border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]'
+                                                    }`}
                                             >
                                                 {pageNum}
                                             </button>
@@ -581,142 +581,12 @@ export default function PickAndDropListing() {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {services.map((service) => (
-                                <div
+                                <PickAndDropCard
                                     key={service.id}
-                                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow flex flex-col"
-                                >
-                                    <div className="mb-4">
-                                        <div className="space-y-2 mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <MapPin className="h-5 w-5 text-green-600 dark:text-green-400" />
-                                                <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white">
-                                                    {service.start_location}
-                                                </h3>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Navigation className="h-5 w-5 text-red-600 dark:text-red-400" />
-                                                <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white">
-                                                    {service.end_location}
-                                                </h3>
-                                            </div>
-                                        </div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                                            <p>by {service.name || service.user.name}</p>
-                                            {(service.contact || (user && service.user.phone_number)) && (
-                                                <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                                                    📞 {service.contact || (user ? service.user.phone_number : '')}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                                                service.is_everyday
-                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                            }`}>
-                                                <Calendar className="h-3 w-3" />
-                                                {service.is_everyday ? (
-                                                    <span>Everyday at {service.departure_time}</span>
-                                                ) : (
-                                                    service.departure_time
-                                                )}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                            <Users className="h-4 w-4" />
-                                            {service.available_spaces} space{service.available_spaces !== 1 ? 's' : ''} available
-                                        </div>
-                                        {service.price_per_person && (
-                                            <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-300">
-                                                {service.currency} {Math.round(service.price_per_person).toLocaleString()} per person
-                                            </div>
-                                        )}
-                                        <div className="flex items-center gap-2">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                                service.driver_gender === 'female'
-                                                    ? 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-400'
-                                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                            }`}>
-                                                {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender === 'female' ? 'Female' : 'Male'} driver
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {service.car_brand && (
-                                        <div className="text-sm text-gray-600 dark:text-gray-300 mb-3 p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
-                                            <strong>Car:</strong> {service.car_brand} {service.car_model} ({service.car_color})
-                                            {service.car_seats && ` • ${service.car_seats} seats`}
-                                        </div>
-                                    )}
-
-                                    {service.stops && service.stops.length > 0 && (
-                                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                            <button
-                                                onClick={() => {
-                                                    const newExpanded = new Set(expandedStops);
-                                                    if (newExpanded.has(service.id)) {
-                                                        newExpanded.delete(service.id);
-                                                    } else {
-                                                        newExpanded.add(service.id);
-                                                    }
-                                                    setExpandedStops(newExpanded);
-                                                }}
-                                                className="w-full text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center justify-between gap-2 hover:text-[#7e246c] transition-colors"
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-4 w-4" />
-                                                    Stops ({service.stops.length})
-                                                </div>
-                                                {expandedStops.has(service.id) ? (
-                                                    <ChevronUp className="h-4 w-4" />
-                                                ) : (
-                                                    <ChevronDown className="h-4 w-4" />
-                                                )}
-                                            </button>
-                                            {expandedStops.has(service.id) ? (
-                                                <ul className="space-y-1">
-                                                    {service.stops.map((stop) => (
-                                                        <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                                                            <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
-                                                            {stop.location} ({service.is_everyday ? stop.stop_time : stop.stop_time})
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <ul className="space-y-1">
-                                                    {service.stops.slice(0, 2).map((stop) => (
-                                                        <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                                                            <span className="w-2 h-2 bg-[#7e246c] rounded-full"></span>
-                                                            {stop.location} ({service.is_everyday ? stop.stop_time : stop.stop_time})
-                                                        </li>
-                                                    ))}
-                                                    {service.stops.length > 2 && (
-                                                        <li className="text-xs text-gray-500 dark:text-gray-500 italic">
-                                                            ... and {service.stops.length - 2} more stop{service.stops.length - 2 !== 1 ? 's' : ''}
-                                                        </li>
-                                                    )}
-                                                </ul>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {service.description && (
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-4 line-clamp-2">
-                                            {service.description}
-                                        </p>
-                                    )}
-
-                                    <button
-                                        onClick={() => navigate(`/pick-and-drop/${service.id}`)}
-                                        className="mt-auto w-full py-2 px-4 bg-[#7e246c] text-white rounded-lg hover:bg-[#6a1f5c] transition-colors"
-                                    >
-                                        View Details
-                                    </button>
-                                </div>
-                                    ))}
+                                    service={service}
+                                    onClick={() => navigate(`/pick-and-drop/${service.id}`)}
+                                />
+                            ))}
                         </div>
                     )}
 
@@ -756,11 +626,10 @@ export default function PickAndDropListing() {
                                             <button
                                                 key={pageNum}
                                                 onClick={() => setCurrentPage(pageNum)}
-                                                className={`px-3 py-1 rounded font-semibold border transition-colors ${
-                                                    pageNum === currentPage
-                                                        ? 'bg-[#7e246c] text-white border-[#7e246c]'
-                                                        : 'border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]'
-                                                }`}
+                                                className={`px-3 py-1 rounded font-semibold border transition-colors ${pageNum === currentPage
+                                                    ? 'bg-[#7e246c] text-white border-[#7e246c]'
+                                                    : 'border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]'
+                                                    }`}
                                             >
                                                 {pageNum}
                                             </button>

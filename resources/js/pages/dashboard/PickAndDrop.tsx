@@ -82,7 +82,7 @@ export default function PickAndDropPage() {
         try {
             // Check if user is admin
             const isAdmin = user && Array.isArray(user.roles) && user.roles.includes('admin');
-            
+
             // Build query parameters
             const params = new URLSearchParams();
             if (searchTerm) {
@@ -135,7 +135,7 @@ export default function PickAndDropPage() {
             const params = new URLSearchParams();
             params.append('page', '1');
             params.append('per_page', perPage.toString());
-            
+
             const response = await apiFetch(`/api/customer/pick-and-drop/my-services?${params.toString()}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch your services');
