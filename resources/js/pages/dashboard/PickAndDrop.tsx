@@ -49,6 +49,10 @@ interface PickAndDropService {
     currency: string;
     is_active: boolean;
     is_everyday?: boolean;
+    schedule_type?: 'once' | 'everyday' | 'weekdays' | 'weekends' | 'custom';
+    selected_days?: string[] | string;
+    is_roundtrip?: boolean;
+    return_time?: string;
     stops?: PickAndDropStop[];
 }
 
@@ -288,39 +292,50 @@ export default function PickAndDropPage() {
                                         by {service.user.name}
                                     </p>
                                 </div>
-                                    <div className="flex gap-2">
-                                        <Link
-                                            to={`/pick-and-drop/${service.id}`}
-                                            className="p-2 text-[#7e246c] hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded"
-                                            title="View Details"
-                                        >
-                                            <MapPin className="h-4 w-4" />
-                                        </Link>
-                                        {user && user.id === service.user.id && (
-                                            <>
-                                                <Link
-                                                    to={`/dashboard/pick-and-drop/${service.id}/edit`}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
-                                                    title="Edit"
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDeleteClick(service.id)}
-                                                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
+                                <div className="flex gap-2">
+                                    <Link
+                                        to={`/pick-and-drop/${service.id}`}
+                                        className="p-2 text-[#7e246c] hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded"
+                                        title="View Details"
+                                    >
+                                        <MapPin className="h-4 w-4" />
+                                    </Link>
+                                    {user && user.id === service.user.id && (
+                                        <>
+                                            <Link
+                                                to={`/dashboard/pick-and-drop/${service.id}/edit`}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
+                                                title="Edit"
+                                            >
+                                                <Edit className="h-4 w-4" />
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDeleteClick(service.id)}
+                                                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="space-y-2 mb-4">
                                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Calendar className="h-4 w-4" />
-                                    {service.is_everyday ? `Everyday at ${service.departure_time}` : service.departure_time}
+                                    {service.schedule_type === 'once' || !service.schedule_type
+                                        ? service.departure_time
+                                        : `${service.schedule_type === 'custom'
+                                            ? (Array.isArray(service.selected_days) ? service.selected_days.join(', ') : service.selected_days)
+                                            : service.schedule_type.charAt(0).toUpperCase() + service.schedule_type.slice(1)
+                                        } • ${service.departure_time.includes('T') ? service.departure_time.split('T')[1].slice(0, 5) : service.departure_time.slice(0, 5)}`
+                                    }
+                                    {service.is_roundtrip && service.return_time && (
+                                        <span className="ml-2 text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 px-2 py-0.5 rounded-full">
+                                            Return: {service.return_time.slice(0, 5)}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Users className="h-4 w-4" />
@@ -332,11 +347,10 @@ export default function PickAndDropPage() {
                                     </div>
                                 )}
                                 <div className="flex items-center gap-2 text-sm">
-                                    <span className={`px-2 py-1 rounded text-xs ${
-                                        service.driver_gender === 'female'
-                                            ? 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-400'
-                                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                    }`}>
+                                    <span className={`px-2 py-1 rounded text-xs ${service.driver_gender === 'female'
+                                        ? 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-400'
+                                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                                        }`}>
                                         {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender} driver
                                     </span>
                                 </div>
@@ -386,11 +400,10 @@ export default function PickAndDropPage() {
                         <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
-                            className={`px-3 py-1 rounded font-semibold border ${
-                                page === currentPage
-                                    ? 'bg-[#7e246c] text-white border-[#7e246c]'
-                                    : 'border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]'
-                            }`}
+                            className={`px-3 py-1 rounded font-semibold border ${page === currentPage
+                                ? 'bg-[#7e246c] text-white border-[#7e246c]'
+                                : 'border-[#7e246c] text-[#7e246c] bg-white dark:bg-gray-800/80 hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:text-[#7e246c]'
+                                }`}
                         >
                             {page}
                         </button>
