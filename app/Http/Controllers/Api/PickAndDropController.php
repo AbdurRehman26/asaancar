@@ -31,6 +31,8 @@ class PickAndDropController extends Controller
      *     @OA\Parameter(name="min_spaces", in="query", description="Minimum available spaces", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="departure_date", in="query", description="Filter by departure date (YYYY-MM-DD)", required=false, @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="departure_time", in="query", description="Filter by departure time (HH:MM)", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="is_roundtrip", in="query", description="Filter by roundtrip services", required=false, @OA\Schema(type="boolean")),
+     *     @OA\Parameter(name="schedule_type", in="query", description="Filter by schedule type", required=false, @OA\Schema(type="string", enum={"once", "everyday", "weekdays", "weekends", "custom"})),
      *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=15)),
      *     @OA\Response(
      *         response=200,
