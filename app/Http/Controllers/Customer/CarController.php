@@ -70,7 +70,7 @@ class CarController extends Controller
             'brand_id', 'type_id', 'store_id', 'transmission',
             'fuel_type', 'min_seats', 'max_price'
         ]);
-        
+
         $user = $request->user();
 
         $paginated = $this->carService->getPaginatedCarsForListing($perPage, $filters, $user);
@@ -121,17 +121,17 @@ class CarController extends Controller
     public function store(CreateCarRequest $request)
     {
         $validated = $request->validated();
-        
+
         // Handle model creation if model name is provided
         if ($request->has('model') && $request->input('model') && $request->has('car_brand_id')) {
             $modelName = $request->input('model');
             $brandId = $request->input('car_brand_id');
-            
+
             // Check if model exists for this brand
             $existingModel = \App\Models\CarModel::where('car_brand_id', $brandId)
                 ->where('name', $modelName)
                 ->first();
-            
+
             if (!$existingModel) {
                 // Create new model
                 $newModel = \App\Models\CarModel::create([
@@ -144,19 +144,27 @@ class CarController extends Controller
                 $validated['car_model_id'] = $existingModel->id;
             }
         }
-        
+
         // Handle image URLs (images are now uploaded separately via ImageUpload API)
         if ($request->has('image_urls') && is_array($request->input('image_urls'))) {
             $validated['image_urls'] = $request->input('image_urls');
         }
-        
+
         $car = Car::create($validated);
-        
+
+        if($validated['with_driver_rate'] || $validated['without_driver_rate']) {
+            CarOffer::query()->create([
+                'car_id' => $car->id,
+                'price_with_driver' => $validated['with_driver_rate'],
+                'price_without_driver' => $validated['without_driver_rate'],
+            ]);
+        }
+
         // Handle tag relationships
         if ($request->has('tag_ids') && is_array($request->input('tag_ids'))) {
             $car->tags()->sync($request->input('tag_ids'));
         }
-        
+
         return new CarResource($car->load(['carBrand', 'carModel', 'carType', 'store', 'tags']));
     }
 
@@ -225,7 +233,7 @@ class CarController extends Controller
      *         description="Successful operation",
      *         @OA\JsonContent(
      *             @OA\Property(property="data", ref="#/components/schemas/Car"),
-     *             @OA\Property(property="offer_form_data", type="object", 
+     *             @OA\Property(property="offer_form_data", type="object",
      *                 @OA\Property(property="currencies", type="array", @OA\Items(type="string")),
      *                 @OA\Property(property="existing_offers", type="array", @OA\Items(ref="#/components/schemas/CarOffer"))
      *             )
@@ -298,19 +306,19 @@ class CarController extends Controller
     public function update(UpdateCarRequest $request, string $id)
     {
         $car = Car::findOrFail($id);
-        
+
         $validated = $request->validated();
-        
+
         // Handle model creation if model name is provided
         if ($request->has('model') && $request->input('model') && $request->has('car_brand_id')) {
             $modelName = $request->input('model');
             $brandId = $request->input('car_brand_id');
-            
+
             // Check if model exists for this brand
             $existingModel = \App\Models\CarModel::where('car_brand_id', $brandId)
                 ->where('name', $modelName)
                 ->first();
-            
+
             if (!$existingModel) {
                 // Create new model
                 $newModel = \App\Models\CarModel::create([
@@ -323,29 +331,29 @@ class CarController extends Controller
                 $validated['car_model_id'] = $existingModel->id;
             }
         }
-        
+
         // Handle image URLs (images are now uploaded separately via ImageUpload API)
         if ($request->has('image_urls') && is_array($request->input('image_urls'))) {
             $validated['image_urls'] = $request->input('image_urls');
         }
-        
+
         $car->update($validated);
-        
+
         // Handle tag relationships
         if ($request->has('tag_ids') && is_array($request->input('tag_ids'))) {
             $car->tags()->sync($request->input('tag_ids'));
         }
-        
+
         // Handle pricing fields - create or update CarOffer
         if ($request->has('without_driver_rate') || $request->has('with_driver_rate')) {
             $withoutDriver = $request->input('without_driver_rate');
             $withDriver = $request->input('with_driver_rate');
-            
+
             // Find existing active offer or create new one
             $carOffer = CarOffer::where('car_id', $car->id)
                 ->where('is_active', true)
                 ->first();
-            
+
             if (!$carOffer) {
                 $carOffer = new CarOffer();
                 $carOffer->car_id = $car->id;
@@ -353,17 +361,17 @@ class CarController extends Controller
                 $carOffer->available_from = now();
                 $carOffer->available_to = now()->addYear(); // Set to expire in 1 year
             }
-            
+
             if ($withoutDriver !== null) {
                 $carOffer->price_without_driver = $withoutDriver;
             }
             if ($withDriver !== null) {
                 $carOffer->price_with_driver = $withDriver;
             }
-            
+
             $carOffer->save();
         }
-        
+
         return new CarResource($car->load(['carBrand', 'carModel', 'carType', 'store', 'tags']));
     }
 
@@ -389,22 +397,22 @@ class CarController extends Controller
     {
         $query = $request->input('q', '');
         $type = $request->input('type');
-        
+
         $tagsQuery = \App\Models\Tag::query();
-        
+
         if ($query) {
             $tagsQuery->where('name', 'like', "%{$query}%");
         }
-        
+
         if ($type) {
             $tagsQuery->where('type', $type);
         }
-        
+
         $tags = $tagsQuery->select('id', 'name', 'type', 'color')
             ->orderBy('name')
             ->limit(20)
             ->get();
-            
+
         return response()->json([
             'success' => true,
             'data' => $tags
@@ -471,12 +479,12 @@ class CarController extends Controller
     public function destroy(string $id)
     {
         $car = Car::findOrFail($id);
-        
+
         // Delete images from S3 if they exist
         if ($car->image_urls && is_array($car->image_urls)) {
             $this->s3Service->deleteMultipleFiles($car->image_urls);
         }
-        
+
         $car->delete();
 
         return response()->json(['message' => 'Car deleted successfully']);
@@ -527,10 +535,10 @@ class CarController extends Controller
     {
         $user = $request->user();
         $perPage = $request->input('per_page', 15);
-        
+
         // Get all store IDs for this user
         $storeIds = $user->stores()->pluck('stores.id');
-        
+
         if ($storeIds->isEmpty()) {
             return response()->json([
                 'data' => [],
@@ -550,7 +558,7 @@ class CarController extends Controller
                 'to' => null,
             ]);
         }
-        
+
         $cars = Car::with(['carBrand', 'carModel', 'carType', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where(function($q) {
@@ -640,7 +648,7 @@ class CarController extends Controller
     {
         $perPage = $request->input('per_page', 15);
         $storeId = $request->input('store_id');
-        
+
         $query = Car::with(['carBrand', 'carModel', 'carType', 'store', 'carOffers' => function($query) {
             $query->where('is_active', true)
                   ->where(function($q) {
@@ -656,7 +664,7 @@ class CarController extends Controller
                   });
         }])
         ->whereHas('store');
-        
+
         if ($storeId) {
             $query->where('store_id', $storeId);
         }
