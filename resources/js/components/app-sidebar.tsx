@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Folder, MessageSquare, Store, BookOpen, Mail, MapPin } from 'lucide-react';
+import { LayoutGrid, Folder, MessageSquare, Store, BookOpen, Mail, MapPin, Zap } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 
@@ -110,6 +110,22 @@ export function AppSidebar() {
                         </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarGroup>
+
+                {user && Array.isArray(user.roles) && user.roles.includes('admin') && (
+                    <SidebarGroup>
+                        <SidebarGroupLabel>Admin</SidebarGroupLabel>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton size="lg" asChild>
+                                    <Link to="/admin-dashboard">
+                                        <Zap className="mr-2" />
+                                        API Testing
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroup>
+                )}
             </SidebarContent>
 
             <SidebarFooter>

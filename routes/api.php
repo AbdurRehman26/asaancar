@@ -224,4 +224,11 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     // Admin Contact Messages Routes
     Route::get('/contact-messages', [ContactMessageController::class, 'index']);
     Route::get('/contact-messages/stats', [ContactMessageController::class, 'stats']);
+
+    // Postman Widget Routes (for testing APIs)
+    Route::prefix('postman')->group(function () {
+        Route::post('/execute', [\App\Http\Controllers\Filament\PostmanController::class, 'executeRequest']);
+        Route::get('/template/pick-and-drop', [\App\Http\Controllers\Filament\PostmanController::class, 'getPickAndDropTemplate']);
+        Route::get('/template/car-rental', [\App\Http\Controllers\Filament\PostmanController::class, 'getCarRentalTemplate']);
+    });
 });
