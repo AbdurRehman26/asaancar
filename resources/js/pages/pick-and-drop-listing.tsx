@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MapPin, Search, Filter, Clock, Plus, ChevronDown, X } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { MapPin, Clock, Plus, ChevronDown, X } from 'lucide-react';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/components/AuthContext';
 import { apiFetch } from '@/lib/utils';
 import SEO from '@/components/SEO';
 import PickAndDropCard from '@/components/PickAndDropCard';
+
 interface PickAndDropStop {
     id: number;
     location: string;
@@ -48,25 +49,171 @@ interface PickAndDropService {
     selected_days?: string;
 }
 
+const SearchableAreaSelect = ({
+    value,
+    onChange,
+    cityId,
+    areas,
+    label,
+    placeholder = "Search or select area..."
+}: {
+    value: number | undefined;
+    onChange: (areaId: number | undefined) => void;
+    cityId: number | undefined;
+    areas: { [cityId: number]: { id: number; name: string }[] };
+    label: string;
+    placeholder?: string;
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [displayValue, setDisplayValue] = useState('');
+    const [debouncedTerm, setDebouncedTerm] = useState('');
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const availableAreas = cityId ? (areas[cityId] || []) : [];
+
+    // Sync display value with selected value
+    useEffect(() => {
+        if (value) {
+            const area = availableAreas.find(a => a.id === value);
+            if (area) {
+                setDisplayValue(area.name);
+                setSearchTerm(''); // Clear search term when value is selected
+            }
+        } else if (!searchTerm) {
+            setDisplayValue('');
+        }
+    }, [value, availableAreas]);
+
+    // Debounce search term
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedTerm(searchTerm);
+        }, 300); // Wait 300ms
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Filter logic based on debounced term
+    const filteredAreas = availableAreas.filter(area =>
+        area.name.toLowerCase().includes(debouncedTerm.toLowerCase())
+    );
+
+    const shouldShowDropdown = isOpen && cityId && debouncedTerm.length >= 3;
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleSelect = (areaId: number) => {
+        onChange(areaId);
+        setIsOpen(false);
+        setSearchTerm('');
+        setDebouncedTerm('');
+    };
+
+    const handleClear = () => {
+        onChange(undefined);
+        setSearchTerm('');
+        setDebouncedTerm('');
+        setDisplayValue('');
+    };
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {label}
+            </label>
+            <div className="relative">
+                <input
+                    type="text"
+                    value={searchTerm || displayValue}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        setSearchTerm(val);
+                        setDisplayValue(val);
+                        setIsOpen(true);
+
+                        if (!val) {
+                            onChange(undefined);
+                        }
+                    }}
+                    onFocus={() => {
+                        if (cityId) {
+                            setIsOpen(true);
+                        }
+                    }}
+                    placeholder={placeholder}
+                    disabled={!cityId}
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    {(value || searchTerm) && (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleClear();
+                            }}
+                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    )}
+                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                </div>
+            </div>
+
+            {shouldShowDropdown && (
+                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredAreas.length > 0 ? (
+                        filteredAreas.map((area) => (
+                            <button
+                                key={area.id}
+                                type="button"
+                                onClick={() => handleSelect(area.id)}
+                                className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white ${value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
+                                    }`}
+                            >
+                                {area.name}
+                            </button>
+                        ))
+                    ) : (
+                        <div className="px-3 py-2 text-gray-500 dark:text-gray-400">
+                            No areas found
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function PickAndDropListing() {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { user } = useAuth();
     const [services, setServices] = useState<PickAndDropService[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
+
     const [filters, setFilters] = useState({
-        start_location: '',
-        end_location: '',
-        driver_gender: '',
-        min_spaces: '',
-        departure_date: '',
-        departure_time: '',
+        start_location: searchParams.get('start_location') || '',
+        end_location: searchParams.get('end_location') || '',
+        driver_gender: searchParams.get('driver_gender') || '',
+        min_spaces: searchParams.get('min_spaces') || '',
+        departure_date: searchParams.get('departure_date') || '',
+        departure_time: searchParams.get('departure_time') || '',
     });
     const [startAreaId, setStartAreaId] = useState<number | undefined>(undefined);
     const [endAreaId, setEndAreaId] = useState<number | undefined>(undefined);
-    const [showFilters, setShowFilters] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
     const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(12);
     const [total, setTotal] = useState(0);
@@ -76,8 +223,29 @@ export default function PickAndDropListing() {
     const areasByCity = karachiCityId ? { [karachiCityId]: karachiAreas } : {};
 
     useEffect(() => {
+        // Sync filters to URL
+        const params = new URLSearchParams(window.location.search); // Use existing params
+
+        if (currentPage > 1) {
+            params.set('page', currentPage.toString());
+        } else {
+            params.delete('page');
+        }
+
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) {
+                params.set(key, value);
+            } else {
+                params.delete(key);
+            }
+        });
+
+        setSearchParams(params, { replace: true });
+    }, [filters, currentPage, setSearchParams]);
+
+    useEffect(() => {
         setCurrentPage(1); // Reset to page 1 when filters change
-    }, [filters, searchTerm]);
+    }, [filters]);
 
     const fetchServices = useCallback(async () => {
         setLoading(true);
@@ -113,24 +281,17 @@ export default function PickAndDropListing() {
             const data = await response.json();
 
             // Handle paginated response from Laravel Resource collection
-            // Laravel returns: { data: [...], links: {...}, meta: { current_page, last_page, per_page, total, ... } }
             if (data.data && Array.isArray(data.data)) {
                 setServices(data.data);
-                // Check for pagination metadata in meta object (Laravel Resource collection format)
+                // Check for pagination metadata
                 if (data.meta && typeof data.meta === 'object') {
-                    // Handle case where meta values might be arrays (extract first value)
-                    const lastPage = Array.isArray(data.meta.last_page)
-                        ? data.meta.last_page[0]
-                        : data.meta.last_page;
-                    const total = Array.isArray(data.meta.total)
-                        ? data.meta.total[0]
-                        : data.meta.total;
+                    const lastPage = Array.isArray(data.meta.last_page) ? data.meta.last_page[0] : data.meta.last_page;
+                    const total = Array.isArray(data.meta.total) ? data.meta.total[0] : data.meta.total;
 
                     if (lastPage !== undefined) {
                         setTotalPages(Number(lastPage) || 1);
                         setTotal(Number(total) || 0);
                     } else {
-                        // If no pagination metadata, check if we got a full page
                         if (data.data.length === perPage) {
                             setTotalPages(2);
                             setTotal(data.data.length);
@@ -140,13 +301,11 @@ export default function PickAndDropListing() {
                         }
                     }
                 } else if (data.last_page !== undefined) {
-                    // Fallback: check if pagination data is at root level
                     const lastPage = Array.isArray(data.last_page) ? data.last_page[0] : data.last_page;
                     const total = Array.isArray(data.total) ? data.total[0] : data.total;
                     setTotalPages(Number(lastPage) || 1);
                     setTotal(Number(total) || 0);
                 } else {
-                    // If no pagination metadata, check if we got a full page
                     if (data.data.length === perPage) {
                         setTotalPages(2);
                         setTotal(data.data.length);
@@ -156,7 +315,6 @@ export default function PickAndDropListing() {
                     }
                 }
             } else if (Array.isArray(data)) {
-                // Fallback for non-paginated response
                 setServices(data);
                 setTotalPages(1);
                 setTotal(data.length);
@@ -203,17 +361,19 @@ export default function PickAndDropListing() {
         fetchKarachiAreas();
     }, []);
 
-    // Update filters when area selections change
+    // Sync state IDs with filter names once areas are loaded (initial load only)
     useEffect(() => {
-        const startArea = startAreaId ? karachiAreas.find(a => a.id === startAreaId) : null;
-        const endArea = endAreaId ? karachiAreas.find(a => a.id === endAreaId) : null;
-        setFilters(prev => ({
-            ...prev,
-            start_location: startArea ? startArea.name : '',
-            end_location: endArea ? endArea.name : '',
-        }));
-    }, [startAreaId, endAreaId, karachiAreas]);
-
+        if (karachiAreas.length > 0) {
+            if (filters.start_location && !startAreaId) {
+                const area = karachiAreas.find(a => a.name === filters.start_location);
+                if (area) setStartAreaId(area.id);
+            }
+            if (filters.end_location && !endAreaId) {
+                const area = karachiAreas.find(a => a.name === filters.end_location);
+                if (area) setEndAreaId(area.id);
+            }
+        }
+    }, [karachiAreas, filters.start_location, filters.end_location]);
 
     const clearFilters = () => {
         setFilters({
@@ -224,7 +384,8 @@ export default function PickAndDropListing() {
             departure_date: '',
             departure_time: '',
         });
-        setSearchTerm('');
+        setStartAreaId(undefined);
+        setEndAreaId(undefined);
     };
 
     // Get the base URL for Open Graph image
@@ -276,218 +437,88 @@ export default function PickAndDropListing() {
 
                     {/* Search and Filters */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                        <div className="flex flex-col md:flex-row gap-4 mb-4">
-                            <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <SearchableAreaSelect
+                                value={startAreaId}
+                                onChange={(id) => {
+                                    setStartAreaId(id);
+                                    const area = id ? karachiAreas.find(a => a.id === id) : null;
+                                    setFilters(prev => ({
+                                        ...prev,
+                                        start_location: area ? area.name : ''
+                                    }));
+                                }}
+                                cityId={karachiCityId}
+                                areas={areasByCity}
+                                label="Start Location"
+                                placeholder="From..."
+                            />
+                            <SearchableAreaSelect
+                                value={endAreaId}
+                                onChange={(id) => {
+                                    setEndAreaId(id);
+                                    const area = id ? karachiAreas.find(a => a.id === id) : null;
+                                    setFilters(prev => ({
+                                        ...prev,
+                                        end_location: area ? area.name : ''
+                                    }));
+                                }}
+                                cityId={karachiCityId}
+                                areas={areasByCity}
+                                label="End Location"
+                                placeholder="To..."
+                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Driver Gender
+                                </label>
+                                <select
+                                    value={filters.driver_gender}
+                                    onChange={(e) => setFilters({ ...filters, driver_gender: e.target.value })}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                >
+                                    <option value="">All</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                    <Clock className="h-4 w-4 text-gray-500" />
+                                    Departure Time
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="time"
+                                        value={filters.departure_time}
+                                        onChange={(e) => setFilters({ ...filters, departure_time: e.target.value })}
+                                        className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    />
+                                    {filters.departure_time && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setFilters({ ...filters, departure_time: '' })}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                            title="Clear time filter"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Departure Date
+                                </label>
                                 <input
-                                    type="text"
-                                    placeholder="Search by start or end location..."
-                                    value={searchTerm}
-                                    onChange={(e) => {
-                                        setSearchTerm(e.target.value);
-                                        setFilters({ ...filters, start_location: e.target.value });
-                                    }}
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    type="date"
+                                    value={filters.departure_date}
+                                    onChange={(e) => setFilters({ ...filters, departure_date: e.target.value })}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
                                 />
                             </div>
-                            <button
-                                onClick={() => setShowFilters(!showFilters)}
-                                className="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                            >
-                                <Filter className="h-5 w-5" />
-                                Filters
-                            </button>
                         </div>
 
-                        {showFilters && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                {(() => {
-                                    const SearchableAreaSelect = ({
-                                        value,
-                                        onChange,
-                                        cityId,
-                                        areas,
-                                        label,
-                                        placeholder = "Search or select area..."
-                                    }: {
-                                        value: number | undefined;
-                                        onChange: (areaId: number | undefined) => void;
-                                        cityId: number | undefined;
-                                        areas: { [cityId: number]: { id: number; name: string }[] };
-                                        label: string;
-                                        placeholder?: string;
-                                    }) => {
-                                        const [isOpen, setIsOpen] = useState(false);
-                                        const [searchTerm, setSearchTerm] = useState('');
-                                        const dropdownRef = useRef<HTMLDivElement>(null);
-
-                                        const availableAreas = cityId ? (areas[cityId] || []) : [];
-                                        const selectedArea = value ? availableAreas.find(a => a.id === value) : null;
-
-                                        useEffect(() => {
-                                            function handleClickOutside(event: MouseEvent) {
-                                                if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                                                    setIsOpen(false);
-                                                }
-                                            }
-                                            document.addEventListener('mousedown', handleClickOutside);
-                                            return () => document.removeEventListener('mousedown', handleClickOutside);
-                                        }, []);
-
-                                        const filteredAreas = availableAreas.filter(area =>
-                                            area.name.toLowerCase().includes(searchTerm.toLowerCase())
-                                        );
-
-                                        const handleSelect = (areaId: number) => {
-                                            onChange(areaId);
-                                            setIsOpen(false);
-                                            setSearchTerm('');
-                                        };
-
-                                        const handleClear = () => {
-                                            onChange(undefined);
-                                            setSearchTerm('');
-                                        };
-
-                                        return (
-                                            <div className="relative" ref={dropdownRef}>
-                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                    {label}
-                                                </label>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        value={selectedArea ? selectedArea.name : searchTerm}
-                                                        onChange={(e) => {
-                                                            setSearchTerm(e.target.value);
-                                                            setIsOpen(true);
-                                                            if (!e.target.value) {
-                                                                onChange(undefined);
-                                                            }
-                                                        }}
-                                                        onFocus={() => {
-                                                            if (cityId) {
-                                                                setIsOpen(true);
-                                                            }
-                                                        }}
-                                                        placeholder={placeholder}
-                                                        disabled={!cityId}
-                                                        className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    />
-                                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                                                        {selectedArea && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleClear();
-                                                                }}
-                                                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                                            >
-                                                                <X className="h-4 w-4" />
-                                                            </button>
-                                                        )}
-                                                        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                                                    </div>
-                                                </div>
-
-                                                {isOpen && cityId && availableAreas.length > 0 && (
-                                                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
-                                                        {filteredAreas.length > 0 ? (
-                                                            filteredAreas.map((area) => (
-                                                                <button
-                                                                    key={area.id}
-                                                                    type="button"
-                                                                    onClick={() => handleSelect(area.id)}
-                                                                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white ${value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
-                                                                        }`}
-                                                                >
-                                                                    {area.name}
-                                                                </button>
-                                                            ))
-                                                        ) : (
-                                                            <div className="px-3 py-2 text-gray-500 dark:text-gray-400">
-                                                                No areas found
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    };
-
-                                    return (
-                                        <>
-                                            <SearchableAreaSelect
-                                                value={startAreaId}
-                                                onChange={setStartAreaId}
-                                                cityId={karachiCityId}
-                                                areas={areasByCity}
-                                                label="Start Location"
-                                                placeholder="From..."
-                                            />
-                                            <SearchableAreaSelect
-                                                value={endAreaId}
-                                                onChange={setEndAreaId}
-                                                cityId={karachiCityId}
-                                                areas={areasByCity}
-                                                label="End Location"
-                                                placeholder="To..."
-                                            />
-                                        </>
-                                    );
-                                })()}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Driver Gender
-                                    </label>
-                                    <select
-                                        value={filters.driver_gender}
-                                        onChange={(e) => setFilters({ ...filters, driver_gender: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
-                                    >
-                                        <option value="">All</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
-                                        <Clock className="h-4 w-4 text-gray-500" />
-                                        Departure Time
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type="time"
-                                            value={filters.departure_time}
-                                            onChange={(e) => setFilters({ ...filters, departure_time: e.target.value })}
-                                            className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
-                                        />
-                                        {filters.departure_time && (
-                                            <button
-                                                type="button"
-                                                onClick={() => setFilters({ ...filters, departure_time: '' })}
-                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                                title="Clear time filter"
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Departure Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={filters.departure_date}
-                                        onChange={(e) => setFilters({ ...filters, departure_date: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
-                                    />
-                                </div>
-                            </div>
-                        )}
 
                         {(filters.start_location || filters.end_location || filters.driver_gender || filters.departure_date || filters.departure_time) && (
                             <div className="mt-4 flex items-center gap-2">
@@ -657,4 +688,3 @@ export default function PickAndDropListing() {
         </div>
     );
 }
-

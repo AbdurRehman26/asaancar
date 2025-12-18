@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
 import DeleteUser from '@/components/delete-user';
-import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,11 +59,9 @@ export default function Profile({ auth }: { auth: SharedData['auth'] }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Profile information" description="Update your name and email address" />
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">

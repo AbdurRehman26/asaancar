@@ -4,7 +4,7 @@ import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
-import UniversalCarFilter from '../components/universal-car-filter';
+import PickAndDropFilter from '../components/pick-and-drop-filter';
 import PickAndDropCard, { PickAndDropService } from '@/components/PickAndDropCard';
 // Animation utility for reveal on scroll
 const useRevealOnScroll = () => {
@@ -570,13 +570,13 @@ export default function Welcome() {
             <main>
                 {/* Hero Section with Search */}
                 <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                    <div className="mx-auto max-w-7xl px-6 py-18 sm:py-24 lg:px-8">
+                    <div className="mx-auto max-w-7xl px-6 sm:py-12 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h1 className="text-4xl font-bold mt-10 tracking-tight text-gray-900 sm:text-6xl dark:text-white">
-                                Search Your Rental Car
+                                Pick and Drop
                             </h1>
                             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                Find the perfect car for your journey with AsaanCar - <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted car rental service</span>.
+                                Find the perfect car for your journey with AsaanCar - <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted pick & drop and car rental service</span>.
                             </p>
 
                             {/* Karachi Availability Notice */}
@@ -606,21 +606,15 @@ export default function Welcome() {
 
                         {/* Search Filter - Full Screen */}
                         <div className="mt-10 w-full max-w-none">
-                            <UniversalCarFilter
+                            <PickAndDropFilter
                                 onSearch={(filters) => {
                                     const params = new URLSearchParams();
                                     Object.entries(filters).forEach(([key, value]) => {
                                         if (value) {
-                                            if (Array.isArray(value)) {
-                                                if (value.length > 0) {
-                                                    params.set(key, value.join(','));
-                                                }
-                                            } else {
-                                                params.set(key, value.toString());
-                                            }
+                                            params.set(key, value.toString());
                                         }
                                     });
-                                    navigate(`/cars?${params.toString()}`);
+                                    navigate(`/pick-and-drop?${params.toString()}`);
                                 }}
                                 fullWidth={true}
                                 className="w-full max-w-none"

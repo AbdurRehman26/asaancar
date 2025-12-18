@@ -11,7 +11,7 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWi
     const { user } = useAuth();
 
     return (
-        <div className="flex min-h-screen w-full flex-col pt-16">
+        <div>
             {/* Main Navbar */}
             <Navbar
                 auth={{ user }}
