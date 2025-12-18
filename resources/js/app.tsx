@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from '
 import { AuthProvider } from '@/components/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import RoleProtectedRoute from '@/components/RoleProtectedRoute';
 import { initializeTheme } from '@/hooks/use-appearance';
 import CarListing from './pages/car-listing';
 import CarDetail from './pages/car-detail';
@@ -19,7 +18,6 @@ import AdminDashboard from './pages/admin-dashboard';
 import Welcome from './pages/welcome';
 import SignupPage from './pages/signup';
 import CreateStoreForm from './pages/create-store';
-import ProfilePage from './pages/profile';
 import CreateCarPage from './pages/create-car';
 import EditCarPage from './pages/edit-car';
 import LoginPage from './pages/login';
@@ -40,7 +38,7 @@ import PickAndDropChat from './pages/dashboard/PickAndDropChat';
 import NotificationsPage from './pages/notifications';
 
 configureEcho({
-    broadcaster: 'pusher',
+  broadcaster: 'pusher',
 });
 
 function ResetPasswordWrapper() {
@@ -64,87 +62,84 @@ function App() {
       <ToastProvider>
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/cars" element={<CarListing />} />
-          <Route path="/car-detail/:id" element={<CarDetail />} />
-          <Route path="/car-detail/:id/edit" element={<CarDetailWithOffer />} />
-          <Route path="/store/:id" element={<StoreProfile />} />
-          <Route path="/pick-and-drop" element={<PickAndDropListing />} />
-          <Route path="/pick-and-drop/:id" element={<PickAndDropDetail />} />
-          <Route path="/bookings" element={
-            <ProtectedRoute>
-              <Bookings />
-            </ProtectedRoute>
-          } />
-          <Route path="/notifications" element={
-            <ProtectedRoute>
-              <NotificationsPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/chat" element={
-            <ProtectedRoute>
-              <Chat />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard" element={
-            <RoleProtectedRoute allowedRoles={['admin', 'store_owner']}>
-              <Dashboard />
-            </RoleProtectedRoute>
-          }>
-            <Route index element={<Dashboard.Home />} />
-            <Route path="cars" element={<Dashboard.CarListings />} />
-            <Route path="messages" element={<Dashboard.Messages />} />
-            <Route path="rental-chat" element={<RentalChat />} />
-            <Route path="pick-and-drop-chat" element={<PickAndDropChat />} />
-            <Route path="inquiries" element={<Dashboard.Inquiries />} />
-            <Route path="stores" element={<DashboardStoresPage />} />
-            <Route path="create-store" element={<CreateStoreForm />} />
-            <Route path="bookings" element={<Bookings />} />
-            <Route path="store-bookings" element={<Dashboard.StoreBookings />} />
-            <Route path="pick-and-drop" element={<PickAndDropPage />} />
-            <Route path="pick-and-drop/create" element={<PickAndDropForm />} />
-            <Route path="pick-and-drop/:id/edit" element={<PickAndDropForm />} />
-          </Route>
-          <Route path="/admin-dashboard" element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/stores" element={
-            <ProtectedRoute>
-              <DashboardStoresPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/stores/:id/edit" element={
-            <ProtectedRoute>
-              <StoreEditPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          } />
-          <Route path="/create-car" element={
-            <ProtectedRoute>
-              <CreateCarPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/edit-car/:id" element={
-            <ProtectedRoute>
-              <EditCarPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/reset-password/:token" element={<ResetPasswordWrapper />} />
-          <Route path="/email/verify/:id/:hash" element={<EmailVerificationSuccess />} />
-          <Route path="/api/email/verify/:id/:hash" element={<EmailVerificationSuccess />} />
-          {/* Add more routes as needed */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/" element={<Welcome />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/cars" element={<CarListing />} />
+            <Route path="/car-detail/:id" element={<CarDetail />} />
+            <Route path="/car-detail/:id/edit" element={<CarDetailWithOffer />} />
+            <Route path="/store/:id" element={<StoreProfile />} />
+            <Route path="/pick-and-drop" element={<PickAndDropListing />} />
+            <Route path="/pick-and-drop/:id" element={<PickAndDropDetail />} />
+            <Route path="/bookings" element={
+              <ProtectedRoute>
+                <Bookings />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chat" element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard.Home />} />
+              <Route path="cars" element={<Dashboard.CarListings />} />
+              <Route path="messages" element={<Dashboard.Messages />} />
+              <Route path="rental-chat" element={<RentalChat />} />
+              <Route path="pick-and-drop-chat" element={<PickAndDropChat />} />
+              <Route path="inquiries" element={<Dashboard.Inquiries />} />
+              <Route path="stores" element={<DashboardStoresPage />} />
+              <Route path="create-store" element={<CreateStoreForm />} />
+              <Route path="bookings" element={<Bookings />} />
+              <Route path="store-bookings" element={<Dashboard.StoreBookings />} />
+              <Route path="pick-and-drop" element={<PickAndDropPage />} />
+              <Route path="pick-and-drop/create" element={<PickAndDropForm />} />
+              <Route path="profile" element={<Dashboard.Profile />} />
+              <Route path="pick-and-drop/:id/edit" element={<PickAndDropForm />} />
+            </Route>
+            <Route path="/admin-dashboard" element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/stores" element={
+              <ProtectedRoute>
+                <DashboardStoresPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/stores/:id/edit" element={
+              <ProtectedRoute>
+                <StoreEditPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
+            <Route path="/create-car" element={
+              <ProtectedRoute>
+                <CreateCarPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-car/:id" element={
+              <ProtectedRoute>
+                <EditCarPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/reset-password/:token" element={<ResetPasswordWrapper />} />
+            <Route path="/email/verify/:id/:hash" element={<EmailVerificationSuccess />} />
+            <Route path="/api/email/verify/:id/:hash" element={<EmailVerificationSuccess />} />
+            {/* Add more routes as needed */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </ToastProvider>

@@ -4,9 +4,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
-import Navbar from '@/components/navbar';
+import { type BreadcrumbItem } from '@/types';
+import AppLayout from '@/layouts/app-layout';
 import { apiFetch } from '@/lib/utils';
 import ImageUpload, { UploadedImage } from '@/components/ImageUpload';
+
+const breadcrumbs: BreadcrumbItem[] = [
+  {
+    title: 'Profile',
+    href: '/dashboard/profile',
+  },
+];
 
 export default function ProfilePage() {
   const { user, setUser } = useAuth();
@@ -92,10 +100,9 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
-      <Navbar />
-      <div className="max-w-xl mx-auto py-12 px-4 mt-10">
-        <h1 className="text-2xl font-bold mb-8">Profile</h1>
+    <AppLayout breadcrumbs={breadcrumbs}>
+      <div className="max-w-xl py-6 px-4">
+        <h1 className="text-2xl font-bold mb-8 text-[#7e246c]">Profile Settings</h1>
         {/* Profile info form */}
         <form onSubmit={handleProfileSubmit} className="space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-10">
           <h2 className="text-lg font-semibold mb-2">Personal Information</h2>
@@ -201,6 +208,6 @@ export default function ProfilePage() {
           </div>
         </form>
       </div>
-    </div>
+    </AppLayout>
   );
 }

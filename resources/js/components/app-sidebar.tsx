@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Folder, MessageSquare, Store, BookOpen, Mail, MapPin, Zap } from 'lucide-react';
+import { LayoutGrid, Folder, MessageSquare, Store, BookOpen, Mail, MapPin, Zap, User } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 
@@ -105,6 +105,14 @@ export function AppSidebar() {
                                 <Link to="/dashboard/inquiries">
                                     <Mail className="mr-2" />
                                     Inquiries
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton size="lg" asChild>
+                                <Link to="/dashboard/profile">
+                                    <User className="mr-2" />
+                                    Profile
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>

@@ -6,6 +6,7 @@ import Messages from './dashboard/Messages';
 import Inquiries from './dashboard/Inquiries';
 import Home from './dashboard/Home';
 import StoreBookings from './dashboard/StoreBookings';
+import ProfilePage from './profile';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,3 +29,4 @@ Dashboard.Messages = Messages;
 Dashboard.Inquiries = Inquiries;
 Dashboard.Home = Home;
 Dashboard.StoreBookings = StoreBookings;
+Dashboard.Profile = ProfilePage;
