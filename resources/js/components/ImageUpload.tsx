@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { apiFetch } from '@/lib/utils';
 import { X, Upload } from 'lucide-react';
 
-interface UploadedImage {
+export interface UploadedImage {
   url: string;
   filename: string;
   size: number;
@@ -46,7 +46,7 @@ export default function ImageUpload({
     setUploading(true);
     setError(null);
     setWarning(null);
-    
+
     try {
       const formData = new FormData();
       Array.from(files).forEach((file) => {
@@ -68,7 +68,7 @@ export default function ImageUpload({
           const newImages = [...uploadedImages, ...result.data.uploaded];
           setUploadedImages(newImages);
           onImagesChange(newImages);
-          
+
           // Show warning about failed uploads
           if (result.data.failed.length > 0) {
             const failedFiles = result.data.failed.map((f: FailedUpload) => f.filename).join(', ');
@@ -132,7 +132,7 @@ export default function ImageUpload({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       uploadImages(e.dataTransfer.files);
     }
@@ -202,11 +202,10 @@ export default function ImageUpload({
 
       {/* Upload Area */}
       <div
-        className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-          dragActive
+        className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragActive
             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
             : 'border-gray-300 dark:border-gray-600'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
@@ -220,7 +219,7 @@ export default function ImageUpload({
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           disabled={disabled || uploading}
         />
-        
+
         <div className="flex flex-col items-center space-y-2">
           <Upload className={`w-8 h-8 ${uploading ? 'animate-pulse' : ''}`} />
           <div>
@@ -255,7 +254,7 @@ export default function ImageUpload({
                     }}
                   />
                 </div>
-                
+
                 {/* Delete Button */}
                 <button
                   type="button"
@@ -265,7 +264,7 @@ export default function ImageUpload({
                 >
                   <X className="w-4 h-4" />
                 </button>
-                
+
                 {/* Image Info */}
                 <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   <p className="truncate">{image.filename}</p>

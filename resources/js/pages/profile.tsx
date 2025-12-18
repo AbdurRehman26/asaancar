@@ -6,13 +6,16 @@ import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
 import Navbar from '@/components/navbar';
 import { apiFetch } from '@/lib/utils';
+import ImageUpload, { UploadedImage } from '@/components/ImageUpload';
 
 export default function ProfilePage() {
   const { user, setUser } = useAuth();
   const [profile, setProfile] = useState({
     name: user?.name || '',
     email: user?.email || '',
+    profile_image: user?.profile_image || '',
   });
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -32,9 +35,13 @@ export default function ProfilePage() {
     setProfileSuccess(false);
     setProfileError(null);
     try {
+      const payload = { ...profile };
+      if (uploadedImages.length > 0) {
+        payload.profile_image = uploadedImages[0].url;
+      }
       const res = await apiFetch('/api/settings/profile', {
         method: 'PATCH',
-        body: JSON.stringify(profile),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -42,11 +49,12 @@ export default function ProfilePage() {
       } else {
         setProfileSuccess(true);
         const updated = await res.json();
-        if (setUser) setUser({ ...user, ...updated });
+        // Update user context with new data including profile image
+        if (setUser) setUser({ ...user, ...updated.user });
       }
     } catch (err) {
       console.error(err);
-      setProfileError('Network error' + err);
+      setProfileError('Network error' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setProfileLoading(false);
     }
@@ -67,9 +75,9 @@ export default function ProfilePage() {
         // Handle validation errors
         if (err.errors) {
           const errorMessages = Object.values(err.errors).flat();
-          setPasswordError(errorMessages[0] || 'Password update failed');
+          setPasswordError((errorMessages[0] as string) || 'Password update failed');
         } else {
-          setPasswordError(err.message || 'Password update failed');
+          setPasswordError((err.message as string) || 'Password update failed');
         }
       } else {
         setPasswordSuccess(true);
@@ -77,7 +85,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error(err);
-      setPasswordError('Network error' + err);
+      setPasswordError('Network error' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setPasswordLoading(false);
     }
@@ -91,6 +99,43 @@ export default function ProfilePage() {
         {/* Profile info form */}
         <form onSubmit={handleProfileSubmit} className="space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-10">
           <h2 className="text-lg font-semibold mb-2">Personal Information</h2>
+
+          <div className="flex flex-col items-center justify-center mb-6">
+            <div className="mb-4">
+              {profile.profile_image ? (
+                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                  <img
+                    src={profile.profile_image}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+                    onClick={() => setProfile({ ...profile, profile_image: '' })}
+                  >
+                    X
+                  </Button>
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-4xl font-bold uppercase overflow-hidden">
+                  {profile.name ? profile.name.charAt(0) : 'U'}
+                </div>
+              )}
+            </div>
+
+            <div className="w-full max-w-xs">
+              <Label className="mb-2 block text-center text-sm text-gray-500">Upload New Photo</Label>
+              <ImageUpload
+                onImagesChange={setUploadedImages}
+                maxImages={1}
+                directory="profile-images"
+              />
+            </div>
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input
@@ -102,7 +147,7 @@ export default function ProfilePage() {
               placeholder="Full name"
             />
           </div>
-          {profileError && <InputError className="mt-2" message={profileError} />}
+          {profileError && <InputError className="mt-2" message={profileError || undefined} />}
           <div className="flex items-center gap-4">
             <Button className="bg-[#7e246c] text-white hover:bg-[#6a1f5c] cursor-pointer" disabled={profileLoading}>Save</Button>
             {profileSuccess && <span className="text-green-600 text-sm">Saved!</span>}
@@ -149,7 +194,7 @@ export default function ProfilePage() {
               placeholder="Confirm new password"
             />
           </div>
-          {passwordError && <InputError className="mt-2" message={passwordError} />}
+          {passwordError && <InputError className="mt-2" message={passwordError || undefined} />}
           <div className="flex items-center gap-4">
             <Button className="bg-[#7e246c] text-white hover:bg-[#6a1f5c] cursor-pointer" disabled={passwordLoading}>Change Password</Button>
             {passwordSuccess && <span className="text-green-600 text-sm">Password updated!</span>}

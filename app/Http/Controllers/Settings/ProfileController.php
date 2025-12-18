@@ -39,7 +39,8 @@ class ProfileController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="name", type="string", example="John Doe"),
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com", nullable=true)
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com", nullable=true),
+     *             @OA\Property(property="profile_image", type="string", nullable=true, example="https://example.com/image.jpg")
      *         )
      *     ),
      *     @OA\Response(
@@ -61,6 +62,7 @@ class ProfileController extends Controller
         $user->fill([
             'name' => $data['name'],
             'email' => $data['email'] ?? $user->email,
+            'profile_image' => $data['profile_image'] ?? $user->profile_image,
         ]);
         if ($emailChanged) {
             $user->email_verified_at = null;

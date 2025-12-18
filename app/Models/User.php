@@ -28,6 +28,7 @@ Route::get('/{any}', function () {
  *     @OA\Property(property="email_verified_at", type="string", format="date-time", nullable=true),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
+ *     @OA\Property(property="profile_image", type="string", nullable=true, example="https://example.com/image.jpg"),
  *     @OA\Property(property="store", ref="#/components/schemas/Store")
  * )
  */
@@ -51,6 +52,7 @@ class User extends Authenticatable
         'otp_code',
         'otp_expires_at',
         'is_verified',
+        'profile_image',
     ];
 
     /**

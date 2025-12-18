@@ -8,8 +8,15 @@ use Illuminate\Support\Str;
 
 class S3Service
 {
+    protected $disk;
+
+    public function __construct()
+    {
+        $this->disk = env('FILESYSTEM_DISK') === 's3' ? 's3' : 'public';
+    }
+
     /**
-     * Upload a file to S3
+     * Upload a file to Storage (S3 or Public)
      *
      * @param UploadedFile|null $file
      * @param string $directory
@@ -32,17 +39,17 @@ class S3Service
             // Create the full path
             $path = $directory . '/' . $filename;
 
-            // Upload to S3
-            $uploaded = Storage::disk('s3')->put($path, $file->get());
+            // Upload to Storage
+            $uploaded = Storage::disk($this->disk)->put($path, $file->get());
 
             if ($uploaded) {
                 // Return the full URL
-                return Storage::disk('s3')->url($path);
+                return Storage::disk($this->disk)->url($path);
             }
 
             return null;
         } catch (\Exception $e) {
-            \Log::error('S3 upload failed: ' . $e->getMessage());
+            \Log::error('Storage upload failed: ' . $e->getMessage());
             return null;
         }
     }
@@ -81,14 +88,21 @@ class S3Service
         try {
             // Extract the path from the URL
             $path = parse_url($url, PHP_URL_PATH);
+            
             if ($path) {
-                // Remove the bucket name from the path if present
+                // If using public disk, we need to remove '/storage' prefix if present
+                if ($this->disk === 'public' && strpos($path, '/storage') === 0) {
+                    $path = substr($path, 8); // Remove '/storage'
+                }
+                
+                // Remove leading slash
                 $path = ltrim($path, '/');
-                return Storage::disk('s3')->delete($path);
+                
+                return Storage::disk($this->disk)->delete($path);
             }
             return false;
         } catch (\Exception $e) {
-            \Log::error('S3 delete failed: ' . $e->getMessage());
+            \Log::error('Storage delete failed: ' . $e->getMessage());
             return false;
         }
     }
