@@ -53,7 +53,8 @@ class PickAndDropController extends Controller
     public function index(Request $request)
     {
         $query = PickAndDrop::with(['user', 'car', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->orderBy('created_at', 'desc');
 
         // Filter by start location (including stops, stop areas, and stop cities)
         if ($request->has('start_location')) {
@@ -113,26 +114,26 @@ class PickAndDropController extends Controller
                 if (count($timeParts) === 2) {
                     $hour = (int)$timeParts[0];
                     $minute = (int)$timeParts[1];
-                    
+
                     // Calculate 1 hour before and after
                     $oneHourBeforeHour = $hour - 1;
                     $oneHourBeforeMinute = $minute;
                     $oneHourAfterHour = $hour + 1;
                     $oneHourAfterMinute = $minute;
-                    
+
                     // Handle hour wraparound (before midnight)
                     if ($oneHourBeforeHour < 0) {
                         $oneHourBeforeHour = 23;
                     }
-                    
+
                     // Handle hour wraparound (after midnight)
                     if ($oneHourAfterHour > 23) {
                         $oneHourAfterHour = 0;
                     }
-                    
+
                     $oneHourBefore = sprintf('%02d:%02d:00', $oneHourBeforeHour, $oneHourBeforeMinute);
                     $oneHourAfter = sprintf('%02d:%02d:00', $oneHourAfterHour, $oneHourAfterMinute);
-                    
+
                     // If the window crosses midnight (e.g., 23:00 to 01:00), we need special handling
                     if ($oneHourBeforeHour > $oneHourAfterHour) {
                         // Window crosses midnight - use OR condition
@@ -249,7 +250,7 @@ class PickAndDropController extends Controller
         if ($request->has('stops') && is_array($request->stops)) {
             // Get Karachi city ID
             $karachi = \App\Models\City::where('name', 'Karachi')->first();
-            
+
             foreach ($request->stops as $stop) {
                 PickAndDropStop::create([
                     'pick_and_drop_service_id' => $service->id,
@@ -373,7 +374,7 @@ class PickAndDropController extends Controller
             if (is_array($request->stops)) {
                 // Get Karachi city ID
                 $karachi = \App\Models\City::where('name', 'Karachi')->first();
-                
+
                 foreach ($request->stops as $stop) {
                     PickAndDropStop::create([
                         'pick_and_drop_service_id' => $service->id,
@@ -519,26 +520,26 @@ class PickAndDropController extends Controller
                 if (count($timeParts) === 2) {
                     $hour = (int)$timeParts[0];
                     $minute = (int)$timeParts[1];
-                    
+
                     // Calculate 1 hour before and after
                     $oneHourBeforeHour = $hour - 1;
                     $oneHourBeforeMinute = $minute;
                     $oneHourAfterHour = $hour + 1;
                     $oneHourAfterMinute = $minute;
-                    
+
                     // Handle hour wraparound (before midnight)
                     if ($oneHourBeforeHour < 0) {
                         $oneHourBeforeHour = 23;
                     }
-                    
+
                     // Handle hour wraparound (after midnight)
                     if ($oneHourAfterHour > 23) {
                         $oneHourAfterHour = 0;
                     }
-                    
+
                     $oneHourBefore = sprintf('%02d:%02d:00', $oneHourBeforeHour, $oneHourBeforeMinute);
                     $oneHourAfter = sprintf('%02d:%02d:00', $oneHourAfterHour, $oneHourAfterMinute);
-                    
+
                     // If the window crosses midnight (e.g., 23:00 to 01:00), we need special handling
                     if ($oneHourBeforeHour > $oneHourAfterHour) {
                         // Window crosses midnight - use OR condition
