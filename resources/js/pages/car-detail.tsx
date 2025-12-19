@@ -273,7 +273,7 @@ export default function CarDetailPage() {
                 setInquiryStatus('error');
                 setInquiryError(data.message || 'Failed to send inquiry.');
                 showError('Inquiry Failed', data.message || 'Failed to send inquiry. Please try again.');
-                
+
                 // Clear error message after 5 seconds
                 setTimeout(() => {
                     setInquiryStatus('idle');
@@ -283,7 +283,7 @@ export default function CarDetailPage() {
                 setInquiryStatus('success');
                 setInquiry({ name: '', contact: '', message: '' });
                 showSuccess('Inquiry Sent', 'Your inquiry has been sent successfully to the store owner!');
-                
+
                 // Clear success message after 5 seconds
                 setTimeout(() => {
                     setInquiryStatus('idle');
@@ -293,7 +293,7 @@ export default function CarDetailPage() {
             setInquiryStatus('error');
             setInquiryError('Network error.');
             showError('Network Error', 'Unable to send inquiry. Please check your internet connection and try again.');
-            
+
             // Clear error message after 5 seconds
             setTimeout(() => {
                 setInquiryStatus('idle');
@@ -308,7 +308,6 @@ export default function CarDetailPage() {
               {/* Navbar */}
               <Navbar auth={{ user }} />
               <div className="px-2 py-10 md:px-8">
-                  <div className="mb-2 text-xs text-gray-400 dark:text-neutral-400">Car ID: {carId}</div>
                   <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-lg md:flex-row dark:bg-gray-800/80">
                       {/* Left: Car Image & Rate Details */}
                       <div className="flex flex-col gap-8 p-8 md:w-1/2">
@@ -550,7 +549,7 @@ export default function CarDetailPage() {
                                       refillTank={refillTank}
                                       setRefillTank={setRefillTank}
                                   />
-                                  
+
                                   {/* Send an Inquiry to Store Owner - Only show when user is not logged in */}
                                   {!user && (
                                       <div className="rounded-xl border border-[#7e246c]/30 bg-white p-6 shadow dark:bg-gray-900">

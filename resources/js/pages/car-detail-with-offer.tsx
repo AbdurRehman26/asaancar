@@ -163,7 +163,6 @@ export default function CarDetailWithOfferPage() {
       <div className="mx-24 px-0 py-1">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <div className="text-xs text-gray-400 dark:text-neutral-400 mb-2">Car ID: {carId}</div>
             <h2 className="text-2xl font-bold text-[#7e246c] dark:text-white">Car Rate Management</h2>
           </div>
           <Link
@@ -343,7 +342,7 @@ export default function CarDetailWithOfferPage() {
                     {isEditing ? 'Cancel' : 'Edit'}
                   </button>
                 </div>
-                
+
                 <div className="space-y-4">
                   {/* Currency */}
                   <div>
