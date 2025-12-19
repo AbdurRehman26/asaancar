@@ -1,10 +1,14 @@
 export interface Conversation {
-  id: string;
+  id: number | string;
   type: string;
-  booking_id?: string;
-  store?: { name?: string };
-  store_id?: string;
-  unread_count?: number;
+  booking_id?: number | string;
+  store_id?: number | string;
+  store?: {
+    name?: string;
+  };
   last_message?: string | object;
-  updated_at?: string | object;
-} 
+  unread_count?: number;
+  updated_at: string | object;
+  created_at?: string;
+  formatted_time?: string;
+}

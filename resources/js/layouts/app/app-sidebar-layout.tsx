@@ -6,9 +6,11 @@ import Navbar from '@/components/navbar';
 import { type BreadcrumbItem } from '@/types';
 import { type PropsWithChildren } from 'react';
 import { useAuth } from '@/components/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
     const { user } = useAuth();
+    const isMobile = useIsMobile();
 
     return (
         <div>
@@ -17,10 +19,10 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWi
                 auth={{ user }}
             />
             {/* Sidebar Layout */}
-            <div className="flex flex-1 ml-64 mt-2.5">
+            <div className={`flex flex-1 mt-2.5 ${isMobile ? 'ml-0' : 'ml-64'}`}>
                 <AppShell variant="sidebar">
-                    <AppSidebar />
-                    <AppContent variant="sidebar" className="overflow-x-hidden">
+                    {!isMobile && <AppSidebar />}
+                    <AppContent variant="sidebar" className={`overflow-x-hidden ${isMobile ? 'mx-auto max-w-7xl' : ''}`}>
                         <AppSidebarHeader breadcrumbs={breadcrumbs} />
                         {children}
                     </AppContent>

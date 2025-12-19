@@ -13,7 +13,7 @@ export default function Home() {
     // Fetch user stores
     useEffect(() => {
         if (!user) return;
-        
+
         fetch('/api/customer/stores', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
@@ -34,7 +34,7 @@ export default function Home() {
             try {
                 const token = localStorage.getItem('token');
                 const params = new URLSearchParams();
-                
+
                 // Add store filter if selected
                 if (selectedStore) {
                     params.append('store_id', selectedStore.id.toString());
@@ -151,7 +151,7 @@ export default function Home() {
     }, [selectedStore, user]);
 
     return (
-        <div className="max-w-7xl sm:px-8 lg:px-12 py-6">
+        <div className="max-w-7xl px-4 sm:px-8 lg:px-12 py-6">
             {/* Store Filter Dropdown */}
             {userStores.length > 0 && (
                 <div className="mb-6">

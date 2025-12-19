@@ -151,7 +151,7 @@ export default function Inquiries() {
 
     return (
         <ErrorBoundary>
-            <div className="max-w-7xl sm:px-8 lg:px-12 py-6">
+            <div className="max-w-7xl px-4 sm:px-8 lg:px-12 py-6">
                 {/* Store Selection Dropdown */}
                 {userStores.length > 0 && (
                     <div className="mb-6">

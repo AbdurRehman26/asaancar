@@ -77,7 +77,7 @@ export default function StoreBookings() {
     }
 
     return (
-        <div className="max-w-7xl sm:px-8 lg:px-12 py-6">
+        <div className="max-w-7xl px-4 sm:px-8 lg:px-12 py-6">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-[#7e246c] dark:text-white">Store Bookings</h2>
             </div>
@@ -168,13 +168,12 @@ export default function StoreBookings() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                                booking.status === 'confirmed'
+                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${booking.status === 'confirmed'
                                                     ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                                     : booking.status === 'pending'
-                                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                            }`}>
+                                                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                                }`}>
                                                 {booking.status}
                                             </span>
                                         </td>

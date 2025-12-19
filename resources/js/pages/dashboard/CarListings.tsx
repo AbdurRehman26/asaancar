@@ -134,25 +134,25 @@ export default function CarListings() {
         }
     }, [selectedStore, perPageState, updateURLParams]);
 
-  // Handle clear filters
-  const handleClearFilters = useCallback(() => {
-    const defaultFilters: DashboardFilters = {
-      brand_id: '',
-      type_id: '',
-      store_id: '',
-      transmission: '',
-      fuel_type: '',
-      min_seats: '',
-      min_price: '',
-      max_price: '',
-      tag_ids: [],
-    };
-    setFilters(defaultFilters);
-    setCurrentPage(1);
-    updateURLParams(defaultFilters, 1);
-  }, [updateURLParams]);
+    // Handle clear filters
+    const handleClearFilters = useCallback(() => {
+        const defaultFilters: DashboardFilters = {
+            brand_id: '',
+            type_id: '',
+            store_id: '',
+            transmission: '',
+            fuel_type: '',
+            min_seats: '',
+            min_price: '',
+            max_price: '',
+            tag_ids: [],
+        };
+        setFilters(defaultFilters);
+        setCurrentPage(1);
+        updateURLParams(defaultFilters, 1);
+    }, [updateURLParams]);
 
-  // (No role-based redirects)
+    // (No role-based redirects)
 
     useEffect(() => {
         // Fetch stores for the user
@@ -218,7 +218,7 @@ export default function CarListings() {
     }
 
     return (
-        <div className="max-w-7xl sm:px-8 lg:px-12 py-6">
+        <div className="max-w-7xl px-4 sm:px-8 lg:px-12 py-6">
             {/* Add New Car Button - Above everything */}
             <div className="mb-6">
                 <Button

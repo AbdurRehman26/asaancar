@@ -79,7 +79,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
   }, []);
 
   return (
-    <div className="bg-white dark:bg-gray-800/80 border-2 border-[#7e246c] rounded-lg mx-0 my-4 w-full max-w-none relative">
+    <div className="bg-white dark:bg-gray-800/80 border-2 border-[#7e246c] rounded-lg mx-0 my-4 w-full max-w-none relative pb-16 sm:pb-4">
       <div className="px-4 py-4 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 w-full">
           <div>
@@ -87,7 +87,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <select
               value={filters.brand_id}
               onChange={(e) => {
-                const newFilters = {...filters, brand_id: e.target.value};
+                const newFilters = { ...filters, brand_id: e.target.value };
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
@@ -107,7 +107,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <select
               value={filters.type_id}
               onChange={(e) => {
-                const newFilters = {...filters, type_id: e.target.value};
+                const newFilters = { ...filters, type_id: e.target.value };
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
@@ -127,7 +127,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <select
               value={filters.transmission}
               onChange={(e) => {
-                const newFilters = {...filters, transmission: e.target.value};
+                const newFilters = { ...filters, transmission: e.target.value };
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
@@ -143,7 +143,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <select
               value={filters.fuel_type}
               onChange={(e) => {
-                const newFilters = {...filters, fuel_type: e.target.value};
+                const newFilters = { ...filters, fuel_type: e.target.value };
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
@@ -160,7 +160,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <select
               value={filters.min_seats}
               onChange={(e) => {
-                const newFilters = {...filters, min_seats: e.target.value};
+                const newFilters = { ...filters, min_seats: e.target.value };
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
@@ -178,7 +178,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <select
               value={filters.min_price || ''}
               onChange={(e) => {
-                const newFilters = {...filters, min_price: e.target.value};
+                const newFilters = { ...filters, min_price: e.target.value };
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
@@ -200,7 +200,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             <select
               value={filters.max_price}
               onChange={(e) => {
-                const newFilters = {...filters, max_price: e.target.value};
+                const newFilters = { ...filters, max_price: e.target.value };
                 setFilters(newFilters);
                 handleSearch(newFilters);
               }}
@@ -219,7 +219,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
           </div>
         </div>
       </div>
-      <div className="absolute bottom-4 right-4">
+      <div className="px-4 pb-4 sm:absolute sm:bottom-4 sm:right-4 sm:p-0 w-full sm:w-auto">
         <button
           onClick={() => {
             if (onClearFilters) {
@@ -242,7 +242,7 @@ const CarFilters: React.FC<CarFiltersProps> = ({
             }
           }}
           disabled={loading}
-          className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 flex items-center justify-center shadow"
+          className="w-full sm:w-auto px-4 py-2 bg-gray-500 text-white font-semibold rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 flex items-center justify-center shadow"
           title="Clear all filters"
         >
           Clear

@@ -91,7 +91,7 @@ export default function ProfilePage() {
   };
 
   return (
-      <div className="max-w-xl py-6 px-4">
+      <div className="w-full py-6 px-4">
           {/* Profile info form */}
           <form onSubmit={handleProfileSubmit}
                 className="space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-10">
