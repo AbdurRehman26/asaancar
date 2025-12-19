@@ -10,7 +10,7 @@ import ProfilePage from './profile';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: '',
         href: '/dashboard',
     },
 ];
