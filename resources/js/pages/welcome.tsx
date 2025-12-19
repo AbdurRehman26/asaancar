@@ -432,10 +432,8 @@ export default function Welcome() {
                 const response = await fetch('/api/pick-and-drop?per_page=6');
                 if (response.ok) {
                     const result = await response.json();
-                    console.log('Pick and Drop API Response:', result);
                     // Handle paginated response - Laravel returns { data: [...], links: {...}, meta: {...} }
                     const services = result.data || (Array.isArray(result) ? result : []);
-                    console.log('Extracted services:', services);
                     setPickAndDropServices((services as PickAndDropService[]).slice(0, 6));
                 } else {
                     const errorText = await response.text();
@@ -570,12 +568,12 @@ export default function Welcome() {
             <main>
                 {/* Hero Section with Search */}
                 <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                    <div className="mx-auto max-w-7xl px-6 sm:py-12 lg:px-8">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 sm:py-12 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
-                            <h1 className="text-4xl font-bold mt-10 tracking-tight text-gray-900 sm:text-6xl dark:text-white">
+                            <h1 className="text-4xl pt-16 font-bold mt-18 xs:pt-14 tracking-tight text-gray-900 sm:text-6xl dark:text-white">
                                 Pick and Drop
                             </h1>
-                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+                            <p className="mt-4 sm:mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
                                 Find the perfect car for your journey with AsaanCar - <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted pick & drop and car rental service</span>.
                             </p>
 
@@ -598,14 +596,14 @@ export default function Welcome() {
                                     <img
                                         src="/google-play-download-android-app-logo.svg"
                                         alt="Get it on Google Play"
-                                        className="h-40 w-auto sm:h-48"
+                                        className="h-32 sm:h-40 w-auto sm:h-48"
                                     />
                                 </a>
                             </div>
                         </div>
 
                         {/* Search Filter - Full Screen */}
-                        <div className="mt-10 w-full max-w-none">
+                        <div className="mt-8 sm:mt-10 w-full max-w-none">
                             <PickAndDropFilter
                                 onSearch={(filters) => {
                                     const params = new URLSearchParams();
@@ -623,7 +621,7 @@ export default function Welcome() {
 
                         {/* Auth Buttons */}
                         {!user && (
-                            <div className="mt-8 flex items-center justify-center gap-x-6">
+                            <div className="mt-6 pb-4 sm:mt-8 flex items-center justify-center gap-x-6">
                                 <a
                                     href="/signup"
                                     className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
@@ -642,8 +640,8 @@ export default function Welcome() {
                 </section>
 
                 {/* Pick & Drop Services Section */}
-                <section className="bg-gray-50 py-16 dark:bg-gray-800">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <section className="bg-gray-50 py-10 sm:py-16 dark:bg-gray-800">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center flex flex-col items-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
                                 Pick & Drop Services
@@ -653,14 +651,14 @@ export default function Welcome() {
                             </p>
                         </div>
                         {pickAndDropLoading ? (
-                            <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                            <div className="mx-auto mt-10 sm:mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                                 {Array.from({ length: 6 }).map((_, index) => (
                                     <div key={index} className="animate-pulse bg-white dark:bg-gray-700 rounded-lg p-6 h-64"></div>
                                 ))}
                             </div>
                         ) : pickAndDropServices.length > 0 ? (
                             <>
-                                <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                                <div className="mx-auto mt-10 sm:mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                                     {pickAndDropServices.map((service) => (
                                         <PickAndDropCard
                                             key={service.id}
@@ -679,7 +677,7 @@ export default function Welcome() {
                                 </div>
                             </>
                         ) : (
-                            <div className="mt-12 text-center py-12 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <div className="mt-10 sm:mt-12 text-center py-12 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                                 <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                 <p className="text-gray-600 dark:text-gray-400">No pick and drop services available at the moment.</p>
                                 <button
@@ -694,8 +692,8 @@ export default function Welcome() {
                 </section>
 
                 {/* Car Categories Section */}
-                <section className="bg-white py-16 dark:bg-gray-900">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <section className="bg-white py-10 sm:py-16 dark:bg-gray-900">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center flex flex-col items-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
                                 Rent Your Perfect Car
@@ -704,7 +702,7 @@ export default function Welcome() {
                                 Browse our diverse collection of car types to find the perfect match for your needs
                             </p>
                         </div>
-                        <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+                        <div className="mx-auto mt-10 sm:mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4">
                             {carTypesLoading ? (
                                 // Loading skeleton for car types
                                 Array.from({ length: 4 }).map((_, index) => (
@@ -739,8 +737,8 @@ export default function Welcome() {
                 </section>
 
                 {/* Latest Cars Section */}
-                <section className="bg-white py-16 dark:bg-gray-900">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <section className="bg-white py-10 sm:py-16 dark:bg-gray-900">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
                                 Latest Rental Cars
@@ -749,7 +747,7 @@ export default function Welcome() {
                                 Choose from our selection of iconic and premium cars. From boardroom to bar, there's a car for every occasion.
                             </p>
                         </div>
-                        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                        <div className="mx-auto mt-10 sm:mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-10 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                             {carsLoading ? (
                                 // Loading skeleton
                                 Array.from({ length: 3 }).map((_, index) => (
@@ -774,7 +772,7 @@ export default function Welcome() {
                             )}
                         </div>
                         {latestCars.length > 0 && (
-                            <div className="mt-12 text-center">
+                            <div className="mt-8 sm:mt-12 text-center">
                                 <button
                                     onClick={() => navigate('/cars')}
                                     className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] transition-colors"
@@ -787,8 +785,8 @@ export default function Welcome() {
                 </section>
 
                 {/* Car Brands Section */}
-                <section className="bg-gray-50 py-16 dark:bg-gray-800">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <section className="bg-gray-50 py-10 sm:py-16 dark:bg-gray-800">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center flex flex-col items-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
                                 Popular Car Brands
@@ -797,7 +795,7 @@ export default function Welcome() {
                                 Choose from our wide selection of trusted car brands
                             </p>
                         </div>
-                        <div className="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:max-w-none lg:grid-cols-3 justify-items-center">
+                        <div className="mx-auto mt-10 sm:mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:max-w-none lg:grid-cols-3 justify-items-center">
                             {carBrandsLoading ? (
                                 // Loading skeleton for car brands
                                 Array.from({ length: 3 }).map((_, index) => (
@@ -838,17 +836,17 @@ export default function Welcome() {
                 </section>
 
                 {/* Why Choose Us Section */}
-                <section className="bg-neutral-50 py-16 dark:bg-gray-800">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <section className="bg-neutral-50 py-10 sm:py-16 dark:bg-gray-800">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
                                 Why Rent A Car With AsaanCar?
                             </h2>
-                            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+                            <p className="mt-4 sm:mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
                                 AsaanCar is widely regarded as one of the best Car Rental Service Providers serving not only Karachi but other major cities of Pakistan as well.
                             </p>
                         </div>
-                        <div className="mx-auto mt-16 max-w-2xl lg:max-w-none">
+                        <div className="mx-auto mt-10 sm:mt-16 max-w-2xl lg:max-w-none">
                             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                                 {features.map((feature) => (
                                     <FeatureCard
@@ -864,14 +862,14 @@ export default function Welcome() {
                 </section>
 
                 {/* Testimonials Section */}
-                <section className="bg-neutral-50 py-16 dark:bg-gray-800">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <section className="bg-neutral-50 py-10 sm:py-16 dark:bg-gray-800">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
                                 What Our Customers Say
                             </h2>
                         </div>
-                        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                        <div className="mx-auto mt-10 sm:mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                             {testimonials.map((testimonial) => (
                                 <TestimonialCard
                                     key={testimonial.name}
@@ -885,14 +883,14 @@ export default function Welcome() {
                 </section>
 
                 {/* FAQ Section */}
-                <section className="bg-white py-16 dark:bg-gray-900">
-                    <div className="mx-auto max-w-3xl px-6 lg:px-8">
+                <section className="bg-white py-10 sm:py-16 dark:bg-gray-900">
+                    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
                                 Frequently Asked Questions
                             </h2>
                         </div>
-                        <div className="mx-auto mt-16 max-w-4xl">
+                        <div className="mx-auto mt-10 sm:mt-16 max-w-4xl">
                             {faqItems.map((item, index) => (
                                 <FAQItem
                                     key={index}
@@ -911,4 +909,5 @@ export default function Welcome() {
             </main>
         </>
     );
+
 }

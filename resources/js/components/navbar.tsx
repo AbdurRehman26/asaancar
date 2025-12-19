@@ -26,17 +26,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
   const NavLinks = (
     <>
       <Link
-        to="/cars"
-        className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'cars'
-          ? 'text-[#7e246c] dark:text-white'
-          : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
-          }`}
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        <Car className="h-4 w-4" />
-        Rental Cars
-      </Link>
-      <Link
         to="/pick-and-drop"
         className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'pick-and-drop'
           ? 'text-[#7e246c] dark:text-white'
@@ -47,6 +36,17 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
         <MapPin className="h-4 w-4" />
         Pick & Drop
       </Link>
+        <Link
+            to="/cars"
+            className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'cars'
+                ? 'text-[#7e246c] dark:text-white'
+                : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+            }`}
+            onClick={() => setMobileMenuOpen(false)}
+        >
+            <Car className="h-4 w-4" />
+            Rental Cars
+        </Link>
       {user && (
         <Link
           to="/bookings"
@@ -129,17 +129,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
         {/* Centered nav links */}
         <div className="flex items-center space-x-6 mx-auto">
           <Link
-            to="/cars"
-            className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'cars'
-              ? 'text-[#7e246c] dark:text-white'
-              : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
-              }`}
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <Car className="h-4 w-4" />
-            Rental Cars
-          </Link>
-          <Link
             to="/pick-and-drop"
             className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'pick-and-drop'
               ? 'text-[#7e246c] dark:text-white'
@@ -150,7 +139,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             <MapPin className="h-4 w-4" />
             Pick & Drop
           </Link>
-          {user && (
+            <Link
+                to="/cars"
+                className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'cars'
+                    ? 'text-[#7e246c] dark:text-white'
+                    : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+            >
+                <Car className="h-4 w-4" />
+                Rental Cars
+            </Link>
+            {user && (
             <Link
               to="/bookings"
               className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'bookings'

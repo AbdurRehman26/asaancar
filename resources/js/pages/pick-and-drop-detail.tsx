@@ -188,7 +188,7 @@ export default function PickAndDropDetail() {
                         <p className="text-red-600 dark:text-red-400 text-lg mb-4">{error || 'Service not found'}</p>
                         <button
                             onClick={() => navigate('/pick-and-drop')}
-                            className="px-6 py-2 bg-[#7e246c] text-white rounded-lg hover:bg-[#6a1f5c] transition-colors"
+                            className="px-6 pt-4 bg-[#7e246c] text-white rounded-lg hover:bg-[#6a1f5c] transition-colors"
                         >
                             Back to Listing
                         </button>
@@ -228,7 +228,7 @@ export default function PickAndDropDetail() {
                     {/* Back Button */}
                     <button
                         onClick={() => navigate('/pick-and-drop')}
-                        className="mb-6 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#7e246c] hover:underline transition-all"
+                        className="mb-6 flex pt-4 items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#7e246c] hover:underline transition-all"
                     >
                         <ArrowRight className="h-4 w-4 rotate-180" />
                         Back to Listing
