@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { MapPin, Clock, Plus, ChevronDown, X } from 'lucide-react';
+import { MapPin, Clock, Plus, ChevronDown, X, Filter } from 'lucide-react';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/components/AuthContext';
@@ -202,6 +202,7 @@ export default function PickAndDropListing() {
     const [services, setServices] = useState<PickAndDropService[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     const [filters, setFilters] = useState({
         start_location: searchParams.get('start_location') || '',
@@ -437,97 +438,109 @@ export default function PickAndDropListing() {
 
                     {/* Search and Filters */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                            <SearchableAreaSelect
-                                value={startAreaId}
-                                onChange={(id) => {
-                                    setStartAreaId(id);
-                                    const area = id ? karachiAreas.find(a => a.id === id) : null;
-                                    setFilters(prev => ({
-                                        ...prev,
-                                        start_location: area ? area.name : ''
-                                    }));
-                                }}
-                                cityId={karachiCityId}
-                                areas={areasByCity}
-                                label="Start Location"
-                                placeholder="From..."
-                            />
-                            <SearchableAreaSelect
-                                value={endAreaId}
-                                onChange={(id) => {
-                                    setEndAreaId(id);
-                                    const area = id ? karachiAreas.find(a => a.id === id) : null;
-                                    setFilters(prev => ({
-                                        ...prev,
-                                        end_location: area ? area.name : ''
-                                    }));
-                                }}
-                                cityId={karachiCityId}
-                                areas={areasByCity}
-                                label="End Location"
-                                placeholder="To..."
-                            />
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Driver Gender
-                                </label>
-                                <select
-                                    value={filters.driver_gender}
-                                    onChange={(e) => setFilters({ ...filters, driver_gender: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
-                                >
-                                    <option value="">All</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
-                                    <Clock className="h-4 w-4 text-gray-500" />
-                                    Departure Time
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="time"
-                                        value={filters.departure_time}
-                                        onChange={(e) => setFilters({ ...filters, departure_time: e.target.value })}
-                                        className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
-                                    />
-                                    {filters.departure_time && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setFilters({ ...filters, departure_time: '' })}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                            title="Clear time filter"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Departure Date
-                                </label>
-                                <input
-                                    type="date"
-                                    value={filters.departure_date}
-                                    onChange={(e) => setFilters({ ...filters, departure_date: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                        <div className="flex items-center justify-between mb-4">
+                            <button
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                className="flex items-center gap-2 text-lg font-semibold text-[#7e246c] dark:text-white"
+                            >
+                                <Filter className="h-5 w-5" />
+                                Filter Services
+                                <ChevronDown
+                                    className={`h-5 w-5 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`}
                                 />
-                            </div>
-                        </div>
+                            </button>
 
-
-                        {(filters.start_location || filters.end_location || filters.driver_gender || filters.departure_date || filters.departure_time) && (
-                            <div className="mt-4 flex items-center gap-2">
+                            {(filters.start_location || filters.end_location || filters.driver_gender || filters.departure_date || filters.departure_time) && (
                                 <button
                                     onClick={clearFilters}
                                     className="text-sm text-[#7e246c] hover:underline"
                                 >
                                     Clear Filters
                                 </button>
+                            )}
+                        </div>
+
+                        {isFilterOpen && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in slide-in-from-top-4 duration-200">
+                                <SearchableAreaSelect
+                                    value={startAreaId}
+                                    onChange={(id) => {
+                                        setStartAreaId(id);
+                                        const area = id ? karachiAreas.find(a => a.id === id) : null;
+                                        setFilters(prev => ({
+                                            ...prev,
+                                            start_location: area ? area.name : ''
+                                        }));
+                                    }}
+                                    cityId={karachiCityId}
+                                    areas={areasByCity}
+                                    label="Start Location"
+                                    placeholder="From..."
+                                />
+                                <SearchableAreaSelect
+                                    value={endAreaId}
+                                    onChange={(id) => {
+                                        setEndAreaId(id);
+                                        const area = id ? karachiAreas.find(a => a.id === id) : null;
+                                        setFilters(prev => ({
+                                            ...prev,
+                                            end_location: area ? area.name : ''
+                                        }));
+                                    }}
+                                    cityId={karachiCityId}
+                                    areas={areasByCity}
+                                    label="End Location"
+                                    placeholder="To..."
+                                />
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Driver Gender
+                                    </label>
+                                    <select
+                                        value={filters.driver_gender}
+                                        onChange={(e) => setFilters({ ...filters, driver_gender: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    >
+                                        <option value="">All</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-gray-500" />
+                                        Departure Time
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="time"
+                                            value={filters.departure_time}
+                                            onChange={(e) => setFilters({ ...filters, departure_time: e.target.value })}
+                                            className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                        />
+                                        {filters.departure_time && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setFilters({ ...filters, departure_time: '' })}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                                title="Clear time filter"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Departure Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={filters.departure_date}
+                                        onChange={(e) => setFilters({ ...filters, departure_date: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div>
                             </div>
                         )}
                     </div>
