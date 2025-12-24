@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
             StoreOfferSeeder::class,
             CitySeeder::class,
             AreaSeeder::class,
-//            PickAndDropSeeder::class,
+            PickAndDropSeeder::class,
         ]);
     }
 }
