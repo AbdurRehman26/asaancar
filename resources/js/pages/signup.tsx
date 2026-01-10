@@ -331,8 +331,9 @@ export default function SignupPage() {
                   <input
                     type="tel"
                     value={phoneNumber}
-                    onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                    onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     required
+                    maxLength={10}
                     className="w-full pl-20 pr-4 py-3 rounded-lg border border-[#7e246c] bg-gray-50 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#7e246c] focus:border-[#7e246c] text-base"
                     placeholder="3001234567"
                   />
@@ -362,9 +363,9 @@ export default function SignupPage() {
           <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Join AsaanCar Today</h2>
           <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">Start your journey with the best car rental platform</p>
           <div className="rounded-2xl overflow-hidden shadow-lg mb-8">
-            <img 
-              src="/images/car-2.png" 
-              alt="Car rental illustration" 
+            <img
+              src="/images/car-2.png"
+              alt="Car rental illustration"
               className="w-full h-auto object-contain"
             />
           </div>
