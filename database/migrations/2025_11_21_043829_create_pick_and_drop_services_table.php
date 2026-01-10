@@ -37,7 +37,7 @@ return new class extends Migration
             // Service details
             $table->dateTime('departure_time');
             $table->text('description')->nullable();
-            $table->decimal('price_per_person', 10, 2)->nullable();
+            $table->unsignedInteger('price_per_person')->nullable();
             $table->string('currency', 8)->default('PKR');
             $table->boolean('is_active')->default(true);
             

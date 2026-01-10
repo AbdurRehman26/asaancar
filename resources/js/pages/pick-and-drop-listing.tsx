@@ -39,11 +39,15 @@ interface PickAndDropService {
     car_transmission?: string;
     car_fuel_type?: string;
     departure_time: string;
+    formatted_departure_time?: string;
     description?: string;
     price_per_person?: number;
     currency: string;
     is_active: boolean;
     is_everyday?: boolean;
+    is_roundtrip?: boolean;
+    return_time?: string;
+    formatted_return_time?: string;
     stops?: PickAndDropStop[];
     schedule_type: 'once' | 'everyday' | 'custom' | 'weekend' | 'weekdays';
     selected_days?: string;
@@ -202,7 +206,12 @@ export default function PickAndDropListing() {
     const [services, setServices] = useState<PickAndDropService[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.matchMedia('(min-width: 768px)').matches;
+        }
+        return false;
+    });
 
     const [filters, setFilters] = useState({
         start_location: searchParams.get('start_location') || '',

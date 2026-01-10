@@ -33,8 +33,6 @@ class OtpNotification extends Notification
         if ($this->isEmail) {
             return ['mail'];
         }
-        // For SMS, Twilio Verify API is handled in the controller
-        // This notification is only used for email OTPs now
         return ['mail'];
     }
 

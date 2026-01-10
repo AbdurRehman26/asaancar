@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, MapPin, Calendar, Users, Edit, Trash2, Search, AlertTriangle } from 'lucide-react';
+import { Plus, MapPin, Search, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { apiFetch } from '@/lib/utils';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/contexts/ToastContext';
+import PickAndDropCard, { PickAndDropService } from '@/components/PickAndDropCard';
 import {
     Dialog,
     DialogContent,
@@ -14,49 +15,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
-interface PickAndDropStop {
-    id: number;
-    location: string;
-    stop_time: string;
-    order: number;
-    notes?: string;
-}
-
-interface PickAndDropService {
-    id: number;
-    user: {
-        id: number;
-        name: string;
-        email: string;
-    };
-    car?: {
-        id: number;
-        name: string;
-    };
-    start_location: string;
-    end_location: string;
-    available_spaces: number;
-    driver_gender: 'male' | 'female';
-    car_brand?: string;
-    car_model?: string;
-    car_color?: string;
-    car_seats?: number;
-    car_transmission?: string;
-    car_fuel_type?: string;
-    departure_time: string;
-    description?: string;
-    price_per_person?: number;
-    currency: string;
-    is_active: boolean;
-    is_everyday?: boolean;
-    schedule_type?: 'once' | 'everyday' | 'weekdays' | 'weekends' | 'custom';
-    selected_days?: string[] | string;
-    is_roundtrip?: boolean;
-    return_time?: string;
-    stops?: PickAndDropStop[];
-}
-
 export default function PickAndDropPage() {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { success: showSuccess, error: showError } = useToast();
     const [services, setServices] = useState<PickAndDropService[]>([]);
@@ -279,108 +239,19 @@ export default function PickAndDropPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {services.map((service) => (
-                        <div
+                        <PickAndDropCard
                             key={service.id}
-                            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-lg hover:shadow-xl transition-shadow"
-                        >
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-[#7e246c] dark:text-white">
-                                        {service.start_location} → {service.end_location}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                        by {service.user.name}
-                                    </p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <Link
-                                        to={`/pick-and-drop/${service.id}`}
-                                        className="p-2 text-[#7e246c] hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded"
-                                        title="View Details"
-                                    >
-                                        <MapPin className="h-4 w-4" />
-                                    </Link>
-                                    {user && user.id === service.user.id && (
-                                        <>
-                                            <Link
-                                                to={`/dashboard/pick-and-drop/${service.id}/edit`}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded"
-                                                title="Edit"
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDeleteClick(service.id)}
-                                                className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
-                                                title="Delete"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="space-y-2 mb-4">
-                                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                    <Calendar className="h-4 w-4" />
-                                    {service.schedule_type === 'once' || !service.schedule_type
-                                        ? service.departure_time
-                                        : `${service.schedule_type === 'custom'
-                                            ? (Array.isArray(service.selected_days) ? service.selected_days.join(', ') : service.selected_days)
-                                            : service.schedule_type.charAt(0).toUpperCase() + service.schedule_type.slice(1)
-                                        } • ${service.departure_time.includes('T') ? service.departure_time.split('T')[1].slice(0, 5) : service.departure_time.slice(0, 5)}`
-                                    }
-                                    {service.is_roundtrip && service.return_time && (
-                                        <span className="ml-2 text-xs bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 px-2 py-0.5 rounded-full">
-                                            Return: {service.return_time.slice(0, 5)}
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                    <Users className="h-4 w-4" />
-                                    {service.available_spaces} spaces available
-                                </div>
-                                {service.price_per_person && (
-                                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                        {service.currency} {service.price_per_person} per person
-                                    </div>
-                                )}
-                                <div className="flex items-center gap-2 text-sm">
-                                    <span className={`px-2 py-1 rounded text-xs ${service.driver_gender === 'female'
-                                        ? 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-400'
-                                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                                        }`}>
-                                        {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender} driver
-                                    </span>
-                                </div>
-                            </div>
-
-                            {service.car_brand && (
-                                <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                                    Car: {service.car_brand} {service.car_model} ({service.car_color})
-                                </div>
-                            )}
-
-                            {service.stops && service.stops.length > 0 && (
-                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Stops:</p>
-                                    <ul className="space-y-1">
-                                        {service.stops.map((stop) => (
-                                            <li key={stop.id} className="text-xs text-gray-600 dark:text-gray-400">
-                                                • {stop.location} ({stop.stop_time})
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            {service.description && (
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-4 line-clamp-2">
-                                    {service.description}
-                                </p>
-                            )}
-                        </div>
+                            service={service}
+                            onClick={() => navigate(`/pick-and-drop/${service.id}`)}
+                            onEdit={user && service.user && user.id === service.user.id
+                                ? () => navigate(`/dashboard/pick-and-drop/${service.id}/edit`)
+                                : undefined
+                            }
+                            onDelete={user && service.user && user.id === service.user.id
+                                ? () => handleDeleteClick(service.id)
+                                : undefined
+                            }
+                        />
                     ))}
                 </div>
             )}

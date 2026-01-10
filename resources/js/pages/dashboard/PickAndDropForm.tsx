@@ -94,6 +94,70 @@ export default function PickAndDropForm() {
             const data = await response.json();
             const service = data.data || data;
 
+            // Helper function to safely parse date/time from various formats
+            const parseDateTime = (dateTimeStr: string | null | undefined): { date: string; time: string } => {
+                if (!dateTimeStr) return { date: '', time: '' };
+
+                try {
+                    // Check if it's already in ISO format or has both date and time
+                    if (dateTimeStr.includes('T')) {
+                        const dt = new Date(dateTimeStr);
+                        if (!isNaN(dt.getTime())) {
+                            return {
+                                date: dt.toISOString().slice(0, 10),
+                                time: dt.toISOString().slice(11, 16)
+                            };
+                        }
+                    }
+
+                    // Check if it's a date-only string (YYYY-MM-DD)
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(dateTimeStr)) {
+                        return { date: dateTimeStr, time: '' };
+                    }
+
+                    // Check if it's a time-only string (HH:mm or HH:mm:ss)
+                    if (/^\d{2}:\d{2}(:\d{2})?$/.test(dateTimeStr)) {
+                        return { date: '', time: dateTimeStr.slice(0, 5) };
+                    }
+
+                    // Try parsing as a full date string
+                    const dt = new Date(dateTimeStr);
+                    if (!isNaN(dt.getTime())) {
+                        return {
+                            date: dt.toISOString().slice(0, 10),
+                            time: dt.toISOString().slice(11, 16)
+                        };
+                    }
+                } catch {
+                    // Parsing failed, return empty values
+                }
+
+                return { date: '', time: '' };
+            };
+
+            const parseTimeOnly = (timeStr: string | null | undefined): string => {
+                if (!timeStr) return '';
+
+                // If it's already HH:mm or HH:mm:ss format
+                if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeStr)) {
+                    return timeStr.slice(0, 5);
+                }
+
+                // Try to parse as a full datetime
+                try {
+                    const dt = new Date(timeStr);
+                    if (!isNaN(dt.getTime())) {
+                        return dt.toISOString().slice(11, 16);
+                    }
+                } catch {
+                    // Ignore parsing errors
+                }
+
+                return timeStr.slice(0, 5);
+            };
+
+            const departureParsed = parseDateTime(service.departure_time);
+
             setFormData({
                 name: service.name || '',
                 contact: service.contact || '',
@@ -103,12 +167,12 @@ export default function PickAndDropForm() {
                 end_location: service.end_location || '',
                 dropoff_city_id: service.dropoff_city_id || undefined,
                 dropoff_area_id: service.dropoff_area_id || undefined,
-                departure_date: service.departure_time ? new Date(service.departure_time).toISOString().slice(0, 10) : '',
-                departure_time: service.departure_time ? new Date(service.departure_time).toISOString().slice(11, 16) : '',
+                departure_date: departureParsed.date,
+                departure_time: departureParsed.time,
                 schedule_type: service.schedule_type || (service.is_everyday ? 'everyday' : 'once'),
                 selected_days: service.selected_days || [],
                 is_roundtrip: service.is_roundtrip || false,
-                return_time: service.return_time ? service.return_time.slice(0, 5) : '',
+                return_time: parseTimeOnly(service.return_time),
                 available_spaces: service.available_spaces || 1,
                 driver_gender: service.driver_gender || 'male',
                 car_brand: service.car_brand || '',
@@ -143,16 +207,18 @@ export default function PickAndDropForm() {
                     order?: number;
                     notes?: string;
                 }
-                const departureDate = service.departure_time ? new Date(service.departure_time).toISOString().slice(0, 10) : '';
-                setStops(service.stops.map((stop: StopData) => ({
-                    location: stop.location || '',
-                    city_id: karachi?.id || stop.city_id || undefined, // Force Karachi
-                    area_id: stop.area_id || undefined,
-                    stop_date: stop.stop_time ? new Date(stop.stop_time).toISOString().slice(0, 10) : departureDate,
-                    stop_time: stop.stop_time ? new Date(stop.stop_time).toISOString().slice(11, 16) : '',
-                    order: stop.order || 0,
-                    notes: stop.notes || '',
-                })));
+                setStops(service.stops.map((stop: StopData) => {
+                    const stopParsed = parseDateTime(stop.stop_time);
+                    return {
+                        location: stop.location || '',
+                        city_id: karachi?.id || stop.city_id || undefined, // Force Karachi
+                        area_id: stop.area_id || undefined,
+                        stop_date: stopParsed.date || departureParsed.date,
+                        stop_time: stopParsed.time,
+                        order: stop.order || 0,
+                        notes: stop.notes || '',
+                    };
+                }));
 
                 // Fetch areas for Karachi if not already fetched
                 if (karachi && !areas[karachi.id]) {
@@ -218,7 +284,7 @@ export default function PickAndDropForm() {
                 is_everyday: formData.schedule_type === 'everyday', // Keep for backward compatibility if needed
                 available_spaces: parseInt(formData.available_spaces.toString()),
                 car_seats: formData.car_seats ? parseInt(formData.car_seats) : null,
-                price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null,
+                price_per_person: formData.price_per_person ? parseInt(formData.price_per_person) : null,
                 stops: stops.map((stop, index) => {
                     // Ensure Karachi is always set for stops
                     const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');

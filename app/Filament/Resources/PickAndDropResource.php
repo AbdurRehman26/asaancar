@@ -136,6 +136,14 @@ class PickAndDropResource extends Resource
                             ])
                             ->required()
                             ->default('male'),
+                        Forms\Components\Toggle::make('is_roundtrip')
+                            ->label('Round Trip')
+                            ->default(false)
+                            ->reactive(),
+                        Forms\Components\TimePicker::make('return_time')
+                            ->label('Return Time')
+                            ->visible(fn ($get) => $get('is_roundtrip'))
+                            ->required(fn ($get) => $get('is_roundtrip')),
                         Forms\Components\Textarea::make('description')
                             ->label('Description')
                             ->rows(3)
@@ -241,6 +249,10 @@ class PickAndDropResource extends Resource
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
+                    ->boolean()
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('is_roundtrip')
+                    ->label('Round Trip')
                     ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stops_count')

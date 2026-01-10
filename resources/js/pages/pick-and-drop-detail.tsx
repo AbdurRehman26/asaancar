@@ -54,11 +54,15 @@ interface PickAndDropService {
     car_transmission?: string;
     car_fuel_type?: string;
     departure_time: string;
+    formatted_departure_time?: string;
     description?: string;
     price_per_person?: number;
     currency: string;
     is_active: boolean;
     is_everyday?: boolean;
+    is_roundtrip?: boolean;
+    return_time?: string;
+    formatted_return_time?: string;
     stops?: PickAndDropStop[];
     schedule_type: 'once' | 'everyday' | 'custom' | 'weekend' | 'weekdays';
     selected_days?: string;
@@ -208,7 +212,7 @@ export default function PickAndDropDetail() {
         : 'Pick & Drop Service Details | Asaancar';
 
     const seoDescription = service
-        ? `Book a ${service.driver_gender === 'female' ? 'female' : 'male'} driver pick & drop service from ${service.start_location} to ${service.end_location}. ${service.is_everyday ? 'Available everyday' : 'Scheduled service'} at ${service.departure_time}. ${service.available_spaces} space${service.available_spaces !== 1 ? 's' : ''} available.${service.price_per_person ? ` Price: ${service.currency} ${Math.round(service.price_per_person).toLocaleString()} per person.` : ''}${service.stops && service.stops.length > 0 ? ` Includes ${service.stops.length} stop${service.stops.length !== 1 ? 's' : ''}.` : ''} Book your ride on Asaancar.`
+        ? `Book a ${service.driver_gender === 'female' ? 'female' : 'male'} driver pick & drop service from ${service.start_location} to ${service.end_location}. ${service.is_everyday ? 'Available everyday' : 'Scheduled service'} at ${service.formatted_departure_time || service.departure_time}. ${service.available_spaces} space${service.available_spaces !== 1 ? 's' : ''} available.${service.price_per_person ? ` Price: ${service.currency} ${Math.round(service.price_per_person).toLocaleString()} per person.` : ''}${service.stops && service.stops.length > 0 ? ` Includes ${service.stops.length} stop${service.stops.length !== 1 ? 's' : ''}.` : ''} Book your ride on Asaancar.`
         : 'View pick & drop service details on Asaancar. Find convenient rides with multiple stops.';
 
     return (
@@ -334,7 +338,7 @@ export default function PickAndDropDetail() {
                                             : 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
                                             }`}>
                                             <Clock className="w-4 h-4" />
-                                            {service.schedule_type == 'once' ? 'On' : service.schedule_type == 'custom' ? service.selected_days : service.schedule_type.toUpperCase()} • {service.departure_time}
+                                            {service.schedule_type == 'once' ? 'On' : service.schedule_type == 'custom' ? service.selected_days : service.schedule_type.toUpperCase()} • {service.formatted_departure_time || service.departure_time}
                                         </div>
 
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-orange-50 text-orange-700 border border-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800/30 w-full justify-center">
@@ -348,6 +352,12 @@ export default function PickAndDropDetail() {
                                                 : 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800/30'
                                                 }`}>
                                                 {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender === 'female' ? 'Female' : 'Male'} Driver
+                                            </div>
+                                        )}
+
+                                        {service.is_roundtrip && (
+                                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-100 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800/30 w-full justify-center">
+                                                🔄 Round Trip {(service.formatted_return_time || service.return_time) && `• Return: ${service.formatted_return_time || service.return_time}`}
                                             </div>
                                         )}
                                     </div>

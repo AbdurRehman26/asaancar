@@ -34,11 +34,15 @@ export interface PickAndDropService {
     car_transmission?: string;
     car_fuel_type?: string;
     departure_time: string;
+    formatted_departure_time?: string;
     description?: string;
     price_per_person?: number;
     currency?: string;
     is_active?: boolean;
     is_everyday?: boolean;
+    is_roundtrip?: boolean;
+    return_time?: string;
+    formatted_return_time?: string;
     stops?: PickAndDropStop[];
     schedule_type: 'once' | 'everyday' | 'custom' | 'weekend' | 'weekdays';
     selected_days?: string;
@@ -47,12 +51,14 @@ export interface PickAndDropService {
 interface PickAndDropCardProps {
     service: PickAndDropService;
     onClick?: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
     showDetails?: boolean; // Toggle for "View Details" button presence if needed elsewhere
     className?: string;
 }
 
-const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, className = '' }) => {
-    const [stopsExpanded, setStopsExpanded] = useState(false);
+const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onEdit, onDelete, className = '' }) => {
+    const [stopsExpanded, setStopsExpanded] = useState(true);
 
     const handleStopsClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -97,7 +103,7 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, cla
                                 <div className="flex-1">
                                     <button
                                         onClick={handleStopsClick}
-                                        className="text-xs font-medium text-[#7e246c] flex items-center gap-1 hover:underline bg-[#7e246c]/5 px-2 py-1 rounded-md w-fit transition-colors"
+                                        className="text-xs font-medium text-[#7e246c] dark:text-[#9d4edd] flex items-center gap-1 hover:underline bg-[#7e246c]/5 px-2 py-1 rounded-md w-fit transition-colors"
                                     >
                                         {service.stops.length} Stop{service.stops.length !== 1 ? 's' : ''} in between
                                         {stopsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -149,11 +155,11 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, cla
             <div className="px-5 py-4 flex flex-wrap gap-2">
                 {/* Time */}
                 <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${service.is_everyday
-                        ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800/30'
-                        : 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+                    ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800/30'
+                    : 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
                     }`}>
                     <Clock className="w-3 h-3" />
-                    {service.schedule_type == 'once' ? 'On' : service.schedule_type == 'custom' ? service.selected_days : service.schedule_type.toUpperCase()} • {service.departure_time}
+                    {service.schedule_type == 'once' ? 'On' : service.schedule_type == 'custom' ? service.selected_days : service.schedule_type.toUpperCase()} • {service.formatted_departure_time || service.departure_time}
                 </div>
 
                 {/* Spaces */}
@@ -165,10 +171,17 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, cla
                 {/* Gender (if available) */}
                 {service.driver_gender && (
                     <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${service.driver_gender === 'female'
-                            ? 'bg-pink-50 text-pink-700 border-pink-100 dark:bg-pink-900/20 dark:text-pink-300 dark:border-pink-800/30'
-                            : 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800/30'
+                        ? 'bg-pink-50 text-pink-700 border-pink-100 dark:bg-pink-900/20 dark:text-pink-300 dark:border-pink-800/30'
+                        : 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800/30'
                         }`}>
                         {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender === 'female' ? 'Female' : 'Male'} Driver
+                    </div>
+                )}
+
+                {/* Round Trip */}
+                {service.is_roundtrip && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-100 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800/30">
+                        🔄 Round Trip {(service.formatted_return_time || service.return_time) && `• Return: ${service.formatted_return_time || service.return_time}`}
                     </div>
                 )}
             </div>
@@ -210,11 +223,45 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, cla
                         </div>
                     </div>
 
-                    <button
-                        className="shrink-0 px-4 py-2 bg-[#7e246c] hover:bg-[#6a1f5c] text-white text-sm font-semibold rounded-lg transition-colors shadow-sm dark:shadow-none"
-                    >
-                        View Details
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {(onEdit || onDelete) && (
+                            <div className="flex gap-1 mr-2">
+                                {onEdit && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEdit();
+                                        }}
+                                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                        title="Edit"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                )}
+                                {onDelete && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDelete();
+                                        }}
+                                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        title="Delete"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                        <button
+                            className="shrink-0 px-4 py-2 bg-[#7e246c] hover:bg-[#6a1f5c] text-white text-sm font-semibold rounded-lg transition-colors shadow-sm dark:shadow-none"
+                        >
+                            View Details
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
