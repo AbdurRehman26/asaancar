@@ -264,7 +264,7 @@ class PickAndDropController extends Controller
             }
         }
 
-        return new PickAndDropResource($service->load(['user', 'car', 'stops.city', 'stops.area']));
+        return new PickAndDropResource($service->load(['user', 'stops.city', 'stops.area']));
     }
 
     /**
@@ -389,7 +389,7 @@ class PickAndDropController extends Controller
             }
         }
 
-        return new PickAndDropResource($service->load(['user', 'car', 'stops.city', 'stops.area']));
+        return new PickAndDropResource($service->load(['user', 'stops.city', 'stops.area']));
     }
 
     /**
@@ -459,7 +459,7 @@ class PickAndDropController extends Controller
      */
     public function myServices(Request $request)
     {
-        $query = PickAndDrop::with(['user', 'car', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
+        $query = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('user_id', Auth::id());
 
         // Filter by start location (including stops, stop areas, and stop cities)
