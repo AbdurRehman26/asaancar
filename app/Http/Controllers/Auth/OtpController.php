@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendOtpJob;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use App\Services\Sms\SmsSendingService;
 
 /**
  * @OA\Tag(
@@ -24,22 +24,29 @@ class OtpController extends Controller
      *     tags={"OTP"},
      *     summary="Send OTP for login",
      *     description="Send OTP via email or SMS for user login",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="email", type="string", format="email", example="user@example.com", nullable=true),
      *             @OA\Property(property="phone_number", type="string", example="+923001234567", nullable=true)
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="OTP sent successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="OTP sent successfully"),
      *             @OA\Property(property="identifier", type="string", example="+923001234567")
      *         )
      *     ),
+     *
      *     @OA\Response(response=404, description="User not found"),
      *     @OA\Response(response=422, description="Validation error"),
      *     @OA\Response(response=500, description="Failed to send OTP")
@@ -52,7 +59,7 @@ class OtpController extends Controller
             'phone_number' => 'string',
         ]);
 
-        if (!$request->phone_number) {
+        if (! $request->phone_number) {
             return response()->json(['message' => 'Phone number is required'], 422);
         }
 
@@ -63,13 +70,13 @@ class OtpController extends Controller
         if ($request->phone_number === $demoPhoneNumber) {
             $user = User::where('phone_number', $demoPhoneNumber)->first();
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json(['message' => 'Demo user not found'], 404);
             }
 
             // Automatically verify and log in demo user
             $user->is_verified = true;
-            if (!$user->email_verified_at) {
+            if (! $user->email_verified_at) {
                 $user->email_verified_at = now();
             }
             $user->save();
@@ -88,31 +95,18 @@ class OtpController extends Controller
         // Regular OTP flow for non-demo users
         $user = User::where('phone_number', $request->phone_number)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        // For SMS, use SmsSendingService
-        try {
-            $otp = (string) random_int(100000, 999999);
-            $message = "Your AsaanCar verification code is: {$otp}";
+        // Generate OTP and store it immediately
+        $otp = (string) random_int(100000, 999999);
+        $user->otp_code = $otp;
+        $user->otp_expires_at = now()->addMinutes(10);
+        $user->save();
 
-            $smsService = new SmsSendingService();
-            $sent = $smsService->send($request->phone_number, $message);
-
-            if (!$sent) {
-                throw new \Exception("Failed to send SMS");
-            }
-
-            // Store OTP
-            $user->otp_code = $otp; 
-            $user->otp_expires_at = now()->addMinutes(10);
-            $user->save();
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to send OTP via SMS', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to send OTP. Please try again.'], 500);
-        }
+        // Dispatch job to send SMS asynchronously
+        SendOtpJob::dispatch($request->phone_number, $otp, $user->id, false);
 
         return response()->json([
             'success' => true,
@@ -128,23 +122,30 @@ class OtpController extends Controller
      *     tags={"OTP"},
      *     summary="Verify OTP for login",
      *     description="Verify OTP and authenticate user",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"identifier", "otp"},
+     *
      *             @OA\Property(property="identifier", type="string", example="+923001234567", description="Phone number"),
      *             @OA\Property(property="otp", type="string", example="123456", description="6-digit OTP code")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="OTP verified and login successful",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="token", type="string", example="1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
      *             @OA\Property(property="user", ref="#/components/schemas/User")
      *         )
      *     ),
+     *
      *     @OA\Response(response=400, description="Invalid or expired OTP"),
      *     @OA\Response(response=404, description="User not found"),
      *     @OA\Response(response=500, description="Failed to verify OTP")
@@ -161,14 +162,14 @@ class OtpController extends Controller
         $user = User::where('phone_number', $request->identifier)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
         // For SMS, verify locally
         try {
             // Check if verification was initiated
-            if (!$user->otp_code || !$user->otp_expires_at || $user->otp_expires_at->isPast()) {
+            if (! $user->otp_code || ! $user->otp_expires_at || $user->otp_expires_at->isPast()) {
                 return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
             }
 
@@ -184,6 +185,7 @@ class OtpController extends Controller
                 'error' => $e->getMessage(),
                 'phone_number' => $request->identifier,
             ]);
+
             return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
         }
 
@@ -191,7 +193,7 @@ class OtpController extends Controller
         $user->otp_code = null;
         $user->otp_expires_at = null;
         $user->is_verified = true;
-        if (!$user->email_verified_at) {
+        if (! $user->email_verified_at) {
             $user->email_verified_at = now();
         }
         $user->save();
@@ -213,23 +215,30 @@ class OtpController extends Controller
      *     tags={"OTP"},
      *     summary="Send OTP for signup",
      *     description="Send OTP via email or SMS for new user registration",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="email", type="string", format="email", example="newuser@example.com", nullable=true),
      *             @OA\Property(property="phone_number", type="string", example="+923001234567", nullable=true)
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="OTP sent successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="OTP sent successfully"),
      *             @OA\Property(property="identifier", type="string", example="+923001234567"),
      *             @OA\Property(property="is_existing_user", type="boolean", example=false, description="True if user already exists (will log in after OTP verification)")
      *         )
      *     ),
+     *
      *     @OA\Response(response=422, description="Validation error"),
      *     @OA\Response(response=500, description="Failed to send OTP")
      * )
@@ -241,7 +250,7 @@ class OtpController extends Controller
             'phone_number' => 'nullable|string',
         ]);
 
-        if (!$request->phone_number) {
+        if (! $request->phone_number) {
             return response()->json(['message' => 'Phone number is required'], 422);
         }
 
@@ -252,69 +261,36 @@ class OtpController extends Controller
 
         $isExistingUser = $existingUser !== null;
 
+        // Generate OTP
+        $otp = (string) random_int(100000, 999999);
+
         if ($isExistingUser) {
+            // Store OTP for existing user
+            $existingUser->otp_code = $otp;
+            $existingUser->otp_expires_at = now()->addMinutes(10);
+            $existingUser->save();
 
-            // For SMS, use SmsSendingService (Existing User)
-            try {
-                $otp = (string) random_int(100000, 999999);
-                $message = "Your AsaanCar verification code is: {$otp}";
+            // Dispatch job to send SMS asynchronously
+            SendOtpJob::dispatch($request->phone_number, $otp, $existingUser->id, false);
 
-                $smsService = new SmsSendingService();
-                $sent = $smsService->send($request->phone_number, $message);
-
-                if (!$sent) {
-                    throw new \Exception("Failed to send SMS");
-                }
-
-                // Store OTP for later verification
-                $existingUser->otp_code = $otp;
-                $existingUser->otp_expires_at = now()->addMinutes(10);
-                $existingUser->save();
-
-                \Log::info('OTP sent for login (via signup)', [
-                    'phone_number' => $request->phone_number,
-                ]);
-            } catch (\Exception $e) {
-                \Log::error('Failed to send OTP for login (via signup)', [
-                    'error' => $e->getMessage(),
-                    'phone_number' => $request->phone_number,
-                ]);
-                return response()->json(['message' => 'Failed to send OTP. Please try again.'], 500);
-            }
-
+            \Log::info('OTP job dispatched for login (via signup)', [
+                'phone_number' => $request->phone_number,
+            ]);
         } else {
-            // New user - use signup OTP flow
-            // For SMS, use SmsSendingService
-            try {
-                $otp = (string) random_int(100000, 999999);
-                $message = "Your AsaanCar verification code is: {$otp}";
+            // New user - store OTP in cache
+            $cacheKey = 'signup_otp_'.md5($identifier);
+            Cache::put($cacheKey, [
+                'otp' => $otp,
+                'expires_at' => now()->addMinutes(10),
+                'identifier' => $identifier,
+            ], now()->addMinutes(10));
 
-                $smsService = new SmsSendingService();
-                $sent = $smsService->send($request->phone_number, $message);
+            // Dispatch job to send SMS asynchronously
+            SendOtpJob::dispatch($request->phone_number, $otp, null, true);
 
-                if (!$sent) {
-                    throw new \Exception("Failed to send SMS");
-                }
-
-                // Store OTP in cache
-                $cacheKey = 'signup_otp_' . md5($identifier);
-                \Illuminate\Support\Facades\Cache::put($cacheKey, [
-                    'otp' => $otp,
-                    'expires_at' => now()->addMinutes(10),
-                    'identifier' => $identifier,
-                ], now()->addMinutes(10));
-
-                \Log::info('OTP sent for signup', [
-                    'phone_number' => $request->phone_number,
-                ]);
-            } catch (\Exception $e) {
-                \Log::error('Failed to send OTP for signup', [
-                    'error' => $e->getMessage(),
-                    'phone_number' => $request->phone_number,
-                ]);
-                return response()->json(['message' => 'Failed to send OTP. Please try again.'], 500);
-            }
-
+            \Log::info('OTP job dispatched for signup', [
+                'phone_number' => $request->phone_number,
+            ]);
         }
 
         return response()->json([
@@ -332,18 +308,24 @@ class OtpController extends Controller
      *     tags={"OTP"},
      *     summary="Verify OTP for signup",
      *     description="Verify OTP for new user registration. Must be called before /api/register",
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"identifier", "otp"},
+     *
      *             @OA\Property(property="identifier", type="string", example="+923001234567", description="Phone number"),
      *             @OA\Property(property="otp", type="string", example="123456", description="6-digit OTP code")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="OTP verified successfully. If user exists, they are logged in immediately.",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="OTP verified successfully"),
      *             @OA\Property(property="identifier", type="string", example="+923001234567"),
@@ -352,6 +334,7 @@ class OtpController extends Controller
      *             @OA\Property(property="user", ref="#/components/schemas/User", description="User object (only if is_existing_user is true)")
      *         )
      *     ),
+     *
      *     @OA\Response(response=400, description="Invalid or expired OTP"),
      *     @OA\Response(response=500, description="Failed to verify OTP")
      * )
@@ -374,7 +357,7 @@ class OtpController extends Controller
             // For SMS, verify locally
             try {
                 // Check if verification was initiated
-                if (!$user->otp_code || !$user->otp_expires_at || $user->otp_expires_at->isPast()) {
+                if (! $user->otp_code || ! $user->otp_expires_at || $user->otp_expires_at->isPast()) {
                     return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
                 }
 
@@ -390,6 +373,7 @@ class OtpController extends Controller
                     'error' => $e->getMessage(),
                     'phone_number' => $request->identifier,
                 ]);
+
                 return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
             }
 
@@ -397,7 +381,7 @@ class OtpController extends Controller
             $user->otp_code = null;
             $user->otp_expires_at = null;
             $user->is_verified = true;
-            if (!$user->email_verified_at) {
+            if (! $user->email_verified_at) {
                 $user->email_verified_at = now();
             }
             $user->save();
@@ -416,15 +400,16 @@ class OtpController extends Controller
         }
 
         // New user - verify OTP from cache (signup flow)
-        $cacheKey = 'signup_otp_' . md5($request->identifier);
+        $cacheKey = 'signup_otp_'.md5($request->identifier);
         $otpData = \Illuminate\Support\Facades\Cache::get($cacheKey);
 
-        if (!$otpData) {
+        if (! $otpData) {
             return response()->json(['message' => 'OTP not found or expired'], 400);
         }
 
         if (now()->isAfter($otpData['expires_at'])) {
             \Illuminate\Support\Facades\Cache::forget($cacheKey);
+
             return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
         }
 
@@ -442,6 +427,7 @@ class OtpController extends Controller
                 'error' => $e->getMessage(),
                 'phone_number' => $request->identifier,
             ]);
+
             return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
         }
 
@@ -465,23 +451,30 @@ class OtpController extends Controller
      *     summary="Set password for user",
      *     description="Set or update password for a user (optional, can be done after OTP login)",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"identifier", "password"},
+     *
      *             @OA\Property(property="identifier", type="string", example="+923001234567", description="Phone number"),
      *             @OA\Property(property="password", type="string", format="password", example="password123", description="New password"),
      *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Password set successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Password set successfully")
      *         )
      *     ),
+     *
      *     @OA\Response(response=404, description="User not found"),
      *     @OA\Response(response=422, description="Validation error")
      * )
@@ -495,7 +488,7 @@ class OtpController extends Controller
         ]);
 
         // Check if this is during signup (user doesn't exist yet)
-        $cacheKey = 'signup_otp_' . md5($request->identifier);
+        $cacheKey = 'signup_otp_'.md5($request->identifier);
         $otpData = \Illuminate\Support\Facades\Cache::get($cacheKey);
 
         if ($otpData && isset($otpData['verified']) && $otpData['verified']) {
@@ -514,7 +507,7 @@ class OtpController extends Controller
             ->orWhere('phone_number', $request->identifier)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 

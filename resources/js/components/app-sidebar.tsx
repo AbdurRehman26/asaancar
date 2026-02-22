@@ -1,6 +1,6 @@
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Folder, MessageSquare, Store, BookOpen, Mail, MapPin, Zap, User } from 'lucide-react';
+import { LayoutGrid, MessageSquare, Mail, MapPin, Zap, User } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 
@@ -35,46 +35,6 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Rental</SidebarGroupLabel>
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton size="lg" asChild>
-                                <Link to="/dashboard/cars">
-                                    <Folder className="mr-2" />
-                                    Car Listings
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton size="lg" asChild>
-                                <Link to="/dashboard/stores">
-                                    <Store className="mr-2" />
-                                    Car Stores
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        {user && Array.isArray(user.roles) && user.roles.includes('store_owner') && (
-                            <SidebarMenuItem>
-                                <SidebarMenuButton size="lg" asChild>
-                                    <Link to="/dashboard/store-bookings">
-                                        <BookOpen className="mr-2" />
-                                        Store Bookings
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        )}
-                        <SidebarMenuItem>
-                            <SidebarMenuButton size="lg" asChild>
-                                <Link to="/dashboard/rental-chat">
-                                    <MessageSquare className="mr-2" />
-                                    Rental Chat
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarGroup>
-
                 <SidebarGroup>
                     <SidebarGroupLabel>Pick & Drop</SidebarGroupLabel>
                     <SidebarMenu>

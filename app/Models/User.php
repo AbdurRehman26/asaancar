@@ -2,40 +2,34 @@
 
 namespace App\Models;
 
+use App\Notifications\CustomEmailVerificationNotification;
+use App\Notifications\CustomPasswordResetNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Traits\HasRoles;
-use App\Notifications\CustomEmailVerificationNotification;
-use App\Notifications\CustomPasswordResetNotification;
-
-Route::get('/{any}', function () {
-    return view('app');
-})->where('any', '.*');
 
 /**
  * @OA\Schema(
  *     schema="User",
  *     title="User",
  *     description="User model",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="John Doe"),
  *     @OA\Property(property="email", type="string", format="email", example="john@example.com"),
- *     @OA\Property(property="store_id", type="integer", nullable=true, example=1),
  *     @OA\Property(property="email_verified_at", type="string", format="date-time", nullable=true),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
- *     @OA\Property(property="profile_image", type="string", nullable=true, example="https://example.com/image.jpg"),
- *     @OA\Property(property="store", ref="#/components/schemas/Store")
+ *     @OA\Property(property="profile_image", type="string", nullable=true, example="https://example.com/image.jpg")
  * )
  */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
+
     use \NotificationChannels\WebPush\HasPushSubscriptions;
 
     /**
@@ -48,7 +42,6 @@ class User extends Authenticatable
         'email',
         'phone_number',
         'password',
-        'store_id',
         'otp_code',
         'otp_expires_at',
         'is_verified',
@@ -78,16 +71,6 @@ class User extends Authenticatable
             'is_verified' => 'boolean',
             'password' => 'hashed',
         ];
-    }
-
-    public function store(): BelongsTo
-    {
-        return $this->belongsTo(Store::class);
-    }
-
-    public function stores()
-    {
-        return $this->belongsToMany(Store::class, 'store_user', 'user_id', 'store_id')->withTimestamps(['created_at']);
     }
 
     public function conversations()

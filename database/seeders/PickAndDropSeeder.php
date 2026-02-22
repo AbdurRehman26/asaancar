@@ -19,7 +19,7 @@ class PickAndDropSeeder extends Seeder
     {
         // Only use Rahima (ID 9) and Kazmi (ID 1) users
         $users = User::whereIn('id', [1, 9])->get();
-        
+
         if ($users->count() === 0) {
             $this->command->warn('Rahima or Kazmi users not found. Please seed users first.');
             return;
@@ -52,17 +52,17 @@ class PickAndDropSeeder extends Seeder
         // Mix of everyday services and date-specific services
         $totalServices = 5;
         $everydayServicesCount = 0;
-        
+
         for ($i = 0; $i < $totalServices; $i++) {
             $user = $users->random();
-            
+
             // Randomly decide if this is an everyday service (about 35% chance)
             $isEveryday = rand(1, 100) <= 35;
-            
+
             // Select random pickup and dropoff areas (ensure they're different)
             $pickupArea = $karachiAreas->random();
             $dropoffArea = $karachiAreas->random();
-            
+
             // Ensure pickup and dropoff are different
             $attempts = 0;
             while ($pickupArea->id === $dropoffArea->id && $attempts < 10) {
@@ -83,7 +83,6 @@ class PickAndDropSeeder extends Seeder
 
             $service = PickAndDrop::create([
                 'user_id' => $user->id,
-                'car_id' => null,
                 'start_location' => $pickupArea->name,
                 'end_location' => $dropoffArea->name,
                 'pickup_city_id' => $karachi->id,
@@ -111,23 +110,23 @@ class PickAndDropSeeder extends Seeder
             // Add multiple stops (1-4 stops) using random Karachi areas
             $numStops = rand(1, 4);
             $usedAreas = [$pickupArea->id, $dropoffArea->id]; // Track used areas to avoid duplicates
-            
+
             $currentTime = $departureTime->copy();
-            
+
             for ($stopIndex = 0; $stopIndex < $numStops; $stopIndex++) {
                 // Get a random area that hasn't been used yet
                 $availableAreas = $karachiAreas->whereNotIn('id', $usedAreas);
-                
+
                 if ($availableAreas->count() === 0) {
                     break; // No more unique areas available
                 }
-                
+
                 $stopArea = $availableAreas->random();
                 $usedAreas[] = $stopArea->id;
-                
+
                 // Calculate stop time (30-90 minutes between stops for within-city)
                 $minutesToAdd = rand(30, 90);
-                
+
                 // For everyday services, use placeholder date with calculated time
                 // For date-specific services, add minutes to the departure time
                 if ($isEveryday) {
@@ -135,7 +134,7 @@ class PickAndDropSeeder extends Seeder
                 } else {
                     $stopTime = $currentTime->copy()->addMinutes($minutesToAdd);
                 }
-                
+
                 PickAndDropStop::create([
                     'pick_and_drop_service_id' => $service->id,
                     'location' => $stopArea->name,
@@ -145,7 +144,7 @@ class PickAndDropSeeder extends Seeder
                     'order' => $stopIndex + 1,
                     'notes' => $this->getRandomStopNote(),
                 ]);
-                
+
                 $stopsCreated++;
                 $currentTime = $stopTime;
             }

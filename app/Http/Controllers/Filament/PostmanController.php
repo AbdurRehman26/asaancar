@@ -4,12 +4,10 @@ namespace App\Http\Controllers\Filament;
 
 use App\Http\Controllers\Controller;
 use App\Models\PickAndDrop;
-use App\Models\Booking;
-use App\Models\Car;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Exception;
 
 class PostmanController extends Controller
 {
@@ -20,26 +18,26 @@ class PostmanController extends Controller
     {
         // Only allow admin users (role_id = 1)
         $user = Auth::user();
-        if (!$user || !$user->hasRole('admin')) {
+        if (! $user || ! $user->hasRole('admin')) {
             return response()->json(['error' => 'Unauthorized. Only admins can execute API requests.'], 403);
         }
 
         try {
             $validated = Validator::make($request->all(), [
-                'api_type' => 'required|in:pick_and_drop,car_rental',
+                'api_type' => 'required|in:pick_and_drop',
                 'payload' => 'required',
             ])->validate();
 
             $apiType = $validated['api_type'];
-            
+
             // Handle both string JSON and already parsed JSON
             if (is_string($validated['payload'])) {
                 $payload = json_decode($validated['payload'], true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     return response()->json([
                         'success' => false,
-                        'error' => 'Invalid JSON format: ' . json_last_error_msg(),
-                        'status' => 'error'
+                        'error' => 'Invalid JSON format: '.json_last_error_msg(),
+                        'status' => 'error',
                     ], 400);
                 }
             } else {
@@ -48,8 +46,6 @@ class PostmanController extends Controller
 
             if ($apiType === 'pick_and_drop') {
                 return $this->executePickAndDrop($payload);
-            } elseif ($apiType === 'car_rental') {
-                return $this->executeCarRental($payload);
             }
 
             return response()->json(['error' => 'Invalid API type'], 400);
@@ -57,7 +53,7 @@ class PostmanController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
-                'status' => 'error'
+                'status' => 'error',
             ], 400);
         }
     }
@@ -71,7 +67,7 @@ class PostmanController extends Controller
             // Validate required fields for Pick & Drop
             $rules = [
                 'user_id' => 'required|integer|exists:users,id',
-                'car_id' => 'nullable|integer|exists:cars,id',
+                'car_id' => 'nullable',
                 'start_location' => 'required|string|max:255',
                 'end_location' => 'required|string|max:255',
                 'pickup_city_id' => 'required|integer|exists:cities,id',
@@ -91,14 +87,14 @@ class PostmanController extends Controller
                     'success' => false,
                     'error' => 'Validation failed',
                     'validation_errors' => $validator->errors(),
-                    'status' => 'validation_error'
+                    'status' => 'validation_error',
                 ], 422);
             }
 
             // Create the Pick & Drop record
             $pickAndDrop = PickAndDrop::create([
                 'user_id' => $payload['user_id'],
-                'car_id' => $payload['car_id'] ?? null,
+                'car_id' => null,
                 'start_location' => $payload['start_location'],
                 'end_location' => $payload['end_location'],
                 'pickup_city_id' => $payload['pickup_city_id'],
@@ -134,76 +130,7 @@ class PostmanController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
-                'status' => 'error'
-            ], 400);
-        }
-    }
-
-    /**
-     * Execute Car Rental API test
-     */
-    private function executeCarRental(array $payload)
-    {
-        try {
-            // Validate required fields for Car Rental (Booking)
-            $rules = [
-                'car_id' => 'required|integer|exists:cars,id',
-                'user_id' => 'nullable|integer|exists:users,id',
-                'store_id' => 'required|integer|exists:stores,id',
-                'guest_name' => 'nullable|string|max:255',
-                'guest_phone' => 'nullable|string|max:20',
-                'pickup_date' => 'required|date_format:Y-m-d',
-                'pickup_time' => 'required|date_format:H:i:s',
-                'number_of_days' => 'required|integer|min:1',
-                'total_price' => 'required|numeric|min:0',
-                'currency' => 'required|string|max:3',
-                'status' => 'required|in:pending,confirmed,completed,cancelled',
-                'notes' => 'nullable|string',
-                'pickup_location' => 'nullable|string|max:255',
-                'refill_tank' => 'nullable|boolean',
-                'refill_amount_per_km' => 'nullable|numeric',
-            ];
-
-            $validator = Validator::make($payload, $rules);
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Validation failed',
-                    'validation_errors' => $validator->errors(),
-                    'status' => 'validation_error'
-                ], 422);
-            }
-
-            // Create the Booking record
-            $booking = Booking::create([
-                'car_id' => $payload['car_id'],
-                'user_id' => $payload['user_id'] ?? null,
-                'store_id' => $payload['store_id'],
-                'guest_name' => $payload['guest_name'] ?? null,
-                'guest_phone' => $payload['guest_phone'] ?? null,
-                'pickup_date' => $payload['pickup_date'],
-                'pickup_time' => $payload['pickup_time'],
-                'number_of_days' => $payload['number_of_days'],
-                'total_price' => $payload['total_price'],
-                'currency' => $payload['currency'],
-                'status' => $payload['status'],
-                'notes' => $payload['notes'] ?? null,
-                'pickup_location' => $payload['pickup_location'] ?? null,
-                'refill_tank' => $payload['refill_tank'] ?? false,
-                'refill_amount_per_km' => $payload['refill_amount_per_km'] ?? null,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Booking created successfully',
-                'status' => 'success',
-                'data' => $booking,
-            ], 201);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'status' => 'error'
+                'status' => 'error',
             ], 400);
         }
     }
@@ -240,35 +167,8 @@ class PostmanController extends Controller
                 'is_active' => true,
                 'is_roundtrip' => false,
                 'schedule_type' => 'once',
-                'selected_days' => []
-            ]
-        ]);
-    }
-
-    /**
-     * Get API template for Car Rental
-     */
-    public function getCarRentalTemplate()
-    {
-        return response()->json([
-            'api_type' => 'car_rental',
-            'template' => [
-                'car_id' => 1,
-                'user_id' => null,
-                'store_id' => 1,
-                'guest_name' => 'John Doe',
-                'guest_phone' => '+923001234567',
-                'pickup_date' => '2024-12-20',
-                'pickup_time' => '10:00:00',
-                'number_of_days' => 3,
-                'total_price' => 5000,
-                'currency' => 'PKR',
-                'status' => 'confirmed',
-                'notes' => 'Customer requested early pickup',
-                'pickup_location' => 'Main Store',
-                'refill_tank' => true,
-                'refill_amount_per_km' => 50
-            ]
+                'selected_days' => [],
+            ],
         ]);
     }
 }

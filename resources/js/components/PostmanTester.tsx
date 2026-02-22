@@ -20,7 +20,7 @@ function PostmanTesterContent() {
     const authContext = useAuth();
     const user = authContext?.user;
 
-    const [apiType, setApiType] = useState<'pick_and_drop' | 'car_rental'>('pick_and_drop');
+    const [apiType,] = useState<'pick_and_drop'>('pick_and_drop');
     const [jsonPayload, setJsonPayload] = useState<string>('{}');
     const [response, setResponse] = useState<ApiResponse | null>(null);
     const [loading, setLoading] = useState(false);
@@ -35,9 +35,7 @@ function PostmanTesterContent() {
         try {
             setLoading(true);
             setError(null);
-            const endpoint = apiType === 'pick_and_drop'
-                ? '/api/admin/postman/template/pick-and-drop'
-                : '/api/admin/postman/template/car-rental';
+            const endpoint = '/api/admin/postman/template/pick-and-drop';
 
             const res = await apiFetch(endpoint);
             if (!res.ok) throw new Error('Failed to load template');
@@ -111,30 +109,10 @@ function PostmanTesterContent() {
                         </label>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => {
-                                    setApiType('pick_and_drop');
-                                    setResponse(null);
-                                }}
-                                className={`flex-1 rounded px-4 py-2 font-semibold transition ${
-                                    apiType === 'pick_and_drop'
-                                        ? 'bg-[#7e246c] text-white'
-                                        : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300'
-                                }`}
+                                onClick={() => setResponse(null)}
+                                className="flex-1 rounded px-4 py-2 font-semibold transition bg-[#7e246c] text-white"
                             >
                                 Pick & Drop
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setApiType('car_rental');
-                                    setResponse(null);
-                                }}
-                                className={`flex-1 rounded px-4 py-2 font-semibold transition ${
-                                    apiType === 'car_rental'
-                                        ? 'bg-[#7e246c] text-white'
-                                        : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300'
-                                }`}
-                            >
-                                Car Rental
                             </button>
                         </div>
                     </div>

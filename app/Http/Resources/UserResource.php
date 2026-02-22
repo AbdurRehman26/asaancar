@@ -13,12 +13,11 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'phone_number' => $this->phone_number,
-            'has_password' => !empty($this->password),
-            'store' => new StoreResource($this->whenLoaded('store')),
+            'has_password' => ! empty($this->password),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'roles' => $this->getRoleNames()->toArray(),
-            'profile_image' => $this->profile_image
+            'profile_image' => $this->profile_image,
         ];
     }
 }

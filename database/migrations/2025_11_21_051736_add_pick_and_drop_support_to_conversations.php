@@ -14,7 +14,7 @@ return new class extends Migration
         // Add pick_and_drop_service_id column
         if (!Schema::hasColumn('conversations', 'pick_and_drop_service_id')) {
             Schema::table('conversations', function (Blueprint $table) {
-                $table->unsignedBigInteger('pick_and_drop_service_id')->nullable()->after('store_id');
+                $table->unsignedBigInteger('pick_and_drop_service_id')->nullable()->after('recipient_user_id');
                 $table->foreign('pick_and_drop_service_id')->references('id')->on('pick_and_drop_services')->onDelete('cascade');
             });
         }
@@ -24,7 +24,7 @@ return new class extends Migration
         if ($driver === 'mysql') {
             $currentType = \DB::select("SHOW COLUMNS FROM conversations WHERE Field = 'type'");
             if (!empty($currentType) && strpos($currentType[0]->Type, "'pick_and_drop'") === false) {
-                \DB::statement("ALTER TABLE conversations MODIFY COLUMN type ENUM('booking', 'store', 'user', 'pick_and_drop') NOT NULL");
+                \DB::statement("ALTER TABLE conversations MODIFY COLUMN type ENUM('user', 'pick_and_drop') NOT NULL");
             }
         } elseif ($driver === 'sqlite') {
             // SQLite doesn't support ENUM, so we'll use a text column with a check constraint
@@ -44,7 +44,7 @@ return new class extends Migration
         $driver = Schema::getConnection()->getDriverName();
         if ($driver === 'mysql') {
             // Remove 'pick_and_drop' from enum
-            \DB::statement("ALTER TABLE conversations MODIFY COLUMN type ENUM('booking', 'store', 'user') NOT NULL");
+            \DB::statement("ALTER TABLE conversations MODIFY COLUMN type ENUM('user') NOT NULL");
         }
         // SQLite doesn't support ALTER ENUM, so we skip this for SQLite
         

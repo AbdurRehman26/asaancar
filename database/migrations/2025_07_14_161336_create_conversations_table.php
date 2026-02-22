@@ -14,11 +14,8 @@ return new class extends Migration
         Schema::create('conversations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('type', ['booking', 'store']);
-            $table->unsignedBigInteger('booking_id')->nullable();
-            $table->unsignedBigInteger('store_id')->nullable();
+            $table->enum('type', ['user']);
             $table->timestamps();
-            $table->unique(['user_id', 'type', 'booking_id', 'store_id'], 'unique_conversation_context');
         });
     }
 

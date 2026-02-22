@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('pick_and_drop_services', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('car_id')->nullable()->constrained()->onDelete('set null');
-            
+
             // Start and end locations
             $table->string('start_location');
             $table->decimal('start_latitude', 10, 8)->nullable();

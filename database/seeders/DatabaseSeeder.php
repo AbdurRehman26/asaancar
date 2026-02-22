@@ -3,11 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Store;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -40,21 +38,16 @@ class DatabaseSeeder extends Seeder
         }
         $specificUser->assignRole('admin');
 
-        // 3. Seed car brands, types, engines
-        $carBrands = \App\Models\CarBrand::factory(10)->create();
-
-
-        // 8. Optionally seed car offers, store offers, etc.
         $this->call([
-            CarTypeSeeder::class,
-            CarModelSeeder::class,
-            ColorSeeder::class,
-            YearSeeder::class,
+            //            CarTypeSeeder::class,
+            //            CarModelSeeder::class,
+            //            ColorSeeder::class,
+            //            YearSeeder::class,
             UserSeeder::class,
-            StoreSeeder::class,
-            CarImportSeeder::class,
-            CarOfferSeeder::class,
-            StoreOfferSeeder::class,
+            //            StoreSeeder::class,
+            //            CarImportSeeder::class,
+            //            CarOfferSeeder::class,
+            //            StoreOfferSeeder::class,
             CitySeeder::class,
             AreaSeeder::class,
             PickAndDropSeeder::class,

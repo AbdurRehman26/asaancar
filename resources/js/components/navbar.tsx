@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Car, Calendar, User, Menu, X, MapPin, LayoutGrid, Folder, Store, BookOpen, Mail, Zap } from 'lucide-react';
+import { User, Menu, X, MapPin, LayoutGrid, Mail, Zap } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -36,30 +36,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
         <MapPin className="h-4 w-4" />
         Pick & Drop
       </Link>
-        <Link
-            to="/cars"
-            className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'cars'
-                ? 'text-[#7e246c] dark:text-white'
-                : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
-            }`}
-            onClick={() => setMobileMenuOpen(false)}
-        >
-            <Car className="h-4 w-4" />
-            Rental Cars
-        </Link>
-      {user && (
-        <Link
-          to="/bookings"
-          className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'bookings'
-            ? 'text-[#7e246c] dark:text-white'
-            : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
-            }`}
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          <Calendar className="h-4 w-4" />
-          My Bookings
-        </Link>
-      )}
       {user && user.roles && Array.isArray(user.roles) && (user.roles.includes('store_owner') || user.roles.includes('admin')) && (
         <Link
           to="/dashboard"
@@ -139,30 +115,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             <MapPin className="h-4 w-4" />
             Pick & Drop
           </Link>
-            <Link
-                to="/cars"
-                className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'cars'
-                    ? 'text-[#7e246c] dark:text-white'
-                    : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-            >
-                <Car className="h-4 w-4" />
-                Rental Cars
-            </Link>
-            {user && (
-            <Link
-              to="/bookings"
-              className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'bookings'
-                ? 'text-[#7e246c] dark:text-white'
-                : 'text-gray-600 dark:text-neutral-400 hover:text-[#7e246c] dark:hover:text-white'
-                }`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Calendar className="h-4 w-4" />
-              My Bookings
-            </Link>
-          )}
           {user && user.roles && Array.isArray(user.roles) && (user.roles.includes('store_owner') || user.roles.includes('admin')) && (
             <Link
               to="/dashboard"
@@ -265,41 +217,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                       <LayoutGrid className="h-4 w-4" />
                       Dashboard Home
                     </Link>
-
-                    {/* Rental Section */}
-                    <div className="mt-4">
-                      <h4 className="text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider mb-2 px-1">
-                        Rental
-                      </h4>
-                      <div className="flex flex-col gap-1">
-                        <Link
-                          to="/dashboard/cars"
-                          className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-neutral-300 hover:text-[#7e246c] dark:hover:text-white transition py-2 px-1"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <Folder className="h-4 w-4" />
-                          Car Listings
-                        </Link>
-                        <Link
-                          to="/dashboard/stores"
-                          className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-neutral-300 hover:text-[#7e246c] dark:hover:text-white transition py-2 px-1"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <Store className="h-4 w-4" />
-                          Car Stores
-                        </Link>
-                        {user.roles.includes('store_owner') && (
-                          <Link
-                            to="/dashboard/store-bookings"
-                            className="flex items-center gap-3 text-sm font-medium text-gray-700 dark:text-neutral-300 hover:text-[#7e246c] dark:hover:text-white transition py-2 px-1"
-                            onClick={() => setMobileMenuOpen(false)}
-                          >
-                            <BookOpen className="h-4 w-4" />
-                            Store Bookings
-                          </Link>
-                        )}
-                      </div>
-                    </div>
 
                     {/* Pick & Drop Section */}
                     <div className="mt-4">

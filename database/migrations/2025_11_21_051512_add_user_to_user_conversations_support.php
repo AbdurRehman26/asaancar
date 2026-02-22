@@ -14,7 +14,7 @@ return new class extends Migration
         // Check if recipient_user_id already exists
         if (!Schema::hasColumn('conversations', 'recipient_user_id')) {
             Schema::table('conversations', function (Blueprint $table) {
-                $table->unsignedBigInteger('recipient_user_id')->nullable()->after('store_id');
+                $table->unsignedBigInteger('recipient_user_id')->nullable()->after('type');
                 $table->foreign('recipient_user_id')->references('id')->on('users')->onDelete('cascade');
             });
         }
@@ -25,7 +25,7 @@ return new class extends Migration
         if ($driver === 'mysql') {
             $currentType = \DB::select("SHOW COLUMNS FROM conversations WHERE Field = 'type'");
             if (!empty($currentType) && strpos($currentType[0]->Type, "'user'") === false) {
-                \DB::statement("ALTER TABLE conversations MODIFY COLUMN type ENUM('booking', 'store', 'user') NOT NULL");
+                \DB::statement("ALTER TABLE conversations MODIFY COLUMN type ENUM('user') NOT NULL");
             }
         } elseif ($driver === 'sqlite') {
             // SQLite doesn't support ENUM, so we'll use a text column with a check constraint
@@ -44,7 +44,7 @@ return new class extends Migration
     {
         $driver = Schema::getConnection()->getDriverName();
         if ($driver === 'mysql') {
-            \DB::statement("ALTER TABLE conversations MODIFY COLUMN type ENUM('booking', 'store') NOT NULL");
+            \DB::statement("ALTER TABLE conversations MODIFY COLUMN type ENUM('user') NOT NULL");
         }
         // SQLite doesn't support ALTER ENUM, so we skip this for SQLite
         

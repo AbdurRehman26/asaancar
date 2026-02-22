@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *     schema="PickAndDrop",
  *     title="Pick and Drop Service",
  *     description="Pick and drop service model",
+ *
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="user_id", type="integer", example=1),
- *     @OA\Property(property="car_id", type="integer", nullable=true, example=1),
  *     @OA\Property(property="start_location", type="string", example="Karachi Airport"),
  *     @OA\Property(property="end_location", type="string", example="Clifton Beach"),
  *     @OA\Property(property="pickup_city_id", type="integer", example=1),
@@ -56,7 +56,6 @@ class PickAndDrop extends Model
         'user_id',
         'name',
         'contact',
-        'car_id',
         'start_location',
         'end_location',
         'pickup_city_id',
@@ -97,11 +96,6 @@ class PickAndDrop extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function car(): BelongsTo
-    {
-        return $this->belongsTo(Car::class);
     }
 
     public function stops(): HasMany

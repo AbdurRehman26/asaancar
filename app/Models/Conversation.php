@@ -10,7 +10,7 @@ class Conversation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'type', 'booking_id', 'store_id', 'user_id', 'recipient_user_id', 'pick_and_drop_service_id',
+        'type', 'user_id', 'recipient_user_id', 'pick_and_drop_service_id',
     ];
 
     public function messages()
@@ -26,16 +26,6 @@ class Conversation extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function booking()
-    {
-        return $this->belongsTo(Booking::class);
-    }
-
-    public function store()
-    {
-        return $this->belongsTo(Store::class);
     }
 
     public function recipientUser()

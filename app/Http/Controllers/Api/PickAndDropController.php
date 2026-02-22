@@ -52,7 +52,7 @@ class PickAndDropController extends Controller
      */
     public function index(Request $request)
     {
-        $query = PickAndDrop::with(['user', 'car', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
+        $query = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('is_active', true)
             ->orderBy('created_at', 'desc');
 
@@ -286,7 +286,7 @@ class PickAndDropController extends Controller
      */
     public function show(string $id)
     {
-        $service = PickAndDrop::with(['user', 'car', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])->findOrFail($id);
+        $service = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])->findOrFail($id);
         return new PickAndDropResource($service);
     }
 
