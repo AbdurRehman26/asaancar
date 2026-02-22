@@ -120,7 +120,6 @@ class UserSeeder extends Seeder
         $adminUser = User::find(1);
         if ($adminUser) {
             $adminUser->assignRole('admin');
-            $adminUser->assignRole('store_owner');
             echo "Assigned admin and store_owner roles to: {$adminUser->name}\n";
         }
 
