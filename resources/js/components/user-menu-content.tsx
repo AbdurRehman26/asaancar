@@ -26,13 +26,13 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup className="dark:bg-gray-800/80 dark:text-white">
                 {/* Dashboard link */}
-                {user.roles && Array.isArray(user.roles) && (user.roles.includes('store_owner') || user.roles.includes('admin')) && (
-                  <DropdownMenuItem asChild>
-                      <Link className="block w-full dark:text-white" to="/dashboard" onClick={cleanup}>
-                          <LayoutGrid className="mr-2" />
-                          Dashboard
-                      </Link>
-                  </DropdownMenuItem>
+                {user.roles && Array.isArray(user.roles) && user.roles.includes('admin') && (
+                    <DropdownMenuItem asChild>
+                        <Link className="block w-full dark:text-white" to="/dashboard" onClick={cleanup}>
+                            <LayoutGrid className="mr-2" />
+                            Dashboard
+                        </Link>
+                    </DropdownMenuItem>
                 )}
                 {/* Profile link */}
                 <DropdownMenuItem asChild className="dark:bg-gray-800/80 dark:text-white">

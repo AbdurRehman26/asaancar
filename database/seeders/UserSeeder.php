@@ -120,7 +120,7 @@ class UserSeeder extends Seeder
         $adminUser = User::find(1);
         if ($adminUser) {
             $adminUser->assignRole('admin');
-            echo "Assigned admin and store_owner roles to: {$adminUser->name}\n";
+            echo "Assigned admin role to: {$adminUser->name}\n";
         }
 
         // Re-enable foreign key checks

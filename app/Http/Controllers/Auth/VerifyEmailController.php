@@ -43,11 +43,5 @@ class VerifyEmailController extends Controller
         return response()->json(['message' => 'Unable to verify email.'], 400);
     }
 
-    protected function redirectAfterVerification($user): RedirectResponse
-    {
-        if ($user->hasRole('store_owner') && (!$user->store_id && $user->stores()->count() === 0)) {
-            return redirect('/create-store?verified=1');
-        }
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
-    }
+
 }

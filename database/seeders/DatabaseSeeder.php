@@ -15,12 +15,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Seed roles and permissions
-        $roles = ['admin', 'store_owner', 'customer', 'user'];
+        $roles = ['admin', 'customer', 'user'];
         foreach ($roles as $role) {
             Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
         }
 
-        // 2. Create specific user with store owner role
+        // 2. Create specific user with admin role
         $specificUser = User::firstOrCreate(
             ['email' => 'sydabdrehman@gmail.com'],
             [
@@ -39,15 +39,7 @@ class DatabaseSeeder extends Seeder
         $specificUser->assignRole('admin');
 
         $this->call([
-            //            CarTypeSeeder::class,
-            //            CarModelSeeder::class,
-            //            ColorSeeder::class,
-            //            YearSeeder::class,
             UserSeeder::class,
-            //            StoreSeeder::class,
-            //            CarImportSeeder::class,
-            //            CarOfferSeeder::class,
-            //            StoreOfferSeeder::class,
             CitySeeder::class,
             AreaSeeder::class,
             PickAndDropSeeder::class,

@@ -73,7 +73,7 @@ function App() {
               </ProtectedRoute>
             }>
               <Route index element={<Dashboard.Home />} />
-              <Route path="messages" element={<Dashboard.Messages />} />
+
               <Route path="pick-and-drop-chat" element={<PickAndDropChat />} />
               <Route path="inquiries" element={<Dashboard.Inquiries />} />
               <Route path="pick-and-drop" element={<PickAndDropPage />} />

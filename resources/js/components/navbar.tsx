@@ -36,7 +36,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
         <MapPin className="h-4 w-4" />
         Pick & Drop
       </Link>
-      {user && user.roles && Array.isArray(user.roles) && (user.roles.includes('store_owner') || user.roles.includes('admin')) && (
+      {user && user.roles && Array.isArray(user.roles) && user.roles.includes('admin') && (
         <Link
           to="/dashboard"
           className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'dashboard'
@@ -66,7 +66,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
           >
             Register Now
           </Link>
-        <DarkModeToggle />
+          <DarkModeToggle />
         </>
       ) : (
         <div className="flex items-center space-x-2">
@@ -115,7 +115,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             <MapPin className="h-4 w-4" />
             Pick & Drop
           </Link>
-          {user && user.roles && Array.isArray(user.roles) && (user.roles.includes('store_owner') || user.roles.includes('admin')) && (
+          {user && user.roles && Array.isArray(user.roles) && user.roles.includes('admin') && (
             <Link
               to="/dashboard"
               className={`flex items-center gap-2 text-sm font-semibold transition ${currentPage === 'dashboard'
@@ -146,7 +146,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             >
               Register Now
             </Link>
-          <DarkModeToggle />
+            <DarkModeToggle />
           </div>
         ) : (
           <div className="flex items-center space-x-2">
@@ -199,15 +199,15 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             </div>
             <div className="flex flex-col gap-4 px-6 py-6 overflow-y-auto flex-1">
               {NavLinks}
-              
+
               {/* Dashboard Sidebar Section - Only show for store owners and admins */}
-              {user && user.roles && Array.isArray(user.roles) && (user.roles.includes('store_owner') || user.roles.includes('admin')) && (
+              {user && user.roles && Array.isArray(user.roles) && user.roles.includes('admin') && (
                 <>
                   <div className="border-t border-neutral-200 dark:border-neutral-800 my-2 pt-4">
                     <h3 className="text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider mb-3">
                       Dashboard
                     </h3>
-                    
+
                     {/* Dashboard Home */}
                     <Link
                       to="/dashboard"

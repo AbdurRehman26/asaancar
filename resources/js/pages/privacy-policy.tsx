@@ -55,7 +55,7 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc pl-6 mb-6 text-gray-700 dark:text-gray-300">
             <li>Service providers who assist us in operating our platform (payment processors, cloud hosting, etc.)</li>
-            <li>Car rental partners and store owners to fulfill your bookings</li>
+            <li>Car rental partners to fulfill your bookings</li>
             <li>Law enforcement or government authorities when required by law</li>
             <li>Other parties with your explicit consent</li>
           </ul>

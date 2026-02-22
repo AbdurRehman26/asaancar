@@ -163,7 +163,7 @@ class ChatController extends Controller
      *         @OA\JsonContent(
      *             required={"message"},
      *
-     *             @OA\Property(property="message", type="string", example="Hello, I'm interested in this car", maxLength=2000)
+     *             @OA\Property(property="message", type="string", example="Hello, I'm interested in this service", maxLength=2000)
      *         )
      *     ),
      *
@@ -253,7 +253,7 @@ class ChatController extends Controller
      *     operationId="createConversation",
      *     tags={"Chat"},
      *     summary="Create conversation",
-     *     description="Create a new conversation for a booking, store, user, or pick and drop service",
+     *     description="Create a new conversation for a user or pick and drop service",
      *     security={{"sanctum": {}}},
      *
      *     @OA\RequestBody(
@@ -277,7 +277,7 @@ class ChatController extends Controller
      *
      *     @OA\Response(response=422, description="Validation error")
      * )
-     * Create a conversation for a booking, store, or user if it doesn't exist
+     * Create a conversation for a user or pick and drop service if it doesn't exist
      */
     public function store(Request $request)
     {

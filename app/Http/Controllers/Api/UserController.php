@@ -51,7 +51,6 @@ class UserController extends Controller
      *     summary="Get user statistics",
      *     description="Get user statistics for admin dashboard",
      *     security={{"sanctum": {}}},
-     *     @OA\Parameter(name="store_id", in="query", description="Filter by store ID", required=false, @OA\Schema(type="integer")),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -66,16 +65,7 @@ class UserController extends Controller
      */
     public function stats(Request $request)
     {
-        $storeId = $request->get('store_id');
-        
         $query = User::query();
-        
-        // If store_id is provided, filter users who are associated with that store
-        if ($storeId) {
-            $query->whereHas('stores', function($q) use ($storeId) {
-                $q->where('stores.id', $storeId);
-            });
-        }
         
         $totalUsers = $query->count();
         $verifiedUsers = $query->clone()->whereNotNull('email_verified_at')->count();
