@@ -124,15 +124,6 @@ class UserSeeder extends Seeder
             echo "Assigned admin and store_owner roles to: {$adminUser->name}\n";
         }
 
-        // Assign store_owner role to other users
-        for ($i = 2; $i <= 9; $i++) {
-            $user = User::find($i);
-            if ($user) {
-                $user->assignRole('store_owner');
-                echo "Assigned store_owner role to: {$user->name}\n";
-            }
-        }
-
         // Re-enable foreign key checks
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
