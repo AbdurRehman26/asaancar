@@ -248,6 +248,7 @@ class OtpController extends Controller
     {
         $request->validate([
             'phone_number' => 'nullable|string',
+            'name' => 'nullable|string',
         ]);
 
         if (! $request->phone_number) {
@@ -257,41 +258,36 @@ class OtpController extends Controller
         $identifier = $request->phone_number;
 
         // Check if user already exists
-        $existingUser = User::where('phone_number', $request->phone_number)->first();
+        $user = User::where('phone_number', $request->phone_number)->first();
+        
+        $isNewlyCreated = false;
+        if (!$user) {
+            $user = User::create([
+                'phone_number' => $request->phone_number,
+                'name' => $request->name ?? 'User',
+            ]);
+            $user->assignRole('customer');
+            $isNewlyCreated = true;
+        }
 
-        $isExistingUser = $existingUser !== null;
+        // Determine if this should be treated as an existing user (fully registered)
+        // A user is existing if they have a password already
+        $isExistingUser = !$isNewlyCreated && !empty($user->password);
 
         // Generate OTP
         $otp = (string) random_int(100000, 999999);
 
-        if ($isExistingUser) {
-            // Store OTP for existing user
-            $existingUser->otp_code = $otp;
-            $existingUser->otp_expires_at = now()->addMinutes(10);
-            $existingUser->save();
+        // Store OTP for user
+        $user->otp_code = $otp;
+        $user->otp_expires_at = now()->addMinutes(10);
+        $user->save();
 
-            // Dispatch job to send SMS asynchronously
-            SendOtpJob::dispatch($request->phone_number, $otp, $existingUser->id, false);
+        // Dispatch job to send SMS asynchronously
+        SendOtpJob::dispatch($request->phone_number, $otp, $user->id, false);
 
-            \Log::info('OTP job dispatched for login (via signup)', [
-                'phone_number' => $request->phone_number,
-            ]);
-        } else {
-            // New user - store OTP in cache
-            $cacheKey = 'signup_otp_'.md5($identifier);
-            Cache::put($cacheKey, [
-                'otp' => $otp,
-                'expires_at' => now()->addMinutes(10),
-                'identifier' => $identifier,
-            ], now()->addMinutes(10));
-
-            // Dispatch job to send SMS asynchronously
-            SendOtpJob::dispatch($request->phone_number, $otp, null, true);
-
-            \Log::info('OTP job dispatched for signup', [
-                'phone_number' => $request->phone_number,
-            ]);
-        }
+        \Log::info($isExistingUser ? 'OTP job dispatched for login (via signup)' : 'OTP job dispatched for signup', [
+            'phone_number' => $request->phone_number,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -352,7 +348,7 @@ class OtpController extends Controller
             ->orWhere('phone_number', $request->identifier)
             ->first();
 
-        if ($user) {
+        if ($user && !empty($user->password)) {
             // User exists - verify OTP using login flow
             // For SMS, verify locally
             try {
@@ -399,37 +395,47 @@ class OtpController extends Controller
             ]);
         }
 
-        // New user - verify OTP from cache (signup flow)
-        $cacheKey = 'signup_otp_'.md5($request->identifier);
-        $otpData = \Illuminate\Support\Facades\Cache::get($cacheKey);
+        // If user exists but has no password, it's a new signup flow using DB
+        if ($user && empty($user->password)) {
+            // For SMS, verify locally (Signup)
+            try {
+                // Check if verification was initiated
+                if (! $user->otp_code || ! $user->otp_expires_at || $user->otp_expires_at->isPast()) {
+                    return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
+                }
 
-        if (! $otpData) {
-            return response()->json(['message' => 'OTP not found or expired'], 400);
-        }
+                if ($user->otp_code !== $request->otp) {
+                    return response()->json(['message' => 'Invalid OTP'], 400);
+                }
 
-        if (now()->isAfter($otpData['expires_at'])) {
-            \Illuminate\Support\Facades\Cache::forget($cacheKey);
+                \Log::info('OTP verified for signup (via DB)', [
+                    'phone_number' => $request->identifier,
+                ]);
 
-            return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
-        }
+                // Clear OTP and mark as verified
+                $user->otp_code = null;
+                $user->otp_expires_at = null;
+                $user->is_verified = true;
+                $user->save();
 
-        // For SMS, verify locally (Signup)
-        try {
-            if ($otpData['otp'] !== $request->otp) {
-                return response()->json(['message' => 'Invalid OTP'], 400);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'OTP verified successfully',
+                    'identifier' => $request->identifier,
+                    'is_existing_user' => false,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to verify OTP for signup (via DB)', [
+                    'error' => $e->getMessage(),
+                    'phone_number' => $request->identifier,
+                ]);
+
+                return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
             }
-
-            \Log::info('OTP verified for signup', [
-                'phone_number' => $request->identifier,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to verify OTP for signup', [
-                'error' => $e->getMessage(),
-                'phone_number' => $request->identifier,
-            ]);
-
-            return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
         }
+
+        // Fallback to cache for any legacy signup flows or if user was deleted mid-flow
+        $cacheKey = 'signup_otp_'.md5($request->identifier);
 
         // Mark OTP as verified in cache (don't clear yet, we need it for registration)
         $otpData['verified'] = true;

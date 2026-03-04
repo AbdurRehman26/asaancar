@@ -32,6 +32,7 @@ export default function SignupPage() {
         method: 'POST',
         body: JSON.stringify({
           phone_number: '+92' + phoneNumber,
+          name: name,
         }),
       });
       if (!res.ok) {
