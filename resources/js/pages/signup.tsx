@@ -68,15 +68,18 @@ export default function SignupPage() {
         setError(err.message || 'OTP verification failed');
       } else {
         const data = await res.json();
-        // If user already exists, they're logged in - redirect to home
-        if (data.is_existing_user && data.token && data.user) {
+        if (data.token && data.user) {
           localStorage.setItem('token', data.token);
           setToken(data.token);
           setUser(data.user);
-          navigate('/');
-        } else {
-          // New user - proceed to password step
-          setStep('password');
+
+          // If user already has a password, they're fully set up
+          if (data.user.has_password) {
+            navigate('/');
+          } else {
+            // Proceed to password step for new users
+            setStep('password');
+          }
         }
       }
     } catch (e) {

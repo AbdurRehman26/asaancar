@@ -343,37 +343,29 @@ class OtpController extends Controller
             'otp' => 'required|string|size:6',
         ]);
 
-        // Check if user exists (login flow)
         $user = User::where('email', $request->identifier)
             ->orWhere('phone_number', $request->identifier)
             ->first();
 
-        if ($user && !empty($user->password)) {
-            // User exists - verify OTP using login flow
-            // For SMS, verify locally
-            try {
-                // Check if verification was initiated
-                if (! $user->otp_code || ! $user->otp_expires_at || $user->otp_expires_at->isPast()) {
-                    return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
-                }
+        if (! $user) {
+            return response()->json(['message' => 'User not found. Please send OTP first.'], 404);
+        }
 
-                if ($user->otp_code !== $request->otp) {
-                    return response()->json(['message' => 'Invalid OTP'], 400);
-                }
-
-                \Log::info('OTP verified for login (via signup)', [
-                    'phone_number' => $request->identifier,
-                ]);
-            } catch (\Exception $e) {
-                \Log::error('Failed to verify OTP for login (via signup)', [
-                    'error' => $e->getMessage(),
-                    'phone_number' => $request->identifier,
-                ]);
-
-                return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
+        try {
+            // Check if verification was initiated
+            if (! $user->otp_code || ! $user->otp_expires_at || $user->otp_expires_at->isPast()) {
+                return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
             }
 
-            // Clear OTP
+            if ($user->otp_code !== $request->otp) {
+                return response()->json(['message' => 'Invalid OTP'], 400);
+            }
+
+            \Log::info('OTP verified for signup', [
+                'phone_number' => $request->identifier,
+            ]);
+
+            // Clear OTP and mark as verified
             $user->otp_code = null;
             $user->otp_expires_at = null;
             $user->is_verified = true;
@@ -387,66 +379,17 @@ class OtpController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'OTP verified successfully. You are now logged in.',
-                'identifier' => $request->identifier,
-                'is_existing_user' => true,
                 'token' => $token,
                 'user' => new \App\Http\Resources\UserResource($user),
             ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to verify OTP for signup', [
+                'error' => $e->getMessage(),
+                'phone_number' => $request->identifier,
+            ]);
+
+            return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
         }
-
-        // If user exists but has no password, it's a new signup flow using DB
-        if ($user && empty($user->password)) {
-            // For SMS, verify locally (Signup)
-            try {
-                // Check if verification was initiated
-                if (! $user->otp_code || ! $user->otp_expires_at || $user->otp_expires_at->isPast()) {
-                    return response()->json(['message' => 'OTP has expired. Please request a new one.'], 400);
-                }
-
-                if ($user->otp_code !== $request->otp) {
-                    return response()->json(['message' => 'Invalid OTP'], 400);
-                }
-
-                \Log::info('OTP verified for signup (via DB)', [
-                    'phone_number' => $request->identifier,
-                ]);
-
-                // Clear OTP and mark as verified
-                $user->otp_code = null;
-                $user->otp_expires_at = null;
-                $user->is_verified = true;
-                $user->save();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'OTP verified successfully',
-                    'identifier' => $request->identifier,
-                    'is_existing_user' => false,
-                ]);
-            } catch (\Exception $e) {
-                \Log::error('Failed to verify OTP for signup (via DB)', [
-                    'error' => $e->getMessage(),
-                    'phone_number' => $request->identifier,
-                ]);
-
-                return response()->json(['message' => 'Failed to verify OTP. Please try again.'], 500);
-            }
-        }
-
-        // Fallback to cache for any legacy signup flows or if user was deleted mid-flow
-        $cacheKey = 'signup_otp_'.md5($request->identifier);
-
-        // Mark OTP as verified in cache (don't clear yet, we need it for registration)
-        $otpData['verified'] = true;
-        \Illuminate\Support\Facades\Cache::put($cacheKey, $otpData, now()->addMinutes(30));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'OTP verified successfully',
-            'identifier' => $otpData['identifier'],
-            'is_existing_user' => false,
-        ]);
     }
 
     /**
@@ -493,22 +436,6 @@ class OtpController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Check if this is during signup (user doesn't exist yet)
-        $cacheKey = 'signup_otp_'.md5($request->identifier);
-        $otpData = \Illuminate\Support\Facades\Cache::get($cacheKey);
-
-        if ($otpData && isset($otpData['verified']) && $otpData['verified']) {
-            // This is during signup - store password in cache for later use during registration
-            $otpData['password'] = Hash::make($request->password);
-            \Illuminate\Support\Facades\Cache::put($cacheKey, $otpData, now()->addMinutes(30));
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Password set successfully. You can now complete your registration.',
-            ]);
-        }
-
-        // Existing user flow - update password
         $user = User::where('email', $request->identifier)
             ->orWhere('phone_number', $request->identifier)
             ->first();
