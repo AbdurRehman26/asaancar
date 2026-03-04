@@ -14,6 +14,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'phone_number' => $this->phone_number,
             'has_password' => ! empty($this->password),
+            'password_set' => ! empty($this->password),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'roles' => $this->getRoleNames()->toArray(),

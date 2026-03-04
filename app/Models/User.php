@@ -73,6 +73,15 @@ class User extends Authenticatable
         ];
     }
 
+    protected $appends = [
+        'password_set',
+    ];
+
+    public function getPasswordSetAttribute(): bool
+    {
+        return ! empty($this->password);
+    }
+
     public function conversations()
     {
         return $this->belongsToMany(Conversation::class, 'messages', 'sender_id', 'conversation_id')->distinct();
