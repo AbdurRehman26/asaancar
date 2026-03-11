@@ -91,51 +91,58 @@ export default function ProfilePage() {
   };
 
   return (
-      <div className="w-full py-6 px-4">
+      <div className="w-full py-6 px-4 max-w-2xl mx-auto">
           {/* Profile info form */}
-          <form onSubmit={handleProfileSubmit}
-                className="space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-10">
-              <h2 className="text-lg font-semibold mb-2">Personal Information</h2>
+          <form
+              onSubmit={handleProfileSubmit}
+              className="space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-10"
+          >
+              <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
 
-              <div className="flex flex-col items-center justify-center mb-6">
-                  <div className="mb-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
+                  <div className="flex flex-col items-center gap-3">
                       {profile.profile_image ? (
-                          <div
-                              className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-white shadow-lg">
                               <img
                                   src={profile.profile_image}
                                   alt="Profile"
                                   className="w-full h-full object-cover"
                               />
-                              <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="sm"
-                                  className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
-                                  onClick={() => setProfile({ ...profile, profile_image: '' })}
-                              >
-                                  X
-                              </Button>
                           </div>
                       ) : (
-                          <div
-                              className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-4xl font-bold uppercase overflow-hidden">
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-3xl sm:text-4xl font-bold uppercase overflow-hidden">
                               {profile.name ? profile.name.charAt(0) : 'U'}
                           </div>
                       )}
+                      {profile.profile_image && (
+                          <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="text-xs"
+                              onClick={() => setProfile({ ...profile, profile_image: '' })}
+                          >
+                              Remove photo
+                          </Button>
+                      )}
                   </div>
 
-                  <div className="w-full max-w-xs">
-                      <Label className="mb-2 block text-center text-sm text-gray-500">Upload New Photo</Label>
+                  <div className="w-full max-w-sm">
+                      <Label className="mb-2 block text-sm text-gray-600 dark:text-gray-300">
+                          Profile photo
+                      </Label>
                       <ImageUpload
                           onImagesChange={setUploadedImages}
                           maxImages={1}
                           directory="profile-images"
                       />
+                      <p className="mt-1 text-xs text-gray-500">
+                          Recommended: square image, at least 256x256px.
+                      </p>
                   </div>
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid gap-2 max-w-sm">
                   <Label htmlFor="name">Name</Label>
                   <Input
                       id="name"
