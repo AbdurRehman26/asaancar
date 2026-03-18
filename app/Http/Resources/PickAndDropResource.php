@@ -96,10 +96,11 @@ class PickAndDropResource extends JsonResource
                 });
             }),
             'schedule_type' => $this->schedule_type,
-            'selected_days' => is_array($this->selected_days) ? implode(', ', array_map(function ($day){
+            'selected_days' => is_array($this->selected_days) ? implode(', ', array_map(function ($day) {
                 return substr($day, 0, 3);
             }, $this->selected_days ?? [])) : [],
             'is_roundtrip' => $this->is_roundtrip ?? false,
+            'is_favorited' => $request->user('sanctum') ? $this->favoritedByUsers()->where('user_id', $request->user('sanctum')->id)->exists() : false,
             'return_time' => $this->return_time,
             'formatted_return_time' => $this->return_time ? Carbon::parse($this->return_time)->format('g:i A') : null,
             'created_at' => Carbon::parse($this->created_at)->format('jS F, g:i A'),

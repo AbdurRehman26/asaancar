@@ -25,6 +25,7 @@ class PickAndDropController extends Controller
      *     tags={"Pick & Drop"},
      *     summary="List pick and drop services",
      *     description="Get a paginated list of active pick and drop services with optional filters",
+     *
      *     @OA\Parameter(name="start_location", in="query", description="Filter by start location", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="end_location", in="query", description="Filter by end location", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="driver_gender", in="query", description="Filter by driver gender", required=false, @OA\Schema(type="string", enum={"male", "female"})),
@@ -34,10 +35,13 @@ class PickAndDropController extends Controller
      *     @OA\Parameter(name="is_roundtrip", in="query", description="Filter by roundtrip services", required=false, @OA\Schema(type="boolean")),
      *     @OA\Parameter(name="schedule_type", in="query", description="Filter by schedule type", required=false, @OA\Schema(type="string", enum={"once", "everyday", "weekdays", "weekends", "custom"})),
      *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=15)),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PickAndDrop")),
      *             @OA\Property(property="meta", type="object",
      *                 @OA\Property(property="current_page", type="integer"),
@@ -59,34 +63,34 @@ class PickAndDropController extends Controller
         // Filter by start location (including stops, stop areas, and stop cities)
         if ($request->has('start_location')) {
             $searchTerm = $request->start_location;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('start_location', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('stops', function($stopQuery) use ($searchTerm) {
-                      $stopQuery->where('location', 'like', '%' . $searchTerm . '%')
-                                ->orWhereHas('area', function($areaQuery) use ($searchTerm) {
-                                    $areaQuery->where('name', 'like', '%' . $searchTerm . '%');
-                                })
-                                ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
-                                    $cityQuery->where('name', 'like', '%' . $searchTerm . '%');
-                                });
-                  });
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('start_location', 'like', '%'.$searchTerm.'%')
+                    ->orWhereHas('stops', function ($stopQuery) use ($searchTerm) {
+                        $stopQuery->where('location', 'like', '%'.$searchTerm.'%')
+                            ->orWhereHas('area', function ($areaQuery) use ($searchTerm) {
+                                $areaQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            })
+                            ->orWhereHas('city', function ($cityQuery) use ($searchTerm) {
+                                $cityQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            });
+                    });
             });
         }
 
         // Filter by end location (including stops, stop areas, and stop cities)
         if ($request->has('end_location')) {
             $searchTerm = $request->end_location;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('end_location', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('stops', function($stopQuery) use ($searchTerm) {
-                      $stopQuery->where('location', 'like', '%' . $searchTerm . '%')
-                                ->orWhereHas('area', function($areaQuery) use ($searchTerm) {
-                                    $areaQuery->where('name', 'like', '%' . $searchTerm . '%');
-                                })
-                                ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
-                                    $cityQuery->where('name', 'like', '%' . $searchTerm . '%');
-                                });
-                  });
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('end_location', 'like', '%'.$searchTerm.'%')
+                    ->orWhereHas('stops', function ($stopQuery) use ($searchTerm) {
+                        $stopQuery->where('location', 'like', '%'.$searchTerm.'%')
+                            ->orWhereHas('area', function ($areaQuery) use ($searchTerm) {
+                                $areaQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            })
+                            ->orWhereHas('city', function ($cityQuery) use ($searchTerm) {
+                                $cityQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            });
+                    });
             });
         }
 
@@ -112,8 +116,8 @@ class PickAndDropController extends Controller
                 // Parse the time
                 $timeParts = explode(':', $selectedTime);
                 if (count($timeParts) === 2) {
-                    $hour = (int)$timeParts[0];
-                    $minute = (int)$timeParts[1];
+                    $hour = (int) $timeParts[0];
+                    $minute = (int) $timeParts[1];
 
                     // Calculate 1 hour before and after
                     $oneHourBeforeHour = $hour - 1;
@@ -137,15 +141,15 @@ class PickAndDropController extends Controller
                     // If the window crosses midnight (e.g., 23:00 to 01:00), we need special handling
                     if ($oneHourBeforeHour > $oneHourAfterHour) {
                         // Window crosses midnight - use OR condition
-                        $query->where(function($q) use ($oneHourBefore, $oneHourAfter) {
+                        $query->where(function ($q) use ($oneHourBefore, $oneHourAfter) {
                             $q->whereTime('departure_time', '>=', $oneHourBefore)
-                              ->orWhereTime('departure_time', '<=', $oneHourAfter);
+                                ->orWhereTime('departure_time', '<=', $oneHourAfter);
                         });
                     } else {
                         // Normal case - time window within same day
-                        $query->where(function($q) use ($oneHourBefore, $oneHourAfter) {
+                        $query->where(function ($q) use ($oneHourBefore, $oneHourAfter) {
                             $q->whereTime('departure_time', '>=', $oneHourBefore)
-                              ->whereTime('departure_time', '<=', $oneHourAfter);
+                                ->whereTime('departure_time', '<=', $oneHourAfter);
                         });
                     }
                 }
@@ -179,17 +183,21 @@ class PickAndDropController extends Controller
      *     summary="Create pick and drop service",
      *     description="Create a new pick and drop service",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
-     *             required={"start_location", "end_location", "pickup_city_id", "pickup_area_id", "dropoff_city_id", "dropoff_area_id", "departure_time", "available_spaces", "driver_gender"},
+     *             required={"start_location", "end_location", "pickup_city_id", "pickup_area_id", "dropoff_city_id", "dropoff_area_id", "departure_date", "departure_time", "available_spaces", "driver_gender"},
+     *
      *             @OA\Property(property="start_location", type="string", example="Karachi Airport"),
      *             @OA\Property(property="end_location", type="string", example="Clifton Beach"),
      *             @OA\Property(property="pickup_city_id", type="integer", example=1),
      *             @OA\Property(property="pickup_area_id", type="integer", example=1),
      *             @OA\Property(property="dropoff_city_id", type="integer", example=1),
      *             @OA\Property(property="dropoff_area_id", type="integer", example=2),
-     *             @OA\Property(property="departure_time", type="string", format="date-time", example="2024-01-15 10:00:00"),
+     *             @OA\Property(property="departure_date", type="string", format="date", example="2024-01-15"),
+     *             @OA\Property(property="departure_time", type="string", format="time", example="10:00"),
      *             @OA\Property(property="available_spaces", type="integer", example=4),
      *             @OA\Property(property="driver_gender", type="string", enum={"male", "female"}, example="male"),
      *             @OA\Property(property="stops", type="array", @OA\Items(type="object",
@@ -202,11 +210,14 @@ class PickAndDropController extends Controller
      *             ))
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Service created successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/PickAndDrop")
      *     ),
+     *
      *     @OA\Response(response=422, description="Validation error")
      * )
      * Store a newly created resource in storage.
@@ -222,7 +233,8 @@ class PickAndDropController extends Controller
             'pickup_area_id' => 'required|integer|exists:areas,id',
             'dropoff_city_id' => 'required|integer|exists:cities,id',
             'dropoff_area_id' => 'required|integer|exists:areas,id',
-            'departure_time' => 'required|date',
+            'departure_date' => 'required|date_format:Y-m-d',
+            'departure_time' => 'required|date_format:H:i',
             'available_spaces' => 'required|integer|min:1',
             'driver_gender' => 'required|in:male,female',
             'schedule_type' => 'nullable|string|in:once,everyday,weekdays,weekends,custom',
@@ -241,8 +253,9 @@ class PickAndDropController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $data = $request->all();
+        $data = $request->except(['departure_date', 'departure_time']);
         $data['user_id'] = Auth::id();
+        $data['departure_time'] = $request->input('departure_date').' '.$request->input('departure_time').':00';
 
         $service = PickAndDrop::create($data);
 
@@ -274,12 +287,16 @@ class PickAndDropController extends Controller
      *     tags={"Pick & Drop"},
      *     summary="Get pick and drop service details",
      *     description="Get detailed information about a specific pick and drop service",
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Service ID", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/PickAndDrop")
      *     ),
+     *
      *     @OA\Response(response=404, description="Service not found")
      * )
      * Display the specified resource.
@@ -287,6 +304,7 @@ class PickAndDropController extends Controller
     public function show(string $id)
     {
         $service = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])->findOrFail($id);
+
         return new PickAndDropResource($service);
     }
 
@@ -298,27 +316,35 @@ class PickAndDropController extends Controller
      *     summary="Update pick and drop service",
      *     description="Update an existing pick and drop service (only owner can update)",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Service ID", @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="start_location", type="string", example="Karachi Airport"),
      *             @OA\Property(property="end_location", type="string", example="Clifton Beach"),
      *             @OA\Property(property="pickup_city_id", type="integer", example=1),
      *             @OA\Property(property="pickup_area_id", type="integer", example=1),
      *             @OA\Property(property="dropoff_city_id", type="integer", example=1),
      *             @OA\Property(property="dropoff_area_id", type="integer", example=2),
-     *             @OA\Property(property="departure_time", type="string", format="date-time", example="2024-01-15 10:00:00"),
+     *             @OA\Property(property="departure_date", type="string", format="date", example="2024-01-15"),
+     *             @OA\Property(property="departure_time", type="string", format="time", example="10:00"),
      *             @OA\Property(property="available_spaces", type="integer", example=4),
      *             @OA\Property(property="driver_gender", type="string", enum={"male", "female"}, example="male"),
      *             @OA\Property(property="stops", type="array", @OA\Items(type="object"))
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Service updated successfully",
+     *
      *         @OA\JsonContent(ref="#/components/schemas/PickAndDrop")
      *     ),
+     *
      *     @OA\Response(response=403, description="Unauthorized - not the owner"),
      *     @OA\Response(response=404, description="Service not found"),
      *     @OA\Response(response=422, description="Validation error")
@@ -343,7 +369,8 @@ class PickAndDropController extends Controller
             'pickup_area_id' => 'required|integer|exists:areas,id',
             'dropoff_city_id' => 'required|integer|exists:cities,id',
             'dropoff_area_id' => 'required|integer|exists:areas,id',
-            'departure_time' => 'sometimes|date',
+            'departure_date' => 'sometimes|date_format:Y-m-d',
+            'departure_time' => 'sometimes|date_format:H:i',
             'schedule_type' => 'nullable|string|in:once,everyday,weekdays,weekends,custom',
             'selected_days' => 'nullable|array',
             'is_roundtrip' => 'boolean',
@@ -363,7 +390,17 @@ class PickAndDropController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $service->update($request->except(['stops']));
+        $updateData = $request->except(['stops', 'departure_date', 'departure_time']);
+
+        if ($request->has('departure_date') && $request->has('departure_time')) {
+            $updateData['departure_time'] = $request->input('departure_date').' '.$request->input('departure_time').':00';
+        } elseif ($request->has('departure_date')) {
+            $updateData['departure_time'] = $request->input('departure_date').' '.$service->departure_time->format('H:i:s');
+        } elseif ($request->has('departure_time')) {
+            $updateData['departure_time'] = $service->departure_time->format('Y-m-d').' '.$request->input('departure_time').':00';
+        }
+
+        $service->update($updateData);
 
         // Update stops if provided
         if ($request->has('stops')) {
@@ -400,14 +437,19 @@ class PickAndDropController extends Controller
      *     summary="Delete pick and drop service",
      *     description="Delete a pick and drop service (only owner can delete)",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\Parameter(name="id", in="path", required=true, description="Service ID", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Service deleted successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Service deleted successfully")
      *         )
      *     ),
+     *
      *     @OA\Response(response=403, description="Unauthorized - not the owner"),
      *     @OA\Response(response=404, description="Service not found")
      * )
@@ -435,16 +477,20 @@ class PickAndDropController extends Controller
      *     summary="Get user's pick and drop services",
      *     description="Get a paginated list of the authenticated user's pick and drop services",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\Parameter(name="start_location", in="query", description="Filter by start location", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="end_location", in="query", description="Filter by end location", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="driver_gender", in="query", description="Filter by driver gender", required=false, @OA\Schema(type="string", enum={"male", "female"})),
      *     @OA\Parameter(name="min_spaces", in="query", description="Minimum available spaces", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="departure_date", in="query", description="Filter by departure date", required=false, @OA\Schema(type="string", format="date")),
      *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=15)),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PickAndDrop")),
      *             @OA\Property(property="meta", type="object",
      *                 @OA\Property(property="current_page", type="integer"),
@@ -465,34 +511,34 @@ class PickAndDropController extends Controller
         // Filter by start location (including stops, stop areas, and stop cities)
         if ($request->has('start_location')) {
             $searchTerm = $request->start_location;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('start_location', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('stops', function($stopQuery) use ($searchTerm) {
-                      $stopQuery->where('location', 'like', '%' . $searchTerm . '%')
-                                ->orWhereHas('area', function($areaQuery) use ($searchTerm) {
-                                    $areaQuery->where('name', 'like', '%' . $searchTerm . '%');
-                                })
-                                ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
-                                    $cityQuery->where('name', 'like', '%' . $searchTerm . '%');
-                                });
-                  });
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('start_location', 'like', '%'.$searchTerm.'%')
+                    ->orWhereHas('stops', function ($stopQuery) use ($searchTerm) {
+                        $stopQuery->where('location', 'like', '%'.$searchTerm.'%')
+                            ->orWhereHas('area', function ($areaQuery) use ($searchTerm) {
+                                $areaQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            })
+                            ->orWhereHas('city', function ($cityQuery) use ($searchTerm) {
+                                $cityQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            });
+                    });
             });
         }
 
         // Filter by end location (including stops, stop areas, and stop cities)
         if ($request->has('end_location')) {
             $searchTerm = $request->end_location;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('end_location', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('stops', function($stopQuery) use ($searchTerm) {
-                      $stopQuery->where('location', 'like', '%' . $searchTerm . '%')
-                                ->orWhereHas('area', function($areaQuery) use ($searchTerm) {
-                                    $areaQuery->where('name', 'like', '%' . $searchTerm . '%');
-                                })
-                                ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
-                                    $cityQuery->where('name', 'like', '%' . $searchTerm . '%');
-                                });
-                  });
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('end_location', 'like', '%'.$searchTerm.'%')
+                    ->orWhereHas('stops', function ($stopQuery) use ($searchTerm) {
+                        $stopQuery->where('location', 'like', '%'.$searchTerm.'%')
+                            ->orWhereHas('area', function ($areaQuery) use ($searchTerm) {
+                                $areaQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            })
+                            ->orWhereHas('city', function ($cityQuery) use ($searchTerm) {
+                                $cityQuery->where('name', 'like', '%'.$searchTerm.'%');
+                            });
+                    });
             });
         }
 
@@ -518,8 +564,8 @@ class PickAndDropController extends Controller
                 // Parse the time
                 $timeParts = explode(':', $selectedTime);
                 if (count($timeParts) === 2) {
-                    $hour = (int)$timeParts[0];
-                    $minute = (int)$timeParts[1];
+                    $hour = (int) $timeParts[0];
+                    $minute = (int) $timeParts[1];
 
                     // Calculate 1 hour before and after
                     $oneHourBeforeHour = $hour - 1;
@@ -543,15 +589,15 @@ class PickAndDropController extends Controller
                     // If the window crosses midnight (e.g., 23:00 to 01:00), we need special handling
                     if ($oneHourBeforeHour > $oneHourAfterHour) {
                         // Window crosses midnight - use OR condition
-                        $query->where(function($q) use ($oneHourBefore, $oneHourAfter) {
+                        $query->where(function ($q) use ($oneHourBefore, $oneHourAfter) {
                             $q->whereTime('departure_time', '>=', $oneHourBefore)
-                              ->orWhereTime('departure_time', '<=', $oneHourAfter);
+                                ->orWhereTime('departure_time', '<=', $oneHourAfter);
                         });
                     } else {
                         // Normal case - time window within same day
-                        $query->where(function($q) use ($oneHourBefore, $oneHourAfter) {
+                        $query->where(function ($q) use ($oneHourBefore, $oneHourAfter) {
                             $q->whereTime('departure_time', '>=', $oneHourBefore)
-                              ->whereTime('departure_time', '<=', $oneHourAfter);
+                                ->whereTime('departure_time', '<=', $oneHourAfter);
                         });
                     }
                 }

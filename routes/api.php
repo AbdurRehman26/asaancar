@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\ImageUploadController;
 use App\Http\Controllers\Api\PickAndDropController;
+use App\Http\Controllers\Api\PickAndDropFavoriteController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -116,6 +117,9 @@ Route::prefix('customer')->middleware(['auth:sanctum'])->group(function () {
     // Pick and Drop Management Routes
     Route::prefix('pick-and-drop')->group(function () {
         Route::get('/my-services', [PickAndDropController::class, 'myServices']);
+        Route::get('/favorites', [PickAndDropFavoriteController::class, 'index']);
+        Route::post('/favorites', [PickAndDropFavoriteController::class, 'store']);
+        Route::delete('/favorites/{id}', [PickAndDropFavoriteController::class, 'destroy']);
         Route::post('/', [PickAndDropController::class, 'store']);
         Route::put('/{id}', [PickAndDropController::class, 'update']);
         Route::delete('/{id}', [PickAndDropController::class, 'destroy']);

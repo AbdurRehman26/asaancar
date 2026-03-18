@@ -92,6 +92,11 @@ class User extends Authenticatable
         return $this->hasMany(Message::class, 'sender_id');
     }
 
+    public function favoritePickAndDrops()
+    {
+        return $this->belongsToMany(PickAndDrop::class, 'pick_and_drop_favorites', 'user_id', 'pick_and_drop_service_id')->withTimestamps();
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomEmailVerificationNotification);

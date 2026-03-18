@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *     @OA\Property(property="is_active", type="boolean", example=true),
  *     @OA\Property(property="is_everyday", type="boolean", example=false),
  *     @OA\Property(property="is_roundtrip", type="boolean", example=false),
+ *     @OA\Property(property="is_favorited", type="boolean", example=true),
  *     @OA\Property(property="return_time", type="string", format="time", example="18:00"),
  *     @OA\Property(property="schedule_type", type="string", enum={"once", "everyday", "weekdays", "weekends", "custom"}, example="custom"),
  *     @OA\Property(property="selected_days", type="array", @OA\Items(type="string"), example={"Monday", "Wednesday", "Friday"}),
@@ -121,5 +122,10 @@ class PickAndDrop extends Model
     public function dropoffArea(): BelongsTo
     {
         return $this->belongsTo(Area::class, 'dropoff_area_id');
+    }
+
+    public function favoritedByUsers(): HasMany
+    {
+        return $this->hasMany(PickAndDropFavorite::class, 'pick_and_drop_service_id', 'id');
     }
 }

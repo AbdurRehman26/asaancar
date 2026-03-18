@@ -12,257 +12,6 @@
         }
     ],
     "paths": {
-        "/api/admin/cars": {
-            "get": {
-                "tags": [
-                    "Admin - Cars"
-                ],
-                "summary": "Get all cars (admin)",
-                "description": "Get a paginated list of all cars for admin (no store filtering)",
-                "operationId": "adminGetCars",
-                "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 9
-                        }
-                    },
-                    {
-                        "name": "brand_id",
-                        "in": "query",
-                        "description": "Filter by brand ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "type_id",
-                        "in": "query",
-                        "description": "Filter by type ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "store_id",
-                        "in": "query",
-                        "description": "Filter by store ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "transmission",
-                        "in": "query",
-                        "description": "Filter by transmission",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "fuel_type",
-                        "in": "query",
-                        "description": "Filter by fuel type",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "min_seats",
-                        "in": "query",
-                        "description": "Minimum seats",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "max_price",
-                        "in": "query",
-                        "description": "Maximum price",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/cars/{id}": {
-            "get": {
-                "tags": [
-                    "Admin - Cars"
-                ],
-                "summary": "Get car details (admin)",
-                "description": "Get detailed information about a specific car for admin",
-                "operationId": "adminGetCar",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Car ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Car"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Car not found"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/cars/stats": {
-            "get": {
-                "tags": [
-                    "Admin - Cars"
-                ],
-                "summary": "Get car statistics (admin)",
-                "description": "Get car statistics for admin dashboard",
-                "operationId": "adminGetCarStats",
-                "parameters": [
-                    {
-                        "name": "store_id",
-                        "in": "query",
-                        "description": "Filter by store ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "total_cars": {
-                                            "type": "integer",
-                                            "example": 500
-                                        },
-                                        "active_cars": {
-                                            "type": "integer",
-                                            "example": 450
-                                        },
-                                        "inactive_cars": {
-                                            "type": "integer",
-                                            "example": 50
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/admin/cars/filters": {
-            "get": {
-                "tags": [
-                    "Admin - Cars"
-                ],
-                "summary": "Get car filters (admin)",
-                "description": "Get all available filters for cars (brands, types, stores) for admin",
-                "operationId": "adminGetCarFilters",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "brands": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "object"
-                                                    }
-                                                },
-                                                "types": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "object"
-                                                    }
-                                                },
-                                                "stores": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "object"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
         "/api/areas": {
             "get": {
                 "tags": [
@@ -331,15 +80,6 @@
                 "description": "Get a paginated list of contact messages (admin only)",
                 "operationId": "getContactMessages",
                 "parameters": [
-                    {
-                        "name": "store_id",
-                        "in": "query",
-                        "description": "Filter by store ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
                     {
                         "name": "per_page",
                         "in": "query",
@@ -430,15 +170,6 @@
                                     "message": {
                                         "type": "string",
                                         "example": "I would like to inquire about..."
-                                    },
-                                    "store_id": {
-                                        "type": "integer",
-                                        "example": 1,
-                                        "nullable": true
-                                    },
-                                    "car_details": {
-                                        "type": "object",
-                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -477,17 +208,6 @@
                 "summary": "Get contact message statistics",
                 "description": "Get statistics for contact messages (admin only)",
                 "operationId": "getContactMessageStats",
-                "parameters": [
-                    {
-                        "name": "store_id",
-                        "in": "query",
-                        "description": "Filter by store ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -1178,6 +898,31 @@
                         }
                     },
                     {
+                        "name": "is_roundtrip",
+                        "in": "query",
+                        "description": "Filter by roundtrip services",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "schedule_type",
+                        "in": "query",
+                        "description": "Filter by schedule type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "once",
+                                "everyday",
+                                "weekdays",
+                                "weekends",
+                                "custom"
+                            ]
+                        }
+                    },
+                    {
                         "name": "per_page",
                         "in": "query",
                         "description": "Items per page",
@@ -1247,6 +992,7 @@
                                     "pickup_area_id",
                                     "dropoff_city_id",
                                     "dropoff_area_id",
+                                    "departure_date",
                                     "departure_time",
                                     "available_spaces",
                                     "driver_gender"
@@ -1276,10 +1022,15 @@
                                         "type": "integer",
                                         "example": 2
                                     },
+                                    "departure_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-15"
+                                    },
                                     "departure_time": {
                                         "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-15 10:00:00"
+                                        "format": "time",
+                                        "example": "10:00"
                                     },
                                     "available_spaces": {
                                         "type": "integer",
@@ -1434,10 +1185,15 @@
                                         "type": "integer",
                                         "example": 2
                                     },
+                                    "departure_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-15"
+                                    },
                                     "departure_time": {
                                         "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-15 10:00:00"
+                                        "format": "time",
+                                        "example": "10:00"
                                     },
                                     "available_spaces": {
                                         "type": "integer",
@@ -1653,6 +1409,147 @@
                 ]
             }
         },
+        "/api/customer/pick-and-drop/favorites": {
+            "get": {
+                "tags": [
+                    "Pick & Drop Favorites"
+                ],
+                "summary": "List favorite pick and drop services",
+                "description": "Get a paginated list of the authenticated user's favorite pick and drop services",
+                "operationId": "getPickAndDropFavorites",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PickAndDrop"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Pick & Drop Favorites"
+                ],
+                "summary": "Add a service to favorites",
+                "description": "Add a specific pick and drop service to the user's favorites",
+                "operationId": "addPickAndDropFavorite",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "pick_and_drop_service_id"
+                                ],
+                                "properties": {
+                                    "pick_and_drop_service_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Service added to favorites",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Service added to favorites"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/customer/pick-and-drop/favorites/{id}": {
+            "delete": {
+                "tags": [
+                    "Pick & Drop Favorites"
+                ],
+                "summary": "Remove a service from favorites",
+                "description": "Remove a specific pick and drop service from the user's favorites",
+                "operationId": "removePickAndDropFavorite",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Pick and Drop Service ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service removed from favorites",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Service removed from favorites"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Favorite not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/user": {
             "get": {
                 "tags": [
@@ -1691,17 +1588,6 @@
                 "summary": "Get user statistics",
                 "description": "Get user statistics for admin dashboard",
                 "operationId": "getUserStats",
-                "parameters": [
-                    {
-                        "name": "store_id",
-                        "in": "query",
-                        "description": "Filter by store ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -2020,10 +1906,6 @@
                                         "identifier": {
                                             "type": "string",
                                             "example": "+923001234567"
-                                        },
-                                        "is_email": {
-                                            "type": "boolean",
-                                            "example": false
                                         }
                                     },
                                     "type": "object"
@@ -2062,7 +1944,7 @@
                                 ],
                                 "properties": {
                                     "identifier": {
-                                        "description": "Email or phone number",
+                                        "description": "Phone number",
                                         "type": "string",
                                         "example": "+923001234567"
                                     },
@@ -2163,7 +2045,8 @@
                                             "type": "string",
                                             "example": "+923001234567"
                                         },
-                                        "is_email": {
+                                        "is_existing_user": {
+                                            "description": "True if user already exists (will log in after OTP verification)",
                                             "type": "boolean",
                                             "example": false
                                         }
@@ -2174,7 +2057,7 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error (email/phone already exists)"
+                        "description": "Validation error"
                     },
                     "500": {
                         "description": "Failed to send OTP"
@@ -2201,7 +2084,7 @@
                                 ],
                                 "properties": {
                                     "identifier": {
-                                        "description": "Email or phone number",
+                                        "description": "Phone number",
                                         "type": "string",
                                         "example": "+923001234567"
                                     },
@@ -2218,7 +2101,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "OTP verified successfully",
+                        "description": "OTP verified successfully. If user exists, they are logged in immediately.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2235,9 +2118,18 @@
                                             "type": "string",
                                             "example": "+923001234567"
                                         },
-                                        "is_email": {
+                                        "is_existing_user": {
+                                            "description": "True if user already exists",
                                             "type": "boolean",
                                             "example": false
+                                        },
+                                        "token": {
+                                            "description": "Authentication token (only if is_existing_user is true)",
+                                            "type": "string",
+                                            "example": "1|xxx..."
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
                                         }
                                     },
                                     "type": "object"
@@ -2273,7 +2165,7 @@
                                 ],
                                 "properties": {
                                     "identifier": {
-                                        "description": "Email or phone number",
+                                        "description": "Phone number",
                                         "type": "string",
                                         "example": "+923001234567"
                                     },
@@ -2398,8 +2290,7 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "name",
-                                    "role"
+                                    "name"
                                 ],
                                 "properties": {
                                     "name": {
@@ -2422,14 +2313,6 @@
                                         "format": "password",
                                         "example": "password123",
                                         "nullable": true
-                                    },
-                                    "role": {
-                                        "type": "string",
-                                        "enum": [
-                                            "user",
-                                            "store_owner"
-                                        ],
-                                        "example": "user"
                                     }
                                 },
                                 "type": "object"
@@ -2481,18 +2364,9 @@
                 "operationId": "getConversations",
                 "parameters": [
                     {
-                        "name": "store_id",
-                        "in": "query",
-                        "description": "Filter by store ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
                         "name": "type",
                         "in": "query",
-                        "description": "Filter by conversation type (rental, booking, store, pick_and_drop)",
+                        "description": "Filter by conversation type (user, pick_and_drop)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -2530,7 +2404,7 @@
                     "Chat"
                 ],
                 "summary": "Create conversation",
-                "description": "Create a new conversation for a booking, store, user, or pick and drop service",
+                "description": "Create a new conversation for a user or pick and drop service",
                 "operationId": "createConversation",
                 "requestBody": {
                     "required": true,
@@ -2544,24 +2418,10 @@
                                     "type": {
                                         "type": "string",
                                         "enum": [
-                                            "booking",
-                                            "store",
                                             "user",
                                             "pick_and_drop"
                                         ],
-                                        "example": "booking"
-                                    },
-                                    "booking_id": {
-                                        "description": "Required if type is booking",
-                                        "type": "integer",
-                                        "example": 1,
-                                        "nullable": true
-                                    },
-                                    "store_id": {
-                                        "description": "Required if type is store",
-                                        "type": "integer",
-                                        "example": 1,
-                                        "nullable": true
+                                        "example": "user"
                                     },
                                     "recipient_user_id": {
                                         "description": "Required if type is user",
@@ -2678,7 +2538,7 @@
                                     "message": {
                                         "type": "string",
                                         "maxLength": 2000,
-                                        "example": "Hello, I'm interested in this car"
+                                        "example": "Hello, I'm interested in this service"
                                     }
                                 },
                                 "type": "object"
@@ -2708,161 +2568,19 @@
                 ]
             }
         },
-        "/api/bookings": {
-            "get": {
+        "/api/chat/conversations/{conversation}": {
+            "delete": {
                 "tags": [
-                    "Bookings"
+                    "Chat"
                 ],
-                "summary": "List bookings",
-                "description": "Get a paginated list of bookings for the authenticated user",
-                "operationId": "getBookings",
+                "summary": "Delete conversation",
+                "description": "Delete a conversation for the current user only (soft delete). The conversation will remain visible to other participants. If the user sends a new message, the conversation will be restored but old messages will remain hidden.",
+                "operationId": "deleteConversation",
                 "parameters": [
                     {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filter by status",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "date_from",
-                        "in": "query",
-                        "description": "Filter from date",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "date_to",
-                        "in": "query",
-                        "description": "Filter to date",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "format": "date"
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 10
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Booking"
-                                            }
-                                        },
-                                        "current_page": {
-                                            "type": "integer"
-                                        },
-                                        "per_page": {
-                                            "type": "integer"
-                                        },
-                                        "total": {
-                                            "type": "integer"
-                                        },
-                                        "last_page": {
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Bookings"
-                ],
-                "summary": "Create booking",
-                "description": "Create a new booking",
-                "operationId": "createBooking",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/BookingRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Booking created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/Booking"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Booking created successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Booking creation failed"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/bookings/{id}": {
-            "get": {
-                "tags": [
-                    "Bookings"
-                ],
-                "summary": "Get booking details",
-                "description": "Get detailed information about a specific booking",
-                "operationId": "getBooking",
-                "parameters": [
-                    {
-                        "name": "id",
+                        "name": "conversation",
                         "in": "path",
-                        "description": "Booking ID",
+                        "description": "Conversation ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2871,13 +2589,14 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
+                        "description": "Conversation deleted successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/Booking"
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Conversation deleted successfully"
                                         }
                                     },
                                     "type": "object"
@@ -2886,10 +2605,10 @@
                         }
                     },
                     "403": {
-                        "description": "Unauthorized - not the owner"
+                        "description": "Unauthorized to delete this conversation"
                     },
                     "404": {
-                        "description": "Booking not found"
+                        "description": "Conversation not found"
                     }
                 },
                 "security": [
@@ -2897,1270 +2616,6 @@
                         "sanctum": []
                     }
                 ]
-            },
-            "put": {
-                "tags": [
-                    "Bookings"
-                ],
-                "summary": "Update booking",
-                "description": "Update booking status and notes (only owner can update)",
-                "operationId": "updateBooking",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Booking ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "status"
-                                ],
-                                "properties": {
-                                    "status": {
-                                        "type": "string",
-                                        "example": "confirmed"
-                                    },
-                                    "notes": {
-                                        "type": "string",
-                                        "example": "Additional notes",
-                                        "nullable": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Booking updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Unauthorized - not the owner"
-                    },
-                    "404": {
-                        "description": "Booking not found"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Bookings"
-                ],
-                "summary": "Cancel booking",
-                "description": "Cancel a booking (only owner can cancel)",
-                "operationId": "cancelBooking",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Booking ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Booking cancelled successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Unauthorized - not the owner"
-                    },
-                    "404": {
-                        "description": "Booking not found"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/bookings/stats": {
-            "get": {
-                "tags": [
-                    "Bookings"
-                ],
-                "summary": "Get booking statistics",
-                "description": "Get booking statistics for user's stores",
-                "operationId": "getBookingStats",
-                "parameters": [
-                    {
-                        "name": "store_id",
-                        "in": "query",
-                        "description": "Filter by store ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "count": {
-                                            "type": "integer",
-                                            "example": 50
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/bookings/check-availability": {
-            "post": {
-                "tags": [
-                    "Bookings"
-                ],
-                "summary": "Check car availability",
-                "description": "Check if a car is available for the specified date range",
-                "operationId": "checkCarAvailability",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "car_id",
-                                    "start_date",
-                                    "end_date"
-                                ],
-                                "properties": {
-                                    "car_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "start_date": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-15 10:00:00"
-                                    },
-                                    "end_date": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-20 10:00:00"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "available": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/bookings/calculate-price": {
-            "post": {
-                "tags": [
-                    "Bookings"
-                ],
-                "summary": "Calculate booking price",
-                "description": "Calculate the total price for a booking based on car, dates, and duration type",
-                "operationId": "calculateBookingPrice",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "car_id",
-                                    "start_date",
-                                    "end_date",
-                                    "duration_type"
-                                ],
-                                "properties": {
-                                    "car_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "start_date": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-15 10:00:00"
-                                    },
-                                    "end_date": {
-                                        "type": "string",
-                                        "format": "date-time",
-                                        "example": "2024-01-20 10:00:00"
-                                    },
-                                    "duration_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "hourly",
-                                            "daily",
-                                            "weekly"
-                                        ],
-                                        "example": "daily"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Price calculated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "total_price": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 5000
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Calculation failed"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/guest-booking": {
-            "post": {
-                "tags": [
-                    "Bookings"
-                ],
-                "summary": "Create guest booking",
-                "description": "Create a booking for an unauthenticated guest user",
-                "operationId": "createGuestBooking",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "car_id",
-                                    "guest_name",
-                                    "guest_phone"
-                                ],
-                                "properties": {
-                                    "car_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "guest_name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "guest_phone": {
-                                        "type": "string",
-                                        "example": "+923001234567"
-                                    },
-                                    "pickup_location": {
-                                        "type": "string",
-                                        "example": "Karachi Airport",
-                                        "nullable": true
-                                    },
-                                    "pickup_time": {
-                                        "type": "string",
-                                        "example": "10:00 AM",
-                                        "nullable": true
-                                    },
-                                    "pickup_date": {
-                                        "type": "string",
-                                        "example": "2024-01-15",
-                                        "nullable": true
-                                    },
-                                    "notes": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "rental_type": {
-                                        "type": "string",
-                                        "nullable": true
-                                    },
-                                    "number_of_days": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    },
-                                    "total_price": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "nullable": true
-                                    },
-                                    "car_offer_id": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    },
-                                    "refill_tank": {
-                                        "type": "boolean",
-                                        "nullable": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Guest booking created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/Booking"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Booking created successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Booking creation failed"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            }
-        },
-        "/api/customer/car-brands": {
-            "get": {
-                "tags": [
-                    "Car Brands"
-                ],
-                "summary": "Get list of car brands",
-                "description": "Returns list of car brands with pagination",
-                "operationId": "getCarBrandsList",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/CarBrand"
-                                            }
-                                        },
-                                        "current_page": {
-                                            "type": "integer"
-                                        },
-                                        "per_page": {
-                                            "type": "integer"
-                                        },
-                                        "total": {
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/customer/cars": {
-            "get": {
-                "tags": [
-                    "Cars"
-                ],
-                "summary": "Get list of cars",
-                "description": "Returns list of cars with pagination (response format similar to Pick & Drop API)",
-                "operationId": "getCarsList",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Car"
-                                            }
-                                        },
-                                        "meta": {
-                                            "properties": {
-                                                "current_page": {
-                                                    "type": "integer"
-                                                },
-                                                "last_page": {
-                                                    "type": "integer"
-                                                },
-                                                "per_page": {
-                                                    "type": "integer"
-                                                },
-                                                "total": {
-                                                    "type": "integer"
-                                                },
-                                                "from": {
-                                                    "type": "integer",
-                                                    "nullable": true
-                                                },
-                                                "to": {
-                                                    "type": "integer",
-                                                    "nullable": true
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Cars"
-                ],
-                "summary": "Store a new car",
-                "description": "Creates a new car record",
-                "operationId": "storeCar",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CarRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Car created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Car"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            }
-        },
-        "/api/customer/cars/{id}": {
-            "get": {
-                "tags": [
-                    "Cars"
-                ],
-                "summary": "Get car information",
-                "description": "Returns car data by ID",
-                "operationId": "getCarById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Car ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Car"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Car not found"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Cars"
-                ],
-                "summary": "Update car information",
-                "description": "Updates car data by ID",
-                "operationId": "updateCar",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Car ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CarRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Car updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Car"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Car not found"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Cars"
-                ],
-                "summary": "Delete car",
-                "description": "Deletes car by ID",
-                "operationId": "deleteCar",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Car ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Car deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Car deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Car not found"
-                    }
-                }
-            }
-        },
-        "/api/cars/{id}/with-offer-form": {
-            "get": {
-                "tags": [
-                    "Cars"
-                ],
-                "summary": "Get car information with offer form data",
-                "description": "Returns car data by ID with additional data needed for offer form",
-                "operationId": "getCarWithOfferForm",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Car ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/Car"
-                                        },
-                                        "offer_form_data": {
-                                            "properties": {
-                                                "currencies": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "existing_offers": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "$ref": "#/components/schemas/CarOffer"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Car not found"
-                    }
-                }
-            }
-        },
-        "/api/my-cars": {
-            "get": {
-                "tags": [
-                    "Cars"
-                ],
-                "summary": "Get my cars only",
-                "description": "Returns cars belonging to authenticated user's stores only",
-                "operationId": "getMyCars",
-                "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Car"
-                                            }
-                                        },
-                                        "meta": {
-                                            "properties": {
-                                                "current_page": {
-                                                    "type": "integer"
-                                                },
-                                                "last_page": {
-                                                    "type": "integer"
-                                                },
-                                                "per_page": {
-                                                    "type": "integer"
-                                                },
-                                                "total": {
-                                                    "type": "integer"
-                                                },
-                                                "from": {
-                                                    "type": "integer",
-                                                    "nullable": true
-                                                },
-                                                "to": {
-                                                    "type": "integer",
-                                                    "nullable": true
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/all-cars": {
-            "get": {
-                "tags": [
-                    "Cars"
-                ],
-                "summary": "Get cars from all stores",
-                "description": "Returns cars from all stores (public endpoint)",
-                "operationId": "getAllCars",
-                "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
-                    },
-                    {
-                        "name": "store_id",
-                        "in": "query",
-                        "description": "Filter by store ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Car"
-                                            }
-                                        },
-                                        "meta": {
-                                            "properties": {
-                                                "current_page": {
-                                                    "type": "integer"
-                                                },
-                                                "last_page": {
-                                                    "type": "integer"
-                                                },
-                                                "per_page": {
-                                                    "type": "integer"
-                                                },
-                                                "total": {
-                                                    "type": "integer"
-                                                },
-                                                "from": {
-                                                    "type": "integer",
-                                                    "nullable": true
-                                                },
-                                                "to": {
-                                                    "type": "integer",
-                                                    "nullable": true
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/car-models": {
-            "get": {
-                "tags": [
-                    "Car Models"
-                ],
-                "summary": "List car models",
-                "description": "Get a list of car models, optionally filtered by brand",
-                "operationId": "getCarModels",
-                "parameters": [
-                    {
-                        "name": "brand_id",
-                        "in": "query",
-                        "description": "Filter by brand ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Civic"
-                                                    },
-                                                    "slug": {
-                                                        "type": "string",
-                                                        "example": "civic"
-                                                    },
-                                                    "car_brand_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "brand_name": {
-                                                        "type": "string",
-                                                        "example": "Honda"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/car-models/brand/{brandId}": {
-            "get": {
-                "tags": [
-                    "Car Models"
-                ],
-                "summary": "Get car models by brand",
-                "description": "Get a list of car models for a specific brand",
-                "operationId": "getCarModelsByBrand",
-                "parameters": [
-                    {
-                        "name": "brandId",
-                        "in": "path",
-                        "description": "Brand ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Civic"
-                                                    },
-                                                    "slug": {
-                                                        "type": "string",
-                                                        "example": "civic"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/customer/car-offers": {
-            "get": {
-                "tags": [
-                    "Car Offers"
-                ],
-                "summary": "Get list of car offers",
-                "description": "Returns list of car offers with pagination",
-                "operationId": "getCarOffersList",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/CarOffer"
-                                            }
-                                        },
-                                        "current_page": {
-                                            "type": "integer"
-                                        },
-                                        "per_page": {
-                                            "type": "integer"
-                                        },
-                                        "total": {
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Car Offers"
-                ],
-                "summary": "Store a new car offer",
-                "description": "Creates a new car offer record",
-                "operationId": "storeCarOffer",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CarOfferRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Car offer created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CarOffer"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            }
-        },
-        "/api/customer/car-offers/{id}": {
-            "get": {
-                "tags": [
-                    "Car Offers"
-                ],
-                "summary": "Get car offer information",
-                "description": "Returns car offer data by ID",
-                "operationId": "getCarOfferById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Car offer ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CarOffer"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Car offer not found"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Car Offers"
-                ],
-                "summary": "Update car offer information",
-                "description": "Updates car offer data by ID",
-                "operationId": "updateCarOffer",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Car offer ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CarOfferRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Car offer updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CarOffer"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Car offer not found"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Car Offers"
-                ],
-                "summary": "Delete car offer",
-                "description": "Deletes car offer by ID",
-                "operationId": "deleteCarOffer",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Car offer ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Car offer deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Car offer deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Car offer not found"
-                    }
-                }
-            }
-        },
-        "/api/customer/car-types": {
-            "get": {
-                "tags": [
-                    "Car Types"
-                ],
-                "summary": "Get list of car types",
-                "description": "Returns list of car types with pagination",
-                "operationId": "getCarTypesList",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/CarType"
-                                            }
-                                        },
-                                        "current_page": {
-                                            "type": "integer"
-                                        },
-                                        "per_page": {
-                                            "type": "integer"
-                                        },
-                                        "total": {
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "/api/cities": {
@@ -4182,366 +2637,6 @@
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/City"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/colors": {
-            "get": {
-                "tags": [
-                    "Colors"
-                ],
-                "summary": "List colors",
-                "description": "Get a list of active colors",
-                "operationId": "getColors",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Red"
-                                                    },
-                                                    "hex_code": {
-                                                        "type": "string",
-                                                        "example": "#FF0000"
-                                                    },
-                                                    "slug": {
-                                                        "type": "string",
-                                                        "example": "red"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/customer/stores": {
-            "get": {
-                "tags": [
-                    "Stores"
-                ],
-                "summary": "Get list of stores",
-                "description": "Returns list of stores with pagination",
-                "operationId": "getStoresList",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Store"
-                                            }
-                                        },
-                                        "current_page": {
-                                            "type": "integer"
-                                        },
-                                        "per_page": {
-                                            "type": "integer"
-                                        },
-                                        "total": {
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Stores"
-                ],
-                "summary": "Store a new store",
-                "description": "Creates a new store record",
-                "operationId": "storeStore",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/StoreRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Store created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Store"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            }
-        },
-        "/api/customer/stores/{id}": {
-            "get": {
-                "tags": [
-                    "Stores"
-                ],
-                "summary": "Get store information",
-                "description": "Returns store data by ID",
-                "operationId": "getStoreById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Store ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Store"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Store not found"
-                    }
-                }
-            },
-            "put": {
-                "tags": [
-                    "Stores"
-                ],
-                "summary": "Update store information",
-                "description": "Updates store data by ID",
-                "operationId": "updateStore",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Store ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/StoreRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Store updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Store"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Store not found"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Stores"
-                ],
-                "summary": "Delete store",
-                "description": "Deletes store by ID",
-                "operationId": "deleteStore",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Store ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Store deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Store deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Store not found"
-                    }
-                }
-            }
-        },
-        "/api/my-stores": {
-            "get": {
-                "tags": [
-                    "Stores"
-                ],
-                "summary": "Get all my stores",
-                "description": "Returns all stores belonging to authenticated user",
-                "operationId": "getMyStores",
-                "parameters": [
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 15
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Store"
-                                            }
-                                        },
-                                        "current_page": {
-                                            "type": "integer"
-                                        },
-                                        "per_page": {
-                                            "type": "integer"
-                                        },
-                                        "total": {
-                                            "type": "integer"
-                                        },
-                                        "last_page": {
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/years": {
-            "get": {
-                "tags": [
-                    "Years"
-                ],
-                "summary": "List years",
-                "description": "Get a list of active years",
-                "operationId": "getYears",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "year": {
-                                                        "type": "integer",
-                                                        "example": 2024
-                                                    }
-                                                },
-                                                "type": "object"
                                             }
                                         }
                                     },
@@ -4698,6 +2793,11 @@
                                         "format": "email",
                                         "example": "john@example.com",
                                         "nullable": true
+                                    },
+                                    "profile_image": {
+                                        "type": "string",
+                                        "example": "https://example.com/image.jpg",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -4832,7 +2932,7 @@
                     },
                     "type": {
                         "type": "string",
-                        "example": "App\\\\Notifications\\\\BookingCreatedNotification"
+                        "example": "App\\\\Notifications\\\\MessageReceivedNotification"
                     },
                     "data": {
                         "type": "object",
@@ -4857,453 +2957,6 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2024-01-01T12:00:00Z"
-                    }
-                },
-                "type": "object"
-            },
-            "BookingRequest": {
-                "title": "Booking Request",
-                "description": "Booking request data",
-                "required": [
-                    "car_id",
-                    "user_id",
-                    "start_date",
-                    "end_date",
-                    "total_price",
-                    "status"
-                ],
-                "properties": {
-                    "car_id": {
-                        "description": "ID of the car to book",
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "user_id": {
-                        "description": "ID of the user making the booking",
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "start_date": {
-                        "description": "Booking start date",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-01-01T10:00:00Z"
-                    },
-                    "end_date": {
-                        "description": "Booking end date",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-01-03T10:00:00Z"
-                    },
-                    "total_price": {
-                        "description": "Total price for the booking",
-                        "type": "number",
-                        "format": "float",
-                        "example": 150
-                    },
-                    "status": {
-                        "description": "Booking status",
-                        "type": "string",
-                        "enum": [
-                            "pending",
-                            "confirmed",
-                            "cancelled",
-                            "completed"
-                        ],
-                        "example": "confirmed"
-                    },
-                    "notes": {
-                        "description": "Additional notes",
-                        "type": "string",
-                        "example": "Customer requested early pickup",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "CarRequest": {
-                "title": "Car Request",
-                "description": "Car request data",
-                "required": [
-                    "car_brand_id",
-                    "car_type_id",
-                    "store_id",
-                    "model",
-                    "year",
-                    "color",
-                    "seats",
-                    "transmission",
-                    "fuel_type"
-                ],
-                "properties": {
-                    "car_brand_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "car_type_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "store_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "model": {
-                        "type": "string",
-                        "example": "Civic"
-                    },
-                    "year": {
-                        "type": "integer",
-                        "example": 2020
-                    },
-                    "color": {
-                        "type": "string",
-                        "example": "blue"
-                    },
-                    "seats": {
-                        "type": "integer",
-                        "example": 5
-                    },
-                    "transmission": {
-                        "type": "string",
-                        "enum": [
-                            "manual",
-                            "automatic"
-                        ]
-                    },
-                    "fuel_type": {
-                        "type": "string",
-                        "enum": [
-                            "petrol",
-                            "diesel",
-                            "electric",
-                            "hybrid"
-                        ]
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "A reliable car for daily use"
-                    },
-                    "image_urls": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "format": "binary"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "CarOfferRequest": {
-                "title": "Car Offer Request",
-                "description": "Car offer request data",
-                "required": [
-                    "car_id",
-                    "discount_percentage",
-                    "start_date",
-                    "end_date"
-                ],
-                "properties": {
-                    "car_id": {
-                        "description": "ID of the car for the offer",
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "discount_percentage": {
-                        "description": "Discount percentage (0-100)",
-                        "type": "number",
-                        "format": "float",
-                        "example": 20
-                    },
-                    "currency": {
-                        "description": "Currency code (3 characters)",
-                        "type": "string",
-                        "example": "PKR"
-                    },
-                    "start_date": {
-                        "description": "Offer start date",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-06-01T00:00:00Z"
-                    },
-                    "end_date": {
-                        "description": "Offer end date",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-08-31T23:59:59Z"
-                    },
-                    "is_active": {
-                        "description": "Whether the offer is active",
-                        "type": "boolean",
-                        "example": true
-                    }
-                },
-                "type": "object"
-            },
-            "StoreRequest": {
-                "title": "Store Request",
-                "description": "Store request data",
-                "required": [
-                    "name",
-                    "store_username"
-                ],
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "example": "Downtown Car Rental"
-                    },
-                    "store_username": {
-                        "type": "string",
-                        "example": "downtown_rental"
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "Premium car rental service"
-                    },
-                    "address": {
-                        "type": "string",
-                        "example": "123 Main St"
-                    },
-                    "phone": {
-                        "type": "string",
-                        "example": "+1234567890"
-                    },
-                    "email": {
-                        "type": "string",
-                        "example": "info@downtown.com"
-                    }
-                },
-                "type": "object"
-            },
-            "Booking": {
-                "title": "Booking",
-                "description": "Booking model",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "store_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "car_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "user_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "start_date": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-01-01T10:00:00Z"
-                    },
-                    "end_date": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-01-03T10:00:00Z"
-                    },
-                    "total_price": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 150
-                    },
-                    "status": {
-                        "type": "string",
-                        "example": "confirmed"
-                    },
-                    "notes": {
-                        "type": "string",
-                        "example": "Customer requested early pickup",
-                        "nullable": true
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "car": {
-                        "$ref": "#/components/schemas/Car"
-                    },
-                    "user": {
-                        "$ref": "#/components/schemas/User"
-                    }
-                },
-                "type": "object"
-            },
-            "Car": {
-                "title": "Car",
-                "description": "Car model",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "car_brand_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "car_type_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "store_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "model": {
-                        "type": "string",
-                        "example": "Civic"
-                    },
-                    "year": {
-                        "type": "integer",
-                        "example": 2020
-                    },
-                    "color": {
-                        "type": "string",
-                        "example": "blue"
-                    },
-                    "seats": {
-                        "type": "integer",
-                        "example": 5
-                    },
-                    "transmission": {
-                        "type": "string",
-                        "example": "automatic"
-                    },
-                    "fuel_type": {
-                        "type": "string",
-                        "example": "petrol"
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "A reliable car for daily use"
-                    },
-                    "image_urls": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "car_brand": {
-                        "$ref": "#/components/schemas/CarBrand"
-                    },
-                    "car_type": {
-                        "$ref": "#/components/schemas/CarType"
-                    },
-                    "store": {
-                        "$ref": "#/components/schemas/Store"
-                    }
-                },
-                "type": "object"
-            },
-            "CarBrand": {
-                "title": "Car Brand",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "Honda"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "type": "object"
-            },
-            "CarOffer": {
-                "title": "Car Offer",
-                "description": "Car offer model",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "car_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "discount_percentage": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 20
-                    },
-                    "currency": {
-                        "description": "Currency code (3 characters)",
-                        "type": "string",
-                        "example": "PKR"
-                    },
-                    "start_date": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-06-01T00:00:00Z"
-                    },
-                    "end_date": {
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2024-08-31T23:59:59Z"
-                    },
-                    "is_active": {
-                        "type": "boolean",
-                        "example": true
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "car": {
-                        "$ref": "#/components/schemas/Car"
-                    }
-                },
-                "type": "object"
-            },
-            "CarType": {
-                "title": "Car Type",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "Sedan"
-                    },
-                    "image": {
-                        "type": "string",
-                        "example": "car-type-sedan.jpg"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -5346,11 +2999,6 @@
                     "user_id": {
                         "type": "integer",
                         "example": 1
-                    },
-                    "car_id": {
-                        "type": "integer",
-                        "example": 1,
-                        "nullable": true
                     },
                     "start_location": {
                         "type": "string",
@@ -5445,6 +3093,41 @@
                         "type": "boolean",
                         "example": false
                     },
+                    "is_roundtrip": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_favorited": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "return_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "18:00"
+                    },
+                    "schedule_type": {
+                        "type": "string",
+                        "enum": [
+                            "once",
+                            "everyday",
+                            "weekdays",
+                            "weekends",
+                            "custom"
+                        ],
+                        "example": "custom"
+                    },
+                    "selected_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Monday",
+                            "Wednesday",
+                            "Friday"
+                        ]
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time"
@@ -5471,48 +3154,6 @@
                 },
                 "type": "object"
             },
-            "Store": {
-                "title": "Store",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "Downtown Car Rental"
-                    },
-                    "store_username": {
-                        "type": "string",
-                        "example": "downtown_rental"
-                    },
-                    "description": {
-                        "type": "string",
-                        "example": "Premium car rental service"
-                    },
-                    "address": {
-                        "type": "string",
-                        "example": "123 Main St"
-                    },
-                    "phone": {
-                        "type": "string",
-                        "example": "+1234567890"
-                    },
-                    "email": {
-                        "type": "string",
-                        "example": "info@downtown.com"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "type": "object"
-            },
             "User": {
                 "title": "User",
                 "description": "User model",
@@ -5530,11 +3171,6 @@
                         "format": "email",
                         "example": "john@example.com"
                     },
-                    "store_id": {
-                        "type": "integer",
-                        "example": 1,
-                        "nullable": true
-                    },
                     "email_verified_at": {
                         "type": "string",
                         "format": "date-time",
@@ -5548,8 +3184,10 @@
                         "type": "string",
                         "format": "date-time"
                     },
-                    "store": {
-                        "$ref": "#/components/schemas/Store"
+                    "profile_image": {
+                        "type": "string",
+                        "example": "https://example.com/image.jpg",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -5565,10 +3203,6 @@
         }
     },
     "tags": [
-        {
-            "name": "Admin - Cars",
-            "description": "API Endpoints for admin car management"
-        },
         {
             "name": "Areas",
             "description": "API Endpoints for area management"
@@ -5602,44 +3236,8 @@
             "description": "API Endpoints for chat and messaging"
         },
         {
-            "name": "Bookings",
-            "description": "API Endpoints for booking management"
-        },
-        {
-            "name": "Car Brands",
-            "description": "API Endpoints for car brand management"
-        },
-        {
-            "name": "Cars",
-            "description": "API Endpoints for car management"
-        },
-        {
-            "name": "Car Models",
-            "description": "API Endpoints for car model management"
-        },
-        {
-            "name": "Car Offers",
-            "description": "API Endpoints for car offer management"
-        },
-        {
-            "name": "Car Types",
-            "description": "API Endpoints for car type management"
-        },
-        {
             "name": "Cities",
             "description": "API Endpoints for city management"
-        },
-        {
-            "name": "Colors",
-            "description": "API Endpoints for color management"
-        },
-        {
-            "name": "Stores",
-            "description": "API Endpoints for store management"
-        },
-        {
-            "name": "Years",
-            "description": "API Endpoints for year management"
         },
         {
             "name": "Settings",
@@ -5652,6 +3250,10 @@
         {
             "name": "Notifications",
             "description": "Notifications"
+        },
+        {
+            "name": "Pick & Drop Favorites",
+            "description": "Pick & Drop Favorites"
         }
     ]
 }
