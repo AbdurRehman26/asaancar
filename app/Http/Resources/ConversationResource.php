@@ -19,6 +19,7 @@ class ConversationResource extends JsonResource
             'id' => $this->id,
             'type' => $this->type,
             'user_id' => $this->user_id,
+            'user' => new UserResource($this->user),
             'recipient_user_id' => $this->recipient_user_id,
             'pick_and_drop_service_id' => $this->pick_and_drop_service_id,
             'last_message' => $this->lastMessage ? $this->lastMessage->message : null,
