@@ -95,6 +95,30 @@ it('requires both departure_date and departure_time for store', function () {
         ->assertJsonValidationErrors(['departure_date', 'departure_time']);
 });
 
+it('does not require departure_date when schedule_type is not once', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/pick-and-drop', [
+            'start_location' => 'Karachi Airport',
+            'end_location' => 'Clifton Beach',
+            'pickup_city_id' => $this->city->id,
+            'pickup_area_id' => $this->area1->id,
+            'dropoff_city_id' => $this->city->id,
+            'dropoff_area_id' => $this->area2->id,
+            'departure_time' => '14:30',
+            'available_spaces' => 4,
+            'driver_gender' => 'male',
+            'schedule_type' => 'everyday',
+        ]);
+
+    $response->assertSuccessful();
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'user_id' => $this->user->id,
+        'schedule_type' => 'everyday',
+        'departure_time' => '2000-01-01 14:30:00',
+    ]);
+});
+
 it('rejects invalid 24hr time values', function (string $invalidTime) {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/pick-and-drop', [

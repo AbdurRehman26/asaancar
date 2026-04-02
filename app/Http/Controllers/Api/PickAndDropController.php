@@ -9,6 +9,7 @@ use App\Models\PickAndDropStop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 /**
  * @OA\Tag(
@@ -233,7 +234,10 @@ class PickAndDropController extends Controller
             'pickup_area_id' => 'required|integer|exists:areas,id',
             'dropoff_city_id' => 'required|integer|exists:cities,id',
             'dropoff_area_id' => 'required|integer|exists:areas,id',
-            'departure_date' => 'required|date_format:Y-m-d',
+            'departure_date' => [
+                Rule::requiredIf(fn (): bool => $request->input('schedule_type', 'once') === 'once'),
+                'date_format:Y-m-d',
+            ],
             'departure_time' => 'required|date_format:H:i',
             'available_spaces' => 'required|integer|min:1',
             'driver_gender' => 'required|in:male,female',
@@ -255,7 +259,13 @@ class PickAndDropController extends Controller
 
         $data = $request->except(['departure_date', 'departure_time']);
         $data['user_id'] = Auth::id();
-        $data['departure_time'] = $request->input('departure_date').' '.$request->input('departure_time').':00';
+        $departureDate = $request->input('departure_date');
+
+        if ($departureDate === null && $request->input('schedule_type', 'once') !== 'once') {
+            $departureDate = '2000-01-01';
+        }
+
+        $data['departure_time'] = $departureDate.' '.$request->input('departure_time').':00';
 
         $service = PickAndDrop::create($data);
 
