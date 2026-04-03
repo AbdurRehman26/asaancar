@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Calendar, Users, Plus, X, Save, ChevronDown } from 'lucide-react';
 import { apiFetch } from '@/lib/utils';
+import { Calendar, ChevronDown, MapPin, Plus, Save, Users, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface Stop {
     location?: string;
@@ -57,15 +57,15 @@ export default function PickAndDropForm() {
     useEffect(() => {
         // Fetch cities
         fetch('/api/cities')
-            .then(res => res.json())
-            .then(data => {
+            .then((res) => res.json())
+            .then((data) => {
                 const allCities = data.data || data;
                 setCities(Array.isArray(allCities) ? allCities : []);
 
                 // Set Karachi as default for both pickup and dropoff
-                const karachi = Array.isArray(allCities) ? allCities.find(c => c.name.toLowerCase() === 'karachi') : null;
+                const karachi = Array.isArray(allCities) ? allCities.find((c) => c.name.toLowerCase() === 'karachi') : null;
                 if (karachi && !isEditing) {
-                    setFormData(prev => ({
+                    setFormData((prev) => ({
                         ...prev,
                         pickup_city_id: karachi.id,
                         dropoff_city_id: karachi.id,
@@ -105,7 +105,7 @@ export default function PickAndDropForm() {
                         if (!isNaN(dt.getTime())) {
                             return {
                                 date: dt.toISOString().slice(0, 10),
-                                time: dt.toISOString().slice(11, 16)
+                                time: dt.toISOString().slice(11, 16),
                             };
                         }
                     }
@@ -125,7 +125,7 @@ export default function PickAndDropForm() {
                     if (!isNaN(dt.getTime())) {
                         return {
                             date: dt.toISOString().slice(0, 10),
-                            time: dt.toISOString().slice(11, 16)
+                            time: dt.toISOString().slice(11, 16),
                         };
                     }
                 } catch {
@@ -197,7 +197,7 @@ export default function PickAndDropForm() {
 
             if (service.stops && Array.isArray(service.stops)) {
                 // Find Karachi to ensure all stops use Karachi
-                const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+                const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
 
                 interface StopData {
                     location?: string;
@@ -207,18 +207,20 @@ export default function PickAndDropForm() {
                     order?: number;
                     notes?: string;
                 }
-                setStops(service.stops.map((stop: StopData) => {
-                    const stopParsed = parseDateTime(stop.stop_time);
-                    return {
-                        location: stop.location || '',
-                        city_id: karachi?.id || stop.city_id || undefined, // Force Karachi
-                        area_id: stop.area_id || undefined,
-                        stop_date: stopParsed.date || departureParsed.date,
-                        stop_time: stopParsed.time,
-                        order: stop.order || 0,
-                        notes: stop.notes || '',
-                    };
-                }));
+                setStops(
+                    service.stops.map((stop: StopData) => {
+                        const stopParsed = parseDateTime(stop.stop_time);
+                        return {
+                            location: stop.location || '',
+                            city_id: karachi?.id || stop.city_id || undefined, // Force Karachi
+                            area_id: stop.area_id || undefined,
+                            stop_date: stopParsed.date || departureParsed.date,
+                            stop_time: stopParsed.time,
+                            order: stop.order || 0,
+                            notes: stop.notes || '',
+                        };
+                    }),
+                );
 
                 // Fetch areas for Karachi if not already fetched
                 if (karachi && !areas[karachi.id]) {
@@ -237,7 +239,7 @@ export default function PickAndDropForm() {
 
         try {
             // Ensure Karachi is always set (find Karachi city)
-            const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+            const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
             if (!karachi) {
                 throw new Error('Karachi city not found. Please refresh the page.');
             }
@@ -251,32 +253,31 @@ export default function PickAndDropForm() {
             let endLocation = formData.end_location;
 
             if (formData.pickup_area_id) {
-                const pickupArea = areas[pickupCityId]?.find(a => a.id === formData.pickup_area_id);
+                const pickupArea = areas[pickupCityId]?.find((a) => a.id === formData.pickup_area_id);
                 if (pickupArea) {
                     startLocation = pickupArea.name;
                 }
             }
 
             if (formData.dropoff_area_id) {
-                const dropoffArea = areas[dropoffCityId]?.find(a => a.id === formData.dropoff_area_id);
+                const dropoffArea = areas[dropoffCityId]?.find((a) => a.id === formData.dropoff_area_id);
                 if (dropoffArea) {
                     endLocation = dropoffArea.name;
                 }
             }
 
+            const { departure_date, ...restFormData } = formData;
+
             const payload = {
-                ...formData,
+                ...restFormData,
                 start_location: startLocation,
                 end_location: endLocation,
                 pickup_city_id: pickupCityId,
                 pickup_area_id: formData.pickup_area_id || null,
                 dropoff_city_id: dropoffCityId,
                 dropoff_area_id: formData.dropoff_area_id || null,
-                departure_time: formData.schedule_type === 'once' && formData.departure_date && formData.departure_time
-                    ? `${formData.departure_date}T${formData.departure_time}:00`
-                    : formData.schedule_type !== 'once' && formData.departure_time
-                        ? `2000-01-01T${formData.departure_time}:00` // Use a placeholder date for recurring services
-                        : formData.departure_time,
+                ...(formData.schedule_type === 'once' ? { departure_date } : {}),
+                departure_time: formData.departure_time,
                 schedule_type: formData.schedule_type,
                 selected_days: formData.schedule_type === 'custom' ? formData.selected_days : null,
                 is_roundtrip: formData.is_roundtrip,
@@ -287,13 +288,13 @@ export default function PickAndDropForm() {
                 price_per_person: formData.price_per_person ? parseInt(formData.price_per_person) : null,
                 stops: stops.map((stop, index) => {
                     // Ensure Karachi is always set for stops
-                    const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+                    const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
                     const stopCityId = karachi?.id || stop.city_id;
 
                     // Auto-populate location from area if not set
                     let stopLocation = stop.location;
                     if (!stopLocation && stop.area_id && karachi) {
-                        const area = areas[karachi.id]?.find(a => a.id === stop.area_id);
+                        const area = areas[karachi.id]?.find((a) => a.id === stop.area_id);
                         if (area) {
                             stopLocation = area.name;
                         }
@@ -303,20 +304,19 @@ export default function PickAndDropForm() {
                         location: stopLocation || null,
                         city_id: stopCityId || null,
                         area_id: stop.area_id || null,
-                        stop_time: formData.schedule_type === 'once' && stop.stop_date && stop.stop_time
-                            ? `${stop.stop_date}T${stop.stop_time}:00`
-                            : formData.schedule_type !== 'once' && stop.stop_time
-                                ? `2000-01-01T${stop.stop_time}:00` // Use a placeholder date for recurring services
-                                : stop.stop_time,
+                        stop_time:
+                            formData.schedule_type === 'once' && stop.stop_date && stop.stop_time
+                                ? `${stop.stop_date}T${stop.stop_time}:00`
+                                : formData.schedule_type !== 'once' && stop.stop_time
+                                  ? `2000-01-01T${stop.stop_time}:00` // Use a placeholder date for recurring services
+                                  : stop.stop_time,
                         order: stop.order || index,
                         notes: stop.notes || null,
                     };
                 }),
             };
 
-            const url = isEditing
-                ? `/api/customer/pick-and-drop/${id}`
-                : '/api/customer/pick-and-drop';
+            const url = isEditing ? `/api/customer/pick-and-drop/${id}` : '/api/customer/pick-and-drop';
             const method = isEditing ? 'PUT' : 'POST';
 
             const response = await apiFetch(url, {
@@ -343,9 +343,9 @@ export default function PickAndDropForm() {
         try {
             const response = await fetch(`/api/areas?city_id=${cityId}`);
             const data = await response.json();
-            setAreas(prev => ({
+            setAreas((prev) => ({
                 ...prev,
-                [cityId]: data.data || []
+                [cityId]: data.data || [],
             }));
             return Promise.resolve();
         } catch (err) {
@@ -356,7 +356,7 @@ export default function PickAndDropForm() {
 
     const addStop = () => {
         // Find Karachi city ID
-        const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+        const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
         if (!karachi) {
             setError('Karachi city not found. Please refresh the page.');
             return;
@@ -368,7 +368,7 @@ export default function PickAndDropForm() {
                 location: '',
                 city_id: karachi.id, // Auto-set to Karachi
                 area_id: undefined,
-                stop_date: formData.schedule_type === 'once' ? (formData.departure_date || '') : '', // Default to departure date if once
+                stop_date: formData.schedule_type === 'once' ? formData.departure_date || '' : '', // Default to departure date if once
                 stop_time: '',
                 order: stops.length,
                 notes: '',
@@ -389,7 +389,7 @@ export default function PickAndDropForm() {
         const newStops = [...stops];
 
         // Ensure city_id is always Karachi for stops
-        const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+        const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
         if (karachi) {
             newStops[index].city_id = karachi.id;
 
@@ -412,7 +412,7 @@ export default function PickAndDropForm() {
         areas,
         index,
         openDropdowns,
-        setOpenDropdowns
+        setOpenDropdowns,
     }: {
         value: string;
         onChange: (location: string) => void;
@@ -424,16 +424,14 @@ export default function PickAndDropForm() {
         setOpenDropdowns: (updater: (prev: { [key: number]: boolean }) => { [key: number]: boolean }) => void;
     }) => {
         const dropdownRef = useRef<HTMLDivElement>(null);
-        const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+        const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
         const availableAreas = karachi && areas[karachi.id] ? areas[karachi.id] : [];
-        const filteredAreas = availableAreas.filter(area =>
-            !value || area.name.toLowerCase().includes(value.toLowerCase())
-        );
+        const filteredAreas = availableAreas.filter((area) => !value || area.name.toLowerCase().includes(value.toLowerCase()));
 
         useEffect(() => {
             function handleClickOutside(event: MouseEvent) {
                 if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                    setOpenDropdowns(prev => ({ ...prev, [index]: false }));
+                    setOpenDropdowns((prev) => ({ ...prev, [index]: false }));
                 }
             }
 
@@ -452,35 +450,33 @@ export default function PickAndDropForm() {
                         onChange(e.target.value);
                         // Show dropdown when typing if areas are available
                         if (availableAreas.length > 0) {
-                            setOpenDropdowns(prev => ({ ...prev, [index]: true }));
+                            setOpenDropdowns((prev) => ({ ...prev, [index]: true }));
                         }
                     }}
                     onFocus={() => {
                         // Show dropdown if areas are available
                         if (availableAreas.length > 0) {
-                            setOpenDropdowns(prev => ({ ...prev, [index]: true }));
+                            setOpenDropdowns((prev) => ({ ...prev, [index]: true }));
                         }
                     }}
                     placeholder="Enter stop location or select from dropdown"
                     required
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 {availableAreas.length > 0 && (
                     <>
-                        <ChevronDown
-                            className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
-                        />
+                        <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                         {openDropdowns[index] && filteredAreas.length > 0 && (
-                            <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                            <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800">
                                 {filteredAreas.map((area) => (
                                     <button
                                         key={area.id}
                                         type="button"
                                         onClick={() => {
                                             onAreaSelect(area.id, area.name);
-                                            setOpenDropdowns(prev => ({ ...prev, [index]: false }));
+                                            setOpenDropdowns((prev) => ({ ...prev, [index]: false }));
                                         }}
-                                        className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white"
+                                        className="w-full px-3 py-2 text-left text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700"
                                     >
                                         {area.name}
                                     </button>
@@ -501,7 +497,7 @@ export default function PickAndDropForm() {
         areas,
         label,
         required = false,
-        disabled = false
+        disabled = false,
     }: {
         value: number | undefined;
         onChange: (areaId: number | undefined) => void;
@@ -516,8 +512,8 @@ export default function PickAndDropForm() {
         const dropdownRef = useRef<HTMLDivElement>(null);
         const inputRef = useRef<HTMLInputElement>(null);
 
-        const availableAreas = cityId ? (areas[cityId] || []) : [];
-        const selectedArea = value ? availableAreas.find(a => a.id === value) : null;
+        const availableAreas = cityId ? areas[cityId] || [] : [];
+        const selectedArea = value ? availableAreas.find((a) => a.id === value) : null;
 
         // Close dropdown when clicking outside
         useEffect(() => {
@@ -531,9 +527,7 @@ export default function PickAndDropForm() {
             return () => document.removeEventListener('mousedown', handleClickOutside);
         }, []);
 
-        const filteredAreas = availableAreas.filter(area =>
-            area.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const filteredAreas = availableAreas.filter((area) => area.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
         const handleSelect = (areaId: number) => {
             onChange(areaId);
@@ -548,7 +542,7 @@ export default function PickAndDropForm() {
 
         return (
             <div className="relative" ref={dropdownRef}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {label} {required && '*'}
                 </label>
                 <div className="relative">
@@ -571,9 +565,9 @@ export default function PickAndDropForm() {
                         }}
                         placeholder="Search or select area..."
                         disabled={disabled || !cityId}
-                        className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 focus:ring-2 focus:ring-[#7e246c] disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
                         {selectedArea && !disabled && (
                             <button
                                 type="button"
@@ -591,23 +585,22 @@ export default function PickAndDropForm() {
                 </div>
 
                 {isOpen && cityId && availableAreas.length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                    <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800">
                         {filteredAreas.length > 0 ? (
                             filteredAreas.map((area) => (
                                 <button
                                     key={area.id}
                                     type="button"
                                     onClick={() => handleSelect(area.id)}
-                                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none text-gray-900 dark:text-white ${value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
-                                        }`}
+                                    className={`w-full px-3 py-2 text-left text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700 ${
+                                        value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
+                                    }`}
                                 >
                                     {area.name}
                                 </button>
                             ))
                         ) : (
-                            <div className="px-3 py-2 text-gray-500 dark:text-gray-400">
-                                No areas found for "{searchTerm}"
-                            </div>
+                            <div className="px-3 py-2 text-gray-500 dark:text-gray-400">No areas found for "{searchTerm}"</div>
                         )}
                     </div>
                 )}
@@ -616,13 +609,11 @@ export default function PickAndDropForm() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <h1 className="text-3xl font-bold text-[#7e246c] dark:text-white mb-6">
-                {isEditing ? 'Edit' : 'Create'} Pick & Drop Service
-            </h1>
+        <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+            <h1 className="mb-6 text-3xl font-bold text-[#7e246c] dark:text-white">{isEditing ? 'Edit' : 'Create'} Pick & Drop Service</h1>
 
             {error && (
-                <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
                     <p className="text-red-600 dark:text-red-400">{error}</p>
                 </div>
             )}
@@ -631,18 +622,22 @@ export default function PickAndDropForm() {
                 {/* Karachi Availability Notice */}
                 <div className="inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 ring-1 ring-blue-700/20 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-300/20">
                     <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clipRule="evenodd"
+                        />
                     </svg>
                     Currently available in Karachi only. We'll be expanding to other cities soon!
                 </div>
 
                 {/* Route Information */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white mb-4 flex items-center gap-2">
+                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <MapPin className="h-5 w-5" />
                         Route Information
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <SearchableAreaSelect
                             value={formData.pickup_area_id}
                             onChange={(areaId) => setFormData({ ...formData, pickup_area_id: areaId })}
@@ -661,18 +656,16 @@ export default function PickAndDropForm() {
                             required={true}
                             disabled={!formData.dropoff_city_id}
                         />
-                        <div className="md:col-span-2 space-y-4">
+                        <div className="space-y-4 md:col-span-2">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Schedule Type
-                                </label>
-                                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Schedule Type</label>
+                                <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
                                     {[
                                         { id: 'once', label: 'One-time' },
                                         { id: 'everyday', label: 'Everyday' },
                                         { id: 'weekdays', label: 'Weekdays' },
                                         { id: 'weekends', label: 'Weekends' },
-                                        { id: 'custom', label: 'Custom' }
+                                        { id: 'custom', label: 'Custom' },
                                     ].map((type) => (
                                         <button
                                             key={type.id}
@@ -680,15 +673,16 @@ export default function PickAndDropForm() {
                                             onClick={() => {
                                                 setFormData({ ...formData, schedule_type: type.id });
                                                 if (type.id !== 'once') {
-                                                    setFormData(prev => ({ ...prev, departure_date: '' }));
+                                                    setFormData((prev) => ({ ...prev, departure_date: '' }));
                                                     // Clear stop dates for recurring
-                                                    setStops(stops.map(stop => ({ ...stop, stop_date: '' })));
+                                                    setStops(stops.map((stop) => ({ ...stop, stop_date: '' })));
                                                 }
                                             }}
-                                            className={`px-3 py-2 text-sm font-medium rounded-lg border ${formData.schedule_type === type.id
-                                                ? 'bg-[#7e246c] text-white border-[#7e246c]'
-                                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                                }`}
+                                            className={`rounded-lg border px-3 py-2 text-sm font-medium ${
+                                                formData.schedule_type === type.id
+                                                    ? 'border-[#7e246c] bg-[#7e246c] text-white'
+                                                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                                            }`}
                                         >
                                             {type.label}
                                         </button>
@@ -698,9 +692,7 @@ export default function PickAndDropForm() {
 
                             {formData.schedule_type === 'custom' && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Select Days
-                                    </label>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Select Days</label>
                                     <div className="flex flex-wrap gap-2">
                                         {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
                                             <button
@@ -709,14 +701,15 @@ export default function PickAndDropForm() {
                                                 onClick={() => {
                                                     const currentDays = formData.selected_days || [];
                                                     const newDays = currentDays.includes(day)
-                                                        ? currentDays.filter(d => d !== day)
+                                                        ? currentDays.filter((d) => d !== day)
                                                         : [...currentDays, day];
                                                     setFormData({ ...formData, selected_days: newDays });
                                                 }}
-                                                className={`px-3 py-1 text-xs font-medium rounded-full border ${formData.selected_days?.includes(day)
-                                                    ? 'bg-[#7e246c] text-white border-[#7e246c]'
-                                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'
-                                                    }`}
+                                                className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                                                    formData.selected_days?.includes(day)
+                                                        ? 'border-[#7e246c] bg-[#7e246c] text-white'
+                                                        : 'border-gray-300 bg-white text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300'
+                                                }`}
                                             >
                                                 {day}
                                             </button>
@@ -730,7 +723,7 @@ export default function PickAndDropForm() {
                                     type="checkbox"
                                     checked={formData.is_roundtrip}
                                     onChange={(e) => setFormData({ ...formData, is_roundtrip: e.target.checked })}
-                                    className="w-4 h-4 text-[#7e246c] border-gray-300 rounded focus:ring-[#7e246c]"
+                                    className="h-4 w-4 rounded border-gray-300 text-[#7e246c] focus:ring-[#7e246c]"
                                 />
                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Round Trip (Return on the same day/schedule)
@@ -739,7 +732,7 @@ export default function PickAndDropForm() {
                         </div>
                         {formData.schedule_type === 'once' && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                <label className="mb-1 block flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     <Calendar className="h-4 w-4" />
                                     Departure Date *
                                 </label>
@@ -751,15 +744,15 @@ export default function PickAndDropForm() {
                                         const newDate = e.target.value;
                                         setFormData({ ...formData, departure_date: newDate });
                                         // Update all stop dates to match departure date
-                                        setStops(stops.map(stop => ({ ...stop, stop_date: newDate })));
+                                        setStops(stops.map((stop) => ({ ...stop, stop_date: newDate })));
                                     }}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 />
                             </div>
                         )}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-1 md:col-span-2">
+                        <div className="col-span-1 grid grid-cols-1 gap-4 md:col-span-2 md:grid-cols-2">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                <label className="mb-1 block flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                     <Calendar className="h-4 w-4" />
                                     Departure Time *
                                 </label>
@@ -768,13 +761,13 @@ export default function PickAndDropForm() {
                                     required
                                     value={formData.departure_time}
                                     onChange={(e) => setFormData({ ...formData, departure_time: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 />
                             </div>
 
                             {formData.is_roundtrip && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
+                                    <label className="mb-1 block flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         <Calendar className="h-4 w-4" />
                                         Return Time *
                                     </label>
@@ -783,7 +776,7 @@ export default function PickAndDropForm() {
                                         required={formData.is_roundtrip}
                                         value={formData.return_time}
                                         onChange={(e) => setFormData({ ...formData, return_time: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                             )}
@@ -792,178 +785,154 @@ export default function PickAndDropForm() {
                 </div>
 
                 {/* Contact Information */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white mb-4 flex items-center gap-2">
+                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <Users className="h-5 w-5" />
                         Contact Information (Optional)
                     </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
                         If provided, these will be used as contact information. Otherwise, your account information will be used.
                     </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Contact Name
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Name</label>
                             <input
                                 type="text"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder="Enter contact name (optional)"
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Contact Number
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Number</label>
                             <input
                                 type="text"
                                 value={formData.contact}
                                 onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                                 placeholder="Enter contact number (optional)"
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Service Details */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white mb-4 flex items-center gap-2">
+                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <Users className="h-5 w-5" />
                         Service Details
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Available Spaces *
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Available Spaces *</label>
                             <input
                                 type="number"
                                 required
                                 min="1"
                                 value={formData.available_spaces}
                                 onChange={(e) => setFormData({ ...formData, available_spaces: parseInt(e.target.value) || 1 })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Driver Gender *
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Driver Gender *</label>
                             <select
                                 required
                                 value={formData.driver_gender}
                                 onChange={(e) => setFormData({ ...formData, driver_gender: e.target.value as 'male' | 'female' })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Price Per Person
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Price Per Person</label>
                             <div className="flex gap-2">
                                 <input
                                     type="number"
                                     step="0.01"
                                     value={formData.price_per_person}
                                     onChange={(e) => setFormData({ ...formData, price_per_person: e.target.value })}
-                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 />
                                 <select
                                     value={formData.currency}
                                     onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                    className="rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 >
                                     <option value="PKR">PKR</option>
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Active
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Active</label>
                             <input
                                 type="checkbox"
                                 checked={formData.is_active}
                                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                                className="h-5 w-5 text-[#7e246c] focus:ring-[#7e246c] rounded"
+                                className="h-5 w-5 rounded text-[#7e246c] focus:ring-[#7e246c]"
                             />
                         </div>
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Description
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 rows={3}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Car Details */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white mb-4">Car Details (Optional)</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <h2 className="mb-4 text-xl font-semibold text-[#7e246c] dark:text-white">Car Details (Optional)</h2>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Car Brand
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Car Brand</label>
                             <input
                                 type="text"
                                 value={formData.car_brand}
                                 onChange={(e) => setFormData({ ...formData, car_brand: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Car Model
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Car Model</label>
                             <input
                                 type="text"
                                 value={formData.car_model}
                                 onChange={(e) => setFormData({ ...formData, car_model: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Car Color
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Car Color</label>
                             <input
                                 type="text"
                                 value={formData.car_color}
                                 onChange={(e) => setFormData({ ...formData, car_color: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Seats
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Seats</label>
                             <input
                                 type="number"
                                 value={formData.car_seats}
                                 onChange={(e) => setFormData({ ...formData, car_seats: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Transmission
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Transmission</label>
                             <select
                                 value={formData.car_transmission}
                                 onChange={(e) => setFormData({ ...formData, car_transmission: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="">Select</option>
                                 <option value="manual">Manual</option>
@@ -971,13 +940,11 @@ export default function PickAndDropForm() {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Fuel Type
-                            </label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Fuel Type</label>
                             <select
                                 value={formData.car_fuel_type}
                                 onChange={(e) => setFormData({ ...formData, car_fuel_type: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="">Select</option>
                                 <option value="petrol">Petrol</option>
@@ -990,35 +957,33 @@ export default function PickAndDropForm() {
                 </div>
 
                 {/* Stops */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <div className="flex justify-between items-center mb-4">
+                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white">Stops (Optional)</h2>
                         <button
                             type="button"
                             onClick={addStop}
-                            className="flex items-center gap-2 px-4 py-2 bg-[#7e246c] text-white rounded-lg hover:bg-[#6a1f5c] transition-colors"
+                            className="flex items-center gap-2 rounded-lg bg-[#7e246c] px-4 py-2 text-white transition-colors hover:bg-[#6a1f5c]"
                         >
                             <Plus className="h-4 w-4" />
                             Add Stop
                         </button>
                     </div>
                     {stops.map((stop, index) => (
-                        <div key={index} className="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <div className="flex justify-between items-center mb-3">
+                        <div key={index} className="mb-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                            <div className="mb-3 flex items-center justify-between">
                                 <h3 className="font-medium text-gray-700 dark:text-gray-300">Stop {index + 1}</h3>
                                 <button
                                     type="button"
                                     onClick={() => removeStop(index)}
-                                    className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                    className="rounded p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Stop Location *
-                                    </label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Stop Location *</label>
                                     <StopLocationInput
                                         value={stop.location || ''}
                                         onChange={(location) => {
@@ -1032,12 +997,12 @@ export default function PickAndDropForm() {
                                             // Update both location and area_id together in a single state update
                                             const newStops = stops.map((s, i) => {
                                                 if (i === index) {
-                                                    const karachi = cities.find(c => c.name.toLowerCase() === 'karachi');
+                                                    const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
                                                     return {
                                                         ...s,
                                                         location: areaName,
                                                         area_id: areaId,
-                                                        city_id: karachi?.id || s.city_id
+                                                        city_id: karachi?.id || s.city_id,
                                                     };
                                                 }
                                                 return s;
@@ -1053,39 +1018,33 @@ export default function PickAndDropForm() {
                                 </div>
                                 {formData.schedule_type === 'once' && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Stop Date *
-                                        </label>
+                                        <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Stop Date *</label>
                                         <input
                                             type="date"
                                             required={formData.schedule_type === 'once'}
                                             value={stop.stop_date}
                                             onChange={(e) => updateStop(index, 'stop_date', e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                         />
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Stop Time *
-                                    </label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Stop Time *</label>
                                     <input
                                         type="time"
                                         required
                                         value={stop.stop_time}
                                         onChange={(e) => updateStop(index, 'stop_time', e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Notes
-                                    </label>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
                                     <textarea
                                         value={stop.notes}
                                         onChange={(e) => updateStop(index, 'notes', e.target.value)}
                                         rows={2}
-                                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-700 dark:text-white"
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                             </div>
@@ -1100,7 +1059,7 @@ export default function PickAndDropForm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex items-center gap-2 px-6 py-3 bg-[#7e246c] text-white rounded-lg hover:bg-[#6a1f5c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 rounded-lg bg-[#7e246c] px-6 py-3 text-white transition-colors hover:bg-[#6a1f5c] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <Save className="h-5 w-5" />
                         {loading ? 'Saving...' : isEditing ? 'Update Service' : 'Create Service'}
@@ -1108,7 +1067,7 @@ export default function PickAndDropForm() {
                     <button
                         type="button"
                         onClick={() => navigate('/dashboard/pick-and-drop')}
-                        className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                        className="rounded-lg bg-gray-200 px-6 py-3 text-gray-700 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
                     >
                         Cancel
                     </button>
@@ -1117,4 +1076,3 @@ export default function PickAndDropForm() {
         </div>
     );
 }
-
