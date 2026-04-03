@@ -58,7 +58,13 @@ class PickAndDrop extends Model
         'name',
         'contact',
         'start_location',
+        'start_place_id',
+        'start_latitude',
+        'start_longitude',
         'end_location',
+        'end_place_id',
+        'end_latitude',
+        'end_longitude',
         'pickup_city_id',
         'dropoff_city_id',
         'pickup_area_id',
@@ -92,6 +98,10 @@ class PickAndDrop extends Model
         'selected_days' => 'array',
         'available_spaces' => 'integer',
         'car_seats' => 'integer',
+        'start_latitude' => 'decimal:8',
+        'start_longitude' => 'decimal:8',
+        'end_latitude' => 'decimal:8',
+        'end_longitude' => 'decimal:8',
     ];
 
     public function user(): BelongsTo

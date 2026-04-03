@@ -1,12 +1,14 @@
+import GooglePlacesInput from '@/components/GooglePlacesInput';
 import { apiFetch } from '@/lib/utils';
-import { Calendar, ChevronDown, MapPin, Plus, Save, Users, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Calendar, MapPin, Plus, Save, Users, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 interface Stop {
     location?: string;
-    city_id?: number;
-    area_id?: number;
+    place_id?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     stop_date: string;
     stop_time: string;
     order: number;
@@ -22,11 +24,13 @@ export default function PickAndDropForm() {
         name: '',
         contact: '',
         start_location: '',
-        pickup_city_id: undefined as number | undefined,
-        pickup_area_id: undefined as number | undefined,
+        start_place_id: null as string | null,
+        start_latitude: null as number | null,
+        start_longitude: null as number | null,
         end_location: '',
-        dropoff_city_id: undefined as number | undefined,
-        dropoff_area_id: undefined as number | undefined,
+        end_place_id: null as string | null,
+        end_latitude: null as number | null,
+        end_longitude: null as number | null,
         departure_date: '',
         departure_time: '',
         schedule_type: 'once', // once, everyday, weekdays, weekends, custom
@@ -50,33 +54,6 @@ export default function PickAndDropForm() {
     const [stops, setStops] = useState<Stop[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [cities, setCities] = useState<{ id: number; name: string }[]>([]);
-    const [areas, setAreas] = useState<{ [cityId: number]: { id: number; name: string }[] }>({});
-    const [openDropdowns, setOpenDropdowns] = useState<{ [key: number]: boolean }>({});
-
-    useEffect(() => {
-        // Fetch cities
-        fetch('/api/cities')
-            .then((res) => res.json())
-            .then((data) => {
-                const allCities = data.data || data;
-                setCities(Array.isArray(allCities) ? allCities : []);
-
-                // Set Karachi as default for both pickup and dropoff
-                const karachi = Array.isArray(allCities) ? allCities.find((c) => c.name.toLowerCase() === 'karachi') : null;
-                if (karachi && !isEditing) {
-                    setFormData((prev) => ({
-                        ...prev,
-                        pickup_city_id: karachi.id,
-                        dropoff_city_id: karachi.id,
-                    }));
-                    // Fetch areas for Karachi
-                    fetchAreasForCity(karachi.id);
-                }
-            })
-            .catch(() => setCities([]));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     useEffect(() => {
         if (isEditing && id) {
@@ -162,11 +139,13 @@ export default function PickAndDropForm() {
                 name: service.name || '',
                 contact: service.contact || '',
                 start_location: service.start_location || '',
-                pickup_city_id: service.pickup_city_id || undefined,
-                pickup_area_id: service.pickup_area_id || undefined,
+                start_place_id: service.start_place_id || null,
+                start_latitude: service.start_latitude ? Number(service.start_latitude) : null,
+                start_longitude: service.start_longitude ? Number(service.start_longitude) : null,
                 end_location: service.end_location || '',
-                dropoff_city_id: service.dropoff_city_id || undefined,
-                dropoff_area_id: service.dropoff_area_id || undefined,
+                end_place_id: service.end_place_id || null,
+                end_latitude: service.end_latitude ? Number(service.end_latitude) : null,
+                end_longitude: service.end_longitude ? Number(service.end_longitude) : null,
                 departure_date: departureParsed.date,
                 departure_time: departureParsed.time,
                 schedule_type: service.schedule_type || (service.is_everyday ? 'everyday' : 'once'),
@@ -187,33 +166,25 @@ export default function PickAndDropForm() {
                 is_active: service.is_active ?? true,
             });
 
-            // Fetch areas for pickup and dropoff cities if they exist
-            if (service.pickup_city_id) {
-                fetchAreasForCity(service.pickup_city_id);
-            }
-            if (service.dropoff_city_id) {
-                fetchAreasForCity(service.dropoff_city_id);
-            }
-
             if (service.stops && Array.isArray(service.stops)) {
-                // Find Karachi to ensure all stops use Karachi
-                const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
-
                 interface StopData {
                     location?: string;
-                    city_id?: number;
-                    area_id?: number;
+                    place_id?: string | null;
+                    latitude?: number | null;
+                    longitude?: number | null;
+                    raw_stop_time?: string;
                     stop_time?: string;
                     order?: number;
                     notes?: string;
                 }
                 setStops(
                     service.stops.map((stop: StopData) => {
-                        const stopParsed = parseDateTime(stop.stop_time);
+                        const stopParsed = parseDateTime(stop.raw_stop_time ?? stop.stop_time);
                         return {
                             location: stop.location || '',
-                            city_id: karachi?.id || stop.city_id || undefined, // Force Karachi
-                            area_id: stop.area_id || undefined,
+                            place_id: stop.place_id || null,
+                            latitude: stop.latitude ? Number(stop.latitude) : null,
+                            longitude: stop.longitude ? Number(stop.longitude) : null,
                             stop_date: stopParsed.date || departureParsed.date,
                             stop_time: stopParsed.time,
                             order: stop.order || 0,
@@ -221,11 +192,6 @@ export default function PickAndDropForm() {
                         };
                     }),
                 );
-
-                // Fetch areas for Karachi if not already fetched
-                if (karachi && !areas[karachi.id]) {
-                    fetchAreasForCity(karachi.id);
-                }
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load service');
@@ -238,44 +204,12 @@ export default function PickAndDropForm() {
         setError(null);
 
         try {
-            // Ensure Karachi is always set (find Karachi city)
-            const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
-            if (!karachi) {
-                throw new Error('Karachi city not found. Please refresh the page.');
-            }
-
-            // Force Karachi for both pickup and dropoff
-            const pickupCityId = karachi.id;
-            const dropoffCityId = karachi.id;
-
-            // Auto-populate start_location and end_location from selected areas
-            let startLocation = formData.start_location;
-            let endLocation = formData.end_location;
-
-            if (formData.pickup_area_id) {
-                const pickupArea = areas[pickupCityId]?.find((a) => a.id === formData.pickup_area_id);
-                if (pickupArea) {
-                    startLocation = pickupArea.name;
-                }
-            }
-
-            if (formData.dropoff_area_id) {
-                const dropoffArea = areas[dropoffCityId]?.find((a) => a.id === formData.dropoff_area_id);
-                if (dropoffArea) {
-                    endLocation = dropoffArea.name;
-                }
-            }
-
             const { departure_date, ...restFormData } = formData;
 
             const payload = {
                 ...restFormData,
-                start_location: startLocation,
-                end_location: endLocation,
-                pickup_city_id: pickupCityId,
-                pickup_area_id: formData.pickup_area_id || null,
-                dropoff_city_id: dropoffCityId,
-                dropoff_area_id: formData.dropoff_area_id || null,
+                start_location: formData.start_location,
+                end_location: formData.end_location,
                 ...(formData.schedule_type === 'once' ? { departure_date } : {}),
                 departure_time: formData.departure_time,
                 schedule_type: formData.schedule_type,
@@ -287,23 +221,11 @@ export default function PickAndDropForm() {
                 car_seats: formData.car_seats ? parseInt(formData.car_seats) : null,
                 price_per_person: formData.price_per_person ? parseInt(formData.price_per_person) : null,
                 stops: stops.map((stop, index) => {
-                    // Ensure Karachi is always set for stops
-                    const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
-                    const stopCityId = karachi?.id || stop.city_id;
-
-                    // Auto-populate location from area if not set
-                    let stopLocation = stop.location;
-                    if (!stopLocation && stop.area_id && karachi) {
-                        const area = areas[karachi.id]?.find((a) => a.id === stop.area_id);
-                        if (area) {
-                            stopLocation = area.name;
-                        }
-                    }
-
                     return {
-                        location: stopLocation || null,
-                        city_id: stopCityId || null,
-                        area_id: stop.area_id || null,
+                        location: stop.location || null,
+                        place_id: stop.place_id || null,
+                        latitude: stop.latitude ?? null,
+                        longitude: stop.longitude ?? null,
                         stop_time:
                             formData.schedule_type === 'once' && stop.stop_date && stop.stop_time
                                 ? `${stop.stop_date}T${stop.stop_time}:00`
@@ -337,48 +259,20 @@ export default function PickAndDropForm() {
         }
     };
 
-    const fetchAreasForCity = async (cityId: number): Promise<void> => {
-        if (areas[cityId]) return Promise.resolve(); // Already fetched
-
-        try {
-            const response = await fetch(`/api/areas?city_id=${cityId}`);
-            const data = await response.json();
-            setAreas((prev) => ({
-                ...prev,
-                [cityId]: data.data || [],
-            }));
-            return Promise.resolve();
-        } catch (err) {
-            console.error('Error fetching areas:', err);
-            return Promise.resolve();
-        }
-    };
-
     const addStop = () => {
-        // Find Karachi city ID
-        const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
-        if (!karachi) {
-            setError('Karachi city not found. Please refresh the page.');
-            return;
-        }
-
         setStops([
             ...stops,
             {
                 location: '',
-                city_id: karachi.id, // Auto-set to Karachi
-                area_id: undefined,
+                place_id: null,
+                latitude: null,
+                longitude: null,
                 stop_date: formData.schedule_type === 'once' ? formData.departure_date || '' : '', // Default to departure date if once
                 stop_time: '',
                 order: stops.length,
                 notes: '',
             },
         ]);
-
-        // Fetch areas for Karachi if not already fetched
-        if (!areas[karachi.id]) {
-            fetchAreasForCity(karachi.id);
-        }
     };
 
     const removeStop = (index: number) => {
@@ -387,225 +281,8 @@ export default function PickAndDropForm() {
 
     const updateStop = (index: number, field: keyof Stop, value: string | number | undefined) => {
         const newStops = [...stops];
-
-        // Ensure city_id is always Karachi for stops
-        const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
-        if (karachi) {
-            newStops[index].city_id = karachi.id;
-
-            // Fetch areas for Karachi if not already fetched
-            if (!areas[karachi.id]) {
-                fetchAreasForCity(karachi.id);
-            }
-        }
-
         newStops[index] = { ...newStops[index], [field]: value };
         setStops(newStops);
-    };
-
-    // Stop Location Input Component with dropdown
-    const StopLocationInput = ({
-        value,
-        onChange,
-        onAreaSelect,
-        cities,
-        areas,
-        index,
-        openDropdowns,
-        setOpenDropdowns,
-    }: {
-        value: string;
-        onChange: (location: string) => void;
-        onAreaSelect: (areaId: number, areaName: string) => void;
-        cities: { id: number; name: string }[];
-        areas: { [cityId: number]: { id: number; name: string }[] };
-        index: number;
-        openDropdowns: { [key: number]: boolean };
-        setOpenDropdowns: (updater: (prev: { [key: number]: boolean }) => { [key: number]: boolean }) => void;
-    }) => {
-        const dropdownRef = useRef<HTMLDivElement>(null);
-        const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
-        const availableAreas = karachi && areas[karachi.id] ? areas[karachi.id] : [];
-        const filteredAreas = availableAreas.filter((area) => !value || area.name.toLowerCase().includes(value.toLowerCase()));
-
-        useEffect(() => {
-            function handleClickOutside(event: MouseEvent) {
-                if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                    setOpenDropdowns((prev) => ({ ...prev, [index]: false }));
-                }
-            }
-
-            if (openDropdowns[index]) {
-                document.addEventListener('mousedown', handleClickOutside);
-                return () => document.removeEventListener('mousedown', handleClickOutside);
-            }
-        }, [openDropdowns, index, setOpenDropdowns]);
-
-        return (
-            <div className="relative" ref={dropdownRef}>
-                <input
-                    type="text"
-                    value={value}
-                    onChange={(e) => {
-                        onChange(e.target.value);
-                        // Show dropdown when typing if areas are available
-                        if (availableAreas.length > 0) {
-                            setOpenDropdowns((prev) => ({ ...prev, [index]: true }));
-                        }
-                    }}
-                    onFocus={() => {
-                        // Show dropdown if areas are available
-                        if (availableAreas.length > 0) {
-                            setOpenDropdowns((prev) => ({ ...prev, [index]: true }));
-                        }
-                    }}
-                    placeholder="Enter stop location or select from dropdown"
-                    required
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-                {availableAreas.length > 0 && (
-                    <>
-                        <ChevronDown className="pointer-events-none absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                        {openDropdowns[index] && filteredAreas.length > 0 && (
-                            <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800">
-                                {filteredAreas.map((area) => (
-                                    <button
-                                        key={area.id}
-                                        type="button"
-                                        onClick={() => {
-                                            onAreaSelect(area.id, area.name);
-                                            setOpenDropdowns((prev) => ({ ...prev, [index]: false }));
-                                        }}
-                                        className="w-full px-3 py-2 text-left text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700"
-                                    >
-                                        {area.name}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
-        );
-    };
-
-    // Searchable Area Selector Component
-    const SearchableAreaSelect = ({
-        value,
-        onChange,
-        cityId,
-        areas,
-        label,
-        required = false,
-        disabled = false,
-    }: {
-        value: number | undefined;
-        onChange: (areaId: number | undefined) => void;
-        cityId: number | undefined;
-        areas: { [cityId: number]: { id: number; name: string }[] };
-        label: string;
-        required?: boolean;
-        disabled?: boolean;
-    }) => {
-        const [isOpen, setIsOpen] = useState(false);
-        const [searchTerm, setSearchTerm] = useState('');
-        const dropdownRef = useRef<HTMLDivElement>(null);
-        const inputRef = useRef<HTMLInputElement>(null);
-
-        const availableAreas = cityId ? areas[cityId] || [] : [];
-        const selectedArea = value ? availableAreas.find((a) => a.id === value) : null;
-
-        // Close dropdown when clicking outside
-        useEffect(() => {
-            function handleClickOutside(event: MouseEvent) {
-                if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                    setIsOpen(false);
-                }
-            }
-
-            document.addEventListener('mousedown', handleClickOutside);
-            return () => document.removeEventListener('mousedown', handleClickOutside);
-        }, []);
-
-        const filteredAreas = availableAreas.filter((area) => area.name.toLowerCase().includes(searchTerm.toLowerCase()));
-
-        const handleSelect = (areaId: number) => {
-            onChange(areaId);
-            setIsOpen(false);
-            setSearchTerm('');
-        };
-
-        const handleClear = () => {
-            onChange(undefined);
-            setSearchTerm('');
-        };
-
-        return (
-            <div className="relative" ref={dropdownRef}>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {label} {required && '*'}
-                </label>
-                <div className="relative">
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        required={required}
-                        value={selectedArea ? selectedArea.name : searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setIsOpen(true);
-                            if (!e.target.value) {
-                                onChange(undefined);
-                            }
-                        }}
-                        onFocus={() => {
-                            if (cityId) {
-                                setIsOpen(true);
-                            }
-                        }}
-                        placeholder="Search or select area..."
-                        disabled={disabled || !cityId}
-                        className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 focus:ring-2 focus:ring-[#7e246c] disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                    <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
-                        {selectedArea && !disabled && (
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleClear();
-                                }}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        )}
-                        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                    </div>
-                </div>
-
-                {isOpen && cityId && availableAreas.length > 0 && (
-                    <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800">
-                        {filteredAreas.length > 0 ? (
-                            filteredAreas.map((area) => (
-                                <button
-                                    key={area.id}
-                                    type="button"
-                                    onClick={() => handleSelect(area.id)}
-                                    className={`w-full px-3 py-2 text-left text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none dark:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700 ${
-                                        value === area.id ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''
-                                    }`}
-                                >
-                                    {area.name}
-                                </button>
-                            ))
-                        ) : (
-                            <div className="px-3 py-2 text-gray-500 dark:text-gray-400">No areas found for "{searchTerm}"</div>
-                        )}
-                    </div>
-                )}
-            </div>
-        );
     };
 
     return (
@@ -638,24 +315,60 @@ export default function PickAndDropForm() {
                         Route Information
                     </h2>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <SearchableAreaSelect
-                            value={formData.pickup_area_id}
-                            onChange={(areaId) => setFormData({ ...formData, pickup_area_id: areaId })}
-                            cityId={formData.pickup_city_id}
-                            areas={areas}
-                            label="Start Area"
-                            required={true}
-                            disabled={!formData.pickup_city_id}
-                        />
-                        <SearchableAreaSelect
-                            value={formData.dropoff_area_id}
-                            onChange={(areaId) => setFormData({ ...formData, dropoff_area_id: areaId })}
-                            cityId={formData.dropoff_city_id}
-                            areas={areas}
-                            label="End Area"
-                            required={true}
-                            disabled={!formData.dropoff_city_id}
-                        />
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Start Location *</label>
+                            <GooglePlacesInput
+                                value={formData.start_location}
+                                required
+                                placeholder="Search start location"
+                                onChange={(value) =>
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        start_location: value,
+                                        start_place_id: null,
+                                        start_latitude: null,
+                                        start_longitude: null,
+                                    }))
+                                }
+                                onPlaceSelected={(place) =>
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        start_location: place.address,
+                                        start_place_id: place.placeId,
+                                        start_latitude: place.latitude,
+                                        start_longitude: place.longitude,
+                                    }))
+                                }
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">End Location *</label>
+                            <GooglePlacesInput
+                                value={formData.end_location}
+                                required
+                                placeholder="Search end location"
+                                onChange={(value) =>
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        end_location: value,
+                                        end_place_id: null,
+                                        end_latitude: null,
+                                        end_longitude: null,
+                                    }))
+                                }
+                                onPlaceSelected={(place) =>
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        end_location: place.address,
+                                        end_place_id: place.placeId,
+                                        end_latitude: place.latitude,
+                                        end_longitude: place.longitude,
+                                    }))
+                                }
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            />
+                        </div>
                         <div className="space-y-4 md:col-span-2">
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Schedule Type</label>
@@ -984,36 +697,33 @@ export default function PickAndDropForm() {
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Stop Location *</label>
-                                    <StopLocationInput
+                                    <GooglePlacesInput
                                         value={stop.location || ''}
+                                        required
+                                        placeholder="Search stop location"
                                         onChange={(location) => {
-                                            updateStop(index, 'location', location);
-                                            // Clear area_id when manually typing
-                                            if (location !== stop.location) {
-                                                updateStop(index, 'area_id', undefined);
-                                            }
-                                        }}
-                                        onAreaSelect={(areaId, areaName) => {
-                                            // Update both location and area_id together in a single state update
-                                            const newStops = stops.map((s, i) => {
-                                                if (i === index) {
-                                                    const karachi = cities.find((c) => c.name.toLowerCase() === 'karachi');
-                                                    return {
-                                                        ...s,
-                                                        location: areaName,
-                                                        area_id: areaId,
-                                                        city_id: karachi?.id || s.city_id,
-                                                    };
-                                                }
-                                                return s;
-                                            });
+                                            const newStops = [...stops];
+                                            newStops[index] = {
+                                                ...newStops[index],
+                                                location,
+                                                place_id: null,
+                                                latitude: null,
+                                                longitude: null,
+                                            };
                                             setStops(newStops);
                                         }}
-                                        cities={cities}
-                                        areas={areas}
-                                        index={index}
-                                        openDropdowns={openDropdowns}
-                                        setOpenDropdowns={setOpenDropdowns}
+                                        onPlaceSelected={(place) => {
+                                            const newStops = [...stops];
+                                            newStops[index] = {
+                                                ...newStops[index],
+                                                location: place.address,
+                                                place_id: place.placeId,
+                                                latitude: place.latitude,
+                                                longitude: place.longitude,
+                                            };
+                                            setStops(newStops);
+                                        }}
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                                 {formData.schedule_type === 'once' && (

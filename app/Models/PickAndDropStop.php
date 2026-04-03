@@ -13,6 +13,9 @@ class PickAndDropStop extends Model
     protected $fillable = [
         'pick_and_drop_service_id',
         'location',
+        'place_id',
+        'latitude',
+        'longitude',
         'city_id',
         'area_id',
         'stop_time',
@@ -23,6 +26,8 @@ class PickAndDropStop extends Model
     protected $casts = [
         'stop_time' => 'datetime',
         'order' => 'integer',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     public function pickAndDropService(): BelongsTo

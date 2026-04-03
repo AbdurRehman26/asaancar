@@ -30,7 +30,13 @@ class PickAndDropResource extends JsonResource
                 'name' => $this->car->name,
             ] : null,
             'start_location' => $this->start_location,
+            'start_place_id' => $this->start_place_id,
+            'start_latitude' => $this->start_latitude,
+            'start_longitude' => $this->start_longitude,
             'end_location' => $this->end_location,
+            'end_place_id' => $this->end_place_id,
+            'end_latitude' => $this->end_latitude,
+            'end_longitude' => $this->end_longitude,
             'pickup_city_id' => $this->pickup_city_id,
             'dropoff_city_id' => $this->dropoff_city_id,
             'pickup_area_id' => $this->pickup_area_id,
@@ -79,6 +85,9 @@ class PickAndDropResource extends JsonResource
                     return [
                         'id' => $stop->id,
                         'location' => $stop->location,
+                        'place_id' => $stop->place_id,
+                        'latitude' => $stop->latitude,
+                        'longitude' => $stop->longitude,
                         'city_id' => $stop->city_id,
                         'area_id' => $stop->area_id,
                         'city' => ($stop->relationLoaded('city') && $stop->city) ? [
@@ -90,6 +99,7 @@ class PickAndDropResource extends JsonResource
                             'name' => $stop->area->name,
                         ] : null,
                         'stop_time' => $this->schedule_type != 'once' ? Carbon::parse($stop->stop_time)->format('g:i A') : Carbon::parse($stop->stop_time)->format('jS F, g:i A'),
+                        'raw_stop_time' => $stop->stop_time,
                         'order' => $stop->order,
                         'notes' => $stop->notes,
                     ];

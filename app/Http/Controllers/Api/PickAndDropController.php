@@ -230,10 +230,16 @@ class PickAndDropController extends Controller
             'contact' => 'nullable|string|max:255',
             'start_location' => 'required|string|max:255',
             'end_location' => 'required|string|max:255',
-            'pickup_city_id' => 'required|integer|exists:cities,id',
-            'pickup_area_id' => 'required|integer|exists:areas,id',
-            'dropoff_city_id' => 'required|integer|exists:cities,id',
-            'dropoff_area_id' => 'required|integer|exists:areas,id',
+            'start_place_id' => 'nullable|string|max:255',
+            'start_latitude' => 'nullable|numeric',
+            'start_longitude' => 'nullable|numeric',
+            'end_place_id' => 'nullable|string|max:255',
+            'end_latitude' => 'nullable|numeric',
+            'end_longitude' => 'nullable|numeric',
+            'pickup_city_id' => 'nullable|integer|exists:cities,id',
+            'pickup_area_id' => 'nullable|integer|exists:areas,id',
+            'dropoff_city_id' => 'nullable|integer|exists:cities,id',
+            'dropoff_area_id' => 'nullable|integer|exists:areas,id',
             'departure_date' => [
                 Rule::requiredIf(fn (): bool => $request->input('schedule_type', 'once') === 'once'),
                 'date_format:Y-m-d',
@@ -246,7 +252,10 @@ class PickAndDropController extends Controller
             'is_roundtrip' => 'boolean',
             'return_time' => 'nullable|date_format:H:i',
             'stops' => 'sometimes|array',
-            'stops.*.location' => 'nullable|string|max:255',
+            'stops.*.location' => 'required_with:stops|string|max:255',
+            'stops.*.place_id' => 'nullable|string|max:255',
+            'stops.*.latitude' => 'nullable|numeric',
+            'stops.*.longitude' => 'nullable|numeric',
             'stops.*.city_id' => 'nullable|integer|exists:cities,id',
             'stops.*.area_id' => 'nullable|integer|exists:areas,id',
             'stops.*.stop_time' => 'required_with:stops|date',
@@ -271,14 +280,14 @@ class PickAndDropController extends Controller
 
         // Create stops if provided
         if ($request->has('stops') && is_array($request->stops)) {
-            // Get Karachi city ID
-            $karachi = \App\Models\City::where('name', 'Karachi')->first();
-
             foreach ($request->stops as $stop) {
                 PickAndDropStop::create([
                     'pick_and_drop_service_id' => $service->id,
                     'location' => $stop['location'] ?? null,
-                    'city_id' => $karachi ? $karachi->id : ($stop['city_id'] ?? null), // Force Karachi
+                    'place_id' => $stop['place_id'] ?? null,
+                    'latitude' => $stop['latitude'] ?? null,
+                    'longitude' => $stop['longitude'] ?? null,
+                    'city_id' => $stop['city_id'] ?? null,
                     'area_id' => $stop['area_id'] ?? null,
                     'stop_time' => $stop['stop_time'],
                     'order' => $stop['order'] ?? 0,
@@ -375,10 +384,16 @@ class PickAndDropController extends Controller
             'contact' => 'nullable|string|max:255',
             'start_location' => 'sometimes|string|max:255',
             'end_location' => 'sometimes|string|max:255',
-            'pickup_city_id' => 'required|integer|exists:cities,id',
-            'pickup_area_id' => 'required|integer|exists:areas,id',
-            'dropoff_city_id' => 'required|integer|exists:cities,id',
-            'dropoff_area_id' => 'required|integer|exists:areas,id',
+            'start_place_id' => 'sometimes|nullable|string|max:255',
+            'start_latitude' => 'sometimes|nullable|numeric',
+            'start_longitude' => 'sometimes|nullable|numeric',
+            'end_place_id' => 'sometimes|nullable|string|max:255',
+            'end_latitude' => 'sometimes|nullable|numeric',
+            'end_longitude' => 'sometimes|nullable|numeric',
+            'pickup_city_id' => 'sometimes|nullable|integer|exists:cities,id',
+            'pickup_area_id' => 'sometimes|nullable|integer|exists:areas,id',
+            'dropoff_city_id' => 'sometimes|nullable|integer|exists:cities,id',
+            'dropoff_area_id' => 'sometimes|nullable|integer|exists:areas,id',
             'departure_date' => 'sometimes|date_format:Y-m-d',
             'departure_time' => 'sometimes|date_format:H:i',
             'schedule_type' => 'nullable|string|in:once,everyday,weekdays,weekends,custom',
@@ -389,7 +404,10 @@ class PickAndDropController extends Controller
             'available_spaces' => 'sometimes|integer|min:1',
             'driver_gender' => 'sometimes|in:male,female',
             'stops' => 'sometimes|array',
-            'stops.*.location' => 'nullable|string|max:255',
+            'stops.*.location' => 'required_with:stops|string|max:255',
+            'stops.*.place_id' => 'nullable|string|max:255',
+            'stops.*.latitude' => 'nullable|numeric',
+            'stops.*.longitude' => 'nullable|numeric',
             'stops.*.city_id' => 'nullable|integer|exists:cities,id',
             'stops.*.area_id' => 'nullable|integer|exists:areas,id',
             'stops.*.stop_time' => 'required_with:stops|date',
@@ -419,14 +437,14 @@ class PickAndDropController extends Controller
 
             // Create new stops
             if (is_array($request->stops)) {
-                // Get Karachi city ID
-                $karachi = \App\Models\City::where('name', 'Karachi')->first();
-
                 foreach ($request->stops as $stop) {
                     PickAndDropStop::create([
                         'pick_and_drop_service_id' => $service->id,
                         'location' => $stop['location'] ?? null,
-                        'city_id' => $karachi ? $karachi->id : ($stop['city_id'] ?? null), // Force Karachi
+                        'place_id' => $stop['place_id'] ?? null,
+                        'latitude' => $stop['latitude'] ?? null,
+                        'longitude' => $stop['longitude'] ?? null,
+                        'city_id' => $stop['city_id'] ?? null,
                         'area_id' => $stop['area_id'] ?? null,
                         'stop_time' => $stop['stop_time'],
                         'order' => $stop['order'] ?? 0,

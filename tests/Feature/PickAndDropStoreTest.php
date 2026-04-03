@@ -40,6 +40,49 @@ it('creates a pick and drop service with separate departure_date and departure_t
     ]);
 });
 
+it('stores google places data without requiring area selections', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/pick-and-drop', [
+            'start_location' => 'Karachi Airport, Karachi, Pakistan',
+            'start_place_id' => 'place_start_123',
+            'start_latitude' => 24.906547,
+            'start_longitude' => 67.160797,
+            'end_location' => 'Clifton Block 5, Karachi, Pakistan',
+            'end_place_id' => 'place_end_456',
+            'end_latitude' => 24.813829,
+            'end_longitude' => 67.029373,
+            'departure_date' => '2026-04-15',
+            'departure_time' => '14:30',
+            'available_spaces' => 4,
+            'driver_gender' => 'male',
+            'stops' => [
+                [
+                    'location' => 'Teen Talwar, Karachi, Pakistan',
+                    'place_id' => 'place_stop_789',
+                    'latitude' => 24.821503,
+                    'longitude' => 67.030828,
+                    'stop_time' => '2026-04-15 15:00:00',
+                    'order' => 0,
+                ],
+            ],
+        ]);
+
+    $response->assertSuccessful();
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'user_id' => $this->user->id,
+        'start_place_id' => 'place_start_123',
+        'end_place_id' => 'place_end_456',
+        'pickup_area_id' => null,
+        'dropoff_area_id' => null,
+    ]);
+
+    $this->assertDatabaseHas('pick_and_drop_stops', [
+        'location' => 'Teen Talwar, Karachi, Pakistan',
+        'place_id' => 'place_stop_789',
+    ]);
+});
+
 it('validates departure_time must be in 24hr H:i format', function () {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/pick-and-drop', [
