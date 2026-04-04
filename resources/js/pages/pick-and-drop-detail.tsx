@@ -7,7 +7,7 @@ import SEO from '@/components/SEO';
 import { useToast } from '@/contexts/ToastContext';
 import { apiFetch } from '@/lib/utils';
 import { ArrowRight, Car, ChevronDown, ChevronUp, Clock, MapPin, MessageSquare, Phone, User as UserIcon, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 interface PickAndDropStop {
@@ -90,6 +90,7 @@ export default function PickAndDropDetail() {
     const [conversationId, setConversationId] = useState<number | null>(null);
     const [chatError, setChatError] = useState<string | null>(null);
     const [showStops, setShowStops] = useState(false);
+    const sortedStops = useMemo(() => [...(service?.stops ?? [])].sort((a, b) => (a.order || 0) - (b.order || 0)), [service?.stops]);
 
     useEffect(() => {
         fetchService();
@@ -236,8 +237,7 @@ export default function PickAndDropDetail() {
                   },
               }
             : null,
-        ...(service.stops ?? [])
-            .sort((a, b) => (a.order || 0) - (b.order || 0))
+        ...sortedStops
             .map((stop, index) =>
                 stop.latitude != null && stop.longitude != null
                     ? {
@@ -332,27 +332,23 @@ export default function PickAndDropDetail() {
                                                         >
                                                             <div className="overflow-hidden">
                                                                 <div className="ml-2 space-y-4 border-l-2 border-dashed border-gray-200 py-1 pl-4 dark:border-gray-700">
-                                                                    {service.stops
-                                                                        .sort((a, b) => (a.order || 0) - (b.order || 0))
-                                                                        .map((stop, index) => (
-                                                                            <div key={stop.id || index} className="relative">
-                                                                                <div className="absolute top-2 -left-[21px] h-2.5 w-2.5 rounded-full bg-gray-300 ring-4 ring-white dark:bg-gray-600 dark:ring-gray-800"></div>
-                                                                                <div className="font-medium text-gray-900 dark:text-white">
-                                                                                    {stop.location ||
-                                                                                        stop.area?.name ||
-                                                                                        stop.city?.name ||
-                                                                                        'Location not specified'}
-                                                                                </div>
-                                                                                <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
-                                                                                    <Clock className="h-3 w-3" /> {stop.stop_time}
-                                                                                </div>
-                                                                                {stop.notes && (
-                                                                                    <p className="mt-1 text-xs text-gray-500 italic">
-                                                                                        "{stop.notes}"
-                                                                                    </p>
-                                                                                )}
+                                                                    {sortedStops.map((stop, index) => (
+                                                                        <div key={stop.id || index} className="relative">
+                                                                            <div className="absolute top-2 -left-[21px] h-2.5 w-2.5 rounded-full bg-gray-300 ring-4 ring-white dark:bg-gray-600 dark:ring-gray-800"></div>
+                                                                            <div className="font-medium text-gray-900 dark:text-white">
+                                                                                {stop.location ||
+                                                                                    stop.area?.name ||
+                                                                                    stop.city?.name ||
+                                                                                    'Location not specified'}
                                                                             </div>
-                                                                        ))}
+                                                                            <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
+                                                                                <Clock className="h-3 w-3" /> {stop.stop_time}
+                                                                            </div>
+                                                                            {stop.notes && (
+                                                                                <p className="mt-1 text-xs text-gray-500 italic">"{stop.notes}"</p>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
                                                                 </div>
                                                             </div>
                                                         </div>

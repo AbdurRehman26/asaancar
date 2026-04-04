@@ -191,13 +191,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
                     (window as unknown as { googleMapInstance?: google.maps.Map }).googleMapInstance = map;
                     fitToBounds();
                 }}
-                onCenterChanged={() => {
-                    if (showFixedPin) {
-                        return;
-                    }
-
-                    fitToBounds();
-                }}
             >
                 {visibleMarkers.map((marker) => (
                     <Marker key={marker.id} position={marker.position} title={marker.title} label={marker.label} />

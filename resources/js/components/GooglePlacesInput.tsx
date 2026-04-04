@@ -30,7 +30,7 @@ export default function GooglePlacesInput({
 }: GooglePlacesInputProps) {
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
     const { isLoaded } = useJsApiLoader({
-        id: 'google-places-script',
+        id: 'google-map-script',
         googleMapsApiKey,
         libraries: GOOGLE_PLACES_LIBRARIES,
     });
