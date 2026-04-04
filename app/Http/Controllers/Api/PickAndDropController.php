@@ -58,11 +58,17 @@ class PickAndDropController extends Controller
     public function index(Request $request)
     {
         $query = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
-            ->where('is_active', true)
-            ->orderBy('created_at', 'desc');
+            ->where('is_active', true);
+
+        $startLatitude = $request->float('start_latitude');
+        $startLongitude = $request->float('start_longitude');
+        $endLatitude = $request->float('end_latitude');
+        $endLongitude = $request->float('end_longitude');
+        $hasStartCoordinates = $request->filled(['start_latitude', 'start_longitude']);
+        $hasEndCoordinates = $request->filled(['end_latitude', 'end_longitude']);
 
         // Filter by start location (including stops, stop areas, and stop cities)
-        if ($request->has('start_location')) {
+        if ($request->has('start_location') && ! $hasStartCoordinates) {
             $searchTerm = $request->start_location;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('start_location', 'like', '%'.$searchTerm.'%')
@@ -79,7 +85,7 @@ class PickAndDropController extends Controller
         }
 
         // Filter by end location (including stops, stop areas, and stop cities)
-        if ($request->has('end_location')) {
+        if ($request->has('end_location') && ! $hasEndCoordinates) {
             $searchTerm = $request->end_location;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('end_location', 'like', '%'.$searchTerm.'%')
@@ -93,6 +99,40 @@ class PickAndDropController extends Controller
                             });
                     });
             });
+        }
+
+        $query->select('pick_and_drop_services.*');
+
+        if ($hasStartCoordinates) {
+            $query->selectRaw(
+                'CASE
+                    WHEN start_latitude IS NULL OR start_longitude IS NULL THEN 999999
+                    ELSE (
+                        6371 * ACOS(
+                            COS(RADIANS(?)) * COS(RADIANS(start_latitude))
+                            * COS(RADIANS(start_longitude) - RADIANS(?))
+                            + SIN(RADIANS(?)) * SIN(RADIANS(start_latitude))
+                        )
+                    )
+                END AS start_distance_km',
+                [$startLatitude, $startLongitude, $startLatitude],
+            );
+        }
+
+        if ($hasEndCoordinates) {
+            $query->selectRaw(
+                'CASE
+                    WHEN end_latitude IS NULL OR end_longitude IS NULL THEN 999999
+                    ELSE (
+                        6371 * ACOS(
+                            COS(RADIANS(?)) * COS(RADIANS(end_latitude))
+                            * COS(RADIANS(end_longitude) - RADIANS(?))
+                            + SIN(RADIANS(?)) * SIN(RADIANS(end_latitude))
+                        )
+                    )
+                END AS end_distance_km',
+                [$endLatitude, $endLongitude, $endLatitude],
+            );
         }
 
         // Filter by driver gender
@@ -158,6 +198,16 @@ class PickAndDropController extends Controller
                 // If time parsing fails, fall back to simple time comparison
                 $query->whereTime('departure_time', '>=', $selectedTime);
             }
+        }
+
+        if ($hasStartCoordinates && $hasEndCoordinates) {
+            $query->orderByRaw('start_distance_km + end_distance_km asc');
+        } elseif ($hasStartCoordinates) {
+            $query->orderBy('start_distance_km');
+        } elseif ($hasEndCoordinates) {
+            $query->orderBy('end_distance_km');
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
         $perPage = $request->input('per_page', 15);
