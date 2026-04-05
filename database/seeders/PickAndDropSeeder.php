@@ -18,7 +18,7 @@ class PickAndDropSeeder extends Seeder
     public function run(): void
     {
         // Only use Rahima (ID 9) and Kazmi (ID 1) users
-        $users = User::whereIn('id', [1, 9])->get();
+        $users = User::whereIn('id', [1, 2, 3, 4, 5])->get();
 
         if ($users->count() === 0) {
             $this->command->warn('Rahima or Kazmi users not found. Please seed users first.');
