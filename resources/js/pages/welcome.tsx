@@ -1,11 +1,11 @@
-import { MapPin, ThumbsUp, CheckCircle, Headphones, Network, ShieldCheck, Wallet } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import Navbar from '../components/navbar';
 import { useAuth } from '@/components/AuthContext';
-import Footer from '../components/Footer';
-import { useNavigate } from 'react-router-dom';
-import PickAndDropFilter from '../components/pick-and-drop-filter';
 import PickAndDropCard, { PickAndDropService } from '@/components/PickAndDropCard';
+import { CheckCircle, Headphones, MapPin, Network, ShieldCheck, ThumbsUp, Wallet } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer';
+import Navbar from '../components/navbar';
+import PickAndDropFilter from '../components/pick-and-drop-filter';
 // Animation utility for reveal on scroll
 const useRevealOnScroll = () => {
     useEffect(() => {
@@ -109,21 +109,13 @@ export default function Welcome() {
                 <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 sm:py-12 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
-                            <h1 className="text-4xl pt-16 font-bold mt-18 xs:pt-14 tracking-tight text-gray-900 sm:text-6xl dark:text-white">
+                            <h1 className="xs:pt-14 mt-18 pt-16 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-white">
                                 Pick and Drop
                             </h1>
-                            <p className="mt-4 sm:mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                                Find the perfect ride for your journey with AsaanCar - <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted pick & drop service</span>.
+                            <p className="mt-4 text-lg leading-8 text-gray-600 sm:mt-6 dark:text-gray-300">
+                                Find the perfect ride for your journey with AsaanCar -{' '}
+                                <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted pick & drop service</span>.
                             </p>
-
-                            {/* Karachi Availability Notice */}
-                            <div className="mt-4 inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 ring-1 ring-blue-700/20 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-300/20">
-                                <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                </svg>
-                                Currently available in Karachi only. We'll be expanding to other cities soon!
-                            </div>
-
                             {/* Play Store Download Button */}
                             <div className="mt-6 flex items-center justify-center">
                                 <a
@@ -135,14 +127,14 @@ export default function Welcome() {
                                     <img
                                         src="/google-play-download-android-app-logo.svg"
                                         alt="Get it on Google Play"
-                                        className="h-32 sm:h-40 w-auto sm:h-48"
+                                        className="h-32 w-auto sm:h-40 sm:h-48"
                                     />
                                 </a>
                             </div>
                         </div>
 
                         {/* Search Filter - Full Screen */}
-                        <div className="mt-8 sm:mt-10 w-full max-w-none">
+                        <div className="mt-8 w-full max-w-none sm:mt-10">
                             <PickAndDropFilter
                                 onSearch={(filters) => {
                                     const params = new URLSearchParams();
@@ -160,7 +152,7 @@ export default function Welcome() {
 
                         {/* Auth Buttons */}
                         {!user && (
-                            <div className="mt-6 pb-4 sm:mt-8 flex items-center justify-center gap-x-6">
+                            <div className="mt-6 flex items-center justify-center gap-x-6 pb-4 sm:mt-8">
                                 <a
                                     href="/signup"
                                     className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
@@ -169,7 +161,7 @@ export default function Welcome() {
                                 </a>
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="text-sm font-semibold leading-6 text-gray-900 hover:text-[#7e246c] dark:text-white dark:hover:text-[#7e246c]"
+                                    className="text-sm leading-6 font-semibold text-gray-900 hover:text-[#7e246c] dark:text-white dark:hover:text-[#7e246c]"
                                 >
                                     Login <span aria-hidden="true">→</span>
                                 </button>
@@ -181,23 +173,21 @@ export default function Welcome() {
                 {/* Pick & Drop Services Section */}
                 <section className="bg-gray-50 py-10 sm:py-16 dark:bg-gray-800">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="mx-auto max-w-2xl text-center flex flex-col items-center">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-                                Pick & Drop Services
-                            </h2>
+                        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">Pick & Drop Services</h2>
                             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                                 Share rides or find passengers for your journey. Multiple stops available.
                             </p>
                         </div>
                         {pickAndDropLoading ? (
-                            <div className="mx-auto mt-10 sm:mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                            <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-6 sm:mt-12 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                                 {Array.from({ length: 6 }).map((_, index) => (
-                                    <div key={index} className="animate-pulse bg-white dark:bg-gray-700 rounded-lg p-6 h-64"></div>
+                                    <div key={index} className="h-64 animate-pulse rounded-lg bg-white p-6 dark:bg-gray-700"></div>
                                 ))}
                             </div>
                         ) : pickAndDropServices.length > 0 ? (
                             <>
-                                <div className="mx-auto mt-10 sm:mt-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                                <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-6 sm:mt-12 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                                     {pickAndDropServices.map((service) => (
                                         <PickAndDropCard
                                             key={service.id}
@@ -209,19 +199,19 @@ export default function Welcome() {
                                 <div className="mt-8 text-center">
                                     <button
                                         onClick={() => navigate('/pick-and-drop')}
-                                        className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] transition-colors"
+                                        className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
                                     >
                                         View All Pick & Drop Services
                                     </button>
                                 </div>
                             </>
                         ) : (
-                            <div className="mt-10 sm:mt-12 text-center py-12 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                                <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <div className="mt-10 rounded-lg border border-gray-200 bg-white py-12 text-center sm:mt-12 dark:border-gray-600 dark:bg-gray-700">
+                                <MapPin className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                                 <p className="text-gray-600 dark:text-gray-400">No pick and drop services available at the moment.</p>
                                 <button
                                     onClick={() => navigate('/pick-and-drop')}
-                                    className="mt-4 rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] transition-colors"
+                                    className="mt-4 rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
                                 >
                                     Browse All Services
                                 </button>
@@ -237,20 +227,18 @@ export default function Welcome() {
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
                                 Why <span className="text-[#7e246c] dark:text-[#9d4edd]">AsaanCar?</span>
                             </h2>
-                            <p className="mt-4 sm:mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
+                            <p className="mt-4 text-lg leading-8 text-gray-600 sm:mt-6 dark:text-gray-300">
                                 Discover a wide range of services offered for different travel and business needs.
                             </p>
                         </div>
-                        <div className="mx-auto mt-10 sm:mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-6 sm:mt-16 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
                             {whyAsaanCarCards.map((card) => {
                                 const Icon = card.icon;
                                 return (
                                     <div
                                         key={card.title}
                                         className={`rounded-2xl p-6 sm:p-8 ${
-                                            card.variant === 'brand'
-                                                ? 'bg-[#7e246c] dark:bg-[#7e246c]'
-                                                : 'bg-slate-800 dark:bg-slate-900'
+                                            card.variant === 'brand' ? 'bg-[#7e246c] dark:bg-[#7e246c]' : 'bg-slate-800 dark:bg-slate-900'
                                         }`}
                                     >
                                         <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 text-white">
@@ -270,5 +258,4 @@ export default function Welcome() {
             </main>
         </>
     );
-
 }

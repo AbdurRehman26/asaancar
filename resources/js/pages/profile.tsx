@@ -1,213 +1,211 @@
-import React, { useState } from 'react';
 import { useAuth } from '@/components/AuthContext';
+import ImageUpload, { UploadedImage } from '@/components/ImageUpload';
+import InputError from '@/components/input-error';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import InputError from '@/components/input-error';
 import { apiFetch } from '@/lib/utils';
-import ImageUpload, { UploadedImage } from '@/components/ImageUpload';
+import { Camera, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 export default function ProfilePage() {
-  const { user, setUser } = useAuth();
-  const [profile, setProfile] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    profile_image: user?.profile_image || '',
-  });
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [profileSuccess, setProfileSuccess] = useState(false);
-  const [profileError, setProfileError] = useState<string | null>(null);
+    const { user, setUser } = useAuth();
+    const [profile, setProfile] = useState({
+        name: user?.name || '',
+        email: user?.email || '',
+        profile_image: user?.profile_image || '',
+    });
+    const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+    const [profileLoading, setProfileLoading] = useState(false);
+    const [profileSuccess, setProfileSuccess] = useState(false);
+    const [profileError, setProfileError] = useState<string | null>(null);
 
-  const [passwords, setPasswords] = useState({
-    current_password: '',
-    password: '',
-    password_confirmation: '',
-  });
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordSuccess, setPasswordSuccess] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [passwords, setPasswords] = useState({
+        current_password: '',
+        password: '',
+        password_confirmation: '',
+    });
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordSuccess, setPasswordSuccess] = useState(false);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const previewImage = uploadedImages[0]?.url || profile.profile_image || '';
+    const profileInitial = profile.name ? profile.name.charAt(0) : 'U';
 
-  const handleProfileSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setProfileLoading(true);
-    setProfileSuccess(false);
-    setProfileError(null);
-    try {
-      const payload = { ...profile };
-      if (uploadedImages.length > 0) {
-        payload.profile_image = uploadedImages[0].url;
-      }
-      const res = await apiFetch('/api/settings/profile', {
-        method: 'PATCH',
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        setProfileError(err.message || 'Update failed');
-      } else {
-        setProfileSuccess(true);
-        const updated = await res.json();
-        // Update user context with new data including profile image
-        if (setUser) setUser({ ...user, ...updated.user });
-      }
-    } catch (err) {
-      console.error(err);
-      setProfileError('Network error' + (err instanceof Error ? err.message : String(err)));
-    } finally {
-      setProfileLoading(false);
-    }
-  };
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordLoading(true);
-    setPasswordSuccess(false);
-    setPasswordError(null);
-    try {
-      const res = await apiFetch('/api/settings/password', {
-        method: 'PUT',
-        body: JSON.stringify(passwords),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        // Handle validation errors
-        if (err.errors) {
-          const errorMessages = Object.values(err.errors).flat();
-          setPasswordError((errorMessages[0] as string) || 'Password update failed');
-        } else {
-          setPasswordError((err.message as string) || 'Password update failed');
+    const handleProfileSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setProfileLoading(true);
+        setProfileSuccess(false);
+        setProfileError(null);
+        try {
+            const payload = { ...profile };
+            if (uploadedImages.length > 0) {
+                payload.profile_image = uploadedImages[0].url;
+            }
+            const res = await apiFetch('/api/settings/profile', {
+                method: 'PATCH',
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                setProfileError(err.message || 'Update failed');
+            } else {
+                setProfileSuccess(true);
+                const updated = await res.json();
+                // Update user context with new data including profile image
+                if (setUser) setUser({ ...user, ...updated.user });
+            }
+        } catch (err) {
+            console.error(err);
+            setProfileError('Network error' + (err instanceof Error ? err.message : String(err)));
+        } finally {
+            setProfileLoading(false);
         }
-      } else {
-        setPasswordSuccess(true);
-        setPasswords({ current_password: '', password: '', password_confirmation: '' });
-      }
-    } catch (err) {
-      console.error(err);
-      setPasswordError('Network error' + (err instanceof Error ? err.message : String(err)));
-    } finally {
-      setPasswordLoading(false);
-    }
-  };
+    };
 
-  return (
-      <div className="w-full py-6 px-4 max-w-2xl mx-auto">
-          {/* Profile info form */}
-          <form
-              onSubmit={handleProfileSubmit}
-              className="space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow p-6 mb-10"
-          >
-              <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
+    const handlePasswordSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPasswordLoading(true);
+        setPasswordSuccess(false);
+        setPasswordError(null);
+        try {
+            const res = await apiFetch('/api/settings/password', {
+                method: 'PUT',
+                body: JSON.stringify(passwords),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                // Handle validation errors
+                if (err.errors) {
+                    const errorMessages = Object.values(err.errors).flat();
+                    setPasswordError((errorMessages[0] as string) || 'Password update failed');
+                } else {
+                    setPasswordError((err.message as string) || 'Password update failed');
+                }
+            } else {
+                setPasswordSuccess(true);
+                setPasswords({ current_password: '', password: '', password_confirmation: '' });
+            }
+        } catch (err) {
+            console.error(err);
+            setPasswordError('Network error' + (err instanceof Error ? err.message : String(err)));
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
 
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
-                  <div className="flex flex-col items-center gap-3">
-                      {profile.profile_image ? (
-                          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                              <img
-                                  src={profile.profile_image}
-                                  alt="Profile"
-                                  className="w-full h-full object-cover"
-                              />
-                          </div>
-                      ) : (
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-3xl sm:text-4xl font-bold uppercase overflow-hidden">
-                              {profile.name ? profile.name.charAt(0) : 'U'}
-                          </div>
-                      )}
-                      {profile.profile_image && (
-                          <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                              onClick={() => setProfile({ ...profile, profile_image: '' })}
-                          >
-                              Remove photo
-                          </Button>
-                      )}
-                  </div>
+    return (
+        <div className="mx-auto w-full max-w-2xl px-4 py-6">
+            {/* Profile info form */}
+            <form onSubmit={handleProfileSubmit} className="mb-10 space-y-6 rounded-xl bg-white p-6 shadow dark:bg-gray-800">
+                <div className="mb-2">
+                    <h2 className="text-lg font-semibold">Personal Information</h2>
+                </div>
 
-                  <div className="w-full max-w-sm">
-                      <Label className="mb-2 block text-sm text-gray-600 dark:text-gray-300">
-                          Profile photo
-                      </Label>
-                      <ImageUpload
-                          onImagesChange={setUploadedImages}
-                          maxImages={1}
-                          directory="profile-images"
-                      />
-                      <p className="mt-1 text-xs text-gray-500">
-                          Recommended: square image, at least 256x256px.
-                      </p>
-                  </div>
-              </div>
+                <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-900/20">
+                    <Label className="mb-4 block text-sm font-medium text-gray-700 dark:text-gray-200">Profile photo</Label>
+                    <div className="grid gap-5 md:grid-cols-[140px_minmax(0,1fr)] md:items-center">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="relative">
+                                <Avatar className="h-28 w-28 rounded-2xl border border-gray-200 shadow-sm dark:border-gray-700">
+                                    <AvatarImage src={previewImage} alt={profile.name || 'Profile'} className="object-cover" />
+                                    <AvatarFallback className="rounded-2xl bg-gray-100 text-3xl font-bold text-[#7e246c] uppercase dark:bg-gray-700">
+                                        {profileInitial}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="absolute right-0 bottom-0 flex h-8 w-8 items-center justify-center rounded-full border border-white bg-[#7e246c] text-white dark:border-gray-800">
+                                    <Camera className="h-3.5 w-3.5" />
+                                </div>
+                            </div>
+                            {previewImage && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-4 rounded-full"
+                                    onClick={() => {
+                                        setProfile({ ...profile, profile_image: '' });
+                                        setUploadedImages([]);
+                                    }}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Remove photo
+                                </Button>
+                            )}
+                        </div>
 
-              <div className="grid gap-2 max-w-sm">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                      id="name"
-                      value={profile.name}
-                      onChange={e => setProfile({ ...profile, name: e.target.value })}
-                      required
-                      autoComplete="name"
-                      placeholder="Full name"
-                  />
-              </div>
-              {profileError && <InputError className="mt-2" message={profileError || undefined} />}
-              <div className="flex items-center gap-4">
-                  <Button className="bg-[#7e246c] text-white hover:bg-[#6a1f5c] cursor-pointer"
-                          disabled={profileLoading}>Save</Button>
-                  {profileSuccess && <span className="text-green-600 text-sm">Saved!</span>}
-              </div>
-          </form>
-          {/* Password form */}
-          <form onSubmit={handlePasswordSubmit} className="space-y-6 bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-              <h2 className="text-lg font-semibold mb-2">{user?.has_password ? 'Change Password' : 'Set Password'}</h2>
-              {user?.has_password && (
-                  <div className="grid gap-2">
-                      <Label htmlFor="current_password">Current Password</Label>
-                      <Input
-                          id="current_password"
-                          type="password"
-                          value={passwords.current_password}
-                          onChange={e => setPasswords({ ...passwords, current_password: e.target.value })}
-                          required
-                          autoComplete="current-password"
-                          placeholder="Enter your current password"
-                      />
-                  </div>
-              )}
-              <div className="grid gap-2">
-                  <Label htmlFor="password">New Password</Label>
-                  <Input
-                      id="password"
-                      type="password"
-                      value={passwords.password}
-                      onChange={e => setPasswords({ ...passwords, password: e.target.value })}
-                      required
-                      autoComplete="new-password"
-                      placeholder="New password"
-                  />
-              </div>
-              <div className="grid gap-2">
-                  <Label htmlFor="password_confirmation">Confirm New Password</Label>
-                  <Input
-                      id="password_confirmation"
-                      type="password"
-                      value={passwords.password_confirmation}
-                      onChange={e => setPasswords({ ...passwords, password_confirmation: e.target.value })}
-                      required
-                      autoComplete="new-password"
-                      placeholder="Confirm new password"
-                  />
-              </div>
-              {passwordError && <InputError className="mt-2" message={passwordError || undefined} />}
-              <div className="flex items-center gap-4">
-                  <Button className="bg-[#7e246c] text-white hover:bg-[#6a1f5c] cursor-pointer"
-                          disabled={passwordLoading}>Change Password</Button>
-                  {passwordSuccess && <span className="text-green-600 text-sm">Password updated!</span>}
-              </div>
-          </form>
-      </div>
-  );
+                        <ImageUpload onImagesChange={setUploadedImages} maxImages={1} directory="profile-images" />
+                    </div>
+                </div>
+
+                <div className="grid max-w-sm gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                        id="name"
+                        value={profile.name}
+                        onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                        required
+                        autoComplete="name"
+                        placeholder="Full name"
+                    />
+                </div>
+                {profileError && <InputError className="mt-2" message={profileError || undefined} />}
+                <div className="flex items-center gap-4">
+                    <Button className="cursor-pointer bg-[#7e246c] text-white hover:bg-[#6a1f5c]" disabled={profileLoading}>
+                        Save
+                    </Button>
+                    {profileSuccess && <span className="text-sm text-green-600">Saved!</span>}
+                </div>
+            </form>
+            {/* Password form */}
+            <form onSubmit={handlePasswordSubmit} className="space-y-6 rounded-xl bg-white p-6 shadow dark:bg-gray-800">
+                <h2 className="mb-2 text-lg font-semibold">{user?.has_password ? 'Change Password' : 'Set Password'}</h2>
+                {user?.has_password && (
+                    <div className="grid gap-2">
+                        <Label htmlFor="current_password">Current Password</Label>
+                        <Input
+                            id="current_password"
+                            type="password"
+                            value={passwords.current_password}
+                            onChange={(e) => setPasswords({ ...passwords, current_password: e.target.value })}
+                            required
+                            autoComplete="current-password"
+                            placeholder="Enter your current password"
+                        />
+                    </div>
+                )}
+                <div className="grid gap-2">
+                    <Label htmlFor="password">New Password</Label>
+                    <Input
+                        id="password"
+                        type="password"
+                        value={passwords.password}
+                        onChange={(e) => setPasswords({ ...passwords, password: e.target.value })}
+                        required
+                        autoComplete="new-password"
+                        placeholder="New password"
+                    />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="password_confirmation">Confirm New Password</Label>
+                    <Input
+                        id="password_confirmation"
+                        type="password"
+                        value={passwords.password_confirmation}
+                        onChange={(e) => setPasswords({ ...passwords, password_confirmation: e.target.value })}
+                        required
+                        autoComplete="new-password"
+                        placeholder="Confirm new password"
+                    />
+                </div>
+                {passwordError && <InputError className="mt-2" message={passwordError || undefined} />}
+                <div className="flex items-center gap-4">
+                    <Button className="cursor-pointer bg-[#7e246c] text-white hover:bg-[#6a1f5c]" disabled={passwordLoading}>
+                        Change Password
+                    </Button>
+                    {passwordSuccess && <span className="text-sm text-green-600">Password updated!</span>}
+                </div>
+            </form>
+        </div>
+    );
 }

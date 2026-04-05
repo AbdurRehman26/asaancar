@@ -1,10 +1,9 @@
-import React from 'react';
+import { useAuth } from '@/components/AuthContext';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/components/AuthContext';
-import { Settings, LogOut, LayoutGrid } from 'lucide-react';
 import type { UserMenuContentProps } from '@/types/user-menu-content';
+import { LayoutGrid, LogOut, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function UserMenuContent({ user }: UserMenuContentProps) {
     const cleanup = useMobileNavigation();
@@ -19,7 +18,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             {/* User name and email at the top */}
             <DropdownMenuLabel className="p-0 font-normal dark:bg-gray-800/80 dark:text-white">
                 <div className="flex flex-col items-start gap-1 px-1 py-2 text-left">
-                    <span className="font-semibold text-base leading-tight">TEST NAME</span>
+                    <span className="text-base leading-tight font-semibold">{user.name || 'User'}</span>
                     <span className="text-xs text-muted-foreground">{user.email}</span>
                 </div>
             </DropdownMenuLabel>

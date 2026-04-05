@@ -1,11 +1,22 @@
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar';
-import { Link } from 'react-router-dom';
-import { LayoutGrid, MessageSquare, Mail, MapPin, Zap, User } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
-import { useState, useEffect, useRef } from 'react';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from '@/components/ui/sidebar';
+import { LayoutGrid, Mail, MapPin, MessageSquare, User, Zap } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export function AppSidebar() {
     const { user } = useAuth();
+    const canViewInquiries = user?.id === 1;
     const [loginOpen, setLoginOpen] = useState(false);
     const wasLoginOpen = useRef(false);
 
@@ -20,8 +31,7 @@ export function AppSidebar() {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                        </SidebarMenuButton>
+                        <SidebarMenuButton size="lg" asChild></SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
@@ -60,14 +70,16 @@ export function AppSidebar() {
                 <SidebarGroup>
                     <SidebarGroupLabel>Other</SidebarGroupLabel>
                     <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton size="lg" asChild>
-                                <Link to="/dashboard/inquiries">
-                                    <Mail className="mr-2" />
-                                    Inquiries
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
+                        {canViewInquiries && (
+                            <SidebarMenuItem>
+                                <SidebarMenuButton size="lg" asChild>
+                                    <Link to="/dashboard/inquiries">
+                                        <Mail className="mr-2" />
+                                        Inquiries
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        )}
                         <SidebarMenuItem>
                             <SidebarMenuButton size="lg" asChild>
                                 <Link to="/dashboard/profile">
@@ -96,9 +108,7 @@ export function AppSidebar() {
                 )}
             </SidebarContent>
 
-            <SidebarFooter>
-                {/* Removed NavFooter, NavUser, and auth buttons from sidebar */}
-            </SidebarFooter>
+            <SidebarFooter>{/* Removed NavFooter, NavUser, and auth buttons from sidebar */}</SidebarFooter>
         </Sidebar>
     );
 }
