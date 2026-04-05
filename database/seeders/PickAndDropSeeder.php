@@ -50,7 +50,7 @@ class PickAndDropSeeder extends Seeder
 
         // Create 5 services with area-to-area routes within Karachi
         // Mix of everyday services and date-specific services
-        $totalServices = 5;
+        $totalServices = 15;
         $everydayServicesCount = 0;
 
         for ($i = 0; $i < $totalServices; $i++) {
