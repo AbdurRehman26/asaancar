@@ -346,7 +346,7 @@ class PickAndDropController extends Controller
             }
         }
 
-        return new PickAndDropResource($service->load(['user', 'stops.city', 'stops.area']));
+        return new PickAndDropResource($service->fresh()->load(['user', 'stops.city', 'stops.area']));
     }
 
     /**

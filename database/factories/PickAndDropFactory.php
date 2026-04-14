@@ -32,6 +32,7 @@ class PickAndDropFactory extends Factory
             'price_per_person' => $this->faker->randomFloat(2, 100, 1000),
             'currency' => 'PKR',
             'is_active' => true,
+            'is_system_generated' => false,
         ];
     }
 }

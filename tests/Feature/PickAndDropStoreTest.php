@@ -159,6 +159,31 @@ it('does not require departure_date when schedule_type is not once', function ()
         'user_id' => $this->user->id,
         'schedule_type' => 'everyday',
         'departure_time' => '2000-01-01 14:30:00',
+        'is_system_generated' => false,
+    ]);
+});
+
+it('defaults is_system_generated to false when creating a service', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/pick-and-drop', [
+            'start_location' => 'Karachi Airport',
+            'end_location' => 'Clifton Beach',
+            'pickup_city_id' => $this->city->id,
+            'pickup_area_id' => $this->area1->id,
+            'dropoff_city_id' => $this->city->id,
+            'dropoff_area_id' => $this->area2->id,
+            'departure_date' => '2026-04-15',
+            'departure_time' => '14:30',
+            'available_spaces' => 4,
+            'driver_gender' => 'male',
+        ]);
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.is_system_generated', false);
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'user_id' => $this->user->id,
+        'is_system_generated' => false,
     ]);
 });
 

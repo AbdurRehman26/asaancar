@@ -79,6 +79,7 @@ class PickAndDropResource extends JsonResource
             'price_per_person' => $this->price_per_person,
             'currency' => $this->currency,
             'is_active' => $this->is_active,
+            'is_system_generated' => $this->is_system_generated,
             'is_everyday' => $this->schedule_type != 'once' ?? false,
             'stops' => $this->whenLoaded('stops', function () {
                 return $this->stops->map(function ($stop) {
