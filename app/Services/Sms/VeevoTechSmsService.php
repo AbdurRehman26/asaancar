@@ -41,14 +41,15 @@ class VeevoTechSmsService implements SmsServiceInterface
                 // receivernetwork is optional, omitting it.
             ]);
 
-            Log::info('Sending sms...');
-            Log::info(json_encode($this->baseUrl));
-            Log::info(json_encode($this->apiKey));
-            Log::info(json_encode($receiverNumber));
-            Log::info(json_encode($this->senderId));
-            Log::info(json_encode($message));
 
             if ($response->successful()) {
+                Log::info('Sending sms...');
+                Log::info(json_encode($this->baseUrl));
+                Log::info(json_encode($this->apiKey));
+                Log::info(json_encode($receiverNumber));
+                Log::info(json_encode($this->senderId));
+                Log::info(json_encode($message));
+
                 Log::info('VeevoTech SMS sent successfully', [
                     'receiver' => $receiverNumber,
                     'response' => $response->body()
