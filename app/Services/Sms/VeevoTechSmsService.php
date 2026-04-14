@@ -44,11 +44,11 @@ class VeevoTechSmsService implements SmsServiceInterface
 
             if ($response->successful()) {
                 Log::info('Sending sms...');
-                Log::info(json_encode($this->baseUrl));
-                Log::info(json_encode($this->apiKey));
-                Log::info(json_encode($receiverNumber));
-                Log::info(json_encode($this->senderId));
-                Log::info(json_encode($message));
+                Log::info($this->baseUrl);
+                Log::info($this->apiKey);
+                Log::info($receiverNumber);
+                Log::info($this->senderId);
+                Log::info($message);
 
                 Log::info('VeevoTech SMS sent successfully', [
                     'receiver' => $receiverNumber,
