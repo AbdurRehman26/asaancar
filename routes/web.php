@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\Auth\NewPasswordController;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Route;
+
 // All frontend routes are now handled by the React SPA. This file can be left empty or used for fallback if needed.
 
 // Password reset routes
@@ -13,6 +14,6 @@ Route::post('reset-password', [NewPasswordController::class, 'store'])->name('pa
 
 Route::get('/{any}', function () {
     return view('app');
-})->where('any', '.*');
+})->where('any', '^(?!telescope(?:/|$)).*');
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);

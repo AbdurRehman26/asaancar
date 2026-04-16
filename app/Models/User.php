@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Notifications\CustomEmailVerificationNotification;
 use App\Notifications\CustomPasswordResetNotification;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,7 +27,7 @@ use Spatie\Permission\Traits\HasRoles;
  *     @OA\Property(property="profile_image", type="string", nullable=true, example="https://example.com/image.jpg")
  * )
  */
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
@@ -80,6 +82,20 @@ class User extends Authenticatable
     public function getPasswordSetAttribute(): bool
     {
         return ! empty($this->password);
+    }
+
+    public function getOtpStatusAttribute(): string
+    {
+        if (! $this->otp_code || ! $this->otp_expires_at) {
+            return 'No OTP';
+        }
+
+        return $this->otp_expires_at->isPast() ? 'Expired' : 'Active';
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $panel->getId() === 'admin' && $this->hasRole('admin');
     }
 
     public function conversations()
