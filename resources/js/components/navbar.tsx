@@ -38,6 +38,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                 <MapPin className="h-4 w-4" />
                 Pick & Drop
             </Link>
+            <Link
+                to="/contact"
+                className={`flex items-center gap-2 text-sm font-semibold transition ${
+                    currentPage === 'contact'
+                        ? 'text-[#7e246c] dark:text-white'
+                        : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+            >
+                <Mail className="h-4 w-4" />
+                Contact Us
+            </Link>
             {user && user.roles && Array.isArray(user.roles) && user.roles.includes('admin') && (
                 <Link
                     to="/dashboard"
@@ -118,6 +130,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     >
                         <MapPin className="h-4 w-4" />
                         Pick & Drop
+                    </Link>
+                    <Link
+                        to="/contact"
+                        className={`flex items-center gap-2 text-sm font-semibold transition ${
+                            currentPage === 'contact'
+                                ? 'text-[#7e246c] dark:text-white'
+                                : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                        }`}
+                        onClick={() => setMobileMenuOpen(false)}
+                    >
+                        <Mail className="h-4 w-4" />
+                        Contact Us
                     </Link>
                     {user && user.roles && Array.isArray(user.roles) && user.roles.includes('admin') && (
                         <Link
