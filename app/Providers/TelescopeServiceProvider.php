@@ -29,18 +29,23 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     public function register(): void
     {
-        // Telescope::night();
+        Telescope::night();
 
         $this->hideSensitiveRequestDetails();
+        $isLocal = $this->app->isLocal();
 
-        Telescope::filter(function (IncomingEntry $entry) {
-            return
-                $entry->isReportableException() ||
+        Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
+            if ($isLocal) {
+                return true;
+            }
+
+            return $entry->isReportableException() ||
                 $entry->isFailedRequest() ||
                 $entry->isFailedJob() ||
                 $entry->isScheduledTask() ||
-                $entry->hasMonitoredTag() ||
-                $entry->isRequest();
+                $entry->isRequest() ||
+                $entry->isDump() ||
+                $entry->hasMonitoredTag();
         });
     }
 
