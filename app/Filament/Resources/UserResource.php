@@ -43,6 +43,11 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('phone_number')
+                    ->label('Phone Number')
+                    ->searchable()
+                    ->placeholder('No phone number')
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('otp_code')
                     ->label('Latest OTP')
                     ->placeholder('No OTP')
