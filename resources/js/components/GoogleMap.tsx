@@ -26,6 +26,14 @@ interface MapComponentProps {
         position: google.maps.LatLngLiteral;
         title?: string;
     }>;
+    markerCandidates?: Array<{
+        id: string;
+        label?: string;
+        title?: string;
+        position?: google.maps.LatLngLiteral | null;
+        placeId?: string | null;
+        address?: string | null;
+    }>;
     path?: google.maps.LatLngLiteral[];
     showFixedPin?: boolean;
     onMapClick?: (data: { lat: number; lng: number; address?: string }) => void;
@@ -56,6 +64,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     zoom = 12,
     markerPosition,
     markers = [],
+    markerCandidates = [],
     path = [],
     showFixedPin = true,
     onMapClick,
@@ -74,6 +83,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
     const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null);
     const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);
     const mapRef = useRef<google.maps.Map | null>(null);
+    const [resolvedCandidateMarkers, setResolvedCandidateMarkers] = useState<
+        Array<{
+            id: string;
+            label?: string;
+            position: google.maps.LatLngLiteral;
+            title?: string;
+        }>
+    >([]);
 
     const onLoadSearchBox = useCallback((ref: google.maps.places.SearchBox) => {
         searchBoxRef.current = ref;
@@ -115,7 +132,122 @@ const MapComponent: React.FC<MapComponentProps> = ({
         fullscreenControl: false,
     };
 
+    useEffect(() => {
+        let isCancelled = false;
+
+        async function resolveCandidateMarkers() {
+            if (!isLoaded || markerCandidates.length === 0 || !window.google?.maps) {
+                setResolvedCandidateMarkers([]);
+                return;
+            }
+
+            const geocoder = new window.google.maps.Geocoder();
+
+            const resolvedMarkers = await Promise.all(
+                markerCandidates.map(
+                    (candidate) =>
+                        new Promise<{
+                            id: string;
+                            label?: string;
+                            position: google.maps.LatLngLiteral;
+                            title?: string;
+                        } | null>((resolve) => {
+                            if (candidate.position) {
+                                resolve({
+                                    id: candidate.id,
+                                    label: candidate.label,
+                                    position: candidate.position,
+                                    title: candidate.title,
+                                });
+
+                                return;
+                            }
+
+                            if (candidate.placeId) {
+                                geocoder.geocode({ placeId: candidate.placeId }, (results, status) => {
+                                    if (status === 'OK' && results?.[0]?.geometry?.location) {
+                                        const location = results[0].geometry.location;
+
+                                        resolve({
+                                            id: candidate.id,
+                                            label: candidate.label,
+                                            position: { lat: location.lat(), lng: location.lng() },
+                                            title: candidate.title ?? results[0].formatted_address,
+                                        });
+
+                                        return;
+                                    }
+
+                                    if (candidate.address) {
+                                        geocoder.geocode({ address: candidate.address }, (addressResults, addressStatus) => {
+                                            if (addressStatus === 'OK' && addressResults?.[0]?.geometry?.location) {
+                                                const location = addressResults[0].geometry.location;
+
+                                                resolve({
+                                                    id: candidate.id,
+                                                    label: candidate.label,
+                                                    position: { lat: location.lat(), lng: location.lng() },
+                                                    title: candidate.title ?? addressResults[0].formatted_address,
+                                                });
+
+                                                return;
+                                            }
+
+                                            resolve(null);
+                                        });
+
+                                        return;
+                                    }
+
+                                    resolve(null);
+                                });
+
+                                return;
+                            }
+
+                            if (candidate.address) {
+                                geocoder.geocode({ address: candidate.address }, (results, status) => {
+                                    if (status === 'OK' && results?.[0]?.geometry?.location) {
+                                        const location = results[0].geometry.location;
+
+                                        resolve({
+                                            id: candidate.id,
+                                            label: candidate.label,
+                                            position: { lat: location.lat(), lng: location.lng() },
+                                            title: candidate.title ?? results[0].formatted_address,
+                                        });
+
+                                        return;
+                                    }
+
+                                    resolve(null);
+                                });
+
+                                return;
+                            }
+
+                            resolve(null);
+                        }),
+                ),
+            );
+
+            if (!isCancelled) {
+                setResolvedCandidateMarkers(resolvedMarkers.filter((marker): marker is NonNullable<typeof marker> => marker !== null));
+            }
+        }
+
+        resolveCandidateMarkers();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [isLoaded, markerCandidates]);
+
     const visibleMarkers = useMemo(() => {
+        if (resolvedCandidateMarkers.length > 0) {
+            return resolvedCandidateMarkers;
+        }
+
         if (markers.length > 0) {
             return markers;
         }
@@ -125,7 +257,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         }
 
         return [];
-    }, [markers, markerPosition]);
+    }, [markers, markerPosition, resolvedCandidateMarkers]);
 
     const pathPoints = useMemo(() => {
         if (path.length > 0) {

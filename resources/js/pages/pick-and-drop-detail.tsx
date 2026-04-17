@@ -265,7 +265,52 @@ export default function PickAndDropDetail() {
             : null,
     ].filter((marker): marker is NonNullable<typeof marker> => marker !== null);
 
-    const routePath = routeMarkers.map((marker) => marker.position);
+    const routeMarkerCandidates = [
+        {
+            id: 'start',
+            label: 'S',
+            title: service.start_location,
+            position:
+                service.start_latitude != null && service.start_longitude != null
+                    ? {
+                          lat: Number(service.start_latitude),
+                          lng: Number(service.start_longitude),
+                      }
+                    : null,
+            placeId: service.start_place_id ?? null,
+            address: service.start_location,
+        },
+        ...sortedStops.map((stop, index) => ({
+            id: `stop-${stop.id ?? index}`,
+            label: `${index + 1}`,
+            title: stop.location || `Stop ${index + 1}`,
+            position:
+                stop.latitude != null && stop.longitude != null
+                    ? {
+                          lat: Number(stop.latitude),
+                          lng: Number(stop.longitude),
+                      }
+                    : null,
+            placeId: stop.place_id ?? null,
+            address: stop.location || stop.area?.name || stop.city?.name || null,
+        })),
+        {
+            id: 'end',
+            label: 'E',
+            title: service.end_location,
+            position:
+                service.end_latitude != null && service.end_longitude != null
+                    ? {
+                          lat: Number(service.end_latitude),
+                          lng: Number(service.end_longitude),
+                      }
+                    : null,
+            placeId: service.end_place_id ?? null,
+            address: service.end_location,
+        },
+    ];
+
+    const routePath = routeMarkers.length === routeMarkerCandidates.length ? routeMarkers.map((marker) => marker.position) : [];
 
     return (
         <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
@@ -434,13 +479,29 @@ export default function PickAndDropDetail() {
                         <div className="grid grid-cols-1 gap-8 p-8 lg:grid-cols-3">
                             {/* Left Column: Car & Description */}
                             <div className="space-y-8 lg:col-span-2">
-                                {routeMarkers.length > 0 && (
+                                {routeMarkerCandidates.length > 1 && (
                                     <div>
-                                        <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Route Map</h2>
+                                        <div className="mb-4 flex items-center justify-between gap-3">
+                                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Route Map</h2>
+                                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                                <span className="rounded-full bg-green-100 px-2 py-1 font-medium text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                                                    S Start
+                                                </span>
+                                                {sortedStops.length > 0 && (
+                                                    <span className="rounded-full bg-gray-100 px-2 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                                        1-{sortedStops.length} Stops
+                                                    </span>
+                                                )}
+                                                <span className="rounded-full bg-[#7e246c]/10 px-2 py-1 font-medium text-[#7e246c] dark:text-[#d18bc2]">
+                                                    E End
+                                                </span>
+                                            </div>
+                                        </div>
                                         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50">
                                             <GoogleMap
-                                                center={routeMarkers[0].position}
+                                                center={routeMarkers[0]?.position}
                                                 markers={routeMarkers}
+                                                markerCandidates={routeMarkerCandidates}
                                                 path={routePath}
                                                 showFixedPin={false}
                                             />
