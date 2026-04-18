@@ -6,7 +6,7 @@
     "keywords": ["asaancar", "platform"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "aws/aws-sdk-php": "^3.351",
         "darkaonline/l5-swagger": "^9.0",
         "filament/filament": "^3.3",
