@@ -40,3 +40,30 @@ it('orders services by the closest start and end coordinates when provided', fun
     expect($response->json('data.0.id'))->toBe($closestService->id)
         ->and($response->json('data.1.id'))->toBe($fartherService->id);
 });
+
+it('shows non-system-generated services before system-generated services', function () {
+    $user = User::factory()->create();
+
+    $systemGeneratedService = PickAndDrop::factory()->create([
+        'user_id' => $user->id,
+        'start_location' => 'System Generated Route',
+        'departure_time' => '2026-04-15 08:00:00',
+        'is_active' => true,
+        'is_system_generated' => true,
+    ]);
+
+    $manualService = PickAndDrop::factory()->create([
+        'user_id' => $user->id,
+        'start_location' => 'Manual Route',
+        'departure_time' => '2026-04-15 09:00:00',
+        'is_active' => true,
+        'is_system_generated' => false,
+    ]);
+
+    $response = $this->getJson('/api/pick-and-drop?per_page=6');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data.0.id'))->toBe($manualService->id)
+        ->and($response->json('data.1.id'))->toBe($systemGeneratedService->id);
+});

@@ -200,6 +200,8 @@ class PickAndDropController extends Controller
             }
         }
 
+        $query->orderBy('is_system_generated', 'asc');
+
         if ($hasStartCoordinates && $hasEndCoordinates) {
             $query->orderByRaw('start_distance_km + end_distance_km asc');
         } elseif ($hasStartCoordinates) {
