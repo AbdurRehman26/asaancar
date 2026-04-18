@@ -4,12 +4,14 @@ namespace App\Models;
 
 use App\Notifications\CustomEmailVerificationNotification;
 use App\Notifications\CustomPasswordResetNotification;
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -29,10 +31,10 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable implements FilamentUser
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
-    use \NotificationChannels\WebPush\HasPushSubscriptions;
+    use HasPushSubscriptions;
 
     /**
      * The attributes that are mass assignable.
@@ -111,6 +113,11 @@ class User extends Authenticatable implements FilamentUser
     public function favoritePickAndDrops()
     {
         return $this->belongsToMany(PickAndDrop::class, 'pick_and_drop_favorites', 'user_id', 'pick_and_drop_service_id')->withTimestamps();
+    }
+
+    public function rideRequests()
+    {
+        return $this->hasMany(RideRequest::class);
     }
 
     public function sendEmailVerificationNotification()

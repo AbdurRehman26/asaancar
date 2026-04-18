@@ -10,7 +10,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { LayoutGrid, Mail, MapPin, MessageSquare, User, Zap } from 'lucide-react';
+import { LayoutGrid, Mail, MapPin, MessageSquare, Route, User, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -53,6 +53,14 @@ export function AppSidebar() {
                                 <Link to="/dashboard/pick-and-drop">
                                     <MapPin className="mr-2" />
                                     Find a Ride
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton size="lg" asChild>
+                                <Link to="/dashboard/ride-requests">
+                                    <Route className="mr-2" />
+                                    Ride Requests
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>

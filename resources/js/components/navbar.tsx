@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
-import { LayoutGrid, Mail, MapPin, Menu, User, X, Zap } from 'lucide-react';
+import { LayoutGrid, Mail, MapPin, Menu, Route, User, X, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { NotificationBell } from './notification-bell';
@@ -37,6 +37,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             >
                 <MapPin className="h-4 w-4" />
                 Find a Ride
+            </Link>
+            <Link
+                to="/ride-requests"
+                className={`flex items-center gap-2 text-sm font-semibold transition ${
+                    currentPage === 'ride-requests'
+                        ? 'text-[#7e246c] dark:text-white'
+                        : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+            >
+                <Route className="h-4 w-4" />
+                Ride Requests
             </Link>
             <Link
                 to="/contact"
@@ -130,6 +142,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     >
                         <MapPin className="h-4 w-4" />
                         Find a Ride
+                    </Link>
+                    <Link
+                        to="/ride-requests"
+                        className={`flex items-center gap-2 text-sm font-semibold transition ${
+                            currentPage === 'ride-requests'
+                                ? 'text-[#7e246c] dark:text-white'
+                                : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                        }`}
+                        onClick={() => setMobileMenuOpen(false)}
+                    >
+                        <Route className="h-4 w-4" />
+                        Ride Requests
                     </Link>
                     <Link
                         to="/contact"

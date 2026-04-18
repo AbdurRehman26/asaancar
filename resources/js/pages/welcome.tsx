@@ -197,24 +197,40 @@ export default function Welcome() {
                                     ))}
                                 </div>
                                 <div className="mt-8 text-center">
-                                    <button
-                                        onClick={() => navigate('/pick-and-drop')}
-                                        className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
-                                    >
-                                        View All Rides
-                                    </button>
+                                    <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                                        <button
+                                            onClick={() => navigate('/pick-and-drop')}
+                                            className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
+                                        >
+                                            View All Rides
+                                        </button>
+                                        <button
+                                            onClick={() => navigate('/ride-requests')}
+                                            className="rounded-lg border border-[#7e246c] px-6 py-3 text-sm font-semibold text-[#7e246c] shadow-sm transition-colors hover:bg-[#7e246c] hover:text-white dark:border-[#d685c3] dark:text-[#d685c3] dark:hover:border-[#7e246c] dark:hover:bg-[#7e246c]"
+                                        >
+                                            View Ride Requests
+                                        </button>
+                                    </div>
                                 </div>
                             </>
                         ) : (
                             <div className="mt-10 rounded-lg border border-gray-200 bg-white py-12 text-center sm:mt-12 dark:border-gray-600 dark:bg-gray-700">
                                 <MapPin className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                                 <p className="text-gray-600 dark:text-gray-400">No rides available at the moment.</p>
-                                <button
-                                    onClick={() => navigate('/pick-and-drop')}
-                                    className="mt-4 rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
-                                >
-                                    Browse All Rides
-                                </button>
+                                <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                                    <button
+                                        onClick={() => navigate('/pick-and-drop')}
+                                        className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
+                                    >
+                                        Browse All Rides
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/ride-requests')}
+                                        className="rounded-lg border border-[#7e246c] px-6 py-3 text-sm font-semibold text-[#7e246c] shadow-sm transition-colors hover:bg-[#7e246c] hover:text-white dark:border-[#d685c3] dark:text-[#d685c3] dark:hover:border-[#7e246c] dark:hover:bg-[#7e246c]"
+                                    >
+                                        Browse Ride Requests
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

@@ -80,6 +80,10 @@ export default function PickAndDropListing() {
         departure_date: searchParams.get('departure_date') || '',
         departure_time: searchParams.get('departure_time') || '',
     });
+    const [locationInputs, setLocationInputs] = useState({
+        start_location: searchParams.get('start_location') || '',
+        end_location: searchParams.get('end_location') || '',
+    });
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
     const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(12);
@@ -223,6 +227,10 @@ export default function PickAndDropListing() {
             departure_date: '',
             departure_time: '',
         });
+        setLocationInputs({
+            start_location: '',
+            end_location: '',
+        });
     };
 
     // Get the base URL for Open Graph image
@@ -320,48 +328,72 @@ export default function PickAndDropListing() {
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Start Location</label>
                                     <GooglePlacesInput
-                                        value={filters.start_location}
+                                        value={locationInputs.start_location}
                                         placeholder="From..."
-                                        onChange={(value) =>
-                                            setFilters((prev) => ({
+                                        onChange={(value) => {
+                                            setLocationInputs((prev) => ({
                                                 ...prev,
                                                 start_location: value,
-                                                start_latitude: '',
-                                                start_longitude: '',
-                                            }))
-                                        }
-                                        onPlaceSelected={(place) =>
+                                            }));
+
+                                            if (value === '') {
+                                                setFilters((prev) => ({
+                                                    ...prev,
+                                                    start_location: '',
+                                                    start_latitude: '',
+                                                    start_longitude: '',
+                                                }));
+                                            }
+                                        }}
+                                        onPlaceSelected={(place) => {
+                                            setLocationInputs((prev) => ({
+                                                ...prev,
+                                                start_location: place.address,
+                                            }));
+
                                             setFilters((prev) => ({
                                                 ...prev,
                                                 start_location: place.address,
                                                 start_latitude: place.latitude?.toString() ?? '',
                                                 start_longitude: place.longitude?.toString() ?? '',
-                                            }))
-                                        }
+                                            }));
+                                        }}
                                         className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">End Location</label>
                                     <GooglePlacesInput
-                                        value={filters.end_location}
+                                        value={locationInputs.end_location}
                                         placeholder="To..."
-                                        onChange={(value) =>
-                                            setFilters((prev) => ({
+                                        onChange={(value) => {
+                                            setLocationInputs((prev) => ({
                                                 ...prev,
                                                 end_location: value,
-                                                end_latitude: '',
-                                                end_longitude: '',
-                                            }))
-                                        }
-                                        onPlaceSelected={(place) =>
+                                            }));
+
+                                            if (value === '') {
+                                                setFilters((prev) => ({
+                                                    ...prev,
+                                                    end_location: '',
+                                                    end_latitude: '',
+                                                    end_longitude: '',
+                                                }));
+                                            }
+                                        }}
+                                        onPlaceSelected={(place) => {
+                                            setLocationInputs((prev) => ({
+                                                ...prev,
+                                                end_location: place.address,
+                                            }));
+
                                             setFilters((prev) => ({
                                                 ...prev,
                                                 end_location: place.address,
                                                 end_latitude: place.latitude?.toString() ?? '',
                                                 end_longitude: place.longitude?.toString() ?? '',
-                                            }))
-                                        }
+                                            }));
+                                        }}
                                         className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     />
                                 </div>

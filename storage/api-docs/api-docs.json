@@ -1550,6 +1550,699 @@
                 ]
             }
         },
+        "/api/ride-requests": {
+            "get": {
+                "tags": [
+                    "Ride Requests"
+                ],
+                "summary": "List ride requests",
+                "description": "Get a paginated list of active ride requests with optional filters",
+                "operationId": "getRideRequests",
+                "parameters": [
+                    {
+                        "name": "start_location",
+                        "in": "query",
+                        "description": "Filter by start location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "start_latitude",
+                        "in": "query",
+                        "description": "Start latitude for nearest match search",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "start_longitude",
+                        "in": "query",
+                        "description": "Start longitude for nearest match search",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "end_location",
+                        "in": "query",
+                        "description": "Filter by end location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "end_latitude",
+                        "in": "query",
+                        "description": "End latitude for nearest match search",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "end_longitude",
+                        "in": "query",
+                        "description": "End longitude for nearest match search",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "preferred_driver_gender",
+                        "in": "query",
+                        "description": "Filter by preferred driver gender",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "male",
+                                "female",
+                                "any"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "required_seats",
+                        "in": "query",
+                        "description": "Minimum seats needed",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "departure_date",
+                        "in": "query",
+                        "description": "Filter by departure date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "departure_time",
+                        "in": "query",
+                        "description": "Filter by departure time (HH:MM)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RideRequest"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/customer/ride-requests": {
+            "post": {
+                "tags": [
+                    "Ride Requests"
+                ],
+                "summary": "Create ride request",
+                "description": "Create a new ride request",
+                "operationId": "createRideRequest",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "start_location",
+                                    "end_location",
+                                    "departure_time",
+                                    "required_seats",
+                                    "preferred_driver_gender"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Sarah Ahmed",
+                                        "nullable": true
+                                    },
+                                    "contact": {
+                                        "type": "string",
+                                        "example": "+923001112233",
+                                        "nullable": true
+                                    },
+                                    "start_location": {
+                                        "type": "string",
+                                        "example": "Lahore, Pakistan"
+                                    },
+                                    "start_place_id": {
+                                        "type": "string",
+                                        "example": "ChIJ2QeB5YMEGTkRYiR-zGy-OsI",
+                                        "nullable": true
+                                    },
+                                    "start_latitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 31.5204,
+                                        "nullable": true
+                                    },
+                                    "start_longitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 74.3587,
+                                        "nullable": true
+                                    },
+                                    "end_location": {
+                                        "type": "string",
+                                        "example": "Karachi, Pakistan"
+                                    },
+                                    "end_place_id": {
+                                        "type": "string",
+                                        "example": "ChIJv8nA2Y4-sz4R77g5SRY5uW0",
+                                        "nullable": true
+                                    },
+                                    "end_latitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 24.8607,
+                                        "nullable": true
+                                    },
+                                    "end_longitude": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 67.0011,
+                                        "nullable": true
+                                    },
+                                    "departure_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-04-25",
+                                        "nullable": true
+                                    },
+                                    "departure_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "08:30"
+                                    },
+                                    "schedule_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "once",
+                                            "everyday",
+                                            "weekdays",
+                                            "weekends",
+                                            "custom"
+                                        ],
+                                        "example": "once"
+                                    },
+                                    "selected_days": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "Monday",
+                                            "Wednesday"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "is_roundtrip": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "return_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "18:00",
+                                        "nullable": true
+                                    },
+                                    "required_seats": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "preferred_driver_gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female",
+                                            "any"
+                                        ],
+                                        "example": "female"
+                                    },
+                                    "budget_per_seat": {
+                                        "type": "integer",
+                                        "example": 1200,
+                                        "nullable": true
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "PKR"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Need a comfortable morning ride.",
+                                        "nullable": true
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ride request created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RideRequest"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/ride-requests/{id}": {
+            "get": {
+                "tags": [
+                    "Ride Requests"
+                ],
+                "summary": "Get ride request details",
+                "description": "Get detailed information about a specific ride request",
+                "operationId": "getRideRequest",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ride request ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RideRequest"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ride request not found"
+                    }
+                }
+            }
+        },
+        "/api/customer/ride-requests/{id}": {
+            "put": {
+                "tags": [
+                    "Ride Requests"
+                ],
+                "summary": "Update ride request",
+                "description": "Update an existing ride request (only owner can update)",
+                "operationId": "updateRideRequest",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ride request ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Sarah Ahmed",
+                                        "nullable": true
+                                    },
+                                    "contact": {
+                                        "type": "string",
+                                        "example": "+923001112233",
+                                        "nullable": true
+                                    },
+                                    "start_location": {
+                                        "type": "string",
+                                        "example": "Lahore, Pakistan"
+                                    },
+                                    "end_location": {
+                                        "type": "string",
+                                        "example": "Karachi, Pakistan"
+                                    },
+                                    "departure_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-04-25",
+                                        "nullable": true
+                                    },
+                                    "departure_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "08:30"
+                                    },
+                                    "schedule_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "once",
+                                            "everyday",
+                                            "weekdays",
+                                            "weekends",
+                                            "custom"
+                                        ],
+                                        "example": "custom"
+                                    },
+                                    "selected_days": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "example": [
+                                            "Monday",
+                                            "Wednesday"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "is_roundtrip": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "return_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "18:00",
+                                        "nullable": true
+                                    },
+                                    "required_seats": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "preferred_driver_gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female",
+                                            "any"
+                                        ],
+                                        "example": "female"
+                                    },
+                                    "budget_per_seat": {
+                                        "type": "integer",
+                                        "example": 1200,
+                                        "nullable": true
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "PKR"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Need a comfortable morning ride.",
+                                        "nullable": true
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ride request updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RideRequest"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized - not the owner"
+                    },
+                    "404": {
+                        "description": "Ride request not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Ride Requests"
+                ],
+                "summary": "Delete ride request",
+                "description": "Delete a ride request (only owner can delete)",
+                "operationId": "deleteRideRequest",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Ride request ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ride request deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ride request deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized - not the owner"
+                    },
+                    "404": {
+                        "description": "Ride request not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/customer/ride-requests/my-requests": {
+            "get": {
+                "tags": [
+                    "Ride Requests"
+                ],
+                "summary": "Get user's ride requests",
+                "description": "Get a paginated list of the authenticated user's ride requests",
+                "operationId": "getMyRideRequests",
+                "parameters": [
+                    {
+                        "name": "start_location",
+                        "in": "query",
+                        "description": "Filter by start location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "end_location",
+                        "in": "query",
+                        "description": "Filter by end location",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "preferred_driver_gender",
+                        "in": "query",
+                        "description": "Filter by preferred driver gender",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "male",
+                                "female",
+                                "any"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "required_seats",
+                        "in": "query",
+                        "description": "Minimum seats needed",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "departure_date",
+                        "in": "query",
+                        "description": "Filter by departure date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "departure_time",
+                        "in": "query",
+                        "description": "Filter by departure time",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RideRequest"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/user": {
             "get": {
                 "tags": [
@@ -3154,6 +3847,153 @@
                 },
                 "type": "object"
             },
+            "RideRequest": {
+                "title": "Ride Request",
+                "description": "Ride request model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Sarah Ahmed",
+                        "nullable": true
+                    },
+                    "contact": {
+                        "type": "string",
+                        "example": "+923001112233",
+                        "nullable": true
+                    },
+                    "start_location": {
+                        "type": "string",
+                        "example": "Lahore, Pakistan"
+                    },
+                    "start_place_id": {
+                        "type": "string",
+                        "example": "ChIJ2QeB5YMEGTkRYiR-zGy-OsI",
+                        "nullable": true
+                    },
+                    "start_latitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 31.5204,
+                        "nullable": true
+                    },
+                    "start_longitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 74.3587,
+                        "nullable": true
+                    },
+                    "end_location": {
+                        "type": "string",
+                        "example": "Karachi, Pakistan"
+                    },
+                    "end_place_id": {
+                        "type": "string",
+                        "example": "ChIJv8nA2Y4-sz4R77g5SRY5uW0",
+                        "nullable": true
+                    },
+                    "end_latitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 24.8607,
+                        "nullable": true
+                    },
+                    "end_longitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 67.0011,
+                        "nullable": true
+                    },
+                    "departure_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-25T08:30:00Z"
+                    },
+                    "schedule_type": {
+                        "type": "string",
+                        "enum": [
+                            "once",
+                            "everyday",
+                            "weekdays",
+                            "weekends",
+                            "custom"
+                        ],
+                        "example": "once"
+                    },
+                    "selected_days": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Monday",
+                            "Wednesday"
+                        ],
+                        "nullable": true
+                    },
+                    "is_roundtrip": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "return_time": {
+                        "type": "string",
+                        "format": "time",
+                        "example": "18:00",
+                        "nullable": true
+                    },
+                    "required_seats": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "preferred_driver_gender": {
+                        "type": "string",
+                        "enum": [
+                            "male",
+                            "female",
+                            "any"
+                        ],
+                        "example": "female"
+                    },
+                    "budget_per_seat": {
+                        "type": "integer",
+                        "example": 1200,
+                        "nullable": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "PKR"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Need a comfortable morning ride.",
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "user": {
+                        "type": "object",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "User": {
                 "title": "User",
                 "description": "User model",
@@ -3218,6 +4058,10 @@
         {
             "name": "Pick & Drop",
             "description": "API Endpoints for pick and drop services"
+        },
+        {
+            "name": "Ride Requests",
+            "description": "API Endpoints for ride requests"
         },
         {
             "name": "Users",
