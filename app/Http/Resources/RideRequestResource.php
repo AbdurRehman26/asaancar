@@ -49,6 +49,7 @@ class RideRequestResource extends JsonResource
             'currency' => $this->currency,
             'description' => $this->description,
             'is_active' => $this->is_active,
+            'is_system_generated' => $this->is_system_generated,
             'created_at' => Carbon::parse($this->created_at)->format('jS F, g:i A'),
             'updated_at' => Carbon::parse($this->updated_at)->toDateTimeString(),
         ];

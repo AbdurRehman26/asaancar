@@ -32,7 +32,8 @@ it('creates a ride request with separate departure date and time', function () {
 
     $response->assertSuccessful()
         ->assertJsonPath('data.required_seats', 2)
-        ->assertJsonPath('data.preferred_driver_gender', 'female');
+        ->assertJsonPath('data.preferred_driver_gender', 'female')
+        ->assertJsonPath('data.is_system_generated', false);
 
     $this->assertDatabaseHas('ride_requests', [
         'user_id' => $this->user->id,
@@ -41,6 +42,7 @@ it('creates a ride request with separate departure date and time', function () {
         'departure_time' => '2026-04-25 08:30:00',
         'required_seats' => 2,
         'preferred_driver_gender' => 'female',
+        'is_system_generated' => false,
     ]);
 });
 
@@ -92,4 +94,24 @@ it('caps seats needed at four', function () {
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrors(['required_seats']);
+});
+
+it('defaults is_system_generated to false when creating a ride request', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/ride-requests', [
+            'start_location' => 'Lahore, Pakistan',
+            'end_location' => 'Karachi, Pakistan',
+            'departure_date' => '2026-04-25',
+            'departure_time' => '08:30',
+            'required_seats' => 2,
+            'preferred_driver_gender' => 'female',
+        ]);
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.is_system_generated', false);
+
+    $this->assertDatabaseHas('ride_requests', [
+        'user_id' => $this->user->id,
+        'is_system_generated' => false,
+    ]);
 });

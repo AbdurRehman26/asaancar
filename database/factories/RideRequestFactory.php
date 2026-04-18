@@ -35,6 +35,7 @@ class RideRequestFactory extends Factory
             'currency' => 'PKR',
             'description' => fake()->sentence(),
             'is_active' => true,
+            'is_system_generated' => false,
         ];
     }
 }

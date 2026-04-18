@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *     @OA\Property(property="currency", type="string", example="PKR"),
  *     @OA\Property(property="description", type="string", nullable=true, example="Need a comfortable morning ride."),
  *     @OA\Property(property="is_active", type="boolean", example=true),
+ *     @OA\Property(property="is_system_generated", type="boolean", example=false),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
  *     @OA\Property(property="user", type="object", nullable=true)
@@ -69,6 +70,7 @@ class RideRequest extends Model
         'currency',
         'description',
         'is_active',
+        'is_system_generated',
     ];
 
     protected $casts = [
@@ -78,6 +80,7 @@ class RideRequest extends Model
         'required_seats' => 'integer',
         'budget_per_seat' => 'integer',
         'is_active' => 'boolean',
+        'is_system_generated' => 'boolean',
         'start_latitude' => 'decimal:8',
         'start_longitude' => 'decimal:8',
         'end_latitude' => 'decimal:8',
