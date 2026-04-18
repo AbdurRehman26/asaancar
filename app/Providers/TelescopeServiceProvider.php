@@ -20,7 +20,13 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         parent::boot();
 
         Telescope::auth(function ($request): bool {
-            return Gate::check('viewTelescope', [$request->user()]);
+            $user = Filament::auth()->user() ?? $request->user();
+
+            if (! $user instanceof User) {
+                return false;
+            }
+
+            return Gate::forUser($user)->check('viewTelescope');
         });
     }
 
