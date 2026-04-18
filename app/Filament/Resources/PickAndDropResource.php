@@ -3,41 +3,34 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PickAndDropResource\Pages;
-use App\Filament\Resources\PickAndDropResource\RelationManagers;
 use App\Models\PickAndDrop;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PickAndDropResource extends Resource
 {
     protected static ?string $model = PickAndDrop::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
+
     protected static ?string $navigationGroup = 'Services';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('User & Car Information')
+                Forms\Components\Section::make('User Information')
                     ->schema([
                         Forms\Components\Select::make('user_id')
                             ->label('User')
                             ->relationship('user', 'name')
                             ->searchable()
                             ->required(),
-                        Forms\Components\Select::make('car_id')
-                            ->label('Car (Optional)')
-                            ->relationship('car', 'name')
-                            ->searchable()
-                            ->nullable(),
                     ])
-                    ->columns(2),
+                    ->columns(1),
 
                 Forms\Components\Section::make('Route Information')
                     ->schema([
@@ -54,8 +47,7 @@ class PickAndDropResource extends Resource
                             ->afterStateUpdated(fn (callable $set) => $set('pickup_area_id', null)),
                         Forms\Components\Select::make('pickup_area_id')
                             ->label('Start Area (Optional)')
-                            ->relationship('pickupArea', 'name', fn ($query, $get) => 
-                                $query->where('city_id', $get('pickup_city_id'))
+                            ->relationship('pickupArea', 'name', fn ($query, $get) => $query->where('city_id', $get('pickup_city_id'))
                             )
                             ->searchable()
                             ->nullable(),
@@ -72,8 +64,7 @@ class PickAndDropResource extends Resource
                             ->afterStateUpdated(fn (callable $set) => $set('dropoff_area_id', null)),
                         Forms\Components\Select::make('dropoff_area_id')
                             ->label('End Area (Optional)')
-                            ->relationship('dropoffArea', 'name', fn ($query, $get) => 
-                                $query->where('city_id', $get('dropoff_city_id'))
+                            ->relationship('dropoffArea', 'name', fn ($query, $get) => $query->where('city_id', $get('dropoff_city_id'))
                             )
                             ->searchable()
                             ->nullable(),
@@ -185,8 +176,7 @@ class PickAndDropResource extends Resource
                                     ->afterStateUpdated(fn (callable $set) => $set('area_id', null)),
                                 Forms\Components\Select::make('area_id')
                                     ->label('Area (Optional)')
-                                    ->relationship('area', 'name', fn ($query, $get) => 
-                                        $query->where('city_id', $get('city_id'))
+                                    ->relationship('area', 'name', fn ($query, $get) => $query->where('city_id', $get('city_id'))
                                     )
                                     ->searchable()
                                     ->nullable(),
@@ -206,8 +196,7 @@ class PickAndDropResource extends Resource
                             ])
                             ->columns(2)
                             ->collapsible()
-                            ->itemLabel(fn (array $state): ?string => 
-                                $state['location'] ?? 
+                            ->itemLabel(fn (array $state): ?string => $state['location'] ??
                                 ($state['area_id'] ? 'Area' : ($state['city_id'] ? 'City' : 'Stop'))
                             ),
                     ]),
