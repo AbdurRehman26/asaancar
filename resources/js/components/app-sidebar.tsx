@@ -46,13 +46,13 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Pick & Drop</SidebarGroupLabel>
+                    <SidebarGroupLabel>Rides</SidebarGroupLabel>
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton size="lg" asChild>
                                 <Link to="/dashboard/pick-and-drop">
                                     <MapPin className="mr-2" />
-                                    Pick & Drop Services
+                                    Find a Ride
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -60,7 +60,7 @@ export function AppSidebar() {
                             <SidebarMenuButton size="lg" asChild>
                                 <Link to="/dashboard/pick-and-drop-chat">
                                     <MessageSquare className="mr-2" />
-                                    Pick & Drop Chat
+                                    Ride Chat
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>

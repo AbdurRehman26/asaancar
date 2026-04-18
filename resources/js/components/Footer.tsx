@@ -13,7 +13,7 @@ const Footer: React.FC = () => (
                         Home
                     </a>
                     <a href="/pick-and-drop" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">
-                        Pick & Drop
+                        Find a Ride
                     </a>
                     <a href="/about" className="text-sm text-[#7e246c] hover:text-[#6a1f5c]">
                         About Us

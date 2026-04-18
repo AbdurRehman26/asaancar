@@ -232,8 +232,8 @@ export default function PickAndDropListing() {
     return (
         <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
             <SEO
-                title="Pick & Drop Services - Find Rides with Multiple Stops | Asaancar"
-                description="Find convenient pick and drop services from location A to location B with multiple stops. Book rides with male or female drivers. Search by start location, end location, departure time, and driver gender. Available in Karachi and across Pakistan."
+                title="Find a Ride - Multiple Stops | Asaancar"
+                description="Find convenient rides from location A to location B with multiple stops. Book with male or female drivers. Search by start location, end location, departure time, and driver gender. Available in Karachi and across Pakistan."
                 image={ogImage}
                 url={typeof window !== 'undefined' ? window.location.href : ''}
                 type="website"
@@ -246,7 +246,7 @@ export default function PickAndDropListing() {
                     {/* Header */}
                     <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div className="text-center md:text-left">
-                            <h1 className="mt-8 mb-4 text-4xl font-bold text-[#7e246c] dark:text-white">Pick & Drop Services</h1>
+                            <h1 className="mt-8 mb-4 text-4xl font-bold text-[#7e246c] dark:text-white">Find a Ride</h1>
                             <p className="text-lg text-gray-600 dark:text-gray-300">Find rides from location A to location B with multiple stops</p>
                         </div>
                         {user ? (
@@ -255,7 +255,7 @@ export default function PickAndDropListing() {
                                 className="flex items-center justify-center gap-2 rounded-lg bg-[#7e246c] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6a1f5c]"
                             >
                                 <Plus className="h-5 w-5" />
-                                Add Service
+                                Add a Ride
                             </button>
                         ) : (
                             <button
@@ -263,7 +263,7 @@ export default function PickAndDropListing() {
                                 className="flex items-center justify-center gap-2 rounded-lg bg-[#7e246c] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6a1f5c]"
                             >
                                 <Plus className="h-5 w-5" />
-                                Add Service
+                                Add a Ride
                             </button>
                         )}
                     </div>

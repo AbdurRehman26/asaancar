@@ -36,7 +36,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                 onClick={() => setMobileMenuOpen(false)}
             >
                 <MapPin className="h-4 w-4" />
-                Pick & Drop
+                Find a Ride
             </Link>
             <Link
                 to="/contact"
@@ -129,7 +129,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                         onClick={() => setMobileMenuOpen(false)}
                     >
                         <MapPin className="h-4 w-4" />
-                        Pick & Drop
+                        Find a Ride
                     </Link>
                     <Link
                         to="/contact"

@@ -287,7 +287,7 @@ export default function PickAndDropForm() {
 
     return (
         <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="mb-6 text-3xl font-bold text-[#7e246c] dark:text-white">{isEditing ? 'Edit' : 'Create'} Pick & Drop Service</h1>
+            <h1 className="mb-6 text-3xl font-bold text-[#7e246c] dark:text-white">{isEditing ? 'Edit' : 'Create'} Ride</h1>
 
             {error && (
                 <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">

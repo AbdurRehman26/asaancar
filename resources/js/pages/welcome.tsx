@@ -110,11 +110,11 @@ export default function Welcome() {
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 sm:py-12 lg:px-8">
                         <div className="mx-auto max-w-2xl text-center">
                             <h1 className="xs:pt-14 mt-18 pt-16 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-white">
-                                Pick and Drop
+                                Find a Ride
                             </h1>
                             <p className="mt-4 text-lg leading-8 text-gray-600 sm:mt-6 dark:text-gray-300">
                                 Find the perfect ride for your journey with AsaanCar -{' '}
-                                <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted pick & drop service</span>.
+                                <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted ride-sharing service</span>.
                             </p>
                             {/* Play Store Download Button */}
                             <div className="mt-6 flex items-center justify-center">
@@ -170,11 +170,11 @@ export default function Welcome() {
                     </div>
                 </section>
 
-                {/* Pick & Drop Services Section */}
+                {/* Find a Ride Section */}
                 <section className="bg-gray-50 py-10 sm:py-16 dark:bg-gray-800">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">Pick & Drop Services</h2>
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">Find a Ride</h2>
                             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                                 Share rides or find passengers for your journey. Multiple stops available.
                             </p>
@@ -201,19 +201,19 @@ export default function Welcome() {
                                         onClick={() => navigate('/pick-and-drop')}
                                         className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
                                     >
-                                        View All Pick & Drop Services
+                                        View All Rides
                                     </button>
                                 </div>
                             </>
                         ) : (
                             <div className="mt-10 rounded-lg border border-gray-200 bg-white py-12 text-center sm:mt-12 dark:border-gray-600 dark:bg-gray-700">
                                 <MapPin className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-                                <p className="text-gray-600 dark:text-gray-400">No pick and drop services available at the moment.</p>
+                                <p className="text-gray-600 dark:text-gray-400">No rides available at the moment.</p>
                                 <button
                                     onClick={() => navigate('/pick-and-drop')}
                                     className="mt-4 rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
                                 >
-                                    Browse All Services
+                                    Browse All Rides
                                 </button>
                             </div>
                         )}
