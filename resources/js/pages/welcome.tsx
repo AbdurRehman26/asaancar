@@ -125,9 +125,9 @@ export default function Welcome() {
                                     className="inline-block transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
                                 >
                                     <img
-                                        src="/google-play-download-android-app-logo.svg"
+                                        src="/google-play-download-android-app-logo.webp"
                                         alt="Get it on Google Play"
-                                        className="h-32 w-auto sm:h-40 sm:h-48"
+                                        className="h-20 w-auto sm:h-24 md:h-28"
                                     />
                                 </a>
                             </div>

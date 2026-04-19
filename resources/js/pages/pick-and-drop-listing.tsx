@@ -292,9 +292,9 @@ export default function PickAndDropListing() {
                                 className="shrink-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                             >
                                 <img
-                                    src="/google-play-download-android-app-logo.svg"
+                                    src="/google-play-download-android-app-logo.webp"
                                     alt="Get it on Google Play"
-                                    className="h-24 w-auto sm:h-28 md:h-32"
+                                    className="h-16 w-auto sm:h-20 md:h-24"
                                 />
                             </a>
                         </div>

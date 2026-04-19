@@ -39,12 +39,21 @@ export default function LoginPage() {
                     href="https://play.google.com/store/apps/details?id=com.asaancar.app"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="mb-3 shrink-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:mb-0"
                 >
-                    <img src="/google-play-download-android-app-logo.svg" alt="Get it on Google Play" className="h-36 w-auto md:h-32" />
+                    <img src="/google-play-download-android-app-logo.webp" alt="Get it on Google Play" className="h-14 w-auto md:h-12" />
                 </a>
             </div>
         </div>
+    );
+    const backToListingsButton = (
+        <button
+            type="button"
+            onClick={() => navigate('/pick-and-drop')}
+            className="mt-3 inline-flex items-center justify-center rounded-lg border border-[#7e246c] px-4 py-2 text-sm font-semibold text-[#7e246c] transition hover:bg-[#7e246c] hover:text-white"
+        >
+            Go back to listings
+        </button>
     );
 
     // Check if user just verified their email
@@ -205,6 +214,7 @@ export default function LoginPage() {
                 <div className="flex flex-1 flex-col justify-start bg-white px-6 py-12 pt-3 md:justify-center md:pt-0 dark:bg-gray-900">
                     <div className="mx-auto w-full max-w-md">
                         <div className="mb-6 hidden md:block">{playStoreBanner}</div>
+                        <div className="mb-6">{backToListingsButton}</div>
                         <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Verify Your Phone</h1>
                         <p className="mb-6 text-gray-500 dark:text-gray-300">We've sent a 6-digit OTP to your phone number</p>
                         {error && (
@@ -283,6 +293,7 @@ export default function LoginPage() {
             <div className="flex flex-1 flex-col justify-start bg-white px-6 py-12 pt-3 md:justify-center md:pt-0 dark:bg-gray-900">
                 <div className="mx-auto w-full max-w-md">
                     <div className="mb-6 hidden md:block">{playStoreBanner}</div>
+                    <div className="mb-6">{backToListingsButton}</div>
                     <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h1>
                     <p className="mb-6 text-gray-500 dark:text-gray-300">Log in to your account</p>
 

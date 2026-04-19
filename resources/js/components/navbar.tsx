@@ -29,9 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             <Link
                 to="/pick-and-drop"
                 className={`flex items-center gap-2 text-sm font-semibold transition ${
-                    currentPage === 'pick-and-drop'
-                        ? 'text-[#7e246c] dark:text-white'
-                        : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                    currentPage === 'pick-and-drop' ? 'text-white' : 'text-white/85 hover:text-white'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
             >
@@ -41,9 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             <Link
                 to="/ride-requests"
                 className={`flex items-center gap-2 text-sm font-semibold transition ${
-                    currentPage === 'ride-requests'
-                        ? 'text-[#7e246c] dark:text-white'
-                        : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                    currentPage === 'ride-requests' ? 'text-white' : 'text-white/85 hover:text-white'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
             >
@@ -53,9 +49,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             <Link
                 to="/contact"
                 className={`flex items-center gap-2 text-sm font-semibold transition ${
-                    currentPage === 'contact'
-                        ? 'text-[#7e246c] dark:text-white'
-                        : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                    currentPage === 'contact' ? 'text-white' : 'text-white/85 hover:text-white'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
             >
@@ -66,9 +60,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                 <Link
                     to="/dashboard"
                     className={`flex items-center gap-2 text-sm font-semibold transition ${
-                        currentPage === 'dashboard'
-                            ? 'text-[#7e246c] dark:text-white'
-                            : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                        currentPage === 'dashboard' ? 'text-white' : 'text-white/85 hover:text-white'
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                 >
@@ -81,14 +73,14 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                 <>
                     <Link
                         to="/login"
-                        className="rounded-md bg-[#7e246c] px-4 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
+                        className="rounded-md border border-white/30 bg-white/15 px-4 py-2 font-semibold text-white transition hover:bg-white/20"
                         onClick={() => setMobileMenuOpen(false)}
                     >
                         Login
                     </Link>
                     <Link
                         to="/signup"
-                        className="rounded-md bg-[#7e246c] px-4 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
+                        className="rounded-md bg-white px-4 py-2 font-semibold text-[#7e246c] transition hover:bg-white/90"
                         onClick={() => setMobileMenuOpen(false)}
                     >
                         Register Now
@@ -120,9 +112,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
     );
 
     return (
-        <nav className="fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b border-neutral-200 bg-white px-6 py-[13px] dark:border-neutral-800 dark:bg-gray-800/80">
-            <div className="flex items-center gap-2 text-xl font-bold text-[#7e246c]">
-                <Link to="/" className="flex items-center gap-2 transition hover:text-[#6a1f5c]">
+        <nav className="fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b border-white/15 bg-gradient-to-r from-[#d88ac8] via-[#9d3d88] to-[#7e246c] px-6 py-[13px] text-white shadow-lg shadow-[#7e246c]/20">
+            <div className="flex items-center gap-2 text-xl font-bold text-white">
+                <Link to="/" className="flex items-center gap-2 transition hover:text-white/90">
                     <img src="/images/car-logo-nameless.png" alt="AsaanCar Logo" className="h-12 w-20" />
                     <span>AsaanCar</span>
                 </Link>
@@ -134,9 +126,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     <Link
                         to="/pick-and-drop"
                         className={`flex items-center gap-2 text-sm font-semibold transition ${
-                            currentPage === 'pick-and-drop'
-                                ? 'text-[#7e246c] dark:text-white'
-                                : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                            currentPage === 'pick-and-drop' ? 'text-white' : 'text-white/85 hover:text-white'
                         }`}
                         onClick={() => setMobileMenuOpen(false)}
                     >
@@ -146,9 +136,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     <Link
                         to="/ride-requests"
                         className={`flex items-center gap-2 text-sm font-semibold transition ${
-                            currentPage === 'ride-requests'
-                                ? 'text-[#7e246c] dark:text-white'
-                                : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                            currentPage === 'ride-requests' ? 'text-white' : 'text-white/85 hover:text-white'
                         }`}
                         onClick={() => setMobileMenuOpen(false)}
                     >
@@ -158,9 +146,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     <Link
                         to="/contact"
                         className={`flex items-center gap-2 text-sm font-semibold transition ${
-                            currentPage === 'contact'
-                                ? 'text-[#7e246c] dark:text-white'
-                                : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                            currentPage === 'contact' ? 'text-white' : 'text-white/85 hover:text-white'
                         }`}
                         onClick={() => setMobileMenuOpen(false)}
                     >
@@ -171,9 +157,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                         <Link
                             to="/dashboard"
                             className={`flex items-center gap-2 text-sm font-semibold transition ${
-                                currentPage === 'dashboard'
-                                    ? 'text-[#7e246c] dark:text-white'
-                                    : 'text-gray-600 hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white'
+                                currentPage === 'dashboard' ? 'text-white' : 'text-white/85 hover:text-white'
                             }`}
                             onClick={() => setMobileMenuOpen(false)}
                         >
@@ -187,14 +171,14 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     <div className="flex items-center space-x-4">
                         <Link
                             to="/login"
-                            className="text-sm font-semibold text-gray-600 transition hover:text-[#7e246c] dark:text-neutral-400 dark:hover:text-white"
+                            className="text-sm font-semibold text-white/85 transition hover:text-white"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Login
                         </Link>
                         <Link
                             to="/signup"
-                            className="rounded-md bg-[#7e246c] px-4 py-2 font-semibold text-white transition hover:bg-[#6a1f5c]"
+                            className="rounded-md bg-white px-4 py-2 font-semibold text-[#7e246c] transition hover:bg-white/90"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Register Now
@@ -225,7 +209,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             </div>
             {/* Mobile Burger */}
             <button
-                className="flex items-center justify-center rounded-md p-2 text-[#7e246c] focus:ring-2 focus:ring-[#7e246c] focus:outline-none md:hidden"
+                className="flex items-center justify-center rounded-md p-2 text-white focus:ring-2 focus:ring-white focus:outline-none md:hidden"
                 onClick={() => setMobileMenuOpen((open) => !open)}
                 aria-label="Open menu"
             >
@@ -238,13 +222,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
                     {/* Drawer */}
                     <div
-                        className="fixed top-0 right-0 z-50 flex h-full w-64 flex-col bg-white shadow-lg md:hidden dark:bg-gray-900"
+                        className="fixed top-0 right-0 z-50 flex h-full w-64 flex-col bg-gradient-to-b from-[#7e246c] via-[#8d2b79] to-[#b14a9a] text-white shadow-lg md:hidden"
                         onClick={(e) => e.stopPropagation()} // Prevent overlay click from bubbling
                     >
-                        <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 px-6 py-4 dark:border-neutral-800">
-                            <span className="text-xl font-bold text-[#7e246c]">Menu</span>
+                        <div className="flex shrink-0 items-center justify-between border-b border-white/15 px-6 py-4">
+                            <span className="text-xl font-bold text-white">Menu</span>
                             <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
-                                <X className="h-6 w-6 text-[#7e246c]" />
+                                <X className="h-6 w-6 text-white" />
                             </button>
                         </div>
                         <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
