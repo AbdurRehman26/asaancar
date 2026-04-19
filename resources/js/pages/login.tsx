@@ -25,6 +25,27 @@ export default function LoginPage() {
     const navigate = useNavigate();
     const { setUser, setToken } = useAuth();
     const { success: showSuccess, error: showError } = useToast();
+    const playStoreBanner = (
+        <div className="overflow-hidden rounded-3xl border border-[#7e246c]/15 bg-gradient-to-r from-[#7e246c] via-[#8d2b79] to-[#b14a9a] text-white shadow-xl shadow-[#7e246c]/20 md:px-5 md:py-4 lg:px-6">
+            <div className="flex flex-col items-center gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
+                <div className="mt-4 max-w-2xl md:mt-0">
+                    <h2 className="text-xl font-bold sm:text-2xl">Book faster with the mobile app</h2>
+                    <p className="mt-1 hidden text-sm text-white/85 md:block">
+                        Search routes, connect with drivers, and manage your rides on the go with the AsaanCar Android app.
+                    </p>
+                </div>
+
+                <a
+                    href="https://play.google.com/store/apps/details?id=com.asaancar.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                    <img src="/google-play-download-android-app-logo.svg" alt="Get it on Google Play" className="h-36 w-auto md:h-32" />
+                </a>
+            </div>
+        </div>
+    );
 
     // Check if user just verified their email
     useEffect(() => {
@@ -180,8 +201,10 @@ export default function LoginPage() {
         return (
             <div className="flex min-h-screen flex-col md:flex-row">
                 <Navbar />
-                <div className="flex flex-1 flex-col justify-center bg-white px-6 py-12 pt-16 md:pt-0 dark:bg-gray-900">
+                <div className="bg-white px-6 pt-24 pb-0 md:hidden dark:bg-gray-900">{playStoreBanner}</div>
+                <div className="flex flex-1 flex-col justify-start bg-white px-6 py-12 pt-3 md:justify-center md:pt-0 dark:bg-gray-900">
                     <div className="mx-auto w-full max-w-md">
+                        <div className="mb-6 hidden md:block">{playStoreBanner}</div>
                         <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Verify Your Phone</h1>
                         <p className="mb-6 text-gray-500 dark:text-gray-300">We've sent a 6-digit OTP to your phone number</p>
                         {error && (
@@ -255,9 +278,11 @@ export default function LoginPage() {
     return (
         <div className="flex min-h-screen flex-col md:flex-row">
             <Navbar />
+            <div className="bg-white px-6 pt-24 pb-0 md:hidden dark:bg-gray-900">{playStoreBanner}</div>
             {/* Left: Login Form */}
-            <div className="flex flex-1 flex-col justify-center bg-white px-6 py-12 pt-16 md:pt-0 dark:bg-gray-900">
+            <div className="flex flex-1 flex-col justify-start bg-white px-6 py-12 pt-3 md:justify-center md:pt-0 dark:bg-gray-900">
                 <div className="mx-auto w-full max-w-md">
+                    <div className="mb-6 hidden md:block">{playStoreBanner}</div>
                     <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h1>
                     <p className="mb-6 text-gray-500 dark:text-gray-300">Log in to your account</p>
 
@@ -369,15 +394,6 @@ export default function LoginPage() {
                     <div className="mb-8 overflow-hidden rounded-2xl shadow-lg">
                         <img src="/images/car-2.png" alt="Car rental illustration" className="h-auto w-full object-contain" />
                     </div>
-                    {/* Play Store Download Button */}
-                    <a
-                        href="https://play.google.com/store/apps/details?id=com.asaancar.app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
-                    >
-                        <img src="/google-play-download-android-app-logo.svg" alt="Get it on Google Play" className="h-40 w-auto sm:h-48" />
-                    </a>
                 </div>
             </div>
         </div>
