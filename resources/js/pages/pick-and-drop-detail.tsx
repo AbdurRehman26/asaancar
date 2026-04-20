@@ -499,9 +499,9 @@ export default function PickAndDropDetail() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-8 p-8 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-8 p-8 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.8fr)]">
                             {/* Left Column: Car & Description */}
-                            <div className="space-y-8 lg:col-span-2">
+                            <div className="space-y-8">
                                 {routeMarkerCandidates.length > 1 && (
                                     <div>
                                         <div className="mb-4 flex items-center justify-between gap-3">
