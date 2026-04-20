@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Jobs\SendOtpJob;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 /**
  * @OA\Tag(
@@ -23,7 +24,7 @@ class OtpController extends Controller
      *     operationId="sendLoginOtp",
      *     tags={"OTP"},
      *     summary="Send OTP for login",
-     *     description="Send OTP via email or SMS for user login",
+     *     description="Send OTP via SMS for login. If the phone number does not exist yet, a customer account will be created first.",
      *
      *     @OA\RequestBody(
      *         required=true,
@@ -47,7 +48,6 @@ class OtpController extends Controller
      *         )
      *     ),
      *
-     *     @OA\Response(response=404, description="User not found"),
      *     @OA\Response(response=422, description="Validation error"),
      *     @OA\Response(response=500, description="Failed to send OTP")
      * )
@@ -87,7 +87,7 @@ class OtpController extends Controller
             return response()->json([
                 'success' => true,
                 'token' => $token,
-                'user' => new \App\Http\Resources\UserResource($user),
+                'user' => new UserResource($user),
                 'message' => 'Demo login successful',
             ]);
         }
@@ -96,7 +96,18 @@ class OtpController extends Controller
         $user = User::where('phone_number', $request->phone_number)->first();
 
         if (! $user) {
-            return response()->json(['message' => 'User not found'], 404);
+            $user = User::create([
+                'name' => 'User '.substr($request->phone_number, -4),
+                'phone_number' => $request->phone_number,
+                'is_verified' => false,
+            ]);
+
+            Role::firstOrCreate([
+                'name' => 'customer',
+                'guard_name' => 'web',
+            ]);
+
+            $user->assignRole('customer');
         }
 
         // Generate OTP and store it immediately
@@ -204,7 +215,7 @@ class OtpController extends Controller
         return response()->json([
             'success' => true,
             'token' => $token,
-            'user' => new \App\Http\Resources\UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
 
@@ -259,9 +270,9 @@ class OtpController extends Controller
 
         // Check if user already exists
         $user = User::where('phone_number', $request->phone_number)->first();
-        
+
         $isNewlyCreated = false;
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'phone_number' => $request->phone_number,
                 'name' => $request->name ?? 'User',
@@ -272,7 +283,7 @@ class OtpController extends Controller
 
         // Determine if this should be treated as an existing user (fully registered)
         // A user is existing if they have a password already
-        $isExistingUser = !$isNewlyCreated && !empty($user->password);
+        $isExistingUser = ! $isNewlyCreated && ! empty($user->password);
 
         // Generate OTP
         $otp = (string) random_int(100000, 999999);
@@ -380,7 +391,7 @@ class OtpController extends Controller
             return response()->json([
                 'success' => true,
                 'token' => $token,
-                'user' => new \App\Http\Resources\UserResource($user),
+                'user' => new UserResource($user),
             ]);
         } catch (\Exception $e) {
             \Log::error('Failed to verify OTP for signup', [
