@@ -6,7 +6,7 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { LayoutGrid, Mail, MapPin, Menu, Route, User, X, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { NotificationBell } from './notification-bell';
 import DarkModeToggle from './ui/dark-mode-toggle';
 
@@ -22,48 +22,39 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
     const canViewInquiries = user?.id === 1;
     const getInitials = useInitials();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const location = useLocation();
+    const isDashboardTheme = location.pathname.startsWith('/dashboard');
+    const userDropdownClassName = isDashboardTheme
+        ? 'z-[80] w-56 border-[#eadfeb] bg-white text-[#2f2231] shadow-[0_18px_40px_-28px_rgba(126,36,108,0.22)] dark:border-white/10 dark:bg-[#17141f] dark:text-white'
+        : 'z-[80] w-56 border-[#eadfeb] bg-white text-[#2f2231] shadow-[0_18px_40px_-28px_rgba(126,36,108,0.18)] dark:border-white/10 dark:bg-[#17141f] dark:text-white';
+    const navLinkClassName = (page: string): string =>
+        `flex items-center gap-2 text-sm font-semibold transition ${
+            isDashboardTheme
+                ? currentPage === page
+                    ? 'text-[#2f2231] dark:text-white'
+                    : 'text-[#6b5368] hover:text-[#2f2231] dark:text-white/75 dark:hover:text-white'
+                : currentPage === page
+                  ? 'text-[#2f2231] dark:text-white'
+                  : 'text-[#6b5368] hover:text-[#2f2231] dark:text-white/75 dark:hover:text-white'
+        }`;
 
     // Nav links as a component for reuse
     const NavLinks = (
         <>
-            <Link
-                to="/pick-and-drop"
-                className={`flex items-center gap-2 text-sm font-semibold transition ${
-                    currentPage === 'pick-and-drop' ? 'text-white' : 'text-white/85 hover:text-white'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-            >
+            <Link to="/pick-and-drop" className={navLinkClassName('pick-and-drop')} onClick={() => setMobileMenuOpen(false)}>
                 <MapPin className="h-4 w-4" />
                 Find a Ride
             </Link>
-            <Link
-                to="/ride-requests"
-                className={`flex items-center gap-2 text-sm font-semibold transition ${
-                    currentPage === 'ride-requests' ? 'text-white' : 'text-white/85 hover:text-white'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-            >
+            <Link to="/ride-requests" className={navLinkClassName('ride-requests')} onClick={() => setMobileMenuOpen(false)}>
                 <Route className="h-4 w-4" />
                 Ride Requests
             </Link>
-            <Link
-                to="/contact"
-                className={`flex items-center gap-2 text-sm font-semibold transition ${
-                    currentPage === 'contact' ? 'text-white' : 'text-white/85 hover:text-white'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-            >
+            <Link to="/contact" className={navLinkClassName('contact')} onClick={() => setMobileMenuOpen(false)}>
                 <Mail className="h-4 w-4" />
                 Contact Us
             </Link>
             {user && user.roles && Array.isArray(user.roles) && user.roles.includes('admin') && (
-                <Link
-                    to="/dashboard"
-                    className={`flex items-center gap-2 text-sm font-semibold transition ${
-                        currentPage === 'dashboard' ? 'text-white' : 'text-white/85 hover:text-white'
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                >
+                <Link to="/dashboard" className={navLinkClassName('dashboard')} onClick={() => setMobileMenuOpen(false)}>
                     <User className="h-4 w-4" />
                     Dashboard
                 </Link>
@@ -73,14 +64,22 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                 <>
                     <Link
                         to="/login"
-                        className="rounded-md border border-white/30 bg-white/15 px-4 py-2 font-semibold text-white transition hover:bg-white/20"
+                        className={
+                            isDashboardTheme
+                                ? 'rounded-xl border border-[#7e246c]/12 bg-white px-4 py-2 font-semibold text-[#6b2f61] transition hover:bg-[#fcf6fb] dark:border-white/10 dark:bg-white/6 dark:text-white dark:hover:bg-white/10'
+                                : 'rounded-xl border border-[#7e246c]/12 bg-white px-4 py-2 font-semibold text-[#6b2f61] transition hover:bg-[#fcf6fb] dark:border-white/10 dark:bg-white/6 dark:text-white dark:hover:bg-white/10'
+                        }
                         onClick={() => setMobileMenuOpen(false)}
                     >
                         Login
                     </Link>
                     <Link
                         to="/signup"
-                        className="rounded-md bg-white px-4 py-2 font-semibold text-[#7e246c] transition hover:bg-white/90"
+                        className={
+                            isDashboardTheme
+                                ? 'rounded-xl bg-[#7e246c] px-4 py-2 font-semibold text-white transition hover:bg-[#67205a]'
+                                : 'rounded-xl bg-[#7e246c] px-4 py-2 font-semibold text-white transition hover:bg-[#67205a]'
+                        }
                         onClick={() => setMobileMenuOpen(false)}
                     >
                         Register Now
@@ -102,7 +101,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                                 </Avatar>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end">
+                        <DropdownMenuContent className={userDropdownClassName} align="end" side="bottom" sideOffset={10}>
                             <UserMenuContent user={user} />
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -112,9 +111,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
     );
 
     return (
-        <nav className="fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b border-white/15 bg-gradient-to-r from-[#d88ac8] via-[#9d3d88] to-[#7e246c] px-6 py-[13px] text-white shadow-lg shadow-[#7e246c]/20">
-            <div className="flex items-center gap-2 text-xl font-bold text-white">
-                <Link to="/" className="flex items-center gap-2 transition hover:text-white/90">
+        <nav className="fixed top-0 left-0 z-50 flex w-full items-center justify-between border-b border-white/60 bg-white/75 px-6 py-[13px] text-[#2f2231] shadow-[0_18px_40px_-34px_rgba(126,36,108,0.18)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/75 dark:text-white dark:shadow-none">
+            <div className="flex items-center gap-2 text-xl font-bold text-[#2f2231] dark:text-white">
+                <Link to="/" className="flex items-center gap-2 transition hover:text-[#4b2b46] dark:hover:text-white/90">
                     <img src="/images/car-logo-nameless.png" alt="AsaanCar Logo" className="h-12 w-20" />
                     <span>AsaanCar</span>
                 </Link>
@@ -123,44 +122,20 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             <div className="hidden flex-1 items-center justify-between md:flex">
                 {/* Centered nav links */}
                 <div className="mx-auto flex items-center space-x-6">
-                    <Link
-                        to="/pick-and-drop"
-                        className={`flex items-center gap-2 text-sm font-semibold transition ${
-                            currentPage === 'pick-and-drop' ? 'text-white' : 'text-white/85 hover:text-white'
-                        }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                    >
+                    <Link to="/pick-and-drop" className={navLinkClassName('pick-and-drop')} onClick={() => setMobileMenuOpen(false)}>
                         <MapPin className="h-4 w-4" />
                         Find a Ride
                     </Link>
-                    <Link
-                        to="/ride-requests"
-                        className={`flex items-center gap-2 text-sm font-semibold transition ${
-                            currentPage === 'ride-requests' ? 'text-white' : 'text-white/85 hover:text-white'
-                        }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                    >
+                    <Link to="/ride-requests" className={navLinkClassName('ride-requests')} onClick={() => setMobileMenuOpen(false)}>
                         <Route className="h-4 w-4" />
                         Ride Requests
                     </Link>
-                    <Link
-                        to="/contact"
-                        className={`flex items-center gap-2 text-sm font-semibold transition ${
-                            currentPage === 'contact' ? 'text-white' : 'text-white/85 hover:text-white'
-                        }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                    >
+                    <Link to="/contact" className={navLinkClassName('contact')} onClick={() => setMobileMenuOpen(false)}>
                         <Mail className="h-4 w-4" />
                         Contact Us
                     </Link>
                     {user && user.roles && Array.isArray(user.roles) && user.roles.includes('admin') && (
-                        <Link
-                            to="/dashboard"
-                            className={`flex items-center gap-2 text-sm font-semibold transition ${
-                                currentPage === 'dashboard' ? 'text-white' : 'text-white/85 hover:text-white'
-                            }`}
-                            onClick={() => setMobileMenuOpen(false)}
-                        >
+                        <Link to="/dashboard" className={navLinkClassName('dashboard')} onClick={() => setMobileMenuOpen(false)}>
                             <User className="h-4 w-4" />
                             Dashboard
                         </Link>
@@ -171,14 +146,22 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     <div className="flex items-center space-x-4">
                         <Link
                             to="/login"
-                            className="text-sm font-semibold text-white/85 transition hover:text-white"
+                            className={
+                                isDashboardTheme
+                                    ? 'text-sm font-semibold text-[#6b5368] transition hover:text-[#2f2231] dark:text-white/75 dark:hover:text-white'
+                                    : 'text-sm font-semibold text-[#6b5368] transition hover:text-[#2f2231] dark:text-white/75 dark:hover:text-white'
+                            }
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Login
                         </Link>
                         <Link
                             to="/signup"
-                            className="rounded-md bg-white px-4 py-2 font-semibold text-[#7e246c] transition hover:bg-white/90"
+                            className={
+                                isDashboardTheme
+                                    ? 'rounded-xl bg-[#7e246c] px-4 py-2 font-semibold text-white transition hover:bg-[#67205a]'
+                                    : 'rounded-xl bg-[#7e246c] px-4 py-2 font-semibold text-white transition hover:bg-[#67205a]'
+                            }
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Register Now
@@ -200,7 +183,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
+                            <DropdownMenuContent className={userDropdownClassName} align="end" side="bottom" sideOffset={10}>
                                 <UserMenuContent user={user} />
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -209,7 +192,11 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             </div>
             {/* Mobile Burger */}
             <button
-                className="flex items-center justify-center rounded-md p-2 text-white focus:ring-2 focus:ring-white focus:outline-none md:hidden"
+                className={`flex items-center justify-center rounded-md p-2 focus:outline-none md:hidden ${
+                    isDashboardTheme
+                        ? 'text-[#2f2231] focus:ring-2 focus:ring-[#7e246c]/30 dark:text-white dark:focus:ring-white/30'
+                        : 'text-[#2f2231] focus:ring-2 focus:ring-[#7e246c]/30 dark:text-white dark:focus:ring-white/30'
+                }`}
                 onClick={() => setMobileMenuOpen((open) => !open)}
                 aria-label="Open menu"
             >
@@ -219,19 +206,27 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             {mobileMenuOpen && (
                 <>
                     {/* Overlay */}
-                    <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setMobileMenuOpen(false)} />
+                    <div className="fixed inset-0 z-[90] bg-black/50" onClick={() => setMobileMenuOpen(false)} />
                     {/* Drawer */}
                     <div
-                        className="fixed top-0 right-0 z-50 flex h-full w-64 flex-col bg-gradient-to-b from-[#7e246c] via-[#8d2b79] to-[#b14a9a] text-white shadow-lg md:hidden"
+                        className={`fixed top-0 right-0 z-[100] flex h-dvh min-h-screen w-64 flex-col border-l shadow-lg md:hidden ${
+                            isDashboardTheme
+                                ? 'border-[#eadfeb] bg-white text-[#2f2231] dark:border-white/10 dark:bg-[#17141f] dark:text-white'
+                                : 'border-[#eadfeb] bg-white text-[#2f2231] dark:border-white/10 dark:bg-[#17141f] dark:text-white'
+                        }`}
                         onClick={(e) => e.stopPropagation()} // Prevent overlay click from bubbling
                     >
-                        <div className="flex shrink-0 items-center justify-between border-b border-white/15 px-6 py-4">
-                            <span className="text-xl font-bold text-white">Menu</span>
+                        <div
+                            className={`flex shrink-0 items-center justify-between px-6 py-4 ${
+                                isDashboardTheme ? 'border-b border-[#eadfeb] dark:border-white/10' : 'border-b border-[#eadfeb] dark:border-white/10'
+                            }`}
+                        >
+                            <span className="text-xl font-bold text-[#2f2231] dark:text-white">Menu</span>
                             <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
-                                <X className="h-6 w-6 text-white" />
+                                <X className="h-6 w-6 text-[#2f2231] dark:text-white" />
                             </button>
                         </div>
-                        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-6">
+                        <div className="flex flex-1 flex-col gap-4 overflow-y-auto bg-inherit px-6 py-6">
                             {NavLinks}
 
                             {/* Dashboard Sidebar Section - Only show for store owners and admins */}

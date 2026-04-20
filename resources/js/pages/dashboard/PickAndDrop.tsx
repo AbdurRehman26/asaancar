@@ -1,4 +1,12 @@
 import { useAuth } from '@/components/AuthContext';
+import {
+    DashboardEmptyState,
+    DashboardHero,
+    DashboardPage,
+    DashboardPanel,
+    DashboardPrimaryLink,
+    DashboardSecondaryButton,
+} from '@/components/dashboard-shell';
 import PickAndDropCard, { PickAndDropService } from '@/components/PickAndDropCard';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,7 +14,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { apiFetch } from '@/lib/utils';
 import { AlertTriangle, MapPin, Plus, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function PickAndDropPage() {
     const navigate = useNavigate();
@@ -136,23 +144,23 @@ export default function PickAndDropPage() {
     };
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-[#7e246c] dark:text-white">Your Rides</h1>
-                {user && (
-                    <Link
-                        to="/dashboard/pick-and-drop/create"
-                        className="flex items-center gap-2 rounded-lg bg-[#7e246c] px-4 py-2 text-white transition-colors hover:bg-[#6a1f5c]"
-                    >
-                        <Plus className="h-5 w-5" />
-                        Add a Ride
-                    </Link>
-                )}
-            </div>
+        <DashboardPage>
+            <DashboardHero
+                eyebrow="Ride management"
+                title="Your rides"
+                description="Review published routes, refine availability, and keep pricing or timings aligned with demand from one place."
+                actions={
+                    user ? (
+                        <DashboardPrimaryLink to="/dashboard/pick-and-drop/create">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add a ride
+                        </DashboardPrimaryLink>
+                    ) : null
+                }
+            />
 
-            {/* Filters */}
-            <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-                <div className="flex flex-col gap-4 md:flex-row">
+            <DashboardPanel title="Filter and search" description="Narrow your dashboard to the routes that need attention right now.">
+                <div className="flex flex-col gap-4 lg:flex-row">
                     <div className="flex-1">
                         <div className="relative">
                             <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
@@ -164,7 +172,7 @@ export default function PickAndDropPage() {
                                     setSearchTerm(e.target.value);
                                     setCurrentPage(1);
                                 }}
-                                className="w-full rounded-lg border border-gray-300 py-2 pr-4 pl-10 focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                className="w-full rounded-2xl border border-[#7e246c]/15 bg-[#fcf8fd] py-3 pr-4 pl-10 focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c] dark:border-white/10 dark:bg-white/5 dark:text-white"
                             />
                         </div>
                     </div>
@@ -174,7 +182,7 @@ export default function PickAndDropPage() {
                             setFilters({ ...filters, driver_gender: e.target.value });
                             setCurrentPage(1);
                         }}
-                        className="rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        className="rounded-2xl border border-[#7e246c]/15 bg-[#fcf8fd] px-4 py-3 focus:ring-2 focus:ring-[#7e246c] dark:border-white/10 dark:bg-white/5 dark:text-white"
                     >
                         <option value="">All Genders</option>
                         <option value="male">Male Driver</option>
@@ -188,7 +196,7 @@ export default function PickAndDropPage() {
                             setFilters({ ...filters, min_spaces: e.target.value });
                             setCurrentPage(1);
                         }}
-                        className="rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        className="rounded-2xl border border-[#7e246c]/15 bg-[#fcf8fd] px-4 py-3 focus:ring-2 focus:ring-[#7e246c] dark:border-white/10 dark:bg-white/5 dark:text-white"
                     />
                     <input
                         type="date"
@@ -197,88 +205,102 @@ export default function PickAndDropPage() {
                             setFilters({ ...filters, departure_date: e.target.value });
                             setCurrentPage(1);
                         }}
-                        className="rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        className="rounded-2xl border border-[#7e246c]/15 bg-[#fcf8fd] px-4 py-3 focus:ring-2 focus:ring-[#7e246c] dark:border-white/10 dark:bg-white/5 dark:text-white"
                     />
                     {user && Array.isArray(user.roles) && user.roles.includes('admin') && (
-                        <button
+                        <DashboardSecondaryButton
                             onClick={() => {
                                 setCurrentPage(1);
-                                fetchMyServices();
+                                void fetchMyServices();
                             }}
-                            className="rounded-lg bg-gray-200 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
                         >
                             My Services
-                        </button>
+                        </DashboardSecondaryButton>
                     )}
                 </div>
-            </div>
+            </DashboardPanel>
 
             {error && (
-                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
                     <p className="text-red-600 dark:text-red-400">{error}</p>
                 </div>
             )}
 
             {loading ? (
-                <div className="py-12 text-center">
+                <DashboardPanel contentClassName="flex justify-center py-16">
                     <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-[#7e246c] border-t-transparent"></div>
-                </div>
+                </DashboardPanel>
             ) : services.length === 0 ? (
-                <div className="rounded-lg border border-gray-200 bg-white py-12 text-center dark:border-gray-700 dark:bg-gray-800">
-                    <MapPin className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-                    <p className="text-gray-600 dark:text-gray-400">No pick and drop services found.</p>
-                </div>
+                <DashboardEmptyState
+                    icon={<MapPin className="h-6 w-6" />}
+                    title="No rides found yet"
+                    description="Once you create or publish a ride, it will appear here with quick access to edit, review, and manage it."
+                    action={
+                        user ? (
+                            <DashboardPrimaryLink to="/dashboard/pick-and-drop/create">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add your first ride
+                            </DashboardPrimaryLink>
+                        ) : null
+                    }
+                />
             ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {services.map((service) => (
-                        <PickAndDropCard
-                            key={service.id}
-                            service={service}
-                            onClick={() => navigate(`/pick-and-drop/${service.id}`)}
-                            onEdit={
-                                user && service.user && user.id === service.user.id
-                                    ? () => navigate(`/dashboard/pick-and-drop/${service.id}/edit`)
-                                    : undefined
-                            }
-                            onDelete={user && service.user && user.id === service.user.id ? () => handleDeleteClick(service.id) : undefined}
-                        />
-                    ))}
-                </div>
-            )}
+                <DashboardPanel
+                    title="Ride listings"
+                    description={`${services.length} route${services.length === 1 ? '' : 's'} on this page`}
+                    contentClassName="space-y-6"
+                >
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        {services.map((service) => (
+                            <PickAndDropCard
+                                key={service.id}
+                                service={service}
+                                variant="dashboard"
+                                onClick={() => navigate(`/pick-and-drop/${service.id}`)}
+                                onEdit={
+                                    user && service.user && user.id === service.user.id
+                                        ? () => navigate(`/dashboard/pick-and-drop/${service.id}/edit`)
+                                        : undefined
+                                }
+                                onDelete={user && service.user && user.id === service.user.id ? () => handleDeleteClick(service.id) : undefined}
+                            />
+                        ))}
+                    </div>
 
-            {/* Pagination */}
-            {!loading && services.length > 0 && totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-center gap-2">
-                    <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="rounded border border-[#7e246c] bg-white px-3 py-1 font-semibold text-[#7e246c] hover:bg-[#7e246c] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-gray-800/80 dark:text-[#7e246c]"
-                    >
-                        Previous
-                    </button>
+                    {!loading && services.length > 0 && totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2">
+                            <button
+                                onClick={() => setCurrentPage(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="rounded-xl border border-[#7e246c]/20 bg-white px-3 py-2 font-semibold text-[#7e246c] hover:bg-[#7e246c] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                            >
+                                Previous
+                            </button>
 
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`rounded border px-3 py-1 font-semibold ${
-                                page === currentPage
-                                    ? 'border-[#7e246c] bg-[#7e246c] text-white'
-                                    : 'border-[#7e246c] bg-white text-[#7e246c] hover:bg-[#7e246c] hover:text-white dark:border-neutral-800 dark:bg-gray-800/80 dark:text-[#7e246c]'
-                            }`}
-                        >
-                            {page}
-                        </button>
-                    ))}
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`rounded-xl border px-3 py-2 font-semibold ${
+                                        page === currentPage
+                                            ? 'border-[#7e246c] bg-[#7e246c] text-white'
+                                            : 'border-[#7e246c]/20 bg-white text-[#7e246c] hover:bg-[#7e246c] hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-white'
+                                    }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
 
-                    <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="rounded border border-[#7e246c] bg-white px-3 py-1 font-semibold text-[#7e246c] hover:bg-[#7e246c] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-gray-800/80 dark:text-[#7e246c]"
-                    >
-                        Next
-                    </button>
-                </div>
+                            <button
+                                onClick={() => setCurrentPage(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="rounded-xl border border-[#7e246c]/20 bg-white px-3 py-2 font-semibold text-[#7e246c] hover:bg-[#7e246c] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
+                </DashboardPanel>
             )}
 
             {/* Delete Confirmation Modal */}
@@ -319,6 +341,6 @@ export default function PickAndDropPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+        </DashboardPage>
     );
 }

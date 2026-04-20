@@ -26,11 +26,11 @@ export default function LoginPage() {
     const { setUser, setToken } = useAuth();
     const { success: showSuccess, error: showError } = useToast();
     const playStoreBanner = (
-        <div className="overflow-hidden rounded-3xl border border-[#7e246c]/15 bg-gradient-to-r from-[#7e246c] via-[#8d2b79] to-[#b14a9a] text-white shadow-xl shadow-[#7e246c]/20 md:px-5 md:py-4 lg:px-6">
-            <div className="flex flex-col items-center gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
-                <div className="mt-4 max-w-2xl md:mt-0">
-                    <h2 className="text-xl font-bold sm:text-2xl">Book faster with the mobile app</h2>
-                    <p className="mt-1 hidden text-sm text-white/85 md:block">
+        <div className="rounded-[1.75rem] border border-white/60 bg-white/80 px-6 py-7 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.28)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/88 dark:[background-image:linear-gradient(90deg,_rgba(23,20,31,0.94)_0%,_rgba(23,20,31,0.94)_44%,_rgba(255,255,255,0.14)_100%)] dark:shadow-none">
+            <div className="flex flex-col items-center gap-4 text-center md:flex-row md:items-center md:justify-between md:text-left">
+                <div className="max-w-2xl">
+                    <h2 className="text-2xl font-bold text-[#2b1128] sm:text-3xl dark:text-white">Book faster with the mobile app</h2>
+                    <p className="mt-2 hidden text-sm text-[#6f556c] md:block dark:text-white/65">
                         Search routes, connect with drivers, and manage your rides on the go with the AsaanCar Android app.
                     </p>
                 </div>
@@ -39,9 +39,9 @@ export default function LoginPage() {
                     href="https://play.google.com/store/apps/details?id=com.asaancar.app"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mb-3 shrink-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:mb-0"
+                    className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
                 >
-                    <img src="/google-play-download-android-app-logo.webp" alt="Get it on Google Play" className="h-14 w-auto md:h-12" />
+                    <img src="/google-play-icon.png" alt="Get it on Google Play" className="h-10 w-auto sm:h-12 md:h-14" />
                 </a>
             </div>
         </div>
@@ -208,76 +208,82 @@ export default function LoginPage() {
 
     if (otpSent) {
         return (
-            <div className="flex min-h-screen flex-col md:flex-row">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
                 <Navbar />
-                <div className="bg-white px-6 pt-24 pb-0 md:hidden dark:bg-gray-900">{playStoreBanner}</div>
-                <div className="flex flex-1 flex-col justify-start bg-white px-6 py-12 pt-3 md:justify-center md:pt-0 dark:bg-gray-900">
-                    <div className="mx-auto w-full max-w-md">
-                        <div className="mb-6 hidden md:block">{playStoreBanner}</div>
-                        <div className="mb-6">{backToListingsButton}</div>
-                        <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Verify Your Phone</h1>
-                        <p className="mb-6 text-gray-500 dark:text-gray-300">We've sent a 6-digit OTP to your phone number</p>
-                        {error && (
-                            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-                                {error}
-                            </div>
-                        )}
-                        <form onSubmit={handleVerifyOtp} className="space-y-4">
-                            <div>
-                                <label className="mb-1 block font-medium text-gray-700 dark:text-gray-200">Enter OTP</label>
-                                <input
-                                    type="text"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                    required
-                                    maxLength={6}
-                                    className="w-full rounded-lg border border-[#7e246c] bg-gray-50 px-4 py-3 text-center text-2xl text-base tracking-widest focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-800 dark:text-white"
-                                    placeholder="000000"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="w-full cursor-pointer rounded-lg bg-[#7e246c] py-3 text-base font-semibold text-white transition hover:bg-[#6a1f5c]"
-                                disabled={verifying || otp.length !== 6}
-                                style={{ pointerEvents: verifying || otp.length !== 6 ? 'none' : 'auto' }}
-                            >
-                                {verifying ? 'Verifying...' : 'Verify OTP'}
-                            </button>
-                        </form>
-                        <div className="mt-6 text-center">
-                            <div className="flex items-center justify-center gap-4">
-                                <button
-                                    type="button"
-                                    className={`font-semibold ${
-                                        retryCooldown > 0 || retryingOtp
-                                            ? 'cursor-not-allowed text-gray-400 dark:text-gray-500'
-                                            : 'text-[#7e246c] hover:underline'
-                                    }`}
-                                    onClick={handleRetryOtp}
-                                    disabled={retryCooldown > 0 || retryingOtp}
-                                >
-                                    {retryingOtp ? 'Retrying...' : retryCooldown > 0 ? `Retry OTP in ${retryCooldown}s` : 'Retry OTP'}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="font-semibold text-[#7e246c] hover:underline"
-                                    onClick={() => {
-                                        setOtpSent(false);
-                                        setRetryCooldown(0);
-                                    }}
-                                >
-                                    Back to login
-                                </button>
+                <div className="flex min-h-screen flex-col md:flex-row">
+                    <div className="px-6 pt-28 pb-0 md:hidden">{playStoreBanner}</div>
+                    <div className="flex flex-1 flex-col justify-start px-6 py-12 pt-3 md:justify-center md:pt-0">
+                        <div className="mx-auto w-full max-w-md">
+                            <div className="mb-6 hidden md:block">{playStoreBanner}</div>
+                            <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-8 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
+                                <div className="mb-6">{backToListingsButton}</div>
+                                <h1 className="mb-2 text-2xl font-bold text-[#2b1128] dark:text-white">Verify Your Phone</h1>
+                                <p className="mb-6 text-[#6f556c] dark:text-white/65">We've sent a 6-digit OTP to your phone number</p>
+                                {error && (
+                                    <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                                        {error}
+                                    </div>
+                                )}
+                                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                                    <div>
+                                        <label className="mb-1 block font-medium text-[#4b3748] dark:text-white/80">Enter OTP</label>
+                                        <input
+                                            type="text"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                            required
+                                            maxLength={6}
+                                            className="w-full rounded-lg border border-[#7e246c]/20 bg-[#fbf4fa] px-4 py-3 text-center text-2xl text-base tracking-widest text-[#2b1128] focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c] dark:border-white/10 dark:bg-white/6 dark:text-white"
+                                            placeholder="000000"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="w-full cursor-pointer rounded-lg bg-[#7e246c] py-3 text-base font-semibold text-white transition hover:bg-[#6a1f5c]"
+                                        disabled={verifying || otp.length !== 6}
+                                        style={{ pointerEvents: verifying || otp.length !== 6 ? 'none' : 'auto' }}
+                                    >
+                                        {verifying ? 'Verifying...' : 'Verify OTP'}
+                                    </button>
+                                </form>
+                                <div className="mt-6 text-center">
+                                    <div className="flex items-center justify-center gap-4">
+                                        <button
+                                            type="button"
+                                            className={`font-semibold ${
+                                                retryCooldown > 0 || retryingOtp
+                                                    ? 'cursor-not-allowed text-gray-400 dark:text-gray-500'
+                                                    : 'text-[#7e246c] hover:underline'
+                                            }`}
+                                            onClick={handleRetryOtp}
+                                            disabled={retryCooldown > 0 || retryingOtp}
+                                        >
+                                            {retryingOtp ? 'Retrying...' : retryCooldown > 0 ? `Retry OTP in ${retryCooldown}s` : 'Retry OTP'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="font-semibold text-[#7e246c] hover:underline"
+                                            onClick={() => {
+                                                setOtpSent(false);
+                                                setRetryCooldown(0);
+                                            }}
+                                        >
+                                            Back to login
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className="relative hidden flex-1 flex-col items-center justify-center bg-white p-12 md:flex dark:bg-gray-900">
-                    <div className="w-full max-w-lg text-center">
-                        <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Verify Your Login</h2>
-                        <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">Enter the OTP sent to your phone number to complete login</p>
-                        <div className="overflow-hidden rounded-2xl shadow-lg">
-                            <img src="/images/car-2.png" alt="Car rental illustration" className="h-auto w-full object-contain" />
+                    <div className="relative hidden flex-1 flex-col items-center justify-center p-12 md:flex">
+                        <div className="w-full max-w-lg rounded-[1.75rem] border border-white/70 bg-white/90 p-8 text-center shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
+                            <h2 className="mb-4 text-3xl font-bold text-[#2b1128] dark:text-white">Verify Your Login</h2>
+                            <p className="mb-8 text-lg text-[#6f556c] dark:text-white/65">
+                                Enter the OTP sent to your phone number to complete login
+                            </p>
+                            <div className="overflow-hidden rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6">
+                                <img src="/images/car-2.png" alt="Car rental illustration" className="h-auto w-full object-contain" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -286,124 +292,137 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex min-h-screen flex-col md:flex-row">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
             <Navbar />
-            <div className="bg-white px-6 pt-24 pb-0 md:hidden dark:bg-gray-900">{playStoreBanner}</div>
-            {/* Left: Login Form */}
-            <div className="flex flex-1 flex-col justify-start bg-white px-6 py-12 pt-3 md:justify-center md:pt-0 dark:bg-gray-900">
-                <div className="mx-auto w-full max-w-md">
-                    <div className="mb-6 hidden md:block">{playStoreBanner}</div>
-                    <div className="mb-6">{backToListingsButton}</div>
-                    <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h1>
-                    <p className="mb-6 text-gray-500 dark:text-gray-300">Log in to your account</p>
+            <div className="flex min-h-screen flex-col md:flex-row">
+                <div className="px-6 pt-28 pb-0 md:hidden">{playStoreBanner}</div>
+                <div className="flex flex-1 flex-col justify-start px-6 py-12 pt-3 md:justify-center md:pt-0">
+                    <div className="mx-auto w-full max-w-md">
+                        <div className="mb-6 hidden md:block">{playStoreBanner}</div>
+                        <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-8 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
+                            <div className="mb-6">{backToListingsButton}</div>
+                            <h1 className="mb-2 text-2xl font-bold text-[#2b1128] dark:text-white">Welcome Back</h1>
+                            <p className="mb-6 text-[#6f556c] dark:text-white/65">Log in to your account</p>
 
-                    {searchParams.get('verified') === '1' && (
-                        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-                            <div className="flex items-center">
-                                <svg className="mr-2 h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                                    Account verified successfully! You can now log in to your account.
-                                </span>
-                            </div>
-                        </div>
-                    )}
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <div>
-                            <label className="mb-1 block font-medium text-gray-700 dark:text-gray-200">Authentication method</label>
-                            <div className="mb-2 flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setAuthMethod('otp')}
-                                    className={`flex-1 rounded-lg border px-4 py-2 transition ${
-                                        authMethod === 'otp'
-                                            ? 'border-[#7e246c] bg-[#7e246c] text-white'
-                                            : 'border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
-                                    }`}
-                                >
-                                    OTP
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setAuthMethod('password')}
-                                    className={`flex-1 rounded-lg border px-4 py-2 transition ${
-                                        authMethod === 'password'
-                                            ? 'border-[#7e246c] bg-[#7e246c] text-white'
-                                            : 'border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
-                                    }`}
-                                >
-                                    Password
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="mb-1 block font-medium text-gray-700 dark:text-gray-200">Phone Number</label>
-                            <div className="relative">
-                                <div className="absolute top-1/2 left-3 flex -translate-y-1/2 transform items-center gap-2">
-                                    <span className="text-xl">🇵🇰</span>
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">+92</span>
+                            {searchParams.get('verified') === '1' && (
+                                <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+                                    <div className="flex items-center">
+                                        <svg className="mr-2 h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                                            Account verified successfully! You can now log in to your account.
+                                        </span>
+                                    </div>
                                 </div>
-                                <input
-                                    type="tel"
-                                    value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                                    required
-                                    className="w-full rounded-lg border border-[#7e246c] bg-gray-50 py-3 pr-4 pl-20 text-base focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-800 dark:text-white"
-                                    placeholder="3001234567"
-                                />
-                            </div>
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Enter your 10-digit phone number without the country code</p>
-                        </div>
-                        {authMethod === 'password' && (
-                            <div>
-                                <label className="mb-1 block font-medium text-gray-700 dark:text-gray-200">Password</label>
-                                <div className="relative">
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="w-full rounded-lg border border-[#7e246c] bg-gray-50 px-4 py-3 pr-12 text-base focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c] dark:bg-gray-800 dark:text-white"
-                                        placeholder="Enter your password"
-                                    />
-                                    <button
-                                        type="button"
-                                        tabIndex={-1}
-                                        className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 hover:text-[#7e246c] focus:outline-none"
-                                        onClick={() => setShowPassword((v) => !v)}
-                                    >
-                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                    </button>
+                            )}
+                            <form onSubmit={handleLogin} className="space-y-4">
+                                <div>
+                                    <label className="mb-1 block font-medium text-[#4b3748] dark:text-white/80">Authentication method</label>
+                                    <div className="mb-2 flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setAuthMethod('otp')}
+                                            className={`flex-1 rounded-lg border px-4 py-2 transition ${
+                                                authMethod === 'otp'
+                                                    ? 'border-[#7e246c] bg-[#7e246c] text-white'
+                                                    : 'border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
+                                            }`}
+                                        >
+                                            OTP
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setAuthMethod('password')}
+                                            className={`flex-1 rounded-lg border px-4 py-2 transition ${
+                                                authMethod === 'password'
+                                                    ? 'border-[#7e246c] bg-[#7e246c] text-white'
+                                                    : 'border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
+                                            }`}
+                                        >
+                                            Password
+                                        </button>
+                                    </div>
                                 </div>
+                                <div>
+                                    <label className="mb-1 block font-medium text-[#4b3748] dark:text-white/80">Phone Number</label>
+                                    <div className="relative">
+                                        <div className="absolute top-1/2 left-3 flex -translate-y-1/2 transform items-center gap-2">
+                                            <span className="text-xl">🇵🇰</span>
+                                            <span className="font-medium text-gray-600 dark:text-gray-400">+92</span>
+                                        </div>
+                                        <input
+                                            type="tel"
+                                            value={phoneNumber}
+                                            onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                                            required
+                                            className="w-full rounded-lg border border-[#7e246c]/20 bg-[#fbf4fa] py-3 pr-4 pl-20 text-base text-[#2b1128] focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c] dark:border-white/10 dark:bg-white/6 dark:text-white"
+                                            placeholder="3001234567"
+                                        />
+                                    </div>
+                                    <p className="mt-1 text-xs text-[#8a7286] dark:text-white/45">
+                                        Enter your 10-digit phone number without the country code
+                                    </p>
+                                </div>
+                                {authMethod === 'password' && (
+                                    <div>
+                                        <label className="mb-1 block font-medium text-[#4b3748] dark:text-white/80">Password</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                required
+                                                className="w-full rounded-lg border border-[#7e246c]/20 bg-[#fbf4fa] px-4 py-3 pr-12 text-base text-[#2b1128] focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c] dark:border-white/10 dark:bg-white/6 dark:text-white"
+                                                placeholder="Enter your password"
+                                            />
+                                            <button
+                                                type="button"
+                                                tabIndex={-1}
+                                                className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 hover:text-[#7e246c] focus:outline-none"
+                                                onClick={() => setShowPassword((v) => !v)}
+                                            >
+                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                                {error && <div className="mt-3 text-center text-sm text-red-600">{error}</div>}
+                                <button
+                                    type="submit"
+                                    className="w-full cursor-pointer rounded-lg bg-[#7e246c] py-3 text-base font-semibold text-white transition hover:bg-[#6a1f5c]"
+                                    disabled={loading}
+                                    style={{ pointerEvents: loading ? 'none' : 'auto' }}
+                                >
+                                    {loading
+                                        ? authMethod === 'otp'
+                                            ? 'Sending OTP...'
+                                            : 'Logging in...'
+                                        : authMethod === 'otp'
+                                          ? 'Send OTP'
+                                          : 'Login'}
+                                </button>
+                            </form>
+                            {/* Signup Link */}
+                            <div className="mt-6 text-center">
+                                <span className="text-[#6f556c] dark:text-white/65">Don't have an account? </span>
+                                <a href="/signup" className="font-semibold text-[#7e246c] hover:underline">
+                                    Sign up
+                                </a>
                             </div>
-                        )}
-                        {error && <div className="mt-3 text-center text-sm text-red-600">{error}</div>}
-                        <button
-                            type="submit"
-                            className="w-full cursor-pointer rounded-lg bg-[#7e246c] py-3 text-base font-semibold text-white transition hover:bg-[#6a1f5c]"
-                            disabled={loading}
-                            style={{ pointerEvents: loading ? 'none' : 'auto' }}
-                        >
-                            {loading ? (authMethod === 'otp' ? 'Sending OTP...' : 'Logging in...') : authMethod === 'otp' ? 'Send OTP' : 'Login'}
-                        </button>
-                    </form>
-                    {/* Signup Link */}
-                    <div className="mt-6 text-center">
-                        <span className="text-gray-600 dark:text-gray-300">Don't have an account? </span>
-                        <a href="/signup" className="font-semibold text-[#7e246c] hover:underline">
-                            Sign up
-                        </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            {/* Right: Car Image */}
-            <div className="relative hidden flex-1 flex-col items-center justify-center bg-white p-12 md:flex dark:bg-gray-900">
-                <div className="w-full max-w-lg text-center">
-                    <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Welcome to AsaanCar</h2>
-                    <p className="mb-8 text-lg text-gray-600 dark:text-gray-300">Your trusted partner for seamless car rental experiences</p>
-                    <div className="mb-8 overflow-hidden rounded-2xl shadow-lg">
-                        <img src="/images/car-2.png" alt="Car rental illustration" className="h-auto w-full object-contain" />
+                {/* Right: Car Image */}
+                <div className="relative hidden flex-1 flex-col items-center justify-center p-12 md:flex">
+                    <div className="w-full max-w-lg rounded-[1.75rem] border border-white/70 bg-white/90 p-8 text-center shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
+                        <h2 className="mb-4 text-3xl font-bold text-[#2b1128] dark:text-white">Welcome to AsaanCar</h2>
+                        <p className="mb-8 text-lg text-[#6f556c] dark:text-white/65">
+                            Find dependable pick and drop rides for your daily commute and one-off travel plans.
+                        </p>
+                        <div className="mb-8 overflow-hidden rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6">
+                            <img src="/images/car-2.png" alt="Car rental illustration" className="h-auto w-full object-contain" />
+                        </div>
                     </div>
                 </div>
             </div>

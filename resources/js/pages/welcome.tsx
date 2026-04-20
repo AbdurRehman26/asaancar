@@ -1,4 +1,5 @@
 import { useAuth } from '@/components/AuthContext';
+import { DashboardEmptyState, DashboardHero, DashboardPanel, DashboardPrimaryLink, DashboardSecondaryButton } from '@/components/dashboard-shell';
 import PickAndDropCard, { PickAndDropService } from '@/components/PickAndDropCard';
 import { CheckCircle, Headphones, MapPin, Network, ShieldCheck, ThumbsUp, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -105,36 +106,26 @@ export default function Welcome() {
             <Navbar auth={{ user }} />
 
             <main>
-                {/* Hero Section with Search */}
-                <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 sm:py-12 lg:px-8">
-                        <div className="mx-auto max-w-2xl text-center">
-                            <h1 className="xs:pt-14 mt-18 pt-16 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-white">
-                                Find a Ride
-                            </h1>
-                            <p className="mt-4 text-lg leading-8 text-gray-600 sm:mt-6 dark:text-gray-300">
-                                Find the perfect ride for your journey with AsaanCar -{' '}
-                                <span className="font-semibold text-[#7e246c] dark:text-[#9d4edd]">Pakistan's trusted ride-sharing service</span>.
-                            </p>
-                            {/* Play Store Download Button */}
-                            <div className="mt-6 flex items-center justify-center">
-                                <a
-                                    href="https://play.google.com/store/apps/details?id=com.asaancar.app"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-block transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
-                                >
-                                    <img
-                                        src="/google-play-download-android-app-logo.webp"
-                                        alt="Get it on Google Play"
-                                        className="h-20 w-auto sm:h-24 md:h-28"
-                                    />
-                                </a>
-                            </div>
-                        </div>
+                <section className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] pt-24 pb-10 sm:pb-16 dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
+                    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 xl:px-8">
+                        <DashboardHero
+                            eyebrow="AsaanCar rides"
+                            title="Find a Ride"
+                            description="Find reliable rides for daily commutes and one-off travel with the same calm, organized experience we’ve brought into the dashboard."
+                            actions={
+                                <>
+                                    <DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>
+                                    <DashboardSecondaryButton onClick={() => navigate('/ride-requests')}>View ride requests</DashboardSecondaryButton>
+                                </>
+                            }
+                        />
 
-                        {/* Search Filter - Full Screen */}
-                        <div className="mt-8 w-full max-w-none sm:mt-10">
+                        <DashboardPanel
+                            title="Search routes"
+                            description="Choose your start and end locations to jump straight into available rides."
+                            className="overflow-visible"
+                            contentClassName="space-y-6"
+                        >
                             <PickAndDropFilter
                                 onSearch={(filters) => {
                                     const params = new URLSearchParams();
@@ -148,124 +139,115 @@ export default function Welcome() {
                                 fullWidth={true}
                                 className="w-full max-w-none"
                             />
-                        </div>
 
-                        {/* Auth Buttons */}
-                        {!user && (
-                            <div className="mt-6 flex items-center justify-center gap-x-6 pb-4 sm:mt-8">
+                            <div className="flex flex-col items-center justify-between gap-4 rounded-[1.5rem] border border-[#7e246c]/10 bg-[#fcf7fb] px-5 py-5 sm:flex-row dark:border-white/10 dark:bg-[#18141f] dark:[background-image:linear-gradient(90deg,_rgba(255,255,255,0.045)_0%,_rgba(255,255,255,0.055)_58%,_rgba(255,255,255,0.09)_100%)]">
+                                <div>
+                                    <p className="text-sm font-semibold text-[#2b1128] dark:text-white">Take AsaanCar with you</p>
+                                    <p className="mt-1 text-sm text-[#7d6678] dark:text-white/65">
+                                        Search routes, connect with drivers, and manage your rides on the go with the AsaanCar Android app.
+                                    </p>
+                                </div>
                                 <a
-                                    href="/signup"
-                                    className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#6a1f5c] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
+                                    href="https://play.google.com/store/apps/details?id=com.asaancar.app"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="shrink-0 transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
                                 >
-                                    Sign Up
+                                    <img src="/google-play-icon.png" alt="Get it on Google Play" className="h-16 w-auto sm:h-20 md:h-24" />
                                 </a>
-                                <button
-                                    onClick={() => navigate('/login')}
-                                    className="text-sm leading-6 font-semibold text-gray-900 hover:text-[#7e246c] dark:text-white dark:hover:text-[#7e246c]"
-                                >
-                                    Login <span aria-hidden="true">→</span>
-                                </button>
                             </div>
-                        )}
-                    </div>
-                </section>
 
-                {/* Find a Ride Section */}
-                <section className="bg-gray-50 py-10 sm:py-16 dark:bg-gray-800">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">Find a Ride</h2>
-                            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                                Share rides or find passengers for your journey. Multiple stops available.
-                            </p>
-                        </div>
-                        {pickAndDropLoading ? (
-                            <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-6 sm:mt-12 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                                {Array.from({ length: 6 }).map((_, index) => (
-                                    <div key={index} className="h-64 animate-pulse rounded-lg bg-white p-6 dark:bg-gray-700"></div>
-                                ))}
-                            </div>
-                        ) : pickAndDropServices.length > 0 ? (
-                            <>
-                                <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-6 sm:mt-12 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                                    {pickAndDropServices.map((service) => (
-                                        <PickAndDropCard
-                                            key={service.id}
-                                            service={service}
-                                            onClick={() => navigate(`/pick-and-drop/${service.id}`)}
-                                        />
+                            {!user ? (
+                                <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                                    <a
+                                        href="/signup"
+                                        className="inline-flex items-center justify-center rounded-xl bg-[#7e246c] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#67205a]"
+                                    >
+                                        Create your account
+                                    </a>
+                                    <button
+                                        onClick={() => navigate('/login')}
+                                        className="inline-flex items-center justify-center rounded-xl border border-[#7e246c]/20 bg-white px-5 py-3 text-sm font-semibold text-[#7e246c] transition hover:border-[#7e246c]/35 hover:bg-[#fbf3fa] dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                    >
+                                        Login
+                                    </button>
+                                </div>
+                            ) : null}
+                        </DashboardPanel>
+
+                        <DashboardPanel
+                            title="Featured rides"
+                            description="A quick look at the latest rides available right now."
+                            actions={<DashboardPrimaryLink to="/pick-and-drop">View all rides</DashboardPrimaryLink>}
+                        >
+                            {pickAndDropLoading ? (
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                    {Array.from({ length: 6 }).map((_, index) => (
+                                        <div
+                                            key={index}
+                                            className="h-72 animate-pulse rounded-[1.75rem] border border-white/70 bg-white/95 shadow-[0_20px_45px_-32px_rgba(126,36,108,0.32)] dark:border-white/10 dark:bg-[#191520]"
+                                        ></div>
                                     ))}
                                 </div>
-                                <div className="mt-8 text-center">
-                                    <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                                        <button
-                                            onClick={() => navigate('/pick-and-drop')}
-                                            className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
-                                        >
-                                            View All Rides
-                                        </button>
-                                        <button
-                                            onClick={() => navigate('/ride-requests')}
-                                            className="rounded-lg border border-[#7e246c] px-6 py-3 text-sm font-semibold text-[#7e246c] shadow-sm transition-colors hover:bg-[#7e246c] hover:text-white dark:border-[#d685c3] dark:text-[#d685c3] dark:hover:border-[#7e246c] dark:hover:bg-[#7e246c]"
-                                        >
-                                            View Ride Requests
-                                        </button>
+                            ) : pickAndDropServices.length > 0 ? (
+                                <>
+                                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                        {pickAndDropServices.map((service) => (
+                                            <PickAndDropCard
+                                                key={service.id}
+                                                service={service}
+                                                variant="dashboard"
+                                                onClick={() => navigate(`/pick-and-drop/${service.id}`)}
+                                            />
+                                        ))}
                                     </div>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="mt-10 rounded-lg border border-gray-200 bg-white py-12 text-center sm:mt-12 dark:border-gray-600 dark:bg-gray-700">
-                                <MapPin className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-                                <p className="text-gray-600 dark:text-gray-400">No rides available at the moment.</p>
-                                <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                                    <button
-                                        onClick={() => navigate('/pick-and-drop')}
-                                        className="rounded-lg bg-[#7e246c] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6a1f5c]"
-                                    >
-                                        Browse All Rides
-                                    </button>
-                                    <button
-                                        onClick={() => navigate('/ride-requests')}
-                                        className="rounded-lg border border-[#7e246c] px-6 py-3 text-sm font-semibold text-[#7e246c] shadow-sm transition-colors hover:bg-[#7e246c] hover:text-white dark:border-[#d685c3] dark:text-[#d685c3] dark:hover:border-[#7e246c] dark:hover:bg-[#7e246c]"
-                                    >
-                                        Browse Ride Requests
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-                {/* Why AsaanCar? Section */}
-                <section className="bg-white py-10 sm:py-16 dark:bg-gray-900">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="mx-auto max-w-2xl text-center">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
-                                Why <span className="text-[#7e246c] dark:text-[#9d4edd]">AsaanCar?</span>
-                            </h2>
-                            <p className="mt-4 text-lg leading-8 text-gray-600 sm:mt-6 dark:text-gray-300">
-                                Discover a wide range of services offered for different travel and business needs.
-                            </p>
-                        </div>
-                        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-6 sm:mt-16 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                            {whyAsaanCarCards.map((card) => {
-                                const Icon = card.icon;
-                                return (
-                                    <div
-                                        key={card.title}
-                                        className={`rounded-2xl p-6 sm:p-8 ${
-                                            card.variant === 'brand' ? 'bg-[#7e246c] dark:bg-[#7e246c]' : 'bg-slate-800 dark:bg-slate-900'
-                                        }`}
-                                    >
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 text-white">
-                                            <Icon className="h-6 w-6" />
+                                    <div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
+                                        <DashboardPrimaryLink to="/pick-and-drop">View all rides</DashboardPrimaryLink>
+                                        <DashboardSecondaryButton onClick={() => navigate('/ride-requests')}>
+                                            View ride requests
+                                        </DashboardSecondaryButton>
+                                    </div>
+                                </>
+                            ) : (
+                                <DashboardEmptyState
+                                    icon={<MapPin className="h-6 w-6" />}
+                                    title="No rides available yet"
+                                    description="There aren’t any rides to show at the moment, but you can still browse the listings page or check ride requests."
+                                    action={
+                                        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                                            <DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>
+                                            <DashboardSecondaryButton onClick={() => navigate('/ride-requests')}>
+                                                Browse ride requests
+                                            </DashboardSecondaryButton>
                                         </div>
-                                        <h3 className="mt-4 text-xl font-bold text-white">{card.title}</h3>
-                                        <p className="mt-2 text-sm leading-6 text-white/90">{card.description}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    }
+                                />
+                            )}
+                        </DashboardPanel>
+
+                        <DashboardPanel
+                            title="Why AsaanCar"
+                            description="Built for dependable daily travel with the same focus on clarity, safety, and support."
+                        >
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                                {whyAsaanCarCards.map((card) => {
+                                    const Icon = card.icon;
+
+                                    return (
+                                        <div
+                                            key={card.title}
+                                            className="rounded-[1.5rem] border border-white/70 bg-white/95 p-6 shadow-[0_16px_38px_-30px_rgba(126,36,108,0.4)] ring-1 ring-[#7e246c]/6 dark:border-white/10 dark:bg-[#1b1724] dark:ring-white/5"
+                                        >
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#7e246c]/10 text-[#7e246c] dark:bg-white/8 dark:text-white">
+                                                <Icon className="h-6 w-6" />
+                                            </div>
+                                            <h3 className="mt-4 text-lg font-semibold text-[#2b1128] dark:text-white">{card.title}</h3>
+                                            <p className="mt-2 text-sm leading-6 text-[#7d6678] dark:text-white/65">{card.description}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </DashboardPanel>
                     </div>
                 </section>
 

@@ -1,4 +1,5 @@
 import GooglePlacesInput from '@/components/GooglePlacesInput';
+import { DashboardHero, DashboardPage, DashboardPanel } from '@/components/dashboard-shell';
 import { apiFetch } from '@/lib/utils';
 import { Calendar, MapPin, Plus, Save, Users, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -286,8 +287,12 @@ export default function PickAndDropForm() {
     };
 
     return (
-        <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="mb-6 text-3xl font-bold text-[#7e246c] dark:text-white">{isEditing ? 'Edit' : 'Create'} Ride</h1>
+        <DashboardPage className="max-w-5xl">
+            <DashboardHero
+                eyebrow="Ride editor"
+                title={`${isEditing ? 'Edit' : 'Create'} ride`}
+                description="Configure the route, schedule, vehicle details, and rider-facing information in one more polished dashboard workflow."
+            />
 
             {error && (
                 <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
@@ -297,7 +302,7 @@ export default function PickAndDropForm() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Route Information */}
-                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                <DashboardPanel title="Route information" description="Set the start, destination, schedule, and optional stop details for the ride.">
                     <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <MapPin className="h-5 w-5" />
                         Route Information
@@ -483,10 +488,10 @@ export default function PickAndDropForm() {
                             )}
                         </div>
                     </div>
-                </div>
+                </DashboardPanel>
 
                 {/* Contact Information */}
-                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                <DashboardPanel title="Contact information" description="Decide which contact details should be shown for this ride.">
                     <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <Users className="h-5 w-5" />
                         Contact Information (Optional)
@@ -516,10 +521,13 @@ export default function PickAndDropForm() {
                             />
                         </div>
                     </div>
-                </div>
+                </DashboardPanel>
 
                 {/* Service Details */}
-                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                <DashboardPanel
+                    title="Service details"
+                    description="Set seats, pricing, visibility, and the basics riders need before they message you."
+                >
                     <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <Users className="h-5 w-5" />
                         Service Details
@@ -586,10 +594,13 @@ export default function PickAndDropForm() {
                             />
                         </div>
                     </div>
-                </div>
+                </DashboardPanel>
 
                 {/* Car Details */}
-                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                <DashboardPanel
+                    title="Car details"
+                    description="Optional vehicle information helps riders understand the comfort and capacity they can expect."
+                >
                     <h2 className="mb-4 text-xl font-semibold text-[#7e246c] dark:text-white">Car Details (Optional)</h2>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
@@ -655,12 +666,13 @@ export default function PickAndDropForm() {
                             </select>
                         </div>
                     </div>
-                </div>
+                </DashboardPanel>
 
                 {/* Stops */}
-                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white">Stops (Optional)</h2>
+                <DashboardPanel
+                    title="Stops"
+                    description="Add optional intermediate stops in the order riders will experience them."
+                    actions={
                         <button
                             type="button"
                             onClick={addStop}
@@ -669,6 +681,10 @@ export default function PickAndDropForm() {
                             <Plus className="h-4 w-4" />
                             Add Stop
                         </button>
+                    }
+                >
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white">Stops (Optional)</h2>
                     </div>
                     {stops.map((stop, index) => (
                         <div key={index} className="mb-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
@@ -751,7 +767,7 @@ export default function PickAndDropForm() {
                     {stops.length === 0 && (
                         <p className="text-sm text-gray-500 dark:text-gray-400">No stops added. Click "Add Stop" to add intermediate stops.</p>
                     )}
-                </div>
+                </DashboardPanel>
 
                 <div className="flex gap-4">
                     <button
@@ -771,6 +787,6 @@ export default function PickAndDropForm() {
                     </button>
                 </div>
             </form>
-        </div>
+        </DashboardPage>
     );
 }

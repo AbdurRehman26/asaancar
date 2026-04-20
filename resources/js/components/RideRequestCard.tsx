@@ -34,37 +34,69 @@ interface RideRequestCardProps {
     onDelete?: () => void;
     className?: string;
     showRequesterInfo?: boolean;
+    variant?: 'default' | 'dashboard';
 }
 
-const RideRequestCard: React.FC<RideRequestCardProps> = ({ request, onClick, onEdit, onDelete, className = '', showRequesterInfo = true }) => {
+const RideRequestCard: React.FC<RideRequestCardProps> = ({
+    request,
+    onClick,
+    onEdit,
+    onDelete,
+    className = '',
+    showRequesterInfo = true,
+    variant = 'default',
+}) => {
     const requesterName = request.name || request.user?.name || 'Requester';
     const requesterPhone = request.contact || request.user?.phone_number;
+    const isDashboard = variant === 'dashboard';
 
     return (
         <div
             onClick={onClick}
-            className={`cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:border-[#7e246c]/30 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800 dark:hover:border-[#7e246c]/50 ${className}`}
+            className={`cursor-pointer overflow-hidden rounded-[1.75rem] border transition-all duration-300 ${
+                isDashboard
+                    ? 'border-white/70 bg-white/95 shadow-[0_20px_45px_-32px_rgba(126,36,108,0.55)] ring-1 ring-[#7e246c]/6 hover:-translate-y-0.5 hover:border-[#7e246c]/20 hover:shadow-[0_28px_60px_-34px_rgba(126,36,108,0.65)] dark:border-white/10 dark:bg-[#191520] dark:ring-white/5 dark:hover:border-white/15'
+                    : 'border-gray-100 bg-white shadow-sm hover:border-[#7e246c]/30 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800 dark:hover:border-[#7e246c]/50'
+            } ${className}`}
         >
             <div className="space-y-4 p-5">
                 <div className="flex items-start justify-between gap-4">
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-[#7e246c] uppercase dark:text-[#c66ab3]">
+                        <div
+                            className={`flex items-center gap-2 text-xs font-semibold tracking-wide uppercase ${isDashboard ? 'text-[#7e246c] dark:text-white/65' : 'text-[#7e246c] dark:text-[#c66ab3]'}`}
+                        >
                             <MapPin className="h-3.5 w-3.5" />
                             Ride Request
                         </div>
                         <div className="space-y-1">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{request.start_location}</h3>
+                            <h3 className={`text-lg font-bold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}>
+                                {request.start_location}
+                            </h3>
                             <div className="flex items-center gap-2 text-gray-400">
                                 <ArrowRight className="h-4 w-4" />
                             </div>
-                            <h4 className="text-base font-semibold text-gray-800 dark:text-gray-200">{request.end_location}</h4>
+                            <h4
+                                className={`text-base font-semibold ${isDashboard ? 'text-[#5f4860] dark:text-white/78' : 'text-gray-800 dark:text-gray-200'}`}
+                            >
+                                {request.end_location}
+                            </h4>
                         </div>
                     </div>
 
                     {request.budget_per_seat ? (
-                        <div className="rounded-xl border border-[#7e246c]/10 bg-[#7e246c]/5 px-3 py-2 text-right dark:border-[#7e246c]/25 dark:bg-[#7e246c]/10">
-                            <div className="text-xs text-gray-500 dark:text-gray-400">Budget / seat</div>
-                            <div className="text-base font-bold text-[#7e246c] dark:text-[#d685c3]">
+                        <div
+                            className={`rounded-xl border px-3 py-2 text-right ${
+                                isDashboard
+                                    ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
+                                    : 'border-[#7e246c]/10 bg-[#7e246c]/5 dark:border-[#7e246c]/25 dark:bg-[#7e246c]/10'
+                            }`}
+                        >
+                            <div className={`text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}>
+                                Budget / seat
+                            </div>
+                            <div
+                                className={`text-base font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#d685c3]'}`}
+                            >
                                 {request.currency || 'PKR'} {Math.round(request.budget_per_seat).toLocaleString()}
                             </div>
                         </div>
@@ -91,20 +123,44 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({ request, onClick, onE
                     </div>
                 </div>
 
-                {request.description ? <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-300">{request.description}</p> : null}
+                {request.description ? (
+                    <p className={`line-clamp-2 text-sm ${isDashboard ? 'text-[#6f556c] dark:text-white/68' : 'text-gray-600 dark:text-gray-300'}`}>
+                        {request.description}
+                    </p>
+                ) : null}
             </div>
 
-            <div className="flex items-center justify-between border-t border-gray-100 px-5 py-4 dark:border-gray-700">
+            <div
+                className={`flex items-center justify-between border-t px-5 py-4 ${isDashboard ? 'border-[#efe4ee] dark:border-white/8' : 'border-gray-100 dark:border-gray-700'}`}
+            >
                 <div className="min-w-0">
                     {showRequesterInfo ? (
                         <>
-                            <div className="truncate text-sm font-semibold text-gray-900 dark:text-white">{requesterName}</div>
-                            {requesterPhone ? <div className="truncate text-xs text-gray-500 dark:text-gray-400">{requesterPhone}</div> : null}
+                            <div
+                                className={`truncate text-sm font-semibold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
+                            >
+                                {requesterName}
+                            </div>
+                            {requesterPhone ? (
+                                <div
+                                    className={`truncate text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
+                                >
+                                    {requesterPhone}
+                                </div>
+                            ) : null}
                         </>
                     ) : (
                         <>
-                            <div className="truncate text-sm font-semibold text-gray-900 dark:text-white">Requester info hidden</div>
-                            <div className="truncate text-xs text-gray-500 dark:text-gray-400">Login to view requester details</div>
+                            <div
+                                className={`truncate text-sm font-semibold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
+                            >
+                                Requester info hidden
+                            </div>
+                            <div
+                                className={`truncate text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
+                            >
+                                Login to view requester details
+                            </div>
                         </>
                     )}
                 </div>

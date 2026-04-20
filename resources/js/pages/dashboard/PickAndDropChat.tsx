@@ -1,5 +1,6 @@
 import { useAuth } from '@/components/AuthContext';
 import Chat from '@/components/chat';
+import { DashboardHero, DashboardPage, DashboardPanel } from '@/components/dashboard-shell';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import type { Conversation } from '@/types/dashboard';
 import { UserCircle } from 'lucide-react';
@@ -62,12 +63,16 @@ export default function PickAndDropChat() {
 
     return (
         <ErrorBoundary>
-            <div className="max-w-7xl py-6 sm:px-8 lg:px-12">
-                <div className="flex h-full min-h-[500px] flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white/80 p-0 shadow-lg dark:border-neutral-800 dark:bg-gray-800/80">
-                    <h2 className="mb-0 px-8 pt-8 pb-4 text-xl font-bold text-[#7e246c] dark:text-white">Ride Chat</h2>
+            <DashboardPage>
+                <DashboardHero
+                    eyebrow="Conversations"
+                    title="Ride chat"
+                    description="Keep rider and driver conversations in one focused place, with route context always visible while you reply."
+                />
+                <DashboardPanel title="Conversation inbox" contentClassName="p-0">
                     <div className="flex min-h-0 flex-1">
                         {/* Conversation List */}
-                        <div className="h-full w-80 max-w-xs min-w-[220px] overflow-y-auto border-r border-gray-300 bg-white/80 dark:border-neutral-700 dark:bg-gray-900">
+                        <div className="h-full w-80 max-w-xs min-w-[220px] overflow-y-auto border-r border-[#7e246c]/10 bg-[#fcf8fd] dark:border-white/10 dark:bg-[#120f18]">
                             {conversationsLoading ? (
                                 <div className="p-4 text-gray-400">Loading conversations...</div>
                             ) : conversations.length === 0 ? (
@@ -86,7 +91,7 @@ export default function PickAndDropChat() {
                                         return (
                                             <button
                                                 key={conv.id}
-                                                className={`flex items-center gap-3 border-b border-gray-100 px-4 py-3 text-left transition-colors hover:bg-[#f3e6f2] dark:border-neutral-800 dark:hover:bg-[#2a1e28] ${isActive ? 'bg-[#7e246c]/10 dark:bg-[#7e246c]/20' : ''}`}
+                                                className={`flex items-center gap-3 border-b border-[#7e246c]/8 px-4 py-3 text-left transition-colors hover:bg-[#f7edf6] dark:border-white/6 dark:hover:bg-white/6 ${isActive ? 'bg-[#7e246c]/10 dark:bg-white/10' : ''}`}
                                                 onClick={() => setSelectedConv(conv)}
                                             >
                                                 {/* Avatar */}
@@ -136,7 +141,7 @@ export default function PickAndDropChat() {
                             )}
                         </div>
                         {/* Chat Window */}
-                        <div className="flex h-full min-h-[400px] flex-1 items-center justify-center bg-white/80 dark:bg-gray-900">
+                        <div className="flex h-full min-h-[400px] flex-1 items-center justify-center bg-white/90 dark:bg-[#16131d]">
                             {selectedConv ? (
                                 <div className="flex h-full w-full flex-col">
                                     {user && selectedConv?.id ? (
@@ -150,8 +155,8 @@ export default function PickAndDropChat() {
                             )}
                         </div>
                     </div>
-                </div>
-            </div>
+                </DashboardPanel>
+            </DashboardPage>
         </ErrorBoundary>
     );
 }

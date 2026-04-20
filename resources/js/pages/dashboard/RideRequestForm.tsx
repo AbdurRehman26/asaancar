@@ -1,4 +1,5 @@
 import { useAuth } from '@/components/AuthContext';
+import { DashboardHero, DashboardPage, DashboardPanel } from '@/components/dashboard-shell';
 import GooglePlacesInput from '@/components/GooglePlacesInput';
 import { apiFetch } from '@/lib/utils';
 import { Calendar, MapPin, Save, Users } from 'lucide-react';
@@ -166,8 +167,12 @@ export default function RideRequestForm() {
     const dayOptions = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     return (
-        <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="mb-6 text-3xl font-bold text-[#7e246c] dark:text-white">{isEditing ? 'Edit' : 'Create'} Ride Request</h1>
+        <DashboardPage className="max-w-5xl">
+            <DashboardHero
+                eyebrow="Ride request editor"
+                title={`${isEditing ? 'Edit' : 'Create'} ride request`}
+                description="Shape the route, rider preferences, and timing in one polished workflow so your request is clear from the first message."
+            />
 
             {error ? (
                 <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
@@ -176,7 +181,10 @@ export default function RideRequestForm() {
             ) : null}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                <DashboardPanel
+                    title="Route information"
+                    description="Define the pickup and destination so drivers know exactly where you need to go."
+                >
                     <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <MapPin className="h-5 w-5" />
                         Route Information
@@ -237,9 +245,9 @@ export default function RideRequestForm() {
                             />
                         </div>
                     </div>
-                </div>
+                </DashboardPanel>
 
-                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                <DashboardPanel title="Schedule" description="Choose when the ride is needed and whether it repeats.">
                     <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <Calendar className="h-5 w-5" />
                         Schedule
@@ -333,9 +341,9 @@ export default function RideRequestForm() {
                             })}
                         </div>
                     ) : null}
-                </div>
+                </DashboardPanel>
 
-                <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                <DashboardPanel title="Request preferences" description="Share the details that help drivers quickly decide whether they are a fit.">
                     <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-[#7e246c] dark:text-white">
                         <Users className="h-5 w-5" />
                         Request Preferences
@@ -416,7 +424,7 @@ export default function RideRequestForm() {
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
-                </div>
+                </DashboardPanel>
 
                 <div className="flex justify-end gap-3">
                     <button
@@ -436,6 +444,6 @@ export default function RideRequestForm() {
                     </button>
                 </div>
             </form>
-        </div>
+        </DashboardPage>
     );
 }

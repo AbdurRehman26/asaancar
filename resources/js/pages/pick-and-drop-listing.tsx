@@ -238,7 +238,7 @@ export default function PickAndDropListing() {
     const ogImage = `${baseUrl}/pick-n-drop.png`;
 
     return (
-        <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
             <SEO
                 title="Find a Ride - Multiple Stops | Asaancar"
                 description="Find convenient rides from location A to location B with multiple stops. Book with male or female drivers. Search by start location, end location, departure time, and driver gender. Available in Karachi and across Pakistan."
@@ -252,56 +252,42 @@ export default function PickAndDropListing() {
             <div className="px-4 pt-20 pb-12 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     {/* Header */}
-                    <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="mb-8 flex flex-col gap-4 rounded-[1.75rem] border border-white/60 bg-white/80 px-6 py-7 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.28)] backdrop-blur md:flex-row md:items-center md:justify-between dark:border-white/10 dark:bg-[#17141f]/88 dark:[background-image:linear-gradient(90deg,_rgba(23,20,31,0.94)_0%,_rgba(23,20,31,0.94)_44%,_rgba(255,255,255,0.14)_100%)] dark:shadow-none">
                         <div className="text-center md:text-left">
-                            <h1 className="mt-8 mb-4 text-4xl font-bold text-[#7e246c] dark:text-white">Find a Ride</h1>
-                            <p className="text-lg text-gray-600 dark:text-gray-300">Find rides from location A to location B with multiple stops</p>
+                            <h1 className="mb-4 text-4xl font-bold text-[#2b1128] dark:text-white">Find a Ride</h1>
+                            <p className="text-lg text-[#6f556c] dark:text-white/65">Find rides from location A to location B with multiple stops</p>
                         </div>
-                        {user ? (
-                            <button
-                                onClick={() => navigate('/dashboard/pick-and-drop/create')}
-                                className="flex items-center justify-center gap-2 rounded-lg bg-[#7e246c] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6a1f5c]"
-                            >
-                                <Plus className="h-5 w-5" />
-                                Add a Ride
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => navigate('/login')}
-                                className="flex items-center justify-center gap-2 rounded-lg bg-[#7e246c] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6a1f5c]"
-                            >
-                                <Plus className="h-5 w-5" />
-                                Add a Ride
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="mb-8 overflow-hidden rounded-3xl border border-[#7e246c]/15 bg-gradient-to-r from-[#7e246c] via-[#8d2b79] to-[#b14a9a] px-5 py-4 text-white shadow-xl shadow-[#7e246c]/20 sm:px-6">
-                        <div className="flex flex-col items-center gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
-                            <div className="max-w-2xl">
-                                <h2 className="text-xl font-bold sm:text-2xl">Book faster with the mobile app</h2>
-                                <p className="mt-1 hidden text-sm text-white/85 md:block">
-                                    Search routes, connect with drivers, and manage your rides on the go with the AsaanCar Android app.
-                                </p>
-                            </div>
-
+                        <div className="flex flex-col items-center gap-4 md:items-end">
                             <a
                                 href="https://play.google.com/store/apps/details?id=com.asaancar.app"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="shrink-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                                className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
                             >
-                                <img
-                                    src="/google-play-download-android-app-logo.webp"
-                                    alt="Get it on Google Play"
-                                    className="h-16 w-auto sm:h-20 md:h-24"
-                                />
+                                <img src="/google-play-icon.png" alt="Get it on Google Play" className="h-10 w-auto sm:h-12 md:h-14" />
                             </a>
+                            {user ? (
+                                <button
+                                    onClick={() => navigate('/dashboard/pick-and-drop/create')}
+                                    className="flex items-center justify-center gap-2 rounded-lg bg-[#7e246c] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6a1f5c]"
+                                >
+                                    <Plus className="h-5 w-5" />
+                                    Add a Ride
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="flex items-center justify-center gap-2 rounded-lg bg-[#7e246c] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#6a1f5c]"
+                                >
+                                    <Plus className="h-5 w-5" />
+                                    Add a Ride
+                                </button>
+                            )}
                         </div>
                     </div>
 
                     {/* Search and Filters */}
-                    <div className="mb-8 rounded-xl bg-white p-6 shadow-lg dark:bg-gray-800">
+                    <div className="mb-8 rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                         <div className="mb-4 flex items-center justify-between">
                             <button
                                 onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -326,7 +312,7 @@ export default function PickAndDropListing() {
                         {isFilterOpen && (
                             <div className="grid grid-cols-1 gap-4 duration-200 animate-in fade-in slide-in-from-top-4 md:grid-cols-2 lg:grid-cols-5">
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Start Location</label>
+                                    <label className="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75">Start Location</label>
                                     <GooglePlacesInput
                                         value={locationInputs.start_location}
                                         placeholder="From..."
@@ -358,11 +344,11 @@ export default function PickAndDropListing() {
                                                 start_longitude: place.longitude?.toString() ?? '',
                                             }));
                                         }}
-                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        className="w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
                                     />
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">End Location</label>
+                                    <label className="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75">End Location</label>
                                     <GooglePlacesInput
                                         value={locationInputs.end_location}
                                         placeholder="To..."
@@ -394,15 +380,15 @@ export default function PickAndDropListing() {
                                                 end_longitude: place.longitude?.toString() ?? '',
                                             }));
                                         }}
-                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        className="w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
                                     />
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Driver Gender</label>
+                                    <label className="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75">Driver Gender</label>
                                     <select
                                         value={filters.driver_gender}
                                         onChange={(e) => setFilters({ ...filters, driver_gender: e.target.value })}
-                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        className="w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
                                     >
                                         <option value="">All</option>
                                         <option value="male">Male</option>
@@ -410,7 +396,7 @@ export default function PickAndDropListing() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="mb-1 block flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-[#6b5368] dark:text-white/75">
                                         <Clock className="h-4 w-4 text-gray-500" />
                                         Departure Time
                                     </label>
@@ -419,7 +405,7 @@ export default function PickAndDropListing() {
                                             type="time"
                                             value={filters.departure_time}
                                             onChange={(e) => setFilters({ ...filters, departure_time: e.target.value })}
-                                            className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                            className="w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 pr-10 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
                                         />
                                         {filters.departure_time && (
                                             <button
@@ -434,12 +420,12 @@ export default function PickAndDropListing() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Departure Date</label>
+                                    <label className="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75">Departure Date</label>
                                     <input
                                         type="date"
                                         value={filters.departure_date}
                                         onChange={(e) => setFilters({ ...filters, departure_date: e.target.value })}
-                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                        className="w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
                                     />
                                 </div>
                             </div>
@@ -454,7 +440,7 @@ export default function PickAndDropListing() {
 
                     {/* Pagination - Top */}
                     {!loading && services.length > 0 && totalPages > 1 && (
-                        <div className="mb-6 flex flex-col items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg sm:flex-row dark:border-gray-700 dark:bg-gray-800">
+                        <div className="mb-6 flex flex-col items-center justify-between gap-4 rounded-[1.25rem] border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.25)] backdrop-blur sm:flex-row dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                             <div className="text-sm text-gray-600 dark:text-gray-400">
                                 {total > 0 ? (
                                     <>
@@ -523,7 +509,7 @@ export default function PickAndDropListing() {
                             <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-[#7e246c] border-t-transparent"></div>
                         </div>
                     ) : services.length === 0 ? (
-                        <div className="rounded-lg border border-gray-200 bg-white py-12 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <div className="rounded-[1.75rem] border border-white/70 bg-white/90 py-12 text-center shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                             <MapPin className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                             <p className="text-lg text-gray-600 dark:text-gray-400">No pick and drop services found.</p>
                             <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">Try adjusting your filters or check back later.</p>
@@ -531,14 +517,19 @@ export default function PickAndDropListing() {
                     ) : (
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {services.map((service) => (
-                                <PickAndDropCard key={service.id} service={service} onClick={() => navigate(`/pick-and-drop/${service.id}`)} />
+                                <PickAndDropCard
+                                    key={service.id}
+                                    service={service}
+                                    variant="dashboard"
+                                    onClick={() => navigate(`/pick-and-drop/${service.id}`)}
+                                />
                             ))}
                         </div>
                     )}
 
                     {/* Pagination */}
                     {!loading && services.length > 0 && totalPages > 1 && (
-                        <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg sm:flex-row dark:border-gray-700 dark:bg-gray-800">
+                        <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-[1.25rem] border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.25)] backdrop-blur sm:flex-row dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                             <div className="text-sm text-gray-600 dark:text-gray-400">
                                 {total > 0 ? (
                                     <>

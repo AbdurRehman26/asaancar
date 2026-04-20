@@ -84,7 +84,7 @@ export default function RideRequestDetail() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
                 <Navbar auth={{ user }} />
                 <div className="flex min-h-screen items-center justify-center pt-20 pb-12">
                     <div className="text-center">
@@ -98,7 +98,7 @@ export default function RideRequestDetail() {
 
     if (error || !request) {
         return (
-            <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
                 <Navbar auth={{ user }} />
                 <div className="flex min-h-screen items-center justify-center pt-20 pb-12">
                     <div className="text-center">
@@ -224,7 +224,7 @@ export default function RideRequestDetail() {
     };
 
     return (
-        <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
             <SEO
                 title={`${request.start_location} to ${request.end_location} Ride Request | Asaancar`}
                 description={`Passenger needs ${request.required_seats} seat${request.required_seats !== 1 ? 's' : ''} from ${request.start_location} to ${request.end_location}.`}
@@ -237,79 +237,81 @@ export default function RideRequestDetail() {
 
             <div className="px-4 pt-20 pb-12 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-6xl space-y-8">
-                    <div className="mt-4 overflow-hidden rounded-3xl border border-[#7e246c]/15 bg-gradient-to-r from-[#7e246c] via-[#8d2b79] to-[#b14a9a] px-5 py-4 text-white shadow-xl shadow-[#7e246c]/20 sm:px-6">
-                        <div className="flex flex-col items-center gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
-                            <div className="max-w-2xl">
-                                <h2 className="text-xl font-bold sm:text-2xl">Book faster with the mobile app</h2>
-                                <p className="mt-1 hidden text-sm text-white/85 md:block">
-                                    Search routes, connect with drivers, and manage your rides on the go with the AsaanCar Android app.
-                                </p>
+                    <div className="mt-4 flex flex-col gap-4 rounded-[1.75rem] border border-white/60 bg-white/80 px-6 py-7 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.28)] backdrop-blur md:flex-row md:items-center md:justify-between dark:border-white/10 dark:bg-[#17141f]/88 dark:[background-image:linear-gradient(90deg,_rgba(23,20,31,0.94)_0%,_rgba(23,20,31,0.94)_44%,_rgba(255,255,255,0.14)_100%)] dark:shadow-none">
+                        <div className="max-w-3xl">
+                            <div className="inline-flex items-center gap-2 rounded-full bg-[#7e246c]/10 px-4 py-2 text-sm font-semibold text-[#7e246c] dark:bg-white/8 dark:text-white/80">
+                                Ride Request
                             </div>
-
+                            <h1 className="mt-4 text-4xl font-bold text-[#2b1128] dark:text-white">{request.start_location}</h1>
+                            <div className="my-2 flex justify-center md:justify-start">
+                                <ArrowRight className="h-5 w-5 text-[#9e889a] dark:text-white/40" />
+                            </div>
+                            <p className="text-2xl font-semibold text-[#5f4860] dark:text-white/78">{request.end_location}</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-4 md:items-end">
                             <a
                                 href="https://play.google.com/store/apps/details?id=com.asaancar.app"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="shrink-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                                className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
                             >
-                                <img
-                                    src="/google-play-download-android-app-logo.webp"
-                                    alt="Get it on Google Play"
-                                    className="h-16 w-auto sm:h-20 md:h-24"
-                                />
+                                <img src="/google-play-icon.png" alt="Get it on Google Play" className="h-10 w-auto sm:h-12 md:h-14" />
                             </a>
+                            <button
+                                onClick={() => navigate('/ride-requests')}
+                                className="inline-flex items-center gap-2 rounded-lg border border-[#7e246c]/20 bg-white px-5 py-3 font-medium text-[#7e246c] transition-colors hover:bg-[#fbf3fa] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                            >
+                                Back to Requests
+                            </button>
                         </div>
                     </div>
 
-                    <div className="rounded-3xl bg-white p-6 shadow-lg dark:bg-gray-800">
+                    <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                             <div className="space-y-4">
-                                <div className="inline-flex items-center gap-2 rounded-full bg-[#7e246c]/10 px-4 py-2 text-sm font-semibold text-[#7e246c] dark:bg-[#7e246c]/20 dark:text-[#d685c3]">
-                                    Ride Request
-                                </div>
                                 <div className="space-y-3">
                                     <div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">From</div>
-                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">{request.start_location}</div>
+                                        <div className="text-sm text-[#8a7286] dark:text-white/45">From</div>
+                                        <div className="text-2xl font-bold text-[#2b1128] dark:text-white">{request.start_location}</div>
                                     </div>
-                                    <ArrowRight className="h-5 w-5 text-gray-400" />
+                                    <ArrowRight className="h-5 w-5 text-[#9e889a] dark:text-white/40" />
                                     <div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">To</div>
-                                        <div className="text-2xl font-bold text-gray-900 dark:text-white">{request.end_location}</div>
+                                        <div className="text-sm text-[#8a7286] dark:text-white/45">To</div>
+                                        <div className="text-2xl font-bold text-[#2b1128] dark:text-white">{request.end_location}</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="grid gap-3 sm:grid-cols-2">
-                                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
-                                    <div className="mb-1 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div className="rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] p-4 dark:border-white/10 dark:bg-white/6">
+                                    <div className="mb-1 flex items-center gap-2 text-sm text-[#8a7286] dark:text-white/45">
                                         <Clock className="h-4 w-4" />
                                         Departure
                                     </div>
-                                    <div className="font-semibold text-gray-900 dark:text-white">
+                                    <div className="font-semibold text-[#2b1128] dark:text-white">
                                         {request.formatted_departure_time || request.departure_time}
                                     </div>
                                 </div>
-                                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
-                                    <div className="mb-1 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div className="rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] p-4 dark:border-white/10 dark:bg-white/6">
+                                    <div className="mb-1 flex items-center gap-2 text-sm text-[#8a7286] dark:text-white/45">
                                         <Users className="h-4 w-4" />
                                         Seats Needed
                                     </div>
-                                    <div className="font-semibold text-gray-900 dark:text-white">{request.required_seats}</div>
+                                    <div className="font-semibold text-[#2b1128] dark:text-white">{request.required_seats}</div>
                                 </div>
-                                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
-                                    <div className="mb-1 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div className="rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] p-4 dark:border-white/10 dark:bg-white/6">
+                                    <div className="mb-1 flex items-center gap-2 text-sm text-[#8a7286] dark:text-white/45">
                                         <User className="h-4 w-4" />
                                         Driver Preference
                                     </div>
-                                    <div className="font-semibold text-gray-900 capitalize dark:text-white">{request.preferred_driver_gender}</div>
+                                    <div className="font-semibold text-[#2b1128] capitalize dark:text-white">{request.preferred_driver_gender}</div>
                                 </div>
-                                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
-                                    <div className="mb-1 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                <div className="rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] p-4 dark:border-white/10 dark:bg-white/6">
+                                    <div className="mb-1 flex items-center gap-2 text-sm text-[#8a7286] dark:text-white/45">
                                         <MapPin className="h-4 w-4" />
                                         Budget
                                     </div>
-                                    <div className="font-semibold text-gray-900 dark:text-white">
+                                    <div className="font-semibold text-[#2b1128] dark:text-white">
                                         {request.budget_per_seat
                                             ? `${request.currency || 'PKR'} ${Math.round(request.budget_per_seat).toLocaleString()}`
                                             : 'Flexible'}
@@ -317,20 +319,11 @@ export default function RideRequestDetail() {
                                 </div>
                             </div>
                         </div>
-
-                        <div className="mt-6 flex flex-wrap gap-3">
-                            <button
-                                onClick={() => navigate('/ride-requests')}
-                                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-5 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
-                            >
-                                Back to Requests
-                            </button>
-                        </div>
                     </div>
 
                     <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
                         <div className="space-y-6">
-                            <div className="rounded-3xl bg-white p-6 shadow-lg dark:bg-gray-800">
+                            <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                                 <h2 className="mb-4 text-xl font-semibold text-[#7e246c] dark:text-white">Route Map</h2>
                                 <GoogleMap
                                     markerCandidates={routeMarkerCandidates}
@@ -342,16 +335,16 @@ export default function RideRequestDetail() {
                         </div>
 
                         <div className="space-y-6">
-                            <div className="rounded-3xl bg-white p-6 shadow-lg dark:bg-gray-800">
+                            <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                                 <h2 className="mb-4 text-xl font-semibold text-[#7e246c] dark:text-white">Requester</h2>
                                 <div className="space-y-3">
                                     <div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">Name</div>
-                                        <div className="font-semibold text-gray-900 dark:text-white">{request.name || request.user.name}</div>
+                                        <div className="text-sm text-[#8a7286] dark:text-white/45">Name</div>
+                                        <div className="font-semibold text-[#2b1128] dark:text-white">{request.name || request.user.name}</div>
                                     </div>
                                     <div>
-                                        <div className="text-sm text-gray-500 dark:text-gray-400">Schedule</div>
-                                        <div className="font-semibold text-gray-900 capitalize dark:text-white">
+                                        <div className="text-sm text-[#8a7286] dark:text-white/45">Schedule</div>
+                                        <div className="font-semibold text-[#2b1128] capitalize dark:text-white">
                                             {request.schedule_type === 'custom'
                                                 ? request.selected_days_label || request.selected_days?.join(', ')
                                                 : request.schedule_type}
@@ -391,8 +384,8 @@ export default function RideRequestDetail() {
                                             </button>
                                         </>
                                     ) : (
-                                        <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center dark:border-blue-800 dark:bg-blue-900/20">
-                                            <p className="mb-4 text-sm font-medium text-blue-800 dark:text-blue-300">
+                                        <div className="rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] p-6 text-center dark:border-white/10 dark:bg-white/6">
+                                            <p className="mb-4 text-sm font-medium text-[#6b5368] dark:text-white/70">
                                                 Login to view contact details and connect with the requester.
                                             </p>
                                             <div className="flex flex-col gap-2">
@@ -404,7 +397,7 @@ export default function RideRequestDetail() {
                                                 </button>
                                                 <button
                                                     onClick={() => navigate('/signup')}
-                                                    className="w-full px-4 py-2 text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                                                    className="w-full px-4 py-2 text-[#7d6678] transition-colors hover:text-[#2b1128] dark:text-white/55 dark:hover:text-white"
                                                 >
                                                     Create Account
                                                 </button>
@@ -415,9 +408,9 @@ export default function RideRequestDetail() {
                             </div>
 
                             {request.description ? (
-                                <div className="rounded-3xl bg-white p-6 shadow-lg dark:bg-gray-800">
+                                <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                                     <h2 className="mb-4 text-xl font-semibold text-[#7e246c] dark:text-white">Notes</h2>
-                                    <p className="whitespace-pre-wrap text-gray-600 dark:text-gray-300">{request.description}</p>
+                                    <p className="whitespace-pre-wrap text-[#6f556c] dark:text-white/65">{request.description}</p>
                                 </div>
                             ) : null}
                         </div>

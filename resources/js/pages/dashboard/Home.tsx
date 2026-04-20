@@ -1,16 +1,30 @@
-import { useState, useEffect } from 'react';
-import { MessageSquare, Users, Mail } from 'lucide-react';
 import { useAuth } from '@/components/AuthContext';
+import {
+    DashboardEmptyState,
+    DashboardHero,
+    DashboardPage,
+    DashboardPanel,
+    DashboardPrimaryLink,
+    DashboardSecondaryButton,
+    DashboardStatCard,
+} from '@/components/dashboard-shell';
+import { Mail, MessageSquare, Plus, Route, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Home() {
     const { user } = useAuth();
     const [stats, setStats] = useState({ messages: 0, users: 0, inquiries: 0 });
     const [statsLoading, setStatsLoading] = useState(false);
     const [statsError, setStatsError] = useState<string | null>(null);
+    const isAdmin = Boolean(user?.roles?.includes('admin'));
 
     useEffect(() => {
         async function fetchStats() {
-            if (!user) return;
+            if (!user) {
+                return;
+            }
+
             setStatsLoading(true);
             setStatsError(null);
 
@@ -28,10 +42,10 @@ export default function Home() {
                         messagesData = await messagesRes.json();
                     }
                 } catch {
-                    // ignore
+                    // ignore individual widget failures
                 }
 
-                if (user?.roles?.includes('admin')) {
+                if (isAdmin) {
                     try {
                         const usersRes = await fetch('/api/admin/users/stats', {
                             headers: { Authorization: `Bearer ${token}` },
@@ -40,7 +54,7 @@ export default function Home() {
                             usersData = await usersRes.json();
                         }
                     } catch {
-                        // ignore
+                        // ignore individual widget failures
                     }
                 }
 
@@ -52,7 +66,7 @@ export default function Home() {
                         inquiriesData = await inquiriesRes.json();
                     }
                 } catch {
-                    // ignore
+                    // ignore individual widget failures
                 }
 
                 setStats({
@@ -61,75 +75,136 @@ export default function Home() {
                     inquiries: inquiriesData.total_inquiries || 0,
                 });
             } catch {
-                setStatsError('Failed to load statistics. Please try again.');
+                setStatsError('Failed to load dashboard statistics. Please try again in a moment.');
             } finally {
                 setStatsLoading(false);
             }
         }
-        fetchStats();
-    }, [user]);
+
+        void fetchStats();
+    }, [isAdmin, user]);
 
     return (
-        <div className="max-w-7xl px-4 sm:px-8 lg:px-12 py-6">
+        <DashboardPage>
+            <DashboardHero
+                eyebrow="Workspace overview"
+                title={`Welcome back${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
+                description="Everything you need to manage rides, ride requests, conversations, and account settings now lives in one calmer, more focused workspace."
+                actions={
+                    <>
+                        <DashboardPrimaryLink to="/dashboard/pick-and-drop/create">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add a ride
+                        </DashboardPrimaryLink>
+                        <DashboardSecondaryButton onClick={() => (window.location.href = '/dashboard/ride-requests/create')}>
+                            <Route className="mr-2 h-4 w-4" />
+                            Request a ride
+                        </DashboardSecondaryButton>
+                    </>
+                }
+            />
+
             {statsError ? (
-                <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <p className="text-red-600 dark:text-red-400">{statsError}</p>
-                </div>
-            ) : (
-                <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.roles?.includes('admin') ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-6 mb-8`}>
-                    <div className="flex items-center gap-4 rounded-2xl border border-gray-300 dark:border-neutral-800 bg-white dark:bg-gray-800/80 p-6 shadow-lg">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
-                            <MessageSquare className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <div className="text-2xl font-bold text-[#7e246c]">
-                                {statsLoading ? (
-                                    <div className="w-8 h-8 border-2 border-[#7e246c] border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                    stats.messages
-                                )}
-                            </div>
-                            <div className="text-gray-700 dark:text-gray-300">Messages</div>
-                        </div>
-                    </div>
-                    {user?.roles?.includes('admin') && (
-                        <div className="flex items-center gap-4 rounded-2xl border border-gray-300 dark:border-neutral-800 bg-white dark:bg-gray-800/80 p-6 shadow-lg">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
-                                <Users className="h-6 w-6" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-bold text-[#7e246c]">
-                                    {statsLoading ? (
-                                        <div className="w-8 h-8 border-2 border-[#7e246c] border-t-transparent rounded-full animate-spin" />
-                                    ) : (
-                                        stats.users
-                                    )}
-                                </div>
-                                <div className="text-gray-700 dark:text-gray-300">Users</div>
-                            </div>
-                        </div>
-                    )}
-                    <div className="flex items-center gap-4 rounded-2xl border border-gray-300 dark:border-neutral-800 bg-white dark:bg-gray-800/80 p-6 shadow-lg">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#7e246c]/10 text-[#7e246c] dark:bg-[#7e246c]/20">
-                            <Mail className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <div className="text-2xl font-bold text-[#7e246c]">
-                                {statsLoading ? (
-                                    <div className="w-8 h-8 border-2 border-[#7e246c] border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                    stats.inquiries
-                                )}
-                            </div>
-                            <div className="text-gray-700 dark:text-gray-300">Inquiries</div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            <div className="rounded-2xl bg-white/80 dark:bg-gray-800/80 border border-gray-300 dark:border-neutral-800 shadow-lg p-10 text-center">
-                <h2 className="text-3xl font-bold text-[#7e246c] dark:text-white mb-4">Welcome to your Dashboard</h2>
-                <p className="text-lg text-gray-700 dark:text-gray-300">Select an option from the sidebar to get started.</p>
+                <DashboardPanel title="Dashboard status">
+                    <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
+                        {statsError}
+                    </p>
+                </DashboardPanel>
+            ) : null}
+
+            <section className={`grid grid-cols-1 gap-4 ${isAdmin ? 'xl:grid-cols-3' : 'md:grid-cols-2'}`}>
+                <DashboardStatCard
+                    icon={
+                        statsLoading ? (
+                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        ) : (
+                            <MessageSquare className="h-5 w-5" />
+                        )
+                    }
+                    label="Active conversations"
+                    value={statsLoading ? '...' : stats.messages}
+                    hint="Pick & drop and ride request chats"
+                />
+                {isAdmin ? (
+                    <DashboardStatCard
+                        icon={
+                            statsLoading ? (
+                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            ) : (
+                                <Users className="h-5 w-5" />
+                            )
+                        }
+                        label="Users"
+                        value={statsLoading ? '...' : stats.users}
+                        hint="Registered members on the platform"
+                    />
+                ) : null}
+                <DashboardStatCard
+                    icon={
+                        statsLoading ? (
+                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        ) : (
+                            <Mail className="h-5 w-5" />
+                        )
+                    }
+                    label="Inquiries"
+                    value={statsLoading ? '...' : stats.inquiries}
+                    hint="Customer messages and contact requests"
+                />
+            </section>
+
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.25fr_0.95fr]">
+                <DashboardPanel
+                    title="Quick actions"
+                    description="Jump straight into the tasks people do most often in the dashboard."
+                    contentClassName="grid gap-4 md:grid-cols-2"
+                >
+                    <Link
+                        to="/dashboard/pick-and-drop"
+                        className="rounded-[1.5rem] border border-[#7e246c]/10 bg-[#fcf7fb] p-5 transition hover:border-[#7e246c]/25 hover:bg-[#faf1f8] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
+                    >
+                        <p className="text-sm font-semibold text-[#2b1128] dark:text-white">Manage your rides</p>
+                        <p className="mt-2 text-sm leading-6 text-[#7d6678] dark:text-white/65">
+                            Review listings, refine availability, and keep your routes up to date.
+                        </p>
+                    </Link>
+                    <Link
+                        to="/dashboard/ride-requests"
+                        className="rounded-[1.5rem] border border-[#7e246c]/10 bg-[#fcf7fb] p-5 transition hover:border-[#7e246c]/25 hover:bg-[#faf1f8] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
+                    >
+                        <p className="text-sm font-semibold text-[#2b1128] dark:text-white">Monitor ride requests</p>
+                        <p className="mt-2 text-sm leading-6 text-[#7d6678] dark:text-white/65">
+                            See what riders need right now and keep your demand view organized.
+                        </p>
+                    </Link>
+                    <Link
+                        to="/dashboard/pick-and-drop-chat"
+                        className="rounded-[1.5rem] border border-[#7e246c]/10 bg-[#fcf7fb] p-5 transition hover:border-[#7e246c]/25 hover:bg-[#faf1f8] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
+                    >
+                        <p className="text-sm font-semibold text-[#2b1128] dark:text-white">Continue conversations</p>
+                        <p className="mt-2 text-sm leading-6 text-[#7d6678] dark:text-white/65">
+                            Pick up where you left off with riders and drivers in one place.
+                        </p>
+                    </Link>
+                    <Link
+                        to="/dashboard/profile"
+                        className="rounded-[1.5rem] border border-[#7e246c]/10 bg-[#fcf7fb] p-5 transition hover:border-[#7e246c]/25 hover:bg-[#faf1f8] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
+                    >
+                        <p className="text-sm font-semibold text-[#2b1128] dark:text-white">Update your profile</p>
+                        <p className="mt-2 text-sm leading-6 text-[#7d6678] dark:text-white/65">
+                            Keep your personal details, avatar, and password current.
+                        </p>
+                    </Link>
+                </DashboardPanel>
+
+                <DashboardPanel title="Workspace guidance" description="A quick reminder of what each section is for.">
+                    <DashboardEmptyState
+                        icon={<Route className="h-6 w-6" />}
+                        title="Use the sidebar as your command center"
+                        description="Create rides, browse ride requests, respond to inquiries, and manage your profile from the left navigation. The redesigned sections keep the most important actions closer to the top."
+                    />
+                </DashboardPanel>
             </div>
-        </div>
+        </DashboardPage>
     );
 }

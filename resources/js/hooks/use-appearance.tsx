@@ -35,11 +35,11 @@ const mediaQuery = () => {
 
 const handleSystemThemeChange = () => {
     const currentAppearance = localStorage.getItem('appearance') as Appearance;
-    applyTheme(currentAppearance || 'light');
+    applyTheme(currentAppearance || 'dark');
 };
 
 export function initializeTheme() {
-    const currentAppearance = (localStorage.getItem('appearance') as Appearance) || 'light';
+    const currentAppearance = (localStorage.getItem('appearance') as Appearance) || 'dark';
     applyTheme(currentAppearance);
 
     // Add the event listener for system theme changes...
@@ -48,12 +48,12 @@ export function initializeTheme() {
 
 export function useAppearance() {
     const [appearance, setAppearance] = useState<Appearance>(() => {
-        // Initialize with the saved appearance or default to light
+        // Initialize with the saved appearance or default to dark
         if (typeof window !== 'undefined') {
             const saved = localStorage.getItem('appearance') as Appearance;
-            return saved || 'light';
+            return saved || 'dark';
         }
-        return 'light';
+        return 'dark';
     });
 
     const updateAppearance = useCallback((mode: Appearance) => {

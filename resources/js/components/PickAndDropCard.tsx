@@ -1,5 +1,5 @@
+import { ChevronDown, ChevronUp, Clock, MapPin, Users } from 'lucide-react';
 import React, { useState } from 'react';
-import { MapPin, Users, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface PickAndDropStop {
     id: number;
@@ -11,7 +11,8 @@ interface PickAndDropStop {
 
 export interface PickAndDropService {
     id: number;
-    user?: { // Made optional and flexible to handle both listing and welcome page data structures
+    user?: {
+        // Made optional and flexible to handle both listing and welcome page data structures
         id: number;
         name: string;
         email?: string;
@@ -55,9 +56,10 @@ interface PickAndDropCardProps {
     onDelete?: () => void;
     showDetails?: boolean; // Toggle for "View Details" button presence if needed elsewhere
     className?: string;
+    variant?: 'default' | 'dashboard';
 }
 
-const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onEdit, onDelete, className = '' }) => {
+const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onEdit, onDelete, className = '', variant = 'default' }) => {
     const [stopsExpanded, setStopsExpanded] = useState(true);
 
     const handleStopsClick = (e: React.MouseEvent) => {
@@ -67,6 +69,7 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onE
 
     const currency = service.currency || 'PKR';
     const price = service.price_per_person ? Math.round(service.price_per_person).toLocaleString() : null;
+    const isDashboard = variant === 'dashboard';
 
     // Helper to get consistent user name
     const userName = service.name || service.user?.name || 'Driver';
@@ -75,62 +78,102 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onE
     return (
         <div
             onClick={onClick}
-            className={`group flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:border-[#7e246c]/30 dark:hover:border-[#7e246c]/50 transition-all duration-300 overflow-hidden cursor-pointer ${className}`}
+            className={`group flex cursor-pointer flex-col overflow-hidden rounded-[1.75rem] border transition-all duration-300 ${
+                isDashboard
+                    ? 'border-white/70 bg-white/95 shadow-[0_20px_45px_-32px_rgba(126,36,108,0.55)] ring-1 ring-[#7e246c]/6 hover:-translate-y-0.5 hover:border-[#7e246c]/20 hover:shadow-[0_28px_60px_-34px_rgba(126,36,108,0.65)] dark:border-white/10 dark:bg-[#191520] dark:ring-white/5 dark:hover:border-white/15'
+                    : 'border-gray-100 bg-white shadow-sm hover:border-[#7e246c]/30 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800 dark:hover:border-[#7e246c]/50'
+            } ${className}`}
         >
             {/* Header / Route Section */}
             <div className="p-5 pb-0">
-                <div className="flex flex-col gap-4 relative">
+                <div className="relative flex flex-col gap-4">
                     {/* Route Visualizer */}
-                    <div className="flex flex-col gap-2 relative z-10">
+                    <div className="relative z-10 flex flex-col gap-2">
                         {/* Start Location */}
                         <div className="flex items-start gap-3">
                             <div className="mt-1 flex flex-col items-center gap-1">
-                                <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_0_4px_rgba(34,197,94,0.15)] ring-2 ring-white dark:ring-gray-800"></div>
-                                <div className="w-0.5 h-10 bg-gradient-to-b from-green-500/50 to-gray-200 dark:to-gray-700"></div>
+                                <div
+                                    className={`h-3 w-3 rounded-full bg-green-500 shadow-[0_0_0_4px_rgba(34,197,94,0.15)] ring-2 ${
+                                        isDashboard ? 'ring-[#fff8fe] dark:ring-[#191520]' : 'ring-white dark:ring-gray-800'
+                                    }`}
+                                ></div>
+                                <div
+                                    className={`h-10 w-0.5 bg-gradient-to-b from-green-500/50 ${isDashboard ? 'to-[#e6d5e4] dark:to-white/15' : 'to-gray-200 dark:to-gray-700'}`}
+                                ></div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="text-base font-bold w-60 text-gray-900 dark:text-white leading-tight">
+                                <h3
+                                    className={`w-60 text-base leading-tight font-bold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
+                                >
                                     {service.start_location}
                                 </h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Start Point</p>
+                                <p
+                                    className={`mt-0.5 text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
+                                >
+                                    Start Point
+                                </p>
                             </div>
                         </div>
 
                         {/* Stops Summary (if any) */}
                         {service.stops && service.stops.length > 0 && (
-                            <div className="flex items-start gap-3 -mt-2 mb-0">
-                                <div className="ml-[5px] w-0.5 h-6 bg-gray-200 dark:bg-gray-700"></div>
+                            <div className="-mt-2 mb-0 flex items-start gap-3">
+                                <div
+                                    className={`ml-[5px] h-6 w-0.5 ${isDashboard ? 'bg-[#eadfeb] dark:bg-white/10' : 'bg-gray-200 dark:bg-gray-700'}`}
+                                ></div>
                                 <div className="flex-1">
                                     <button
                                         onClick={handleStopsClick}
-                                        className="text-xs font-medium text-[#7e246c] dark:text-[#9d4edd] flex items-center gap-1 hover:underline bg-[#7e246c]/5 px-2 py-1 rounded-md w-fit transition-colors"
+                                        className={`flex w-fit items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors hover:underline ${
+                                            isDashboard
+                                                ? 'bg-[#7e246c]/8 text-[#7e246c] dark:bg-white/8 dark:text-white/80'
+                                                : 'bg-[#7e246c]/5 text-[#7e246c] dark:text-[#9d4edd]'
+                                        }`}
                                     >
                                         {service.stops.length} Stop{service.stops.length !== 1 ? 's' : ''} in between
-                                        {stopsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                        {stopsExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                                     </button>
                                 </div>
                             </div>
                         )}
 
                         {/* End Location */}
-                        <div className="flex items-start gap-3 -mt-1">
+                        <div className="-mt-1 flex items-start gap-3">
                             <div className="mt-1 flex flex-col items-center">
-                                <MapPin className="w-4 h-4 text-[#7e246c] fill-[#7e246c]/10" />
+                                <MapPin className="h-4 w-4 fill-[#7e246c]/10 text-[#7e246c]" />
                             </div>
                             <div className="flex-1">
-                                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight">
+                                <h3
+                                    className={`text-base leading-tight font-bold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
+                                >
                                     {service.end_location}
                                 </h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Destination</p>
+                                <p
+                                    className={`mt-0.5 text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
+                                >
+                                    Destination
+                                </p>
                             </div>
                         </div>
                     </div>
 
                     {/* Price Tag (Top Right) */}
                     {price && (
-                        <div className="absolute top-0 right-0 bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-600">
-                            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">Per Person</div>
-                            <div className="text-lg font-bold text-[#7e246c] dark:text-[#9d4edd]">
+                        <div
+                            className={`absolute top-0 right-0 rounded-xl border px-3 py-1.5 ${
+                                isDashboard
+                                    ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
+                                    : 'border-gray-100 bg-gray-50 dark:border-gray-600 dark:bg-gray-700/50'
+                            }`}
+                        >
+                            <div
+                                className={`text-xs font-medium ${isDashboard ? 'text-[#887086] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
+                            >
+                                Per Person
+                            </div>
+                            <div
+                                className={`text-lg font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#9d4edd]'}`}
+                            >
                                 {currency} {price}
                             </div>
                         </div>
@@ -139,66 +182,96 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onE
             </div>
 
             {/* Expansible Stops List */}
-            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${stopsExpanded ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div className="mx-5 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 text-sm space-y-2 mt-2 border border-dashed border-gray-200 dark:border-gray-700">
+            <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${stopsExpanded ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}
+            >
+                <div
+                    className={`mx-5 mt-2 space-y-2 rounded-lg border border-dashed p-3 text-sm ${
+                        isDashboard
+                            ? 'border-[#e7d8e6] bg-[#fbf6fb] dark:border-white/10 dark:bg-white/4'
+                            : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50'
+                    }`}
+                >
                     {service.stops?.map((stop, index) => (
-                        <div key={stop.id || index} className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                            <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+                        <div
+                            key={stop.id || index}
+                            className={`flex items-center gap-2 ${isDashboard ? 'text-[#6f556c] dark:text-white/70' : 'text-gray-600 dark:text-gray-300'}`}
+                        >
+                            <div
+                                className={`h-1.5 w-1.5 rounded-full ${isDashboard ? 'bg-[#c8afc6] dark:bg-white/35' : 'bg-gray-300 dark:bg-gray-600'}`}
+                            ></div>
                             <span className="flex-1 truncate">{stop.location}</span>
-                            <span className="text-xs text-gray-400 whitespace-nowrap">{stop.stop_time}</span>
+                            <span className={`text-xs whitespace-nowrap ${isDashboard ? 'text-[#a893a6] dark:text-white/35' : 'text-gray-400'}`}>
+                                {stop.stop_time}
+                            </span>
                         </div>
                     ))}
                 </div>
             </div>
 
             {/* Key Info Chips */}
-            <div className="px-5 py-4 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 px-5 py-4">
                 {/* Time */}
-                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${service.is_everyday
-                    ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800/30'
-                    : 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
-                    }`}>
-                    <Clock className="w-3 h-3" />
-                    {service.schedule_type == 'once' ? 'On' : service.schedule_type == 'custom' ? service.selected_days : service.schedule_type.toUpperCase()} • {service.formatted_departure_time || service.departure_time}
+                <div
+                    className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${
+                        service.is_everyday
+                            ? 'border-blue-100 bg-blue-50 text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/20 dark:text-blue-300'
+                            : 'border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                    }`}
+                >
+                    <Clock className="h-3 w-3" />
+                    {service.schedule_type == 'once'
+                        ? 'On'
+                        : service.schedule_type == 'custom'
+                          ? service.selected_days
+                          : service.schedule_type.toUpperCase()}{' '}
+                    • {service.formatted_departure_time || service.departure_time}
                 </div>
 
                 {/* Spaces */}
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-orange-50 text-orange-700 border border-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:border-orange-800/30">
-                    <Users className="w-3 h-3" />
+                <div className="inline-flex items-center gap-1.5 rounded-md border border-orange-100 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700 dark:border-orange-800/30 dark:bg-orange-900/20 dark:text-orange-300">
+                    <Users className="h-3 w-3" />
                     {service.available_spaces} Seat{service.available_spaces !== 1 ? 's' : ''} left
                 </div>
 
                 {/* Gender (if available) */}
                 {service.driver_gender && (
-                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${service.driver_gender === 'female'
-                        ? 'bg-pink-50 text-pink-700 border-pink-100 dark:bg-pink-900/20 dark:text-pink-300 dark:border-pink-800/30'
-                        : 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800/30'
-                        }`}>
+                    <div
+                        className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${
+                            service.driver_gender === 'female'
+                                ? 'border-pink-100 bg-pink-50 text-pink-700 dark:border-pink-800/30 dark:bg-pink-900/20 dark:text-pink-300'
+                                : 'border-indigo-100 bg-indigo-50 text-indigo-700 dark:border-indigo-800/30 dark:bg-indigo-900/20 dark:text-indigo-300'
+                        }`}
+                    >
                         {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender === 'female' ? 'Female' : 'Male'} Driver
                     </div>
                 )}
 
                 {/* Round Trip */}
                 {service.is_roundtrip && (
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-100 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800/30">
-                        🔄 Round Trip {(service.formatted_return_time || service.return_time) && `• Return: ${service.formatted_return_time || service.return_time}`}
+                    <div className="inline-flex items-center gap-1.5 rounded-md border border-green-100 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 dark:border-green-800/30 dark:bg-green-900/20 dark:text-green-300">
+                        🔄 Round Trip{' '}
+                        {(service.formatted_return_time || service.return_time) &&
+                            `• Return: ${service.formatted_return_time || service.return_time}`}
                     </div>
                 )}
             </div>
 
             {/* Separator */}
-            <div className="h-px bg-gray-100 dark:bg-gray-700 mx-5"></div>
+            <div className={`mx-5 h-px ${isDashboard ? 'bg-[#efe4ee] dark:bg-white/8' : 'bg-gray-100 dark:bg-gray-700'}`}></div>
 
             {/* Footer / Car Info */}
-            <div className="p-5 pt-4 mt-auto">
+            <div className="mt-auto p-5 pt-4">
                 {/* Car Info */}
-                {(service.car_brand || (service.car && service.car.name)) ? (
+                {service.car_brand || (service.car && service.car.name) ? (
                     <div className="mb-4">
-                        <div className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Vehicle</div>
-                        <div className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                        <div className="mb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">Vehicle</div>
+                        <div className="flex items-center gap-2 text-sm font-medium text-gray-800 dark:text-gray-200">
                             <span>🚗</span>
                             {service.car_brand ? (
-                                <span>{service.car_brand} {service.car_model} <span className="text-gray-400 font-normal">({service.car_color})</span></span>
+                                <span>
+                                    {service.car_brand} {service.car_model} <span className="font-normal text-gray-400">({service.car_color})</span>
+                                </span>
                             ) : (
                                 <span>{service.car?.name || 'Standard Vehicle'}</span>
                             )}
@@ -214,29 +287,42 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onE
                 {/* Driver & CTA */}
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 overflow-hidden">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-400">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-500 dark:bg-gray-700 dark:text-gray-400">
                             {userName.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex flex-col truncate">
-                            <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">{userName}</span>
-                            {userPhone && <span className="text-xs text-gray-500 truncate">{userPhone}</span>}
+                            <span
+                                className={`truncate text-sm font-semibold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
+                            >
+                                {userName}
+                            </span>
+                            {userPhone && (
+                                <span className={`truncate text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500'}`}>
+                                    {userPhone}
+                                </span>
+                            )}
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         {(onEdit || onDelete) && (
-                            <div className="flex gap-1 mr-2">
+                            <div className="mr-2 flex gap-1">
                                 {onEdit && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onEdit();
                                         }}
-                                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                        className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                         title="Edit"
                                     >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                            />
                                         </svg>
                                     </button>
                                 )}
@@ -246,18 +332,27 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onE
                                             e.stopPropagation();
                                             onDelete();
                                         }}
-                                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
                                         title="Delete"
                                     >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                            />
                                         </svg>
                                     </button>
                                 )}
                             </div>
                         )}
                         <button
-                            className="shrink-0 px-4 py-2 bg-[#7e246c] hover:bg-[#6a1f5c] text-white text-sm font-semibold rounded-lg transition-colors shadow-sm dark:shadow-none"
+                            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                                isDashboard
+                                    ? 'bg-gradient-to-r from-[#7e246c] to-[#9d3d88] shadow-[0_16px_35px_-20px_rgba(126,36,108,0.8)] hover:from-[#6f205e] hover:to-[#8b3578]'
+                                    : 'bg-[#7e246c] shadow-sm hover:bg-[#6a1f5c] dark:shadow-none'
+                            }`}
                         >
                             View Details
                         </button>

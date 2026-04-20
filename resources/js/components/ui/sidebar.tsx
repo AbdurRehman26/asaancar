@@ -163,10 +163,10 @@ function Sidebar({
 
   if (collapsible === "none") {
     return (
-      <div
-        data-slot="sidebar"
-        className={cn(
-          "bg-white/80 dark:bg-gray-800/80 border-r border-gray-100 dark:border-neutral-800 text-sidebar-foreground flex h-full w-[var(--sidebar-width)] flex-col",
+        <div
+          data-slot="sidebar"
+          className={cn(
+          "flex h-full w-[var(--sidebar-width)] flex-col border-r border-[#eadfeb] bg-[linear-gradient(180deg,_rgba(255,253,255,0.98)_0%,_rgba(246,239,248,0.98)_100%)] text-[#2f2231] shadow-[0_30px_80px_-50px_rgba(126,36,108,0.2)] dark:border-white/10 dark:bg-[linear-gradient(180deg,_rgba(28,18,34,0.98)_0%,_rgba(19,15,25,0.98)_100%)] dark:text-white dark:shadow-[0_30px_80px_-50px_rgba(0,0,0,0.75)]",
           className
         )}
         {...props}
@@ -187,7 +187,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-white/80 dark:bg-gray-800/80 border-r border-gray-100 dark:border-neutral-800 text-sidebar-foreground w-[var(--sidebar-width)] p-0 pt-16 [&>button]:hidden"
+          className="w-[var(--sidebar-width)] border-r border-[#eadfeb] bg-[linear-gradient(180deg,_rgba(255,253,255,0.98)_0%,_rgba(246,239,248,0.98)_100%)] p-0 pt-16 text-[#2f2231] dark:border-white/10 dark:bg-[linear-gradient(180deg,_rgba(28,18,34,0.98)_0%,_rgba(19,15,25,0.98)_100%)] dark:text-white [&>button]:hidden"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -205,7 +205,7 @@ function Sidebar({
     <div
       data-slot="sidebar"
       className={cn(
-        "fixed top-[66px] left-0 z-40 bg-white/80 dark:bg-gray-800/80 border-r border-gray-100 dark:border-neutral-800 text-sidebar-foreground flex h-[calc(100vh-4rem)] w-64 flex-col",
+        "fixed top-[66px] left-0 z-40 flex h-[calc(100vh-4rem)] w-64 flex-col border-r border-[#eadfeb] bg-[linear-gradient(180deg,_rgba(255,253,255,0.98)_0%,_rgba(246,239,248,0.98)_100%)] text-[#2f2231] shadow-[0_30px_80px_-50px_rgba(126,36,108,0.22)] dark:border-white/10 dark:bg-[linear-gradient(180deg,_rgba(28,18,34,0.98)_0%,_rgba(19,15,25,0.98)_100%)] dark:text-white dark:shadow-[0_30px_80px_-50px_rgba(0,0,0,0.85)]",
         className
       )}
       {...props}

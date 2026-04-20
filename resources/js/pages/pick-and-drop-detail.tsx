@@ -181,12 +181,12 @@ export default function PickAndDropDetail() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
                 <Navbar auth={{ user }} />
                 <div className="flex min-h-screen items-center justify-center pt-20 pb-12">
-                    <div className="text-center">
+                    <div className="rounded-[1.75rem] border border-white/70 bg-white/85 px-8 py-10 text-center shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                         <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-2 border-[#7e246c] border-t-transparent"></div>
-                        <p className="text-gray-600 dark:text-gray-400">Loading service details...</p>
+                        <p className="text-[#6b5368] dark:text-white/65">Loading service details...</p>
                     </div>
                 </div>
             </div>
@@ -195,14 +195,14 @@ export default function PickAndDropDetail() {
 
     if (error || !service) {
         return (
-            <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
                 <Navbar auth={{ user }} />
                 <div className="flex min-h-screen items-center justify-center pt-20 pb-12">
-                    <div className="text-center">
+                    <div className="rounded-[1.75rem] border border-white/70 bg-white/85 px-8 py-10 text-center shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                         <p className="mb-4 text-lg text-red-600 dark:text-red-400">{error || 'Service not found'}</p>
                         <button
                             onClick={() => navigate('/pick-and-drop')}
-                            className="rounded-lg bg-[#7e246c] px-6 pt-4 text-white transition-colors hover:bg-[#6a1f5c]"
+                            className="rounded-lg bg-[#7e246c] px-6 py-3 text-white transition-colors hover:bg-[#6a1f5c]"
                         >
                             Back to Listing
                         </button>
@@ -313,7 +313,7 @@ export default function PickAndDropDetail() {
     const routePath = routeMarkers.length === routeMarkerCandidates.length ? routeMarkers.map((marker) => marker.position) : [];
 
     return (
-        <div className="min-h-screen bg-neutral-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
             <SEO
                 title={seoTitle}
                 description={seoDescription}
@@ -326,21 +326,42 @@ export default function PickAndDropDetail() {
 
             <div className="px-4 pt-20 pb-12 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-5xl">
-                    {/* Back Button */}
-                    <button
-                        onClick={() => navigate('/pick-and-drop')}
-                        className="mb-6 flex items-center gap-2 pt-4 text-gray-600 transition-all hover:text-[#7e246c] hover:underline dark:text-gray-400"
-                    >
-                        <ArrowRight className="h-4 w-4 rotate-180" />
-                        Back to Listing
-                    </button>
+                    <div className="mt-4 mb-8 flex flex-col gap-4 rounded-[1.75rem] border border-white/60 bg-white/80 px-6 py-7 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.28)] backdrop-blur md:flex-row md:items-center md:justify-between dark:border-white/10 dark:bg-[#17141f]/88 dark:[background-image:linear-gradient(90deg,_rgba(23,20,31,0.94)_0%,_rgba(23,20,31,0.94)_44%,_rgba(255,255,255,0.14)_100%)] dark:shadow-none">
+                        <div className="max-w-3xl text-center md:text-left">
+                            <div className="inline-flex items-center gap-2 rounded-full bg-[#7e246c]/10 px-4 py-2 text-sm font-semibold text-[#7e246c] dark:bg-white/8 dark:text-white/80">
+                                Route Details
+                            </div>
+                            <h1 className="mt-4 text-4xl font-bold text-[#2b1128] dark:text-white">{service.start_location}</h1>
+                            <div className="my-2 flex justify-center md:justify-start">
+                                <ArrowRight className="h-5 w-5 text-[#9e889a] dark:text-white/40" />
+                            </div>
+                            <p className="text-2xl font-semibold text-[#5f4860] dark:text-white/78">{service.end_location}</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-4 md:items-end">
+                            <a
+                                href="https://play.google.com/store/apps/details?id=com.asaancar.app"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c]"
+                            >
+                                <img src="/google-play-icon.png" alt="Get it on Google Play" className="h-10 w-auto sm:h-12 md:h-14" />
+                            </a>
+                            <button
+                                onClick={() => navigate('/pick-and-drop')}
+                                className="inline-flex items-center gap-2 rounded-lg border border-[#7e246c]/20 bg-white px-5 py-3 font-medium text-[#7e246c] transition-colors hover:bg-[#fbf3fa] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                            >
+                                <ArrowRight className="h-4 w-4 rotate-180" />
+                                Back to Listing
+                            </button>
+                        </div>
+                    </div>
 
-                    <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                    <div className="overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/90 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                         {/* Header Section */}
-                        <div className="border-b border-gray-100 bg-gray-50 p-8 dark:border-gray-700 dark:bg-gray-900/50">
+                        <div className="border-b border-[#7e246c]/8 p-8 dark:border-white/10">
                             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
                                 <div className="flex-1">
-                                    <h1 className="mb-4 text-2xl font-bold text-gray-900 md:text-3xl dark:text-white">Route Details</h1>
+                                    <h1 className="mb-4 text-2xl font-bold text-[#2b1128] md:text-3xl dark:text-white">Route Details</h1>
 
                                     {/* Visual Route */}
                                     <div className="relative pl-2">
@@ -354,7 +375,7 @@ export default function PickAndDropDetail() {
                                                 <h3 className="text-xl leading-tight font-bold text-gray-900 dark:text-white">
                                                     {service.start_location}
                                                 </h3>
-                                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Start Point</p>
+                                                <p className="mt-1 text-sm text-[#8a7286] dark:text-white/45">Start Point</p>
                                             </div>
                                         </div>
 
@@ -362,11 +383,11 @@ export default function PickAndDropDetail() {
                                         {service.stops && service.stops.length > 0 && (
                                             <div className="relative z-10">
                                                 <div className="mb-6 flex items-center gap-4">
-                                                    <div className="absolute top-0 bottom-0 left-[9px] -z-10 h-full w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+                                                    <div className="absolute top-0 bottom-0 left-[9px] -z-10 h-full w-0.5 bg-[#eadfeb] dark:bg-white/10"></div>
                                                     <div className="-mt-4 ml-[9px] w-full pl-8">
                                                         <button
                                                             onClick={() => setShowStops(!showStops)}
-                                                            className="flex w-fit items-center gap-2 rounded-full bg-[#7e246c]/5 px-3 py-1.5 text-sm font-medium text-[#7e246c] transition-colors hover:bg-[#7e246c]/10"
+                                                            className="flex w-fit items-center gap-2 rounded-full bg-[#7e246c]/8 px-3 py-1.5 text-sm font-medium text-[#7e246c] transition-colors hover:bg-[#7e246c]/12 dark:bg-white/8 dark:text-white/80"
                                                         >
                                                             {service.stops.length} Stop{service.stops.length !== 1 ? 's' : ''} in between
                                                             {showStops ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -376,21 +397,23 @@ export default function PickAndDropDetail() {
                                                             className={`grid transition-all duration-300 ease-in-out ${showStops ? 'mt-3 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
                                                         >
                                                             <div className="overflow-hidden">
-                                                                <div className="ml-2 space-y-4 border-l-2 border-dashed border-gray-200 py-1 pl-4 dark:border-gray-700">
+                                                                <div className="ml-2 space-y-4 border-l-2 border-dashed border-[#eadfeb] py-1 pl-4 dark:border-white/10">
                                                                     {sortedStops.map((stop, index) => (
                                                                         <div key={stop.id || index} className="relative">
-                                                                            <div className="absolute top-2 -left-[21px] h-2.5 w-2.5 rounded-full bg-gray-300 ring-4 ring-white dark:bg-gray-600 dark:ring-gray-800"></div>
-                                                                            <div className="font-medium text-gray-900 dark:text-white">
+                                                                            <div className="absolute top-2 -left-[21px] h-2.5 w-2.5 rounded-full bg-[#c8afc6] ring-4 ring-white dark:bg-white/35 dark:ring-[#17141f]"></div>
+                                                                            <div className="font-medium text-[#2b1128] dark:text-white">
                                                                                 {stop.location ||
                                                                                     stop.area?.name ||
                                                                                     stop.city?.name ||
                                                                                     'Location not specified'}
                                                                             </div>
-                                                                            <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
+                                                                            <div className="mt-0.5 flex items-center gap-2 text-xs text-[#8a7286] dark:text-white/45">
                                                                                 <Clock className="h-3 w-3" /> {stop.stop_time}
                                                                             </div>
                                                                             {stop.notes && (
-                                                                                <p className="mt-1 text-xs text-gray-500 italic">"{stop.notes}"</p>
+                                                                                <p className="mt-1 text-xs text-[#8a7286] italic dark:text-white/45">
+                                                                                    "{stop.notes}"
+                                                                                </p>
                                                                             )}
                                                                         </div>
                                                                     ))}
@@ -408,10 +431,10 @@ export default function PickAndDropDetail() {
                                                 <MapPin className="h-5 w-5 fill-[#7e246c]/10 text-[#7e246c]" />
                                             </div>
                                             <div>
-                                                <h3 className="text-xl leading-tight font-bold text-gray-900 dark:text-white">
+                                                <h3 className="text-xl leading-tight font-bold text-[#2b1128] dark:text-white">
                                                     {service.end_location}
                                                 </h3>
-                                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Destination</p>
+                                                <p className="mt-1 text-sm text-[#8a7286] dark:text-white/45">Destination</p>
                                             </div>
                                         </div>
                                     </div>
@@ -420,9 +443,9 @@ export default function PickAndDropDetail() {
                                 {/* Price & Quick Stats */}
                                 <div className="flex min-w-[200px] shrink-0 flex-col gap-4">
                                     {service.price_per_person && (
-                                        <div className="rounded-xl border border-gray-100 bg-white p-4 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Per Person</p>
-                                            <div className="mt-1 text-3xl font-bold text-[#7e246c] dark:text-[#9d4edd]">
+                                        <div className="rounded-xl border border-[#7e246c]/10 bg-[#fbf4fa] p-4 text-center dark:border-white/10 dark:bg-white/6">
+                                            <p className="text-sm font-medium text-[#8a7286] dark:text-white/45">Per Person</p>
+                                            <div className="mt-1 text-3xl font-bold text-[#7e246c] dark:text-white">
                                                 {service.currency} {Math.round(service.price_per_person).toLocaleString()}
                                             </div>
                                         </div>
@@ -482,8 +505,8 @@ export default function PickAndDropDetail() {
                                 {routeMarkerCandidates.length > 1 && (
                                     <div>
                                         <div className="mb-4 flex items-center justify-between gap-3">
-                                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Route Map</h2>
-                                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                            <h2 className="text-lg font-bold text-[#2b1128] dark:text-white">Route Map</h2>
+                                            <div className="flex flex-wrap items-center gap-2 text-xs text-[#8a7286] dark:text-white/45">
                                                 <span className="rounded-full bg-green-100 px-2 py-1 font-medium text-green-700 dark:bg-green-900/30 dark:text-green-300">
                                                     S Start
                                                 </span>
@@ -497,7 +520,7 @@ export default function PickAndDropDetail() {
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50">
+                                        <div className="overflow-hidden rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6">
                                             <GoogleMap
                                                 center={routeMarkers[0]?.position}
                                                 markers={routeMarkers}
@@ -509,71 +532,49 @@ export default function PickAndDropDetail() {
                                     </div>
                                 )}
 
-                                <div className="overflow-hidden rounded-3xl border border-[#7e246c]/15 bg-gradient-to-r from-[#7e246c] via-[#8d2b79] to-[#b14a9a] px-5 py-4 text-white shadow-xl shadow-[#7e246c]/20 sm:px-6">
-                                    <div className="flex flex-col items-center gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
-                                        <div className="max-w-2xl">
-                                            <h2 className="text-xl font-bold sm:text-2xl">Book faster with the mobile app</h2>
-                                            <p className="mt-1 hidden text-sm text-white/85 md:block">
-                                                Search routes, connect with drivers, and manage your rides on the go with the AsaanCar Android app.
-                                            </p>
-                                        </div>
-
-                                        <a
-                                            href="https://play.google.com/store/apps/details?id=com.asaancar.app"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="shrink-0 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                                        >
-                                            <img
-                                                src="/google-play-download-android-app-logo.webp"
-                                                alt="Get it on Google Play"
-                                                className="h-16 w-auto sm:h-20 md:h-24"
-                                            />
-                                        </a>
-                                    </div>
-                                </div>
-
                                 {/* Car Information */}
                                 {(service.car_brand || (service.car && service.car.name)) && (
                                     <div>
-                                        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+                                        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#2b1128] dark:text-white">
                                             <Car className="h-5 w-5 text-[#7e246c]" />
                                             Vehicle Details
                                         </h2>
-                                        <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900/50">
+                                        <div className="rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] p-6 dark:border-white/10 dark:bg-white/6">
                                             <div className="mb-6 flex items-center gap-4">
                                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#7e246c]/10 text-2xl">
                                                     🚗
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                                    <h3 className="text-lg font-bold text-[#2b1128] dark:text-white">
                                                         {service.car_brand
                                                             ? `${service.car_brand} ${service.car_model || ''}`
                                                             : service.car?.name || 'Standard Vehicle'}
                                                     </h3>
-                                                    {service.car_color && <p className="text-sm text-gray-500 capitalize">{service.car_color}</p>}
+                                                    {service.car_color && (
+                                                        <p className="text-sm text-[#8a7286] capitalize dark:text-white/45">{service.car_color}</p>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                                                 {service.car_seats && (
-                                                    <div className="rounded-lg border border-gray-100 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
-                                                        <div className="mb-1 text-xs text-gray-400">Seats</div>
-                                                        <div className="font-semibold text-gray-900 dark:text-white">{service.car_seats}</div>
+                                                    <div className="rounded-lg border border-white/70 bg-white p-3 dark:border-white/10 dark:bg-[#17141f]/92">
+                                                        <div className="mb-1 text-xs text-[#8a7286] dark:text-white/45">Seats</div>
+                                                        <div className="font-semibold text-[#2b1128] dark:text-white">{service.car_seats}</div>
                                                     </div>
                                                 )}
                                                 {service.car_transmission && (
-                                                    <div className="rounded-lg border border-gray-100 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
-                                                        <div className="mb-1 text-xs text-gray-400">Transmission</div>
-                                                        <div className="font-semibold text-gray-900 capitalize dark:text-white">
+                                                    <div className="rounded-lg border border-white/70 bg-white p-3 dark:border-white/10 dark:bg-[#17141f]/92">
+                                                        <div className="mb-1 text-xs text-[#8a7286] dark:text-white/45">Transmission</div>
+                                                        <div className="font-semibold text-[#2b1128] capitalize dark:text-white">
                                                             {service.car_transmission}
                                                         </div>
                                                     </div>
                                                 )}
                                                 {service.car_fuel_type && (
-                                                    <div className="rounded-lg border border-gray-100 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
-                                                        <div className="mb-1 text-xs text-gray-400">Fuel Type</div>
-                                                        <div className="font-semibold text-gray-900 capitalize dark:text-white">
+                                                    <div className="rounded-lg border border-white/70 bg-white p-3 dark:border-white/10 dark:bg-[#17141f]/92">
+                                                        <div className="mb-1 text-xs text-[#8a7286] dark:text-white/45">Fuel Type</div>
+                                                        <div className="font-semibold text-[#2b1128] capitalize dark:text-white">
                                                             {service.car_fuel_type}
                                                         </div>
                                                     </div>
@@ -586,8 +587,8 @@ export default function PickAndDropDetail() {
                                 {/* Description */}
                                 {service.description && (
                                     <div>
-                                        <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Description</h2>
-                                        <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 leading-relaxed whitespace-pre-wrap text-gray-600 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-300">
+                                        <h2 className="mb-4 text-lg font-bold text-[#2b1128] dark:text-white">Description</h2>
+                                        <div className="rounded-2xl border border-[#7e246c]/10 bg-[#fbf4fa] p-6 leading-relaxed whitespace-pre-wrap text-[#6f556c] dark:border-white/10 dark:bg-white/6 dark:text-white/65">
                                             {service.description}
                                         </div>
                                     </div>
@@ -596,19 +597,19 @@ export default function PickAndDropDetail() {
 
                             {/* Right Column: Provider & Contacts */}
                             <div className="space-y-6">
-                                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg shadow-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:shadow-none">
-                                    <h2 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+                                <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
+                                    <h2 className="mb-6 flex items-center gap-2 text-lg font-bold text-[#2b1128] dark:text-white">
                                         <UserIcon className="h-5 w-5 text-[#7e246c]" />
                                         Driver Info
                                     </h2>
 
                                     <div className="mb-6 flex flex-col items-center text-center">
-                                        <div className="mb-3 flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-gray-100 text-2xl font-bold text-gray-400 shadow-md dark:border-gray-800 dark:bg-gray-700 dark:text-gray-500">
+                                        <div className="mb-3 flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-[#fbf4fa] text-2xl font-bold text-[#9e889a] shadow-md dark:border-[#17141f] dark:bg-white/6 dark:text-white/45">
                                             {(service.name || service.user.name).charAt(0).toUpperCase()}
                                         </div>
-                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{service.name || service.user.name}</h3>
+                                        <h3 className="text-xl font-bold text-[#2b1128] dark:text-white">{service.name || service.user.name}</h3>
                                         {user && (
-                                            <p className="mt-1 text-sm text-gray-500">
+                                            <p className="mt-1 text-sm text-[#8a7286] dark:text-white/45">
                                                 {service.contact || service.user.phone_number || service.user.email}
                                             </p>
                                         )}
@@ -639,15 +640,15 @@ export default function PickAndDropDetail() {
                                                 )}
                                                 <button
                                                     onClick={handleMessageUser}
-                                                    className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#7e246c] bg-white px-6 py-3 font-semibold text-[#7e246c] transition-all hover:bg-[#7e246c] hover:text-white"
+                                                    className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#7e246c] bg-white px-6 py-3 font-semibold text-[#7e246c] transition-all hover:bg-[#7e246c] hover:text-white dark:bg-transparent"
                                                 >
                                                     <MessageSquare className="h-5 w-5" />
                                                     Chat in App
                                                 </button>
                                             </>
                                         ) : (
-                                            <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center dark:border-blue-800 dark:bg-blue-900/20">
-                                                <p className="mb-4 text-sm font-medium text-blue-800 dark:text-blue-300">
+                                            <div className="rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] p-6 text-center dark:border-white/10 dark:bg-white/6">
+                                                <p className="mb-4 text-sm font-medium text-[#6b5368] dark:text-white/70">
                                                     Login to view contact details and book your ride.
                                                 </p>
                                                 <div className="flex flex-col gap-2">
@@ -659,7 +660,7 @@ export default function PickAndDropDetail() {
                                                     </button>
                                                     <button
                                                         onClick={() => navigate('/signup')}
-                                                        className="w-full px-4 py-2 text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                                                        className="w-full px-4 py-2 text-[#7d6678] transition-colors hover:text-[#2b1128] dark:text-white/55 dark:hover:text-white"
                                                     >
                                                         Create Account
                                                     </button>
