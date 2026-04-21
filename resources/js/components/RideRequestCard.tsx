@@ -85,7 +85,7 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
 
                     {request.budget_per_seat ? (
                         <div
-                            className={`rounded-xl border px-3 py-2 text-right ${
+                            className={`hidden rounded-xl border px-3 py-2 text-right md:block ${
                                 isDashboard
                                     ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
                                     : 'border-[#7e246c]/10 bg-[#7e246c]/5 dark:border-[#7e246c]/25 dark:bg-[#7e246c]/10'
@@ -102,6 +102,25 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
                         </div>
                     ) : null}
                 </div>
+
+                {request.budget_per_seat ? (
+                    <div
+                        className={`inline-flex w-fit items-center gap-2 rounded-xl border px-3 py-2 md:hidden ${
+                            isDashboard
+                                ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
+                                : 'border-[#7e246c]/10 bg-[#7e246c]/5 dark:border-[#7e246c]/25 dark:bg-[#7e246c]/10'
+                        }`}
+                    >
+                        <span className={`text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}>
+                            Budget / seat
+                        </span>
+                        <span
+                            className={`text-sm font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#d685c3]'}`}
+                        >
+                            {request.currency || 'PKR'} {Math.round(request.budget_per_seat).toLocaleString()}
+                        </span>
+                    </div>
+                ) : null}
 
                 <div className="flex flex-wrap gap-2">
                     <div className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
