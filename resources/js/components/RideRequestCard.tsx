@@ -82,11 +82,30 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
                             </h4>
                         </div>
                     </div>
+
+                    {request.budget_per_seat ? (
+                        <div
+                            className={`hidden rounded-xl border px-3 py-2 text-right md:block ${
+                                isDashboard
+                                    ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
+                                    : 'border-[#7e246c]/10 bg-[#7e246c]/5 dark:border-[#7e246c]/25 dark:bg-[#7e246c]/10'
+                            }`}
+                        >
+                            <div className={`text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}>
+                                Budget / seat
+                            </div>
+                            <div
+                                className={`text-base font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#d685c3]'}`}
+                            >
+                                {request.currency || 'PKR'} {Math.round(request.budget_per_seat).toLocaleString()}
+                            </div>
+                        </div>
+                    ) : null}
                 </div>
 
                 {request.budget_per_seat ? (
                     <div
-                        className={`inline-flex w-fit items-center gap-2 rounded-xl border px-3 py-2 ${
+                        className={`inline-flex w-fit items-center gap-2 rounded-xl border px-3 py-2 md:hidden ${
                             isDashboard
                                 ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
                                 : 'border-[#7e246c]/10 bg-[#7e246c]/5 dark:border-[#7e246c]/25 dark:bg-[#7e246c]/10'

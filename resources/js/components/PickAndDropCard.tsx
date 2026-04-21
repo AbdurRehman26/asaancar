@@ -57,9 +57,18 @@ interface PickAndDropCardProps {
     showDetails?: boolean; // Toggle for "View Details" button presence if needed elsewhere
     className?: string;
     variant?: 'default' | 'dashboard';
+    pricePlacement?: 'top-right' | 'below-route';
 }
 
-const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onEdit, onDelete, className = '', variant = 'default' }) => {
+const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
+    service,
+    onClick,
+    onEdit,
+    onDelete,
+    className = '',
+    variant = 'default',
+    pricePlacement = 'top-right',
+}) => {
     const [stopsExpanded, setStopsExpanded] = useState(true);
 
     const handleStopsClick = (e: React.MouseEvent) => {
@@ -166,12 +175,31 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onE
                         </div>
                     </div>
 
-                    {/* Price Tag (Top Right) */}
+                    {price && pricePlacement === 'top-right' && (
+                        <div
+                            className={`absolute top-0 right-0 hidden rounded-xl border px-3 py-1.5 md:block ${
+                                isDashboard
+                                    ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
+                                    : 'border-gray-100 bg-gray-50 dark:border-gray-600 dark:bg-gray-700/50'
+                            }`}
+                        >
+                            <div
+                                className={`text-xs font-medium ${isDashboard ? 'text-[#887086] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
+                            >
+                                Per Person
+                            </div>
+                            <div
+                                className={`text-lg font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#9d4edd]'}`}
+                            >
+                                {currency} {price}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {price && (
-                <div className="px-5 pt-4">
+                <div className={`px-5 pt-4 ${pricePlacement === 'top-right' ? 'md:hidden' : ''}`}>
                     <div
                         className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${
                             isDashboard

@@ -197,6 +197,7 @@ export default function Welcome() {
                                                 key={service.id}
                                                 service={service}
                                                 variant="dashboard"
+                                                pricePlacement="below-route"
                                                 onClick={() => navigate(`/pick-and-drop/${service.id}`)}
                                             />
                                         ))}
