@@ -167,31 +167,11 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({ service, onClick, onE
                     </div>
 
                     {/* Price Tag (Top Right) */}
-                    {price && (
-                        <div
-                            className={`absolute top-0 right-0 hidden rounded-xl border px-3 py-1.5 md:block ${
-                                isDashboard
-                                    ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
-                                    : 'border-gray-100 bg-gray-50 dark:border-gray-600 dark:bg-gray-700/50'
-                            }`}
-                        >
-                            <div
-                                className={`text-xs font-medium ${isDashboard ? 'text-[#887086] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
-                            >
-                                Per Person
-                            </div>
-                            <div
-                                className={`text-lg font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#9d4edd]'}`}
-                            >
-                                {currency} {price}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 
             {price && (
-                <div className="px-5 pt-4 md:hidden">
+                <div className="px-5 pt-4">
                     <div
                         className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${
                             isDashboard
