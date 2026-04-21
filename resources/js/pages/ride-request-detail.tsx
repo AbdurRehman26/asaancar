@@ -195,9 +195,9 @@ export default function RideRequestDetail() {
 
         const cleanPhoneNumber = phoneNumber.replace(/[^\d+]/g, '');
         const contactName = request.name || request.user?.name || 'there';
-        const senderName = user?.name || 'a Sawari user';
+        const senderName = user?.name || 'a AsaanCar user';
         const departureLabel = formatWhatsAppDeparture(request.departure_time, request.schedule_type);
-        const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride request on Sawari from ${request.start_location} to ${request.end_location} ${departureLabel}. Is it still available?`;
+        const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride request on AsaanCar from ${request.start_location} to ${request.end_location} ${departureLabel}. Is it still available?`;
 
         window.open(`https://wa.me/${cleanPhoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     };

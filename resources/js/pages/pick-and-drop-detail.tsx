@@ -196,9 +196,9 @@ export default function PickAndDropDetail() {
         if (phoneNumber) {
             const cleanPhoneNumber = phoneNumber.replace(/[^\d+]/g, '');
             const contactName = service?.name || service?.user?.name || 'there';
-            const senderName = user?.name || 'a Sawari user';
+            const senderName = user?.name || 'a AsaanCar user';
             const departureLabel = formatWhatsAppDeparture(service.departure_time, service.schedule_type);
-            const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride on Sawari from ${service.start_location} to ${service.end_location} ${departureLabel}. Is it still available?`;
+            const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride on AsaanCar from ${service.start_location} to ${service.end_location} ${departureLabel}. Is it still available?`;
 
             window.open(`https://wa.me/${cleanPhoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
         } else {
