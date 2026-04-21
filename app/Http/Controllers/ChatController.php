@@ -29,7 +29,7 @@ class ChatController extends Controller
      *     description="Get a list of conversations for the authenticated user",
      *     security={{"sanctum": {}}},
      *
-     *     @OA\Parameter(name="type", in="query", description="Filter by conversation type (user, pick_and_drop)", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="type", in="query", description="Filter by conversation type (user, pick_and_drop, ride_request)", required=false, @OA\Schema(type="string")),
      *
      *     @OA\Response(
      *         response=200,
@@ -48,7 +48,7 @@ class ChatController extends Controller
         $user = Auth::user();
         $type = $request->get('type');
 
-        $query = $user->conversations()->with(['lastMessage', 'recipientUser', 'pickAndDropService']);
+        $query = $user->conversations()->with(['lastMessage', 'recipientUser', 'pickAndDropService', 'rideRequest']);
 
         // Filter by type if provided
         if ($type) {
@@ -210,7 +210,7 @@ class ChatController extends Controller
         $message->load('sender');
 
         // Notify the recipient(s) about the new message
-        $conversation->load(['user', 'recipientUser']);
+        $conversation->load(['user', 'recipientUser', 'pickAndDropService', 'rideRequest']);
 
         // Determine who should be notified
         $recipients = [];
@@ -230,6 +230,16 @@ class ChatController extends Controller
             }
             if ($conversation->recipient_user_id && $conversation->recipient_user_id !== Auth::id() && $conversation->recipientUser) {
                 $recipients[] = $conversation->recipientUser;
+            }
+        } elseif ($conversation->type === 'ride_request') {
+            if ($conversation->rideRequest && $conversation->rideRequest->user_id !== Auth::id() && $conversation->rideRequest->user) {
+                $recipients[] = $conversation->rideRequest->user;
+            }
+            if ($conversation->recipient_user_id && $conversation->recipient_user_id !== Auth::id() && $conversation->recipientUser) {
+                $recipients[] = $conversation->recipientUser;
+            }
+            if ($conversation->user_id !== Auth::id() && $conversation->user) {
+                $recipients[] = $conversation->user;
             }
         }
 
@@ -253,7 +263,7 @@ class ChatController extends Controller
      *     operationId="createConversation",
      *     tags={"Chat"},
      *     summary="Create conversation",
-     *     description="Create a new conversation for a user or pick and drop service",
+     *     description="Create a new conversation for a user, pick and drop service, or ride request",
      *     security={{"sanctum": {}}},
      *
      *     @OA\RequestBody(
@@ -262,9 +272,11 @@ class ChatController extends Controller
      *         @OA\JsonContent(
      *             required={"type"},
      *
-     *             @OA\Property(property="type", type="string", enum={"user", "pick_and_drop"}, example="user"),
+     *             @OA\Property(property="type", type="string", enum={"user", "pick_and_drop", "ride_request"}, example="user"),
      *             @OA\Property(property="recipient_user_id", type="integer", example=2, nullable=true, description="Required if type is user"),
-     *             @OA\Property(property="pick_and_drop_service_id", type="integer", example=1, nullable=true, description="Required if type is pick_and_drop")
+     *             @OA\Property(property="user_id", type="integer", example=2, nullable=true, description="Alias for recipient_user_id when type is ride_request"),
+     *             @OA\Property(property="pick_and_drop_service_id", type="integer", example=1, nullable=true, description="Required if type is pick_and_drop"),
+     *             @OA\Property(property="ride_request_id", type="integer", example=1, nullable=true, description="Optional ride request reference if type is ride_request")
      *         )
      *     ),
      *
@@ -277,26 +289,41 @@ class ChatController extends Controller
      *
      *     @OA\Response(response=422, description="Validation error")
      * )
-     * Create a conversation for a user or pick and drop service if it doesn't exist
+     * Create a conversation for a user, pick and drop service, or ride request if it doesn't exist
      */
     public function store(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:user,pick_and_drop',
+            'type' => 'required|in:user,pick_and_drop,ride_request',
             'recipient_user_id' => 'required_if:type,user|nullable|integer|exists:users,id',
             'pick_and_drop_service_id' => 'required_if:type,pick_and_drop|nullable|integer|exists:pick_and_drop_services,id',
+            'user_id' => 'nullable|integer|exists:users,id',
+            'ride_request_id' => 'nullable|integer|exists:ride_requests,id',
         ]);
 
         $user = auth()->user();
+        $recipientUserId = $request->type === 'ride_request'
+            ? ($request->input('user_id') ?: $request->input('recipient_user_id'))
+            : $request->input('recipient_user_id');
+
+        if ($request->type === 'ride_request' && ! $recipientUserId) {
+            return response()->json([
+                'message' => 'The user id field is required when type is ride_request.',
+                'errors' => [
+                    'user_id' => ['The user id field is required when type is ride_request.'],
+                ],
+            ], 422);
+        }
 
         $query = [
             'user_id' => $user->id,
             'type' => $request->type,
-            'recipient_user_id' => $request->type === 'user' ? $request->recipient_user_id : null,
+            'recipient_user_id' => in_array($request->type, ['user', 'ride_request'], true) ? $recipientUserId : null,
             'pick_and_drop_service_id' => $request->type === 'pick_and_drop' ? $request->pick_and_drop_service_id : null,
+            'ride_request_id' => $request->type === 'ride_request' ? $request->ride_request_id : null,
         ];
 
-        $conversation = \App\Models\Conversation::firstOrCreate($query);
+        $conversation = Conversation::firstOrCreate($query);
 
         // If user had previously deleted this conversation, update the deletion timestamp
         // This restores the conversation in their list but keeps old messages hidden

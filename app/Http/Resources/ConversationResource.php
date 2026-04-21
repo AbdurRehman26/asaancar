@@ -22,6 +22,7 @@ class ConversationResource extends JsonResource
             'user' => new UserResource($this->user),
             'recipient_user_id' => $this->recipient_user_id,
             'pick_and_drop_service_id' => $this->pick_and_drop_service_id,
+            'ride_request_id' => $this->ride_request_id,
             'last_message' => $this->lastMessage ? $this->lastMessage->message : null,
             'unread_count' => $this->unread_count ?? 0,
             'created_at' => $this->created_at ? $this->created_at->toISOString() : null,
@@ -29,6 +30,7 @@ class ConversationResource extends JsonResource
             'formatted_time' => $this->updated_at ? $this->formatConversationTime($this->updated_at) : null,
             'recipientUser' => $this->whenLoaded('recipientUser'),
             'pickAndDropService' => $this->whenLoaded('pickAndDropService'),
+            'rideRequest' => $this->whenLoaded('rideRequest'),
         ];
     }
 

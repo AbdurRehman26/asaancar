@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Conversation extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'type', 'user_id', 'recipient_user_id', 'pick_and_drop_service_id',
+        'type', 'user_id', 'recipient_user_id', 'pick_and_drop_service_id', 'ride_request_id',
     ];
 
     public function messages()
@@ -38,7 +39,12 @@ class Conversation extends Model
         return $this->belongsTo(PickAndDrop::class, 'pick_and_drop_service_id');
     }
 
-    public function lastMessage(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function rideRequest()
+    {
+        return $this->belongsTo(RideRequest::class, 'ride_request_id');
+    }
+
+    public function lastMessage(): HasOne
     {
         return $this->hasOne(Message::class)->orderBy('created_at', 'desc');
     }
