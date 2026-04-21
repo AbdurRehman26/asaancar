@@ -35,6 +35,7 @@ interface RideRequestCardProps {
     className?: string;
     showRequesterInfo?: boolean;
     variant?: 'default' | 'dashboard';
+    budgetPlacement?: 'top-right' | 'below-route';
 }
 
 const RideRequestCard: React.FC<RideRequestCardProps> = ({
@@ -45,6 +46,7 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
     className = '',
     showRequesterInfo = true,
     variant = 'default',
+    budgetPlacement = 'top-right',
 }) => {
     const requesterName = request.name || request.user?.name || 'Requester';
     const requesterPhone = request.contact || request.user?.phone_number;
@@ -83,7 +85,7 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
                         </div>
                     </div>
 
-                    {request.budget_per_seat ? (
+                    {request.budget_per_seat && budgetPlacement === 'top-right' ? (
                         <div
                             className={`hidden rounded-xl border px-3 py-2 text-right md:block ${
                                 isDashboard
@@ -105,7 +107,7 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
 
                 {request.budget_per_seat ? (
                     <div
-                        className={`inline-flex w-fit items-center gap-2 rounded-xl border px-3 py-2 md:hidden ${
+                        className={`inline-flex w-fit items-center gap-2 rounded-xl border px-3 py-2 ${budgetPlacement === 'top-right' ? 'md:hidden' : ''} ${
                             isDashboard
                                 ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
                                 : 'border-[#7e246c]/10 bg-[#7e246c]/5 dark:border-[#7e246c]/25 dark:bg-[#7e246c]/10'

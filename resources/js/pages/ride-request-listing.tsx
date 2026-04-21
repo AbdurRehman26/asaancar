@@ -291,6 +291,7 @@ export default function RideRequestListing() {
                                     key={request.id}
                                     request={request}
                                     variant="dashboard"
+                                    budgetPlacement="below-route"
                                     onClick={() => navigate(`/ride-requests/${request.id}`)}
                                     showRequesterInfo={Boolean(user)}
                                 />
