@@ -168,12 +168,39 @@ export default function PickAndDropDetail() {
         }
     };
 
+    const formatWhatsAppDeparture = (departureTime: string, scheduleType: PickAndDropService['schedule_type']) => {
+        const parsedDate = new Date(departureTime);
+
+        if (Number.isNaN(parsedDate.getTime())) {
+            return scheduleType === 'once' ? `on ${departureTime}` : `at ${departureTime}`;
+        }
+
+        const dateLabel = new Intl.DateTimeFormat('en-GB', {
+            day: 'numeric',
+            month: 'short',
+        }).format(parsedDate);
+
+        const timeLabel = new Intl.DateTimeFormat('en-GB', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        })
+            .format(parsedDate)
+            .toLowerCase();
+
+        return scheduleType === 'once' ? `on ${dateLabel} at ${timeLabel}` : `at ${timeLabel}`;
+    };
+
     const handleWhatsAppCall = () => {
         const phoneNumber = service?.contact || service?.user?.phone_number;
         if (phoneNumber) {
-            // Remove any non-digit characters except + for WhatsApp
             const cleanPhoneNumber = phoneNumber.replace(/[^\d+]/g, '');
-            window.open(`https://wa.me/${cleanPhoneNumber}`, '_blank');
+            const contactName = service?.name || service?.user?.name || 'there';
+            const senderName = user?.name || 'a Sawari user';
+            const departureLabel = formatWhatsAppDeparture(service.departure_time, service.schedule_type);
+            const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride on Sawari from ${service.start_location} to ${service.end_location} ${departureLabel}. Is it still available?`;
+
+            window.open(`https://wa.me/${cleanPhoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
         } else {
             showError('Phone Number', 'Phone number not available for this service provider.');
         }

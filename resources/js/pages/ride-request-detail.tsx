@@ -161,6 +161,29 @@ export default function RideRequestDetail() {
         window.location.href = `tel:${phoneNumber}`;
     };
 
+    const formatWhatsAppDeparture = (departureTime: string, scheduleType: RideRequestDetailData['schedule_type']) => {
+        const parsedDate = new Date(departureTime);
+
+        if (Number.isNaN(parsedDate.getTime())) {
+            return scheduleType === 'once' ? `on ${departureTime}` : `at ${departureTime}`;
+        }
+
+        const dateLabel = new Intl.DateTimeFormat('en-GB', {
+            day: 'numeric',
+            month: 'short',
+        }).format(parsedDate);
+
+        const timeLabel = new Intl.DateTimeFormat('en-GB', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        })
+            .format(parsedDate)
+            .toLowerCase();
+
+        return scheduleType === 'once' ? `on ${dateLabel} at ${timeLabel}` : `at ${timeLabel}`;
+    };
+
     const handleWhatsAppCall = () => {
         const phoneNumber = request.contact || request.user?.phone_number;
 
@@ -171,7 +194,12 @@ export default function RideRequestDetail() {
         }
 
         const cleanPhoneNumber = phoneNumber.replace(/[^\d+]/g, '');
-        window.open(`https://wa.me/${cleanPhoneNumber}`, '_blank');
+        const contactName = request.name || request.user?.name || 'there';
+        const senderName = user?.name || 'a Sawari user';
+        const departureLabel = formatWhatsAppDeparture(request.departure_time, request.schedule_type);
+        const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride request on Sawari from ${request.start_location} to ${request.end_location} ${departureLabel}. Is it still available?`;
+
+        window.open(`https://wa.me/${cleanPhoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     };
 
     const handleMessageUser = async () => {
