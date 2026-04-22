@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AreaController;
+use App\Http\Controllers\Api\ContactingStatController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\ImageUploadController;
 use App\Http\Controllers\Api\NotificationController;
@@ -108,6 +109,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/chat/conversations/{conversation}', [ChatController::class, 'destroy']);
     Route::get('/chat/conversations/{conversation}/messages', [ChatController::class, 'messages']);
     Route::post('/chat/conversations/{conversation}/messages', [ChatController::class, 'sendMessage']);
+    Route::post('/contacting-stats', [ContactingStatController::class, 'store']);
 });
 
 // Notification endpoints

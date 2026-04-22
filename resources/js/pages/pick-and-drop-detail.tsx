@@ -5,6 +5,7 @@ import GoogleMap from '@/components/GoogleMap';
 import Navbar from '@/components/navbar';
 import SEO from '@/components/SEO';
 import { useToast } from '@/contexts/ToastContext';
+import { recordContactingStat } from '@/lib/contacting-stats';
 import { apiFetch } from '@/lib/utils';
 import { ArrowRight, Car, ChevronDown, ChevronUp, Clock, MapPin, MessageSquare, Phone, User as UserIcon, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -118,6 +119,13 @@ export default function PickAndDropDetail() {
     const handleMessageUser = async () => {
         if (!user || !service) return;
 
+        recordContactingStat({
+            recipientUserId: service.user.id,
+            contactableType: 'pick_and_drop',
+            contactableId: service.id,
+            contactMethod: 'chat',
+        });
+
         const serviceId = service.id;
         try {
             // Check if conversation exists for this pick and drop service
@@ -162,6 +170,14 @@ export default function PickAndDropDetail() {
     const handleCall = () => {
         const phoneNumber = service?.contact || service?.user?.phone_number;
         if (phoneNumber) {
+            if (service) {
+                recordContactingStat({
+                    recipientUserId: service.user.id,
+                    contactableType: 'pick_and_drop',
+                    contactableId: service.id,
+                    contactMethod: 'call',
+                });
+            }
             window.location.href = `tel:${phoneNumber}`;
         } else {
             showError('Phone Number', 'Phone number not available for this service provider.');
@@ -194,6 +210,14 @@ export default function PickAndDropDetail() {
     const handleWhatsAppCall = () => {
         const phoneNumber = service?.contact || service?.user?.phone_number;
         if (phoneNumber) {
+            if (service) {
+                recordContactingStat({
+                    recipientUserId: service.user.id,
+                    contactableType: 'pick_and_drop',
+                    contactableId: service.id,
+                    contactMethod: 'whatsapp',
+                });
+            }
             const cleanPhoneNumber = phoneNumber.replace(/[^\d+]/g, '');
             const contactName = service?.name || service?.user?.name || 'there';
             const senderName = user?.name || 'a AsaanCar user';

@@ -5,6 +5,7 @@ import GoogleMap from '@/components/GoogleMap';
 import Navbar from '@/components/navbar';
 import SEO from '@/components/SEO';
 import { useToast } from '@/contexts/ToastContext';
+import { recordContactingStat } from '@/lib/contacting-stats';
 import { apiFetch } from '@/lib/utils';
 import { ArrowRight, Clock, MapPin, MessageSquare, Phone, User, Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -158,6 +159,13 @@ export default function RideRequestDetail() {
             return;
         }
 
+        recordContactingStat({
+            recipientUserId: request.user.id,
+            contactableType: 'ride_request',
+            contactableId: request.id,
+            contactMethod: 'call',
+        });
+
         window.location.href = `tel:${phoneNumber}`;
     };
 
@@ -193,6 +201,13 @@ export default function RideRequestDetail() {
             return;
         }
 
+        recordContactingStat({
+            recipientUserId: request.user.id,
+            contactableType: 'ride_request',
+            contactableId: request.id,
+            contactMethod: 'whatsapp',
+        });
+
         const cleanPhoneNumber = phoneNumber.replace(/[^\d+]/g, '');
         const contactName = request.name || request.user?.name || 'there';
         const senderName = user?.name || 'a AsaanCar user';
@@ -206,6 +221,13 @@ export default function RideRequestDetail() {
         if (!user || !request) {
             return;
         }
+
+        recordContactingStat({
+            recipientUserId: request.user.id,
+            contactableType: 'ride_request',
+            contactableId: request.id,
+            contactMethod: 'chat',
+        });
 
         try {
             const response = await apiFetch('/api/chat/conversations');

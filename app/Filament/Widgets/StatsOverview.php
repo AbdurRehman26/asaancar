@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\ContactingStat;
 use App\Models\Message;
 use App\Models\PickAndDrop;
 use App\Models\User;
@@ -33,6 +34,10 @@ class StatsOverview extends BaseWidget
                 ->description('Total chat messages')
                 ->descriptionIcon('heroicon-m-chat-bubble-left-right')
                 ->color('primary'),
+            Stat::make('Contact Interactions', ContactingStat::query()->sum('interaction_count'))
+                ->description('Call, WhatsApp, and chat taps')
+                ->descriptionIcon('heroicon-m-phone')
+                ->color('success'),
         ];
     }
 }

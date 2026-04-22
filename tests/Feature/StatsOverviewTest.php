@@ -1,6 +1,7 @@
 <?php
 
 use App\Filament\Widgets\StatsOverview;
+use App\Models\ContactingStat;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\PickAndDrop;
@@ -104,4 +105,28 @@ it('includes the total chat message count', function () {
 
     expect($chatMessagesStat)->not->toBeNull()
         ->and($chatMessagesStat->getValue())->toBe(2);
+});
+
+it('includes the total contact interaction count', function () {
+    ContactingStat::factory()->create([
+        'interaction_count' => 3,
+    ]);
+
+    ContactingStat::factory()->create([
+        'interaction_count' => 5,
+    ]);
+
+    $widget = new class extends StatsOverview
+    {
+        public function exposedStats(): array
+        {
+            return $this->getStats();
+        }
+    };
+
+    $contactInteractionsStat = collect($widget->exposedStats())
+        ->first(fn ($stat) => $stat->getLabel() === 'Contact Interactions');
+
+    expect($contactInteractionsStat)->not->toBeNull()
+        ->and($contactInteractionsStat->getValue())->toBe(8);
 });
