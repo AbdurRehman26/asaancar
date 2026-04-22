@@ -245,6 +245,97 @@
                 ]
             }
         },
+        "/api/contacting-stats": {
+            "post": {
+                "tags": [
+                    "Contact Stats"
+                ],
+                "summary": "Record a contact interaction",
+                "description": "Create or increment a contact stat when a user taps call, WhatsApp, or chat on a ride or ride request",
+                "operationId": "storeContactingStat",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "recipient_user_id",
+                                    "contactable_type",
+                                    "contactable_id",
+                                    "contact_method"
+                                ],
+                                "properties": {
+                                    "recipient_user_id": {
+                                        "type": "integer",
+                                        "example": 44
+                                    },
+                                    "contactable_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pick_and_drop",
+                                            "ride_request"
+                                        ],
+                                        "example": "pick_and_drop"
+                                    },
+                                    "contactable_id": {
+                                        "type": "integer",
+                                        "example": 17
+                                    },
+                                    "contact_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "call",
+                                            "whatsapp",
+                                            "chat"
+                                        ],
+                                        "example": "whatsapp"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contact interaction recorded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "interaction_count": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/upload/image": {
             "post": {
                 "tags": [
@@ -2556,7 +2647,7 @@
                     "OTP"
                 ],
                 "summary": "Send OTP for login",
-                "description": "Send OTP via email or SMS for user login",
+                "description": "Send OTP via SMS for login. If the phone number does not exist yet, a customer account will be created first.",
                 "operationId": "sendLoginOtp",
                 "requestBody": {
                     "required": true,
@@ -2605,9 +2696,6 @@
                                 }
                             }
                         }
-                    },
-                    "404": {
-                        "description": "User not found"
                     },
                     "422": {
                         "description": "Validation error"
@@ -3059,7 +3147,7 @@
                     {
                         "name": "type",
                         "in": "query",
-                        "description": "Filter by conversation type (user, pick_and_drop)",
+                        "description": "Filter by conversation type (user, pick_and_drop, ride_request)",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -3097,7 +3185,7 @@
                     "Chat"
                 ],
                 "summary": "Create conversation",
-                "description": "Create a new conversation for a user or pick and drop service",
+                "description": "Create a new conversation for a user, pick and drop service, or ride request",
                 "operationId": "createConversation",
                 "requestBody": {
                     "required": true,
@@ -3112,7 +3200,8 @@
                                         "type": "string",
                                         "enum": [
                                             "user",
-                                            "pick_and_drop"
+                                            "pick_and_drop",
+                                            "ride_request"
                                         ],
                                         "example": "user"
                                     },
@@ -3122,8 +3211,20 @@
                                         "example": 2,
                                         "nullable": true
                                     },
+                                    "user_id": {
+                                        "description": "Alias for recipient_user_id when type is ride_request",
+                                        "type": "integer",
+                                        "example": 2,
+                                        "nullable": true
+                                    },
                                     "pick_and_drop_service_id": {
                                         "description": "Required if type is pick_and_drop",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "ride_request_id": {
+                                        "description": "Optional ride request reference if type is ride_request",
                                         "type": "integer",
                                         "example": 1,
                                         "nullable": true
@@ -3681,6 +3782,58 @@
                 },
                 "type": "object"
             },
+            "ContactingStat": {
+                "title": "Contacting Stat",
+                "description": "Tracks contact actions taken on rides and ride requests",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "recipient_user_id": {
+                        "type": "integer",
+                        "example": 44
+                    },
+                    "contactable_type": {
+                        "type": "string",
+                        "enum": [
+                            "pick_and_drop",
+                            "ride_request"
+                        ],
+                        "example": "pick_and_drop"
+                    },
+                    "contactable_id": {
+                        "type": "integer",
+                        "example": 17
+                    },
+                    "contact_method": {
+                        "type": "string",
+                        "enum": [
+                            "call",
+                            "whatsapp",
+                            "chat"
+                        ],
+                        "example": "whatsapp"
+                    },
+                    "interaction_count": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "PickAndDrop": {
                 "title": "Pick and Drop Service",
                 "description": "Pick and drop service model",
@@ -3979,6 +4132,10 @@
                         "type": "boolean",
                         "example": true
                     },
+                    "is_system_generated": {
+                        "type": "boolean",
+                        "example": false
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time"
@@ -4050,6 +4207,10 @@
         {
             "name": "Contact Messages",
             "description": "API Endpoints for contact messages"
+        },
+        {
+            "name": "Contact Stats",
+            "description": "API Endpoints for tracking contact actions"
         },
         {
             "name": "Image Upload",

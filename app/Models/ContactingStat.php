@@ -9,6 +9,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
+/**
+ * @OA\Schema(
+ *     schema="ContactingStat",
+ *     title="Contacting Stat",
+ *     description="Tracks contact actions taken on rides and ride requests",
+ *
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="user_id", type="integer", example=12),
+ *     @OA\Property(property="recipient_user_id", type="integer", example=44),
+ *     @OA\Property(property="contactable_type", type="string", enum={"pick_and_drop", "ride_request"}, example="pick_and_drop"),
+ *     @OA\Property(property="contactable_id", type="integer", example=17),
+ *     @OA\Property(property="contact_method", type="string", enum={"call", "whatsapp", "chat"}, example="whatsapp"),
+ *     @OA\Property(property="interaction_count", type="integer", example=3),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
+ * )
+ */
 class ContactingStat extends Model
 {
     /** @use HasFactory<ContactingStatFactory> */

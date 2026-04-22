@@ -10,8 +10,55 @@ use App\Models\RideRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @OA\Tag(
+ *     name="Contact Stats",
+ *     description="API Endpoints for tracking contact actions"
+ * )
+ */
 class ContactingStatController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/api/contacting-stats",
+     *     operationId="storeContactingStat",
+     *     tags={"Contact Stats"},
+     *     summary="Record a contact interaction",
+     *     description="Create or increment a contact stat when a user taps call, WhatsApp, or chat on a ride or ride request",
+     *     security={{"sanctum": {}}},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"recipient_user_id", "contactable_type", "contactable_id", "contact_method"},
+     *
+     *             @OA\Property(property="recipient_user_id", type="integer", example=44),
+     *             @OA\Property(property="contactable_type", type="string", enum={"pick_and_drop", "ride_request"}, example="pick_and_drop"),
+     *             @OA\Property(property="contactable_id", type="integer", example=17),
+     *             @OA\Property(property="contact_method", type="string", enum={"call", "whatsapp", "chat"}, example="whatsapp")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contact interaction recorded successfully",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="interaction_count", type="integer", example=3)
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function store(StoreContactingStatRequest $request): JsonResponse
     {
         $validated = $request->validated();
