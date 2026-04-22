@@ -7,7 +7,6 @@ import { useInitials } from '@/hooks/use-initials';
 import { LayoutGrid, Mail, MapPin, Menu, Route, User, X, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { NotificationBell } from './notification-bell';
 import DarkModeToggle from './ui/dark-mode-toggle';
 
 type NavbarProps = {
@@ -89,7 +88,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             ) : (
                 <div className="flex items-center space-x-2">
                     <DarkModeToggle />
-                    <NotificationBell />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="size-10 rounded-full p-1">
@@ -171,7 +169,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                 ) : (
                     <div className="flex items-center space-x-2">
                         <DarkModeToggle />
-                        <NotificationBell />
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="size-10 rounded-full p-1">

@@ -21,7 +21,6 @@ import RideRequestForm from './pages/dashboard/RideRequestForm';
 import RideRequestsPage from './pages/dashboard/RideRequests';
 import EmailVerificationSuccess from './pages/email-verification-success';
 import LoginPage from './pages/login';
-import NotificationsPage from './pages/notifications';
 import PickAndDropDetail from './pages/pick-and-drop-detail';
 import PickAndDropListing from './pages/pick-and-drop-listing';
 import PrivacyPolicy from './pages/privacy-policy';
@@ -63,14 +62,6 @@ function App() {
                         <Route path="/pick-and-drop/:id" element={<PickAndDropDetail />} />
                         <Route path="/ride-requests" element={<RideRequestListing />} />
                         <Route path="/ride-requests/:id" element={<RideRequestDetail />} />
-                        <Route
-                            path="/notifications"
-                            element={
-                                <ProtectedRoute>
-                                    <NotificationsPage />
-                                </ProtectedRoute>
-                            }
-                        />
                         <Route
                             path="/chat"
                             element={

@@ -7,7 +7,6 @@ use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
-use App\Notifications\MessageReceivedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -208,49 +207,6 @@ class ChatController extends Controller
 
         // Load sender relationship
         $message->load('sender');
-
-        // Notify the recipient(s) about the new message
-        $conversation->load(['user', 'recipientUser', 'pickAndDropService', 'rideRequest']);
-
-        // Determine who should be notified
-        $recipients = [];
-
-        if ($conversation->type === 'user' && $conversation->recipientUser) {
-            // Direct user-to-user conversation
-            if ($conversation->recipientUser->id !== Auth::id()) {
-                $recipients[] = $conversation->recipientUser;
-            }
-            if ($conversation->user_id !== Auth::id() && $conversation->user) {
-                $recipients[] = $conversation->user;
-            }
-        } elseif ($conversation->type === 'pick_and_drop' && $conversation->pickAndDropService) {
-            // Pick and drop conversation - notify service owner and recipient user
-            if ($conversation->pickAndDropService->user_id !== Auth::id() && $conversation->pickAndDropService->user) {
-                $recipients[] = $conversation->pickAndDropService->user;
-            }
-            if ($conversation->recipient_user_id && $conversation->recipient_user_id !== Auth::id() && $conversation->recipientUser) {
-                $recipients[] = $conversation->recipientUser;
-            }
-        } elseif ($conversation->type === 'ride_request') {
-            if ($conversation->rideRequest && $conversation->rideRequest->user_id !== Auth::id() && $conversation->rideRequest->user) {
-                $recipients[] = $conversation->rideRequest->user;
-            }
-            if ($conversation->recipient_user_id && $conversation->recipient_user_id !== Auth::id() && $conversation->recipientUser) {
-                $recipients[] = $conversation->recipientUser;
-            }
-            if ($conversation->user_id !== Auth::id() && $conversation->user) {
-                $recipients[] = $conversation->user;
-            }
-        }
-
-        // Send notifications to unique recipients
-        $notifiedUserIds = [];
-        foreach ($recipients as $recipient) {
-            if (! in_array($recipient->id, $notifiedUserIds)) {
-                $recipient->notify(new MessageReceivedNotification($message, $conversation));
-                $notifiedUserIds[] = $recipient->id;
-            }
-        }
 
         broadcast(new MessageSent($message))->toOthers();
 

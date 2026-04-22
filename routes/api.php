@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\ContactingStatController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\ImageUploadController;
-use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PickAndDropController;
 use App\Http\Controllers\Api\PickAndDropFavoriteController;
 use App\Http\Controllers\Api\RideRequestController;
@@ -110,16 +109,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/conversations/{conversation}/messages', [ChatController::class, 'messages']);
     Route::post('/chat/conversations/{conversation}/messages', [ChatController::class, 'sendMessage']);
     Route::post('/contacting-stats', [ContactingStatController::class, 'store']);
-});
-
-// Notification endpoints
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/notifications', [NotificationController::class, 'index']);
-    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
-    Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-    Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
-    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
-    Route::delete('/notifications', [NotificationController::class, 'deleteAll']);
 });
 
 // Cities API
