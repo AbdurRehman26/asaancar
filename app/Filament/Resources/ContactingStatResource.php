@@ -7,8 +7,6 @@ use App\Models\ContactingStat;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\Layout\Panel;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 
 class ContactingStatResource extends Resource
@@ -36,29 +34,44 @@ class ContactingStatResource extends Resource
             ->defaultSort('updated_at', 'desc')
             ->modifyQueryUsing(fn ($query) => $query->with(['user', 'recipientUser', 'pickAndDrop', 'rideRequest']))
             ->columns([
-                ViewColumn::make('summary')
-                    ->view('filament.tables.columns.contacting-stat-summary'),
-                Panel::make([
-                    Tables\Columns\TextColumn::make('contacted_listing_label')
-                        ->label('Contacted On')
-                        ->badge()
-                        ->color(fn (string $state): string => $state === 'Ride' ? 'warning' : 'danger'),
-                    Tables\Columns\TextColumn::make('contacted_route')
-                        ->label('Route')
-                        ->wrap()
-                        ->placeholder('Listing details unavailable'),
-                    Tables\Columns\TextColumn::make('contacted_departure')
-                        ->label('Departure')
-                        ->placeholder('No departure time'),
-                    Tables\Columns\TextColumn::make('contacted_schedule')
-                        ->label('Schedule')
-                        ->placeholder('No schedule'),
-                    Tables\Columns\TextColumn::make('contacted_price_summary')
-                        ->label('Price / Budget')
-                        ->placeholder('Not set'),
-                ])
-                    ->collapsible()
-                    ->collapsed(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('User')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('recipientUser.name')
+                    ->label('Recipient')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('contact_method')
+                    ->label('Method')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => str($state)->headline()->toString())
+                    ->color(fn (string $state): string => match ($state) {
+                        'call' => 'success',
+                        'whatsapp' => 'info',
+                        'chat' => 'primary',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('contacted_listing_label')
+                    ->label('Target')
+                    ->badge()
+                    ->color(fn (string $state): string => $state === 'Ride' ? 'warning' : 'danger'),
+                Tables\Columns\TextColumn::make('contactable_id')
+                    ->label('Listing ID')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('contacted_route')
+                    ->label('Route')
+                    ->limit(40)
+                    ->tooltip(fn (ContactingStat $record): ?string => $record->contacted_route)
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('interaction_count')
+                    ->label('Count')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Last Contact')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('contact_method')
