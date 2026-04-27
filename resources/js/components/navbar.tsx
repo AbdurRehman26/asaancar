@@ -3,8 +3,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { useChatUnreadSummary } from '@/hooks/use-chat-unread-summary';
 import { useInitials } from '@/hooks/use-initials';
-import { LayoutGrid, Mail, MapPin, Menu, Route, User, X, Zap } from 'lucide-react';
+import { LayoutGrid, Mail, MapPin, Menu, MessageSquare, Route, User, X, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DarkModeToggle from './ui/dark-mode-toggle';
@@ -18,6 +19,7 @@ type NavbarProps = {
 
 const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
     const { user } = useAuth();
+    const { unreadConversations } = useChatUnreadSummary(Boolean(user));
     const canViewInquiries = user?.id === 1;
     const getInitials = useInitials();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -168,6 +170,19 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     </div>
                 ) : (
                     <div className="flex items-center space-x-2">
+                        {isDashboardTheme && (
+                            <Link
+                                to="/dashboard/pick-and-drop-chat"
+                                className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[#6b5368] transition hover:bg-white/70 hover:text-[#2f2231] dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
+                            >
+                                <MessageSquare className="h-5 w-5" />
+                                {unreadConversations > 0 && (
+                                    <span className="absolute -top-1 -right-1 inline-flex min-w-5 items-center justify-center rounded-full bg-[#7e246c] px-1.5 py-0.5 text-[10px] font-semibold text-white dark:bg-white dark:text-[#2b1128]">
+                                        {unreadConversations}
+                                    </span>
+                                )}
+                            </Link>
+                        )}
                         <DarkModeToggle />
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -247,7 +262,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                                         {/* Pick & Drop Section */}
                                         <div className="mt-4">
                                             <h4 className="mb-2 px-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-neutral-400">
-                                                Pick & Drop
+                                                Rides
                                             </h4>
                                             <div className="flex flex-col gap-1">
                                                 <Link
@@ -256,7 +271,28 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                                                     onClick={() => setMobileMenuOpen(false)}
                                                 >
                                                     <MapPin className="h-4 w-4" />
-                                                    Pick & Drop Services
+                                                    Find a Ride
+                                                </Link>
+                                                <Link
+                                                    to="/dashboard/ride-requests"
+                                                    className="flex items-center gap-3 px-1 py-2 text-sm font-medium text-gray-700 transition hover:text-[#7e246c] dark:text-neutral-300 dark:hover:text-white"
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                >
+                                                    <Route className="h-4 w-4" />
+                                                    Ride Requests
+                                                </Link>
+                                                <Link
+                                                    to="/dashboard/pick-and-drop-chat"
+                                                    className="flex items-center gap-3 px-1 py-2 text-sm font-medium text-gray-700 transition hover:text-[#7e246c] dark:text-neutral-300 dark:hover:text-white"
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                >
+                                                    <MessageSquare className="h-4 w-4" />
+                                                    <span>Ride Chat</span>
+                                                    {unreadConversations > 0 && (
+                                                        <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-[#7e246c] px-2 py-0.5 text-[11px] font-semibold text-white dark:bg-white dark:text-[#2b1128]">
+                                                            {unreadConversations}
+                                                        </span>
+                                                    )}
                                                 </Link>
                                             </div>
                                         </div>

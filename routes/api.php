@@ -104,6 +104,7 @@ Route::middleware('auth:sanctum')->post('/webpush/subscribe', [WebPushController
 // Chat endpoints
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/conversations', [ChatController::class, 'conversations']);
+    Route::get('/chat/unread-summary', [ChatController::class, 'unreadSummary']);
     Route::post('/chat/conversations', [ChatController::class, 'store']);
     Route::delete('/chat/conversations/{conversation}', [ChatController::class, 'destroy']);
     Route::get('/chat/conversations/{conversation}/messages', [ChatController::class, 'messages']);

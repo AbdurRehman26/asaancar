@@ -7,6 +7,8 @@ use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -47,44 +49,10 @@ class ChatController extends Controller
         $user = Auth::user();
         $type = $request->get('type');
 
-        $query = $user->conversations()->with(['lastMessage', 'recipientUser', 'pickAndDropService', 'rideRequest']);
-
-        // Filter by type if provided
-        if ($type) {
-            $query->where('type', $type);
-        }
-
-        // Exclude conversations that the user has deleted, but only if there are no new messages after deletion
-        $deletedConversations = DB::table('conversation_user_deletes')
-            ->where('user_id', $user->id)
-            ->get()
-            ->keyBy('conversation_id');
-
-        if ($deletedConversations->isNotEmpty()) {
-            $conversationIds = $deletedConversations->keys()->toArray();
-
-            // For each deleted conversation, check if there are messages after deletion
-            $conversationsWithNewMessages = [];
-            foreach ($deletedConversations as $conversationId => $deleteRecord) {
-                $hasNewMessages = DB::table('messages')
-                    ->where('conversation_id', $conversationId)
-                    ->where('created_at', '>', $deleteRecord->deleted_at)
-                    ->exists();
-
-                if ($hasNewMessages) {
-                    $conversationsWithNewMessages[] = $conversationId;
-                }
-            }
-
-            // Exclude deleted conversations that don't have new messages
-            $conversationsToExclude = array_diff($conversationIds, $conversationsWithNewMessages);
-
-            if (! empty($conversationsToExclude)) {
-                $query->whereNotIn('conversations.id', $conversationsToExclude);
-            }
-        }
-
-        $conversations = $query->latest('updated_at')->get();
+        $conversations = $this->visibleConversationsQuery($user->id, $type)
+            ->with(['lastMessage', 'recipientUser', 'pickAndDropService', 'rideRequest'])
+            ->latest('updated_at')
+            ->get();
 
         // Add unread count for each conversation
         $conversations->transform(function ($conv) use ($user) {
@@ -94,6 +62,59 @@ class ChatController extends Controller
         });
 
         return response()->json(ConversationResource::collection($conversations));
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/chat/unread-summary",
+     *     operationId="getUnreadChatSummary",
+     *     tags={"Chat"},
+     *     summary="Get unread chat summary",
+     *     description="Get unread conversation and message counts for the authenticated user",
+     *     security={{"sanctum": {}}},
+     *
+     *     @OA\Parameter(name="type", in="query", description="Filter by conversation type (user, pick_and_drop, ride_request)", required=false, @OA\Schema(type="string")),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="unread_conversations", type="integer", example=3),
+     *             @OA\Property(property="unread_messages", type="integer", example=8)
+     *         )
+     *     )
+     * )
+     */
+    public function unreadSummary(Request $request)
+    {
+        $user = Auth::user();
+        $type = $request->get('type');
+
+        $conversations = $this->visibleConversationsQuery($user->id, $type)->get(['conversations.id']);
+
+        $conversationIds = $conversations->pluck('id');
+
+        if ($conversationIds->isEmpty()) {
+            return response()->json([
+                'unread_conversations' => 0,
+                'unread_messages' => 0,
+            ]);
+        }
+
+        $unreadMessagesByConversation = Message::query()
+            ->select('conversation_id', DB::raw('COUNT(*) as unread_count'))
+            ->whereIn('conversation_id', $conversationIds)
+            ->where('is_read', false)
+            ->where('sender_id', '!=', $user->id)
+            ->groupBy('conversation_id')
+            ->pluck('unread_count', 'conversation_id');
+
+        return response()->json([
+            'unread_conversations' => $unreadMessagesByConversation->count(),
+            'unread_messages' => (int) $unreadMessagesByConversation->sum(),
+        ]);
     }
 
     /**
@@ -361,5 +382,44 @@ class ChatController extends Controller
         return response()->json([
             'message' => 'Conversation deleted successfully',
         ], 200);
+    }
+
+    protected function visibleConversationsQuery(int $userId, ?string $type = null): BelongsToMany
+    {
+        $user = User::query()->findOrFail($userId);
+        $query = $user->conversations();
+
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        $deletedConversations = DB::table('conversation_user_deletes')
+            ->where('user_id', $userId)
+            ->get()
+            ->keyBy('conversation_id');
+
+        if ($deletedConversations->isNotEmpty()) {
+            $conversationIds = $deletedConversations->keys()->toArray();
+            $conversationsWithNewMessages = [];
+
+            foreach ($deletedConversations as $conversationId => $deleteRecord) {
+                $hasNewMessages = DB::table('messages')
+                    ->where('conversation_id', $conversationId)
+                    ->where('created_at', '>', $deleteRecord->deleted_at)
+                    ->exists();
+
+                if ($hasNewMessages) {
+                    $conversationsWithNewMessages[] = $conversationId;
+                }
+            }
+
+            $conversationsToExclude = array_diff($conversationIds, $conversationsWithNewMessages);
+
+            if (! empty($conversationsToExclude)) {
+                $query->whereNotIn('conversations.id', $conversationsToExclude);
+            }
+        }
+
+        return $query;
     }
 }

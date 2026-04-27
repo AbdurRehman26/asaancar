@@ -10,12 +10,14 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useChatUnreadSummary } from '@/hooks/use-chat-unread-summary';
 import { LayoutGrid, Mail, MapPin, MessageSquare, Route, User, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 export function AppSidebar() {
     const { user } = useAuth();
+    const { unreadConversations } = useChatUnreadSummary(Boolean(user));
     const canViewInquiries = user?.id === 1;
     const [loginOpen, setLoginOpen] = useState(false);
     const wasLoginOpen = useRef(false);
@@ -91,6 +93,11 @@ export function AppSidebar() {
                                 <Link to="/dashboard/pick-and-drop-chat">
                                     <MessageSquare className="mr-2" />
                                     Ride Chat
+                                    {unreadConversations > 0 && (
+                                        <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-[#7e246c] px-2 py-0.5 text-[11px] font-semibold text-white dark:bg-white dark:text-[#2b1128]">
+                                            {unreadConversations}
+                                        </span>
+                                    )}
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
