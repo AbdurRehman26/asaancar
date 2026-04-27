@@ -46,6 +46,25 @@ it('creates a ride request with separate departure date and time', function () {
     ]);
 });
 
+it('normalizes dotted departure_date format for ride requests', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/ride-requests', [
+            'start_location' => 'Lahore, Pakistan',
+            'end_location' => 'Karachi, Pakistan',
+            'departure_date' => '25.04.2026',
+            'departure_time' => '08:30',
+            'required_seats' => 2,
+            'preferred_driver_gender' => 'female',
+        ]);
+
+    $response->assertSuccessful();
+
+    $this->assertDatabaseHas('ride_requests', [
+        'user_id' => $this->user->id,
+        'departure_time' => '2026-04-25 08:30:00',
+    ]);
+});
+
 it('does not require departure date when schedule type is not once', function () {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/ride-requests', [

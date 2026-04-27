@@ -7,6 +7,7 @@ use App\Http\Requests\StoreRideRequest;
 use App\Http\Requests\UpdateRideRequest;
 use App\Http\Resources\RideRequestResource;
 use App\Models\RideRequest;
+use App\Support\DepartureDateNormalizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
@@ -58,6 +59,12 @@ class RideRequestController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
+        if ($request->exists('departure_date')) {
+            $request->merge([
+                'departure_date' => DepartureDateNormalizer::normalize($request->input('departure_date')),
+            ]);
+        }
+
         $query = RideRequest::query()
             ->with('user')
             ->where('is_active', true);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PickAndDropResource;
 use App\Models\PickAndDrop;
 use App\Models\PickAndDropStop;
+use App\Support\DepartureDateNormalizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -57,6 +58,8 @@ class PickAndDropController extends Controller
      */
     public function index(Request $request)
     {
+        $departureDate = DepartureDateNormalizer::normalize($request->input('departure_date'));
+
         $query = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('is_active', true);
 
@@ -146,8 +149,8 @@ class PickAndDropController extends Controller
         }
 
         // Filter by departure date
-        if ($request->has('departure_date')) {
-            $query->whereDate('departure_time', $request->departure_date);
+        if ($departureDate) {
+            $query->whereDate('departure_time', $departureDate);
         }
 
         // Filter by departure time (show services 1 hour before and after selected time)
@@ -277,6 +280,12 @@ class PickAndDropController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->exists('departure_date')) {
+            $request->merge([
+                'departure_date' => DepartureDateNormalizer::normalize($request->input('departure_date')),
+            ]);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|max:255',
             'contact' => 'nullable|string|max:255',
@@ -426,6 +435,12 @@ class PickAndDropController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        if ($request->exists('departure_date')) {
+            $request->merge([
+                'departure_date' => DepartureDateNormalizer::normalize($request->input('departure_date')),
+            ]);
+        }
+
         $service = PickAndDrop::findOrFail($id);
 
         // Check if user owns this service

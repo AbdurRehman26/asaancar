@@ -42,6 +42,29 @@ it('creates a pick and drop service with separate departure_date and departure_t
     ]);
 });
 
+it('normalizes dotted departure_date format for pick and drop services', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/pick-and-drop', [
+            'start_location' => 'Karachi Airport',
+            'end_location' => 'Clifton Beach',
+            'pickup_city_id' => $this->city->id,
+            'pickup_area_id' => $this->area1->id,
+            'dropoff_city_id' => $this->city->id,
+            'dropoff_area_id' => $this->area2->id,
+            'departure_date' => '15.04.2026',
+            'departure_time' => '14:30',
+            'available_spaces' => 4,
+            'driver_gender' => 'male',
+        ]);
+
+    $response->assertSuccessful();
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'user_id' => $this->user->id,
+        'departure_time' => '2026-04-15 14:30:00',
+    ]);
+});
+
 it('stores google places data without requiring area selections', function () {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/pick-and-drop', [

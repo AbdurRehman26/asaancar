@@ -2,11 +2,23 @@
 
 namespace App\Http\Requests;
 
+use App\Support\DepartureDateNormalizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreRideRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if (! $this->exists('departure_date')) {
+            return;
+        }
+
+        $this->merge([
+            'departure_date' => DepartureDateNormalizer::normalize($this->input('departure_date')),
+        ]);
+    }
+
     public function authorize(): bool
     {
         return true;
