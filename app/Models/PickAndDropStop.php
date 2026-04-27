@@ -13,6 +13,7 @@ class PickAndDropStop extends Model
     protected $fillable = [
         'pick_and_drop_service_id',
         'location',
+        'stop_area',
         'place_id',
         'latitude',
         'longitude',

@@ -167,6 +167,10 @@ class PickAndDropResource extends Resource
                                     ->label('Location (Optional)')
                                     ->maxLength(255)
                                     ->nullable(),
+                                Forms\Components\TextInput::make('stop_area')
+                                    ->label('Area (Text)')
+                                    ->maxLength(255)
+                                    ->nullable(),
                                 Forms\Components\Select::make('city_id')
                                     ->label('City (Optional)')
                                     ->relationship('city', 'name')

@@ -40,4 +40,8 @@ return [
         'sender_id' => env('VEEVOTECH_SENDER_ID', 'Default'),
     ],
 
+    'google_maps' => [
+        'api_key' => env('GOOGLE_MAPS_API_KEY', env('VITE_GOOGLE_MAPS_API_KEY')),
+    ],
+
 ];

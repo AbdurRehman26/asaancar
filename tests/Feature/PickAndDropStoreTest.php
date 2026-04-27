@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Area;
+use App\Models\City;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -7,9 +9,9 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     // Seed cities and areas needed for validation
-    $city = \App\Models\City::create(['name' => 'Karachi']);
-    $area1 = \App\Models\Area::create(['name' => 'Airport', 'city_id' => $city->id]);
-    $area2 = \App\Models\Area::create(['name' => 'Clifton', 'city_id' => $city->id]);
+    $city = City::create(['name' => 'Karachi']);
+    $area1 = Area::create(['name' => 'Airport', 'city_id' => $city->id]);
+    $area2 = Area::create(['name' => 'Clifton', 'city_id' => $city->id]);
 
     $this->city = $city;
     $this->area1 = $area1;
@@ -58,6 +60,7 @@ it('stores google places data without requiring area selections', function () {
             'stops' => [
                 [
                     'location' => 'Teen Talwar, Karachi, Pakistan',
+                    'stop_area' => 'Clifton',
                     'place_id' => 'place_stop_789',
                     'latitude' => 24.821503,
                     'longitude' => 67.030828,
@@ -79,8 +82,11 @@ it('stores google places data without requiring area selections', function () {
 
     $this->assertDatabaseHas('pick_and_drop_stops', [
         'location' => 'Teen Talwar, Karachi, Pakistan',
+        'stop_area' => 'Clifton',
         'place_id' => 'place_stop_789',
     ]);
+
+    $response->assertJsonPath('data.stops.0.stop_area', 'Clifton');
 });
 
 it('validates departure_time must be in 24hr H:i format', function () {

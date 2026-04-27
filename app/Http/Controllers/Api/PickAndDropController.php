@@ -305,6 +305,7 @@ class PickAndDropController extends Controller
             'return_time' => 'nullable|date_format:H:i',
             'stops' => 'sometimes|array',
             'stops.*.location' => 'required_with:stops|string|max:255',
+            'stops.*.stop_area' => 'nullable|string|max:255',
             'stops.*.place_id' => 'nullable|string|max:255',
             'stops.*.latitude' => 'nullable|numeric',
             'stops.*.longitude' => 'nullable|numeric',
@@ -336,6 +337,7 @@ class PickAndDropController extends Controller
                 PickAndDropStop::create([
                     'pick_and_drop_service_id' => $service->id,
                     'location' => $stop['location'] ?? null,
+                    'stop_area' => $stop['stop_area'] ?? null,
                     'place_id' => $stop['place_id'] ?? null,
                     'latitude' => $stop['latitude'] ?? null,
                     'longitude' => $stop['longitude'] ?? null,
@@ -457,6 +459,7 @@ class PickAndDropController extends Controller
             'driver_gender' => 'sometimes|in:male,female',
             'stops' => 'sometimes|array',
             'stops.*.location' => 'required_with:stops|string|max:255',
+            'stops.*.stop_area' => 'nullable|string|max:255',
             'stops.*.place_id' => 'nullable|string|max:255',
             'stops.*.latitude' => 'nullable|numeric',
             'stops.*.longitude' => 'nullable|numeric',
@@ -493,6 +496,7 @@ class PickAndDropController extends Controller
                     PickAndDropStop::create([
                         'pick_and_drop_service_id' => $service->id,
                         'location' => $stop['location'] ?? null,
+                        'stop_area' => $stop['stop_area'] ?? null,
                         'place_id' => $stop['place_id'] ?? null,
                         'latitude' => $stop['latitude'] ?? null,
                         'longitude' => $stop['longitude'] ?? null,
