@@ -86,6 +86,27 @@ it('does not require departure date when schedule type is not once', function ()
     ]);
 });
 
+it('allows a null departure date when schedule type is not once', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/ride-requests', [
+            'start_location' => 'Islamabad, Pakistan',
+            'end_location' => 'Rawalpindi, Pakistan',
+            'departure_date' => null,
+            'departure_time' => '09:15',
+            'schedule_type' => 'everyday',
+            'required_seats' => 1,
+            'preferred_driver_gender' => 'any',
+        ]);
+
+    $response->assertSuccessful();
+
+    $this->assertDatabaseHas('ride_requests', [
+        'user_id' => $this->user->id,
+        'schedule_type' => 'everyday',
+        'departure_time' => '2000-01-01 09:15:00',
+    ]);
+});
+
 it('requires departure date when schedule type is once', function () {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/ride-requests', [
@@ -116,6 +137,29 @@ it('requires departure date when updating a ride request to once', function () {
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrors(['departure_date']);
+});
+
+it('allows a null departure date when updating a ride request to a non-once schedule', function () {
+    $rideRequest = RideRequest::factory()->create([
+        'user_id' => $this->user->id,
+        'schedule_type' => 'everyday',
+        'departure_time' => '2000-01-01 09:15:00',
+    ]);
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->putJson("/api/customer/ride-requests/{$rideRequest->id}", [
+            'schedule_type' => 'everyday',
+            'departure_date' => null,
+            'departure_time' => '09:30',
+        ]);
+
+    $response->assertSuccessful();
+
+    $this->assertDatabaseHas('ride_requests', [
+        'id' => $rideRequest->id,
+        'schedule_type' => 'everyday',
+        'departure_time' => '2000-01-01 09:30:00',
+    ]);
 });
 
 it('caps seats needed at four', function () {

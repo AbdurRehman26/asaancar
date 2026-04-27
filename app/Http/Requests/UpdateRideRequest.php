@@ -43,6 +43,7 @@ class UpdateRideRequest extends FormRequest
             'end_longitude' => ['sometimes', 'nullable', 'numeric'],
             'departure_date' => [
                 'sometimes',
+                'nullable',
                 Rule::requiredIf(fn (): bool => $this->input('schedule_type') === 'once'),
                 'date_format:Y-m-d',
             ],

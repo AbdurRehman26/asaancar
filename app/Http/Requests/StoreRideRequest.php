@@ -41,6 +41,7 @@ class StoreRideRequest extends FormRequest
             'end_latitude' => ['nullable', 'numeric'],
             'end_longitude' => ['nullable', 'numeric'],
             'departure_date' => [
+                'nullable',
                 Rule::requiredIf(fn (): bool => $this->input('schedule_type', 'once') === 'once'),
                 'date_format:Y-m-d',
             ],
