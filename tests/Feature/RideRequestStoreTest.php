@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\RideRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -94,6 +95,23 @@ it('requires departure date when schedule type is once', function () {
             'schedule_type' => 'once',
             'required_seats' => 1,
             'preferred_driver_gender' => 'any',
+        ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['departure_date']);
+});
+
+it('requires departure date when updating a ride request to once', function () {
+    $rideRequest = RideRequest::factory()->create([
+        'user_id' => $this->user->id,
+        'schedule_type' => 'everyday',
+        'departure_time' => '2000-01-01 09:15:00',
+    ]);
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->putJson("/api/customer/ride-requests/{$rideRequest->id}", [
+            'schedule_type' => 'once',
+            'departure_time' => '09:30',
         ]);
 
     $response->assertUnprocessable()

@@ -324,6 +324,18 @@ class PickAndDropController extends Controller
             'stops.*.order' => 'required_with:stops|integer|min:0',
         ]);
 
+        $validator->after(function ($validator) use ($request) {
+            if ($request->input('schedule_type') !== 'once') {
+                return;
+            }
+
+            if ($request->filled('departure_date')) {
+                return;
+            }
+
+            $validator->errors()->add('departure_date', 'The departure date field is required when schedule type is once.');
+        });
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
@@ -483,6 +495,18 @@ class PickAndDropController extends Controller
             'stops.*.stop_time' => 'required_with:stops|date',
             'stops.*.order' => 'required_with:stops|integer|min:0',
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            if ($request->input('schedule_type') !== 'once') {
+                return;
+            }
+
+            if ($request->filled('departure_date')) {
+                return;
+            }
+
+            $validator->errors()->add('departure_date', 'The departure date field is required when schedule type is once.');
+        });
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);

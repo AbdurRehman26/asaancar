@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Support\DepartureDateNormalizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpdateRideRequest extends FormRequest
 {
@@ -58,5 +59,20 @@ class UpdateRideRequest extends FormRequest
             'description' => ['sometimes', 'nullable', 'string'],
             'is_active' => ['sometimes', 'boolean'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($this->input('schedule_type') !== 'once') {
+                return;
+            }
+
+            if ($this->filled('departure_date')) {
+                return;
+            }
+
+            $validator->errors()->add('departure_date', 'The departure date field is required when schedule type is once.');
+        });
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Models\Area;
 use App\Models\City;
+use App\Models\PickAndDrop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -190,6 +191,27 @@ it('does not require departure_date when schedule_type is not once', function ()
         'departure_time' => '2000-01-01 14:30:00',
         'is_system_generated' => false,
     ]);
+});
+
+it('requires departure_date when updating a pick and drop service to once', function () {
+    $service = PickAndDrop::factory()->create([
+        'user_id' => $this->user->id,
+        'pickup_city_id' => $this->city->id,
+        'pickup_area_id' => $this->area1->id,
+        'dropoff_city_id' => $this->city->id,
+        'dropoff_area_id' => $this->area2->id,
+        'schedule_type' => 'everyday',
+        'departure_time' => '2000-01-01 14:30:00',
+    ]);
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->putJson("/api/customer/pick-and-drop/{$service->id}", [
+            'schedule_type' => 'once',
+            'departure_time' => '15:00',
+        ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['departure_date']);
 });
 
 it('defaults is_system_generated to false when creating a service', function () {
