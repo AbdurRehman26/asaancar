@@ -11,6 +11,11 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverview extends BaseWidget
 {
+    protected function getColumns(): int
+    {
+        return 4;
+    }
+
     protected function getStats(): array
     {
         return [
@@ -18,6 +23,14 @@ class StatsOverview extends BaseWidget
                 ->description('Registered users')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('warning'),
+            Stat::make('Expired OTP Users', User::query()
+                ->whereNotNull('otp_code')
+                ->whereNotNull('otp_expires_at')
+                ->where('otp_expires_at', '<', now())
+                ->count())
+                ->description('Users with expired OTPs')
+                ->descriptionIcon('heroicon-m-clock')
+                ->color('danger'),
             Stat::make('Manual Pick & Drop', PickAndDrop::query()->where('is_system_generated', false)->count())
                 ->description('Non-system-generated services')
                 ->descriptionIcon('heroicon-m-map-pin')

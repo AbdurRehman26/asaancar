@@ -7,6 +7,18 @@ use App\Models\Message;
 use App\Models\PickAndDrop;
 use App\Models\User;
 
+it('uses four stats columns on the admin dashboard', function () {
+    $widget = new class extends StatsOverview
+    {
+        public function exposedColumns(): int
+        {
+            return $this->getColumns();
+        }
+    };
+
+    expect($widget->exposedColumns())->toBe(4);
+});
+
 it('includes the count of non-system-generated pick and drop services', function () {
     PickAndDrop::factory()->count(2)->create([
         'is_system_generated' => false,
@@ -29,6 +41,37 @@ it('includes the count of non-system-generated pick and drop services', function
 
     expect($manualPickAndDropStat)->not->toBeNull()
         ->and($manualPickAndDropStat->getValue())->toBe(2);
+});
+
+it('includes the count of users with expired otps', function () {
+    User::factory()->create([
+        'otp_code' => '123456',
+        'otp_expires_at' => now()->subMinutes(5),
+    ]);
+
+    User::factory()->create([
+        'otp_code' => '654321',
+        'otp_expires_at' => now()->addMinutes(5),
+    ]);
+
+    User::factory()->create([
+        'otp_code' => null,
+        'otp_expires_at' => now()->subMinutes(10),
+    ]);
+
+    $widget = new class extends StatsOverview
+    {
+        public function exposedStats(): array
+        {
+            return $this->getStats();
+        }
+    };
+
+    $expiredOtpUsersStat = collect($widget->exposedStats())
+        ->first(fn ($stat) => $stat->getLabel() === 'Expired OTP Users');
+
+    expect($expiredOtpUsersStat)->not->toBeNull()
+        ->and($expiredOtpUsersStat->getValue())->toBe(1);
 });
 
 it('includes unique male and female driver counts', function () {
