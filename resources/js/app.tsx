@@ -80,7 +80,7 @@ function App() {
                         >
                             <Route index element={<Dashboard.Home />} />
 
-                            <Route path="pick-and-drop-chat" element={<PickAndDropChat />} />
+                            <Route path="chat" element={<PickAndDropChat />} />
                             <Route path="inquiries" element={<Dashboard.Inquiries />} />
                             <Route path="pick-and-drop" element={<PickAndDropPage />} />
                             <Route path="pick-and-drop/create" element={<PickAndDropForm />} />

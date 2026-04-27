@@ -28,10 +28,81 @@ class ConversationResource extends JsonResource
             'created_at' => $this->created_at ? $this->created_at->toISOString() : null,
             'updated_at' => $this->updated_at ? $this->updated_at->toISOString() : null,
             'formatted_time' => $this->updated_at ? $this->formatConversationTime($this->updated_at) : null,
-            'recipientUser' => $this->whenLoaded('recipientUser'),
-            'pickAndDropService' => $this->whenLoaded('pickAndDropService'),
-            'rideRequest' => $this->whenLoaded('rideRequest'),
+            'recipientUser' => $this->recipientUserPayload(),
+            'pickAndDropService' => $this->pickAndDropServicePayload(),
+            'rideRequest' => $this->rideRequestPayload(),
+            'typeObject' => $this->typeObjectPayload(),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function recipientUserPayload(): ?array
+    {
+        if (! $this->relationLoaded('recipientUser') || ! $this->recipientUser) {
+            return null;
+        }
+
+        return [
+            'id' => $this->recipientUser->id,
+            'name' => $this->recipientUser->name,
+            'email' => $this->recipientUser->email,
+            'phone' => $this->recipientUser->phone,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function pickAndDropServicePayload(): ?array
+    {
+        if (! $this->relationLoaded('pickAndDropService') || ! $this->pickAndDropService) {
+            return null;
+        }
+
+        return [
+            'id' => $this->pickAndDropService->id,
+            'start_location' => $this->pickAndDropService->start_location,
+            'end_location' => $this->pickAndDropService->end_location,
+            'departure_date' => $this->pickAndDropService->departure_date,
+            'departure_time' => $this->pickAndDropService->departure_time,
+            'schedule_type' => $this->pickAndDropService->schedule_type,
+            'price_per_seat' => $this->pickAndDropService->price_per_seat,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function rideRequestPayload(): ?array
+    {
+        if (! $this->relationLoaded('rideRequest') || ! $this->rideRequest) {
+            return null;
+        }
+
+        return [
+            'id' => $this->rideRequest->id,
+            'start_location' => $this->rideRequest->start_location,
+            'end_location' => $this->rideRequest->end_location,
+            'departure_date' => $this->rideRequest->departure_date,
+            'departure_time' => $this->rideRequest->departure_time,
+            'schedule_type' => $this->rideRequest->schedule_type,
+            'budget_per_seat' => $this->rideRequest->budget_per_seat,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function typeObjectPayload(): ?array
+    {
+        return match ($this->type) {
+            'user' => $this->recipientUserPayload(),
+            'pick_and_drop' => $this->pickAndDropServicePayload(),
+            'ride_request' => $this->rideRequestPayload(),
+            default => null,
+        };
     }
 
     /**

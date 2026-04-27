@@ -89,10 +89,10 @@ export function AppSidebar() {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                         <SidebarMenuItem>
-                            <SidebarMenuButton size="lg" asChild isActive={isActive('/dashboard/pick-and-drop-chat')} className={menuButtonClassName}>
-                                <Link to="/dashboard/pick-and-drop-chat">
+                            <SidebarMenuButton size="lg" asChild isActive={isActive('/dashboard/chat')} className={menuButtonClassName}>
+                                <Link to="/dashboard/chat">
                                     <MessageSquare className="mr-2" />
-                                    Ride Chat
+                                    Chat
                                     {unreadConversations > 0 && (
                                         <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-[#7e246c] px-2 py-0.5 text-[11px] font-semibold text-white dark:bg-white dark:text-[#2b1128]">
                                             {unreadConversations}

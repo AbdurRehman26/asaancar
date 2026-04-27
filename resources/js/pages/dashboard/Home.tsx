@@ -178,7 +178,7 @@ export default function Home() {
                         </p>
                     </Link>
                     <Link
-                        to="/dashboard/pick-and-drop-chat"
+                        to="/dashboard/chat"
                         className="rounded-[1.5rem] border border-[#7e246c]/10 bg-[#fcf7fb] p-5 transition hover:border-[#7e246c]/25 hover:bg-[#faf1f8] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
                     >
                         <p className="text-sm font-semibold text-[#2b1128] dark:text-white">Continue conversations</p>

@@ -9,8 +9,14 @@ import { useEffect, useState } from 'react';
 interface RawConversation {
     id: string | number;
     type: string;
+    recipientUser?: {
+        id?: number | string;
+        name?: string;
+    };
     pick_and_drop_service_id?: string | number;
     pickAndDropService?: { id: number; start_location?: string; end_location?: string };
+    rideRequest?: { id: number; start_location?: string; end_location?: string };
+    ride_request_id?: string | number;
     unread_count?: number;
     last_message?: string | object;
     updated_at?: string | object;
@@ -24,12 +30,9 @@ export default function PickAndDropChat() {
     const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
 
     useEffect(() => {
-        // Fetch conversations for pick and drop
         setConversationsLoading(true);
-        const params = new URLSearchParams();
-        params.append('type', 'pick_and_drop'); // Filter for pick and drop conversations
 
-        fetch(`/api/chat/conversations?${params.toString()}`, {
+        fetch('/api/chat/conversations', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
             .then((res) => {
@@ -66,8 +69,8 @@ export default function PickAndDropChat() {
             <DashboardPage>
                 <DashboardHero
                     eyebrow="Conversations"
-                    title="Ride chat"
-                    description="Keep rider and driver conversations in one focused place, with route context always visible while you reply."
+                    title="Chat"
+                    description="Keep rider and driver conversations in one focused place, with the full inbox available while you reply."
                 />
                 <DashboardPanel title="Conversation inbox" contentClassName="p-0">
                     <div className="flex min-h-0 flex-1">
@@ -76,7 +79,7 @@ export default function PickAndDropChat() {
                             {conversationsLoading ? (
                                 <div className="p-4 text-gray-400">Loading conversations...</div>
                             ) : conversations.length === 0 ? (
-                                <div className="p-4 text-gray-400">No ride conversations yet.</div>
+                                <div className="p-4 text-gray-400">No conversations yet.</div>
                             ) : (
                                 <div className="flex flex-col">
                                     {conversations.map((conv: Conversation) => {
@@ -84,9 +87,15 @@ export default function PickAndDropChat() {
                                         const service = (
                                             conv as Conversation & { pickAndDropService?: { start_location?: string; end_location?: string } }
                                         ).pickAndDropService;
+                                        const rideRequest = (
+                                            conv as Conversation & { rideRequest?: { start_location?: string; end_location?: string } }
+                                        ).rideRequest;
+                                        const conversationName = conv.recipientUser?.name || 'Chat';
                                         const routeLabel = service
                                             ? `${service.start_location || 'Start'} → ${service.end_location || 'End'}`
-                                            : `Service #${(conv as Conversation & { pick_and_drop_service_id?: number }).pick_and_drop_service_id || 'N/A'}`;
+                                            : rideRequest
+                                              ? `${rideRequest.start_location || 'Start'} → ${rideRequest.end_location || 'End'}`
+                                              : '';
 
                                         return (
                                             <button
@@ -103,13 +112,20 @@ export default function PickAndDropChat() {
                                                 {/* Info */}
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="truncate font-semibold text-[#7e246c] dark:text-white">{routeLabel}</span>
+                                                        <span className="truncate font-semibold text-[#7e246c] dark:text-white">
+                                                            {conversationName}
+                                                        </span>
                                                         {typeof conv.unread_count === 'number' && conv.unread_count > 0 && (
                                                             <span className="ml-2 inline-block min-w-[20px] rounded-full bg-red-600 px-2 py-0.5 text-center text-xs text-white">
                                                                 {String(conv.unread_count)}
                                                             </span>
                                                         )}
                                                     </div>
+                                                    {routeLabel ? (
+                                                        <div className="truncate text-xs font-medium text-[#8a7286] dark:text-white/55">
+                                                            {routeLabel}
+                                                        </div>
+                                                    ) : null}
                                                     <div className="truncate text-xs text-gray-500 dark:text-gray-300">
                                                         {typeof conv.last_message === 'string' ? conv.last_message : 'No messages yet.'}
                                                     </div>

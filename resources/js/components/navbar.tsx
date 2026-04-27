@@ -172,7 +172,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     <div className="flex items-center space-x-2">
                         {isDashboardTheme && (
                             <Link
-                                to="/dashboard/pick-and-drop-chat"
+                                to="/dashboard/chat"
                                 className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[#6b5368] transition hover:bg-white/70 hover:text-[#2f2231] dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
                             >
                                 <MessageSquare className="h-5 w-5" />
@@ -282,12 +282,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                                                     Ride Requests
                                                 </Link>
                                                 <Link
-                                                    to="/dashboard/pick-and-drop-chat"
+                                                    to="/dashboard/chat"
                                                     className="flex items-center gap-3 px-1 py-2 text-sm font-medium text-gray-700 transition hover:text-[#7e246c] dark:text-neutral-300 dark:hover:text-white"
                                                     onClick={() => setMobileMenuOpen(false)}
                                                 >
                                                     <MessageSquare className="h-4 w-4" />
-                                                    <span>Ride Chat</span>
+                                                    <span>Chat</span>
                                                     {unreadConversations > 0 && (
                                                         <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-[#7e246c] px-2 py-0.5 text-[11px] font-semibold text-white dark:bg-white dark:text-[#2b1128]">
                                                             {unreadConversations}

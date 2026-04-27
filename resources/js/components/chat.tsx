@@ -1,6 +1,6 @@
+import { apiFetch } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 import echo from '../lib/echo';
-import { apiFetch } from '@/lib/utils';
 
 interface User {
     id: number;
@@ -27,6 +27,7 @@ interface RawMessage {
     is_read: boolean;
     created_at: string | object;
     updated_at: string | object;
+    sender?: User;
 }
 
 interface ChatProps {
@@ -62,7 +63,8 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                             is_read: Boolean(msg.is_read),
                             created_at: String(msg.created_at || new Date().toISOString()),
                             updated_at: String(msg.updated_at || new Date().toISOString()),
-                            formatted_time: msg.formatted_time
+                            formatted_time: msg.formatted_time,
+                            sender: msg.sender,
                         };
                     });
                     setMessages(formattedMessages);
@@ -85,7 +87,8 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 is_read: Boolean(message.is_read),
                 created_at: String(message.created_at || new Date().toISOString()),
                 updated_at: String(message.updated_at || new Date().toISOString()),
-                formatted_time: (message as { formatted_time?: string }).formatted_time
+                formatted_time: (message as { formatted_time?: string }).formatted_time,
+                sender: (message as RawMessage).sender,
             };
             // Only add if not sent by current user and not already present
             setMessages((prev) => {
@@ -123,7 +126,8 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 is_read: Boolean(msg.is_read),
                 created_at: String(msg.created_at || new Date().toISOString()),
                 updated_at: String(msg.updated_at || new Date().toISOString()),
-                formatted_time: (msg as { formatted_time?: string }).formatted_time
+                formatted_time: (msg as { formatted_time?: string }).formatted_time,
+                sender: (msg as RawMessage).sender,
             };
             // Only add if not already present
             setMessages((prev) => {
@@ -139,35 +143,36 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
     };
 
     return (
-        <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-300 dark:border-gray-800 h-[500px] max-h-full">
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex h-[500px] max-h-full flex-col rounded-lg border border-gray-300 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
+            <div className="flex-1 space-y-2 overflow-y-auto p-4">
                 {loading ? (
-                    <div className="flex items-center justify-center h-full text-gray-400">Loading messages...</div>
+                    <div className="flex h-full items-center justify-center text-gray-400">Loading messages...</div>
                 ) : error ? (
-                    <div className="flex items-center justify-center h-full text-red-500">{error}</div>
+                    <div className="flex h-full items-center justify-center text-red-500">{error}</div>
                 ) : messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-gray-400">No messages yet.</div>
+                    <div className="flex h-full items-center justify-center text-gray-400">No messages yet.</div>
                 ) : (
                     messages.map((msg) => {
                         const isCurrentUser = msg.sender_id === currentUser.id;
-                        const senderName = isCurrentUser ? currentUser.name : `User ${msg.sender_id}`;
+                        const senderName = msg.sender?.name || (isCurrentUser ? currentUser.name : `User ${msg.sender_id}`);
 
                         return (
-                            <div
-                                key={msg.id}
-                                className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}
-                            >
-                                <div className={`px-4 py-2 rounded-lg max-w-xs
-                                    ${isCurrentUser
-                                        ? 'bg-primary text-white dark:bg-primary dark:text-white'
-                                        : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'}
-                                `}>
-                                    <span className="block text-xs font-semibold mb-1">{senderName}</span>
+                            <div key={msg.id} className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+                                <div
+                                    className={`max-w-xs rounded-lg px-4 py-2 ${
+                                        isCurrentUser
+                                            ? 'bg-primary text-white dark:bg-primary dark:text-white'
+                                            : 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                                    } `}
+                                >
+                                    <span className="mb-1 block text-xs font-semibold">{senderName}</span>
                                     <span>{typeof msg.message === 'string' ? msg.message : JSON.stringify(msg.message)}</span>
                                 </div>
-                                <span 
-                                    className="text-xs text-gray-400 mt-1"
-                                    title={new Date(typeof msg.created_at === 'string' ? msg.created_at : JSON.stringify(msg.created_at)).toLocaleString('en-US', {
+                                <span
+                                    className="mt-1 text-xs text-gray-400"
+                                    title={new Date(
+                                        typeof msg.created_at === 'string' ? msg.created_at : JSON.stringify(msg.created_at),
+                                    ).toLocaleString('en-US', {
                                         weekday: 'long',
                                         year: 'numeric',
                                         month: 'long',
@@ -177,7 +182,10 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                                         hour12: true,
                                     })}
                                 >
-                                    {msg.formatted_time || new Date(typeof msg.created_at === 'string' ? msg.created_at : JSON.stringify(msg.created_at)).toLocaleTimeString()}
+                                    {msg.formatted_time ||
+                                        new Date(
+                                            typeof msg.created_at === 'string' ? msg.created_at : JSON.stringify(msg.created_at),
+                                        ).toLocaleTimeString()}
                                 </span>
                             </div>
                         );
@@ -185,9 +193,9 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            <form onSubmit={sendMessage} className="p-4 flex gap-2 border-t border-gray-300 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <form onSubmit={sendMessage} className="flex gap-2 border-t border-gray-300 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
                 <input
-                    className="flex-1 rounded bg-white text-gray-900 dark:bg-gray-800 dark:text-white px-4 py-2 focus:outline-none border border-gray-300 dark:border-gray-700"
+                    className="flex-1 rounded border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type a message..."
@@ -195,16 +203,14 @@ export default function Chat({ conversationId, currentUser }: ChatProps) {
                 />
                 <button
                     type="submit"
-                    className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 ${
-                        sending
-                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                            : 'bg-primary text-white hover:bg-primary/90 cursor-pointer'
+                    className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all duration-200 ${
+                        sending ? 'cursor-not-allowed bg-gray-400 text-gray-600' : 'cursor-pointer bg-primary text-white hover:bg-primary/90'
                     }`}
                     disabled={sending || !input.trim()}
                 >
                     {sending ? (
                         <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                             Sending...
                         </>
                     ) : (

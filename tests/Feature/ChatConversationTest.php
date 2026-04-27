@@ -25,7 +25,10 @@ it('creates a ride request conversation when provided a ride_request type and us
         ->assertJsonPath('type', 'ride_request')
         ->assertJsonPath('user_id', $sender->id)
         ->assertJsonPath('recipient_user_id', $recipient->id)
-        ->assertJsonPath('ride_request_id', $rideRequest->id);
+        ->assertJsonPath('ride_request_id', $rideRequest->id)
+        ->assertJsonPath('typeObject.id', $rideRequest->id)
+        ->assertJsonPath('typeObject.start_location', $rideRequest->start_location)
+        ->assertJsonPath('typeObject.end_location', $rideRequest->end_location);
 
     $this->assertDatabaseHas('conversations', [
         'type' => 'ride_request',
@@ -33,6 +36,46 @@ it('creates a ride request conversation when provided a ride_request type and us
         'recipient_user_id' => $recipient->id,
         'ride_request_id' => $rideRequest->id,
     ]);
+});
+
+it('returns the correct type object for ride request conversations in the list response', function () {
+    $user = User::factory()->create();
+    $recipient = User::factory()->create();
+    $rideRequest = RideRequest::factory()->create([
+        'user_id' => $recipient->id,
+        'start_location' => 'DHA Phase 8',
+        'end_location' => 'Gulshan-e-Iqbal',
+    ]);
+
+    $conversation = Conversation::query()->create([
+        'type' => 'ride_request',
+        'user_id' => $user->id,
+        'recipient_user_id' => $recipient->id,
+        'ride_request_id' => $rideRequest->id,
+    ]);
+
+    Message::query()->create([
+        'conversation_id' => $conversation->id,
+        'sender_id' => $user->id,
+        'message' => 'Starting the conversation',
+        'is_read' => true,
+    ]);
+
+    Message::query()->create([
+        'conversation_id' => $conversation->id,
+        'sender_id' => $recipient->id,
+        'message' => 'Is this still available?',
+        'is_read' => false,
+    ]);
+
+    $response = $this->actingAs($user)->getJson('/api/chat/conversations');
+
+    $response->assertSuccessful()
+        ->assertJsonPath('0.type', 'ride_request')
+        ->assertJsonPath('0.rideRequest.id', $rideRequest->id)
+        ->assertJsonPath('0.typeObject.id', $rideRequest->id)
+        ->assertJsonPath('0.typeObject.start_location', 'DHA Phase 8')
+        ->assertJsonPath('0.typeObject.end_location', 'Gulshan-e-Iqbal');
 });
 
 it('returns unread conversation and message counts for the authenticated user', function () {
