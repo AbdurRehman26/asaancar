@@ -46,7 +46,8 @@ class ContactMessageResource extends Resource
                     ->label('Message')
                     ->searchable()
                     ->wrap()
-                    ->limit(90),
+                    ->limit(90)
+                    ->tooltip(fn (ContactMessage $record): string => $record->message),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Submitted')
                     ->dateTime()
