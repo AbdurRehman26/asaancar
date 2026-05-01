@@ -3,7 +3,13 @@
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\ContactingStatController;
 use App\Http\Controllers\Api\ContactMessageController;
+use App\Http\Controllers\Api\CustomerLiveRideController;
+use App\Http\Controllers\Api\DriverAvailabilityController;
+use App\Http\Controllers\Api\DriverLiveRideController;
+use App\Http\Controllers\Api\DriverLocationController;
 use App\Http\Controllers\Api\ImageUploadController;
+use App\Http\Controllers\Api\LiveRideEstimateController;
+use App\Http\Controllers\Api\LiveRideTrackingController;
 use App\Http\Controllers\Api\PickAndDropController;
 use App\Http\Controllers\Api\PickAndDropFavoriteController;
 use App\Http\Controllers\Api\RideRequestController;
@@ -77,6 +83,8 @@ Route::prefix('ride-requests')->group(function () {
     Route::get('/{id}', [RideRequestController::class, 'show']);
 });
 
+Route::post('/live-rides/estimate', [LiveRideEstimateController::class, 'store']);
+
 // User information endpoint
 Route::get('/user', [UserController::class, 'me'])->middleware('auth:sanctum');
 
@@ -110,6 +118,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/chat/conversations/{conversation}/messages', [ChatController::class, 'messages']);
     Route::post('/chat/conversations/{conversation}/messages', [ChatController::class, 'sendMessage']);
     Route::post('/contacting-stats', [ContactingStatController::class, 'store']);
+    Route::get('/live-rides/{liveRideRequest}/tracking', [LiveRideTrackingController::class, 'tracking']);
+    Route::get('/live-rides/{liveRideRequest}/timeline', [LiveRideTrackingController::class, 'timeline']);
+    Route::post('/driver/availability', [DriverAvailabilityController::class, 'store']);
+    Route::post('/driver/location', [DriverLocationController::class, 'store']);
+    Route::get('/driver/live-rides/incoming', [DriverLiveRideController::class, 'incoming']);
+    Route::post('/driver/live-rides/{liveRideRequest}/accept', [DriverLiveRideController::class, 'accept']);
+    Route::post('/driver/live-rides/{liveRideRequest}/reject', [DriverLiveRideController::class, 'reject']);
+    Route::post('/driver/live-rides/{liveRideRequest}/arrived', [DriverLiveRideController::class, 'arrived']);
+    Route::post('/driver/live-rides/{liveRideRequest}/start', [DriverLiveRideController::class, 'start']);
+    Route::post('/driver/live-rides/{liveRideRequest}/complete', [DriverLiveRideController::class, 'complete']);
+    Route::post('/driver/live-rides/{liveRideRequest}/cancel', [DriverLiveRideController::class, 'cancel']);
 });
 
 // Cities API
@@ -136,6 +155,13 @@ Route::prefix('customer')->middleware(['auth:sanctum'])->group(function () {
         Route::post('/', [RideRequestController::class, 'store']);
         Route::put('/{id}', [RideRequestController::class, 'update']);
         Route::delete('/{id}', [RideRequestController::class, 'destroy']);
+    });
+
+    Route::prefix('live-rides')->group(function () {
+        Route::post('/', [CustomerLiveRideController::class, 'store']);
+        Route::get('/active', [CustomerLiveRideController::class, 'active']);
+        Route::get('/{liveRideRequest}', [CustomerLiveRideController::class, 'show']);
+        Route::post('/{liveRideRequest}/cancel', [CustomerLiveRideController::class, 'cancel']);
     });
 });
 

@@ -8,6 +8,8 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -118,6 +120,26 @@ class User extends Authenticatable implements FilamentUser
     public function rideRequests()
     {
         return $this->hasMany(RideRequest::class);
+    }
+
+    public function liveRideRequestsAsRider(): HasMany
+    {
+        return $this->hasMany(LiveRideRequest::class, 'rider_user_id');
+    }
+
+    public function liveRideRequestsAsDriver(): HasMany
+    {
+        return $this->hasMany(LiveRideRequest::class, 'driver_user_id');
+    }
+
+    public function driverAvailability(): HasOne
+    {
+        return $this->hasOne(DriverAvailability::class, 'driver_user_id');
+    }
+
+    public function driverLocation(): HasOne
+    {
+        return $this->hasOne(DriverLocation::class, 'driver_user_id');
     }
 
     public function sendEmailVerificationNotification()
