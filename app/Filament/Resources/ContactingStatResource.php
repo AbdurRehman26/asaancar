@@ -37,11 +37,19 @@ class ContactingStatResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('User')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (ContactingStat $record): ?string => $record->user
+                        ? UserResource::getUrl('edit', ['record' => $record->user])
+                        : null
+                    ),
                 Tables\Columns\TextColumn::make('recipientUser.name')
                     ->label('Recipient')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (ContactingStat $record): ?string => $record->recipientUser
+                        ? UserResource::getUrl('edit', ['record' => $record->recipientUser])
+                        : null
+                    ),
                 Tables\Columns\TextColumn::make('contact_method')
                     ->label('Method')
                     ->badge()
@@ -58,11 +66,13 @@ class ContactingStatResource extends Resource
                     ->color(fn (string $state): string => $state === 'Ride' ? 'warning' : 'danger'),
                 Tables\Columns\TextColumn::make('contactable_id')
                     ->label('Listing ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (ContactingStat $record): ?string => static::getContactableUrl($record)),
                 Tables\Columns\TextColumn::make('contacted_route')
                     ->label('Route')
                     ->limit(40)
                     ->tooltip(fn (ContactingStat $record): ?string => $record->contacted_route)
+                    ->url(fn (ContactingStat $record): ?string => static::getContactableUrl($record))
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('interaction_count')
                     ->label('Count')
@@ -117,5 +127,18 @@ class ContactingStatResource extends Resource
     public static function canDelete($record): bool
     {
         return false;
+    }
+
+    protected static function getContactableUrl(ContactingStat $record): ?string
+    {
+        return match ($record->contactable_type) {
+            'pick_and_drop' => $record->pickAndDrop
+                ? PickAndDropResource::getUrl('edit', ['record' => $record->pickAndDrop])
+                : null,
+            'ride_request' => $record->rideRequest
+                ? RideRequestResource::getUrl('edit', ['record' => $record->rideRequest])
+                : null,
+            default => null,
+        };
     }
 }

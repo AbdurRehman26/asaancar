@@ -42,5 +42,8 @@ it('shows contact stats in the filament table listing', function () {
         ->assertSee('Recipient User')
         ->assertSee('WhatsApp')
         ->assertSee((string) $ride->id)
-        ->assertSee('4');
+        ->assertSee('4')
+        ->assertSee(route('filament.admin.resources.users.edit', ['record' => $user]), false)
+        ->assertSee(route('filament.admin.resources.users.edit', ['record' => $recipient]), false)
+        ->assertSee(route('filament.admin.resources.pick-and-drops.edit', ['record' => $ride]), false);
 });
