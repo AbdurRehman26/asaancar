@@ -336,6 +336,43 @@
                 ]
             }
         },
+        "/api/config": {
+            "get": {
+                "tags": [
+                    "Global Config"
+                ],
+                "summary": "Get global API config",
+                "description": "Returns public configuration values needed by clients such as the Android app version.",
+                "operationId": "getGlobalConfig",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "android_version": {
+                                                    "type": "string",
+                                                    "example": "2.3.0"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Global config fetched successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/upload/image": {
             "post": {
                 "tags": [
@@ -3873,6 +3910,10 @@
         {
             "name": "Contact Stats",
             "description": "API Endpoints for tracking contact actions"
+        },
+        {
+            "name": "Global Config",
+            "description": "Public API configuration endpoints"
         },
         {
             "name": "Image Upload",

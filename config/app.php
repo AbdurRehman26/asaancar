@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'android_version' => env('ANDROID_VERSION', '1.0.0'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

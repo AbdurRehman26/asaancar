@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CustomerLiveRideController;
 use App\Http\Controllers\Api\DriverAvailabilityController;
 use App\Http\Controllers\Api\DriverLiveRideController;
 use App\Http\Controllers\Api\DriverLocationController;
+use App\Http\Controllers\Api\GlobalConfigController;
 use App\Http\Controllers\Api\ImageUploadController;
 use App\Http\Controllers\Api\LiveRideEstimateController;
 use App\Http\Controllers\Api\LiveRideTrackingController;
@@ -42,6 +43,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Auth API endpoints
+Route::get('/config', GlobalConfigController::class);
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::post('/register', [RegisteredUserController::class, 'store']);
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']);
