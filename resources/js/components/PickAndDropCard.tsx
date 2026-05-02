@@ -56,6 +56,7 @@ interface PickAndDropCardProps {
     onDelete?: () => void;
     showDetails?: boolean; // Toggle for "View Details" button presence if needed elsewhere
     className?: string;
+    showUserInfo?: boolean;
     variant?: 'default' | 'dashboard';
     pricePlacement?: 'top-right' | 'below-route';
 }
@@ -66,6 +67,7 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
     onEdit,
     onDelete,
     className = '',
+    showUserInfo = true,
     variant = 'default',
     pricePlacement = 'top-right',
 }) => {
@@ -327,18 +329,33 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 overflow-hidden">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                            {userName.charAt(0).toUpperCase()}
+                            {(showUserInfo ? userName : 'Login').charAt(0).toUpperCase()}
                         </div>
                         <div className="flex flex-col truncate">
-                            <span
-                                className={`truncate text-sm font-semibold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
-                            >
-                                {userName}
-                            </span>
-                            {userPhone && (
-                                <span className={`truncate text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500'}`}>
-                                    {userPhone}
-                                </span>
+                            {showUserInfo ? (
+                                <>
+                                    <span
+                                        className={`truncate text-sm font-semibold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
+                                    >
+                                        {userName}
+                                    </span>
+                                    {userPhone && (
+                                        <span className={`truncate text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500'}`}>
+                                            {userPhone}
+                                        </span>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <span
+                                        className={`truncate text-sm font-semibold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
+                                    >
+                                        Driver info hidden
+                                    </span>
+                                    <span className={`truncate text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500'}`}>
+                                        Login to view driver details
+                                    </span>
+                                </>
                             )}
                         </div>
                     </div>

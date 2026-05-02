@@ -520,6 +520,7 @@ export default function PickAndDropListing() {
                                 <PickAndDropCard
                                     key={service.id}
                                     service={service}
+                                    showUserInfo={Boolean(user)}
                                     variant="dashboard"
                                     onClick={() => navigate(`/pick-and-drop/${service.id}`)}
                                 />
