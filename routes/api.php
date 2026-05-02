@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CustomerLiveRideController;
 use App\Http\Controllers\Api\DriverAvailabilityController;
 use App\Http\Controllers\Api\DriverLiveRideController;
 use App\Http\Controllers\Api\DriverLocationController;
+use App\Http\Controllers\Api\FcmTokenController;
 use App\Http\Controllers\Api\GlobalConfigController;
 use App\Http\Controllers\Api\ImageUploadController;
 use App\Http\Controllers\Api\LiveRideEstimateController;
@@ -132,6 +133,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/driver/live-rides/{liveRideRequest}/start', [DriverLiveRideController::class, 'start']);
     Route::post('/driver/live-rides/{liveRideRequest}/complete', [DriverLiveRideController::class, 'complete']);
     Route::post('/driver/live-rides/{liveRideRequest}/cancel', [DriverLiveRideController::class, 'cancel']);
+    Route::post('/fcm/tokens', [FcmTokenController::class, 'store']);
+    Route::delete('/fcm/tokens', [FcmTokenController::class, 'destroy']);
 });
 
 // Cities API

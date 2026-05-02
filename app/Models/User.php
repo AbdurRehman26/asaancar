@@ -142,6 +142,21 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(DriverLocation::class, 'driver_user_id');
     }
 
+    public function fcmTokens(): HasMany
+    {
+        return $this->hasMany(UserFcmToken::class);
+    }
+
+    public function routeNotificationForFcm(): array
+    {
+        return $this->fcmTokens()
+            ->pluck('token')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomEmailVerificationNotification);
