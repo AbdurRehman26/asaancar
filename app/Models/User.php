@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -25,6 +26,8 @@ use Spatie\Permission\Traits\HasRoles;
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="name", type="string", example="John Doe"),
  *     @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+ *     @OA\Property(property="gender", type="string", enum={"male", "female"}, nullable=true, example="male"),
+ *     @OA\Property(property="city_id", type="integer", nullable=true, example=1),
  *     @OA\Property(property="email_verified_at", type="string", format="date-time", nullable=true),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time"),
@@ -47,6 +50,8 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'phone_number',
+        'gender',
+        'city_id',
         'password',
         'otp_code',
         'otp_expires_at',
@@ -75,6 +80,7 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'otp_expires_at' => 'datetime',
             'is_verified' => 'boolean',
+            'city_id' => 'integer',
             'password' => 'hashed',
         ];
     }
@@ -115,6 +121,16 @@ class User extends Authenticatable implements FilamentUser
     public function favoritePickAndDrops()
     {
         return $this->belongsToMany(PickAndDrop::class, 'pick_and_drop_favorites', 'user_id', 'pick_and_drop_service_id')->withTimestamps();
+    }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    public function pickAndDropServices(): HasMany
+    {
+        return $this->hasMany(PickAndDrop::class);
     }
 
     public function rideRequests()

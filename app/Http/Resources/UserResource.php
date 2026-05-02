@@ -13,6 +13,14 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'phone_number' => $this->phone_number,
+            'gender' => $this->gender,
+            'city_id' => $this->city_id,
+            'city' => $this->whenLoaded('city', function () {
+                return [
+                    'id' => $this->city->id,
+                    'name' => $this->city->name,
+                ];
+            }),
             'has_password' => ! empty($this->password),
             'password_set' => ! empty($this->password),
             'created_at' => $this->created_at,

@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/compon
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useChatUnreadSummary } from '@/hooks/use-chat-unread-summary';
 import { useInitials } from '@/hooks/use-initials';
-import { LayoutGrid, Mail, MapPin, Menu, MessageSquare, Route, User, X, Zap } from 'lucide-react';
+import { CarFront, LayoutGrid, Mail, MapPin, Menu, MessageSquare, Route, User, X, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DarkModeToggle from './ui/dark-mode-toggle';
@@ -49,6 +49,10 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
             <Link to="/ride-requests" className={navLinkClassName('ride-requests')} onClick={() => setMobileMenuOpen(false)}>
                 <Route className="h-4 w-4" />
                 Ride Requests
+            </Link>
+            <Link to="/drivers" className={navLinkClassName('drivers')} onClick={() => setMobileMenuOpen(false)}>
+                <CarFront className="h-4 w-4" />
+                Drivers
             </Link>
             <Link to="/contact" className={navLinkClassName('contact')} onClick={() => setMobileMenuOpen(false)}>
                 <Mail className="h-4 w-4" />
@@ -129,6 +133,10 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage = '' }) => {
                     <Link to="/ride-requests" className={navLinkClassName('ride-requests')} onClick={() => setMobileMenuOpen(false)}>
                         <Route className="h-4 w-4" />
                         Ride Requests
+                    </Link>
+                    <Link to="/drivers" className={navLinkClassName('drivers')} onClick={() => setMobileMenuOpen(false)}>
+                        <CarFront className="h-4 w-4" />
+                        Drivers
                     </Link>
                     <Link to="/contact" className={navLinkClassName('contact')} onClick={() => setMobileMenuOpen(false)}>
                         <Mail className="h-4 w-4" />

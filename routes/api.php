@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ContactingStatController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\CustomerLiveRideController;
 use App\Http\Controllers\Api\DriverAvailabilityController;
+use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\DriverLiveRideController;
 use App\Http\Controllers\Api\DriverLocationController;
 use App\Http\Controllers\Api\FcmTokenController;
@@ -87,10 +88,14 @@ Route::prefix('ride-requests')->group(function () {
     Route::get('/{id}', [RideRequestController::class, 'show']);
 });
 
+Route::get('/drivers', [DriverController::class, 'index']);
+Route::get('/drivers/{id}', [DriverController::class, 'show']);
+
 Route::post('/live-rides/estimate', [LiveRideEstimateController::class, 'store']);
 
 // User information endpoint
 Route::get('/user', [UserController::class, 'me'])->middleware('auth:sanctum');
+Route::patch('/user', [UserController::class, 'update'])->middleware('auth:sanctum');
 
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {

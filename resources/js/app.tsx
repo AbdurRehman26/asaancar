@@ -19,6 +19,8 @@ import PickAndDropChat from './pages/dashboard/PickAndDropChat';
 import PickAndDropForm from './pages/dashboard/PickAndDropForm';
 import RideRequestForm from './pages/dashboard/RideRequestForm';
 import RideRequestsPage from './pages/dashboard/RideRequests';
+import DriverDetail from './pages/driver-detail';
+import DriversListing from './pages/drivers-listing';
 import EmailVerificationSuccess from './pages/email-verification-success';
 import LoginPage from './pages/login';
 import PickAndDropDetail from './pages/pick-and-drop-detail';
@@ -57,6 +59,8 @@ function App() {
                         <Route path="/" element={<Welcome />} />
                         <Route path="/about" element={<About />} />
                         <Route path="/contact" element={<Contact />} />
+                        <Route path="/drivers" element={<DriversListing />} />
+                        <Route path="/drivers/:id" element={<DriverDetail />} />
                         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                         <Route path="/pick-and-drop" element={<PickAndDropListing />} />
                         <Route path="/pick-and-drop/:id" element={<PickAndDropDetail />} />

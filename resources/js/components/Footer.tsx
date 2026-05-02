@@ -16,6 +16,9 @@ const Footer: React.FC = () => (
                     <a href="/pick-and-drop" className="text-sm text-[#6b5368] hover:text-[#2f2231] dark:text-white/75 dark:hover:text-white">
                         Find a Ride
                     </a>
+                    <a href="/drivers" className="text-sm text-[#6b5368] hover:text-[#2f2231] dark:text-white/75 dark:hover:text-white">
+                        Drivers
+                    </a>
                     <a href="/about" className="text-sm text-[#6b5368] hover:text-[#2f2231] dark:text-white/75 dark:hover:text-white">
                         About Us
                     </a>
