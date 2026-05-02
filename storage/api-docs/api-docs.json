@@ -336,6 +336,95 @@
                 ]
             }
         },
+        "/api/drivers": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "List drivers with active rides",
+                "description": "Returns users who currently have at least one active pick and drop service.",
+                "operationId": "getDriversListing",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 12
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/DriverListing"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/drivers/{id}": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a driver profile",
+                "description": "Returns a driver who currently has at least one active pick and drop service.",
+                "operationId": "getDriverProfile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Driver user ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/DriverListing"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Driver not found"
+                    }
+                }
+            }
+        },
         "/api/fcm/tokens": {
             "post": {
                 "tags": [
@@ -811,6 +900,15 @@
                                 "male",
                                 "female"
                             ]
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Filter by driver user ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
                         }
                     },
                     {
@@ -2208,6 +2306,72 @@
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update current user",
+                "description": "Update the authenticated user's gender and city.",
+                "operationId": "updateCurrentUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male",
+                                        "nullable": true
+                                    },
+                                    "city_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User profile updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -3616,6 +3780,83 @@
     },
     "components": {
         "schemas": {
+            "DriverLatestService": {
+                "title": "Driver Latest Service",
+                "description": "Latest active pick and drop service summary for a driver",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 17
+                    },
+                    "start_location": {
+                        "type": "string",
+                        "example": "Lyari"
+                    },
+                    "end_location": {
+                        "type": "string",
+                        "example": "Surjani Town"
+                    },
+                    "formatted_departure_time": {
+                        "type": "string",
+                        "example": "2nd May, 10:00 AM"
+                    },
+                    "driver_gender": {
+                        "type": "string",
+                        "enum": [
+                            "male",
+                            "female"
+                        ],
+                        "example": "male"
+                    },
+                    "price_per_person": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 250
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "PKR"
+                    }
+                },
+                "type": "object"
+            },
+            "DriverListing": {
+                "title": "Driver Listing",
+                "description": "Public driver listing payload",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Dr. Sami"
+                    },
+                    "phone_number": {
+                        "type": "string",
+                        "example": "03001234567",
+                        "nullable": true
+                    },
+                    "profile_image": {
+                        "type": "string",
+                        "example": "https://example.com/profile.jpg",
+                        "nullable": true
+                    },
+                    "active_services_count": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "latest_service": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/DriverLatestService"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "City": {
                 "title": "City",
                 "description": "City model",
@@ -4028,6 +4269,20 @@
                         "type": "string",
                         "format": "email",
                         "example": "john@example.com"
+                    },
+                    "gender": {
+                        "type": "string",
+                        "enum": [
+                            "male",
+                            "female"
+                        ],
+                        "example": "male",
+                        "nullable": true
+                    },
+                    "city_id": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
                     },
                     "email_verified_at": {
                         "type": "string",

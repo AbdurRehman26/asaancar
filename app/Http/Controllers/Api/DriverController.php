@@ -21,7 +21,20 @@ class DriverController extends Controller
      *
      *     @OA\Response(
      *         response=200,
-     *         description="Successful operation"
+     *         description="Successful operation",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *
+     *                 @OA\Items(ref="#/components/schemas/DriverListing")
+     *             ),
+     *
+     *             @OA\Property(property="links", type="object"),
+     *             @OA\Property(property="meta", type="object")
+     *         )
      *     )
      * )
      */
@@ -66,7 +79,16 @@ class DriverController extends Controller
      *
      *     @OA\Parameter(name="id", in="path", description="Driver user ID", required=true, @OA\Schema(type="integer")),
      *
-     *     @OA\Response(response=200, description="Successful operation"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *
+     *         @OA\JsonContent(
+     *
+     *             @OA\Property(property="data", ref="#/components/schemas/DriverListing")
+     *         )
+     *     ),
+     *
      *     @OA\Response(response=404, description="Driver not found")
      * )
      */
