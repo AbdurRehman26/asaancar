@@ -11,6 +11,8 @@ use Filament\Tables\Table;
 
 class ContactMessageResource extends Resource
 {
+    private const DEFAULT_WHATSAPP_MESSAGE = 'Hi this is Kazmi from Asaancar, I see you contacted on our website, How may I help you';
+
     protected static ?string $model = ContactMessage::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
@@ -88,7 +90,7 @@ class ContactMessageResource extends Resource
             return null;
         }
 
-        return 'https://wa.me/'.ltrim($formattedNumber, '+');
+        return 'https://wa.me/'.ltrim($formattedNumber, '+').'?text='.urlencode(static::DEFAULT_WHATSAPP_MESSAGE);
     }
 
     public static function formatPakistaniWhatsAppNumber(?string $contactInfo): ?string

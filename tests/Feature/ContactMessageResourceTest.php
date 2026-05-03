@@ -27,9 +27,11 @@ it('shows inquiries in the filament admin resource', function () {
 });
 
 it('formats phone contacts as whatsapp links in +92 format', function () {
+    $encodedMessage = urlencode('Hi this is Kazmi from Asaancar, I see you contacted on our website, How may I help you');
+
     expect(ContactMessageResource::formatPakistaniWhatsAppNumber('0300 1234567'))->toBe('+923001234567')
         ->and(ContactMessageResource::formatPakistaniWhatsAppNumber('+92 300 1234567'))->toBe('+923001234567')
         ->and(ContactMessageResource::formatPakistaniWhatsAppNumber('923001234567'))->toBe('+923001234567')
-        ->and(ContactMessageResource::whatsAppUrl('0300 1234567'))->toBe('https://wa.me/923001234567')
+        ->and(ContactMessageResource::whatsAppUrl('0300 1234567'))->toBe("https://wa.me/923001234567?text={$encodedMessage}")
         ->and(ContactMessageResource::whatsAppUrl('ayesha@example.com'))->toBeNull();
 });
