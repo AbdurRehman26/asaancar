@@ -41,7 +41,9 @@ class ContactMessageResource extends Resource
                 Tables\Columns\TextColumn::make('contact_info')
                     ->label('Contact')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (ContactMessage $record): ?string => static::whatsAppUrl($record->contact_info))
+                    ->openUrlInNewTab(),
                 Tables\Columns\TextColumn::make('message')
                     ->label('Message')
                     ->searchable()
@@ -76,5 +78,49 @@ class ContactMessageResource extends Resource
         return [
             'index' => Pages\ListContactMessages::route('/'),
         ];
+    }
+
+    public static function whatsAppUrl(?string $contactInfo): ?string
+    {
+        $formattedNumber = static::formatPakistaniWhatsAppNumber($contactInfo);
+
+        if ($formattedNumber === null) {
+            return null;
+        }
+
+        return 'https://wa.me/'.ltrim($formattedNumber, '+');
+    }
+
+    public static function formatPakistaniWhatsAppNumber(?string $contactInfo): ?string
+    {
+        if (! filled($contactInfo)) {
+            return null;
+        }
+
+        $trimmedContact = trim($contactInfo);
+
+        if (filter_var($trimmedContact, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $trimmedContact);
+
+        if ($digits === '') {
+            return null;
+        }
+
+        if (str_starts_with($digits, '0092')) {
+            return '+'.substr($digits, 2);
+        }
+
+        if (str_starts_with($digits, '92')) {
+            return '+'.$digits;
+        }
+
+        if (str_starts_with($digits, '0')) {
+            return '+92'.substr($digits, 1);
+        }
+
+        return '+92'.ltrim($digits, '0');
     }
 }
