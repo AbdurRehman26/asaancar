@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Middleware\SanitizeFilamentNotifications;
 use App\Filament\Widgets\LatestPickAndDropsTable;
+use App\Filament\Widgets\LatestRideRequestsTable;
 use App\Filament\Widgets\StatsOverview;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -42,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 StatsOverview::class,
                 LatestPickAndDropsTable::class,
+                LatestRideRequestsTable::class,
             ])
             ->middleware([
                 EncryptCookies::class,
