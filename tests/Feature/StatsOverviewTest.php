@@ -5,6 +5,7 @@ use App\Models\ContactingStat;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\PickAndDrop;
+use App\Models\RideRequest;
 use App\Models\User;
 
 it('uses four stats columns on the admin dashboard', function () {
@@ -41,6 +42,24 @@ it('includes the count of non-system-generated pick and drop services', function
 
     expect($manualPickAndDropStat)->not->toBeNull()
         ->and($manualPickAndDropStat->getValue())->toBe(2);
+});
+
+it('includes the total ride request count', function () {
+    RideRequest::factory()->count(3)->create();
+
+    $widget = new class extends StatsOverview
+    {
+        public function exposedStats(): array
+        {
+            return $this->getStats();
+        }
+    };
+
+    $rideRequestsStat = collect($widget->exposedStats())
+        ->first(fn ($stat) => $stat->getLabel() === 'Ride Requests');
+
+    expect($rideRequestsStat)->not->toBeNull()
+        ->and($rideRequestsStat->getValue())->toBe(3);
 });
 
 it('includes the count of users with expired otps', function () {

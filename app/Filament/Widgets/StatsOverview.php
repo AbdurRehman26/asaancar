@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\ContactingStat;
 use App\Models\Message;
 use App\Models\PickAndDrop;
+use App\Models\RideRequest;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -35,6 +36,10 @@ class StatsOverview extends BaseWidget
                 ->description('Non-system-generated services')
                 ->descriptionIcon('heroicon-m-map-pin')
                 ->color('success'),
+            Stat::make('Ride Requests', RideRequest::count())
+                ->description('Total ride requests')
+                ->descriptionIcon('heroicon-m-map')
+                ->color('primary'),
             Stat::make('Male Drivers', PickAndDrop::query()->where('driver_gender', 'male')->distinct('user_id')->count('user_id'))
                 ->description('Unique male drivers')
                 ->descriptionIcon('heroicon-m-user')
