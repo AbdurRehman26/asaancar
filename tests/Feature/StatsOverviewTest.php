@@ -41,7 +41,8 @@ it('includes the count of non-system-generated pick and drop services', function
         ->first(fn ($stat) => $stat->getLabel() === 'Manual Pick & Drop');
 
     expect($manualPickAndDropStat)->not->toBeNull()
-        ->and($manualPickAndDropStat->getValue())->toBe(2);
+        ->and($manualPickAndDropStat->getValue())->toBe(2)
+        ->and($manualPickAndDropStat->getDescription())->toBe('Today: 2');
 });
 
 it('includes the total ride request count', function () {
@@ -59,7 +60,8 @@ it('includes the total ride request count', function () {
         ->first(fn ($stat) => $stat->getLabel() === 'Ride Requests');
 
     expect($rideRequestsStat)->not->toBeNull()
-        ->and($rideRequestsStat->getValue())->toBe(3);
+        ->and($rideRequestsStat->getValue())->toBe(3)
+        ->and($rideRequestsStat->getDescription())->toBe('Today: 3');
 });
 
 it('includes the count of users with expired otps', function () {
@@ -90,7 +92,8 @@ it('includes the count of users with expired otps', function () {
         ->first(fn ($stat) => $stat->getLabel() === 'Expired OTP Users');
 
     expect($expiredOtpUsersStat)->not->toBeNull()
-        ->and($expiredOtpUsersStat->getValue())->toBe(1);
+        ->and($expiredOtpUsersStat->getValue())->toBe(1)
+        ->and($expiredOtpUsersStat->getDescription())->toBe('Today: 1');
 });
 
 it('includes unique male and female driver counts', function () {
@@ -128,8 +131,10 @@ it('includes unique male and female driver counts', function () {
 
     expect($maleDriversStat)->not->toBeNull()
         ->and($maleDriversStat->getValue())->toBe(1)
+        ->and($maleDriversStat->getDescription())->toBe('Today: 1')
         ->and($femaleDriversStat)->not->toBeNull()
-        ->and($femaleDriversStat->getValue())->toBe(2);
+        ->and($femaleDriversStat->getValue())->toBe(2)
+        ->and($femaleDriversStat->getDescription())->toBe('Today: 2');
 });
 
 it('includes the total chat message count', function () {
@@ -166,7 +171,8 @@ it('includes the total chat message count', function () {
         ->first(fn ($stat) => $stat->getLabel() === 'Chat Messages');
 
     expect($chatMessagesStat)->not->toBeNull()
-        ->and($chatMessagesStat->getValue())->toBe(2);
+        ->and($chatMessagesStat->getValue())->toBe(2)
+        ->and($chatMessagesStat->getDescription())->toBe('Today: 2');
 });
 
 it('includes the total contact interaction count', function () {
@@ -190,5 +196,31 @@ it('includes the total contact interaction count', function () {
         ->first(fn ($stat) => $stat->getLabel() === 'Contact Interactions');
 
     expect($contactInteractionsStat)->not->toBeNull()
-        ->and($contactInteractionsStat->getValue())->toBe(8);
+        ->and($contactInteractionsStat->getValue())->toBe(8)
+        ->and($contactInteractionsStat->getDescription())->toBe('Today: 8');
+});
+
+it('includes today count descriptions for total users', function () {
+    User::factory()->count(2)->create([
+        'created_at' => now(),
+    ]);
+
+    User::factory()->create([
+        'created_at' => now()->subDay(),
+    ]);
+
+    $widget = new class extends StatsOverview
+    {
+        public function exposedStats(): array
+        {
+            return $this->getStats();
+        }
+    };
+
+    $totalUsersStat = collect($widget->exposedStats())
+        ->first(fn ($stat) => $stat->getLabel() === 'Total Users');
+
+    expect($totalUsersStat)->not->toBeNull()
+        ->and($totalUsersStat->getValue())->toBe(3)
+        ->and($totalUsersStat->getDescription())->toBe('Today: 2');
 });
