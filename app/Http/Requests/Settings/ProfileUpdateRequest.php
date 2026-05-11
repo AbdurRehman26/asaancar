@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\Settings;
 
-use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
@@ -19,6 +17,7 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'city_id' => ['sometimes', 'nullable', 'integer', 'exists:cities,id'],
             'profile_image' => ['nullable', 'string', 'max:2048'],
         ];
     }

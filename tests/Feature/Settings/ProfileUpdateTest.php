@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\City;
 use App\Models\User;
 
 test('profile page is displayed', function () {
@@ -11,15 +12,19 @@ test('profile page is displayed', function () {
 
 test('profile information can be updated', function () {
     $user = User::factory()->create();
+    $city = City::create(['name' => 'Karachi']);
+
     $response = $this->actingAs($user, 'sanctum')->patchJson('/api/settings/profile', [
         'name' => 'Test User',
         'email' => 'test@example.com',
+        'city_id' => $city->id,
     ]);
     $response->assertStatus(200);
     $response->assertJsonStructure(['user']);
     $user->refresh();
     expect($user->name)->toBe('Test User');
     expect($user->email)->toBe('test@example.com');
+    expect($user->city_id)->toBe($city->id);
     expect($user->email_verified_at)->toBeNull();
 });
 

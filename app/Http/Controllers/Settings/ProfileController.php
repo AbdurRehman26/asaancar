@@ -35,21 +35,29 @@ class ProfileController extends Controller
      *     summary="Update user profile",
      *     description="Update the authenticated user's profile information",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="john@example.com", nullable=true),
+     *             @OA\Property(property="city_id", type="integer", nullable=true, example=1),
      *             @OA\Property(property="profile_image", type="string", nullable=true, example="https://example.com/image.jpg")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Profile updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="user", ref="#/components/schemas/User")
      *         )
      *     ),
+     *
      *     @OA\Response(response=422, description="Validation error")
      * )
      * Update the user's profile settings.
@@ -62,12 +70,14 @@ class ProfileController extends Controller
         $user->fill([
             'name' => $data['name'],
             'email' => $data['email'] ?? $user->email,
+            'city_id' => array_key_exists('city_id', $data) ? $data['city_id'] : $user->city_id,
             'profile_image' => $data['profile_image'] ?? $user->profile_image,
         ]);
         if ($emailChanged) {
             $user->email_verified_at = null;
         }
         $user->save();
+
         return response()->json(['user' => $user]);
     }
 
@@ -79,20 +89,27 @@ class ProfileController extends Controller
      *     summary="Delete user account",
      *     description="Delete the authenticated user's account",
      *     security={{"sanctum": {}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"password"},
+     *
      *             @OA\Property(property="password", type="string", format="password", example="currentpassword")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Account deleted successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true)
      *         )
      *     ),
+     *
      *     @OA\Response(response=422, description="Validation error")
      * )
      * Delete the user's account.
@@ -108,6 +125,7 @@ class ProfileController extends Controller
             $request->user()->currentAccessToken()->delete();
         }
         $user->delete();
+
         return response()->json(['success' => true]);
     }
 }
