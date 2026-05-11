@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\PickAndDropController;
 use App\Http\Controllers\Api\PickAndDropFavoriteController;
 use App\Http\Controllers\Api\RideRequestController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserVehicleController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -140,6 +141,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/driver/live-rides/{liveRideRequest}/cancel', [DriverLiveRideController::class, 'cancel']);
     Route::post('/fcm/tokens', [FcmTokenController::class, 'store']);
     Route::delete('/fcm/tokens', [FcmTokenController::class, 'destroy']);
+    Route::get('/user/vehicles', [UserVehicleController::class, 'index']);
+    Route::post('/user/vehicles', [UserVehicleController::class, 'store']);
 });
 
 // Cities API

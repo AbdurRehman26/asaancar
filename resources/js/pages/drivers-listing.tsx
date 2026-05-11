@@ -53,6 +53,8 @@ export default function DriversListing() {
         void fetchDrivers();
     }, []);
 
+    const driverOnboardingPath = user ? '/driver-onboarding' : '/signup';
+
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
             <SEO
@@ -68,7 +70,12 @@ export default function DriversListing() {
                     <DashboardPanel
                         title="Drivers"
                         description="Browse active drivers and jump straight into the rides they are currently offering."
-                        actions={<DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>}
+                        actions={
+                            <div className="flex flex-wrap gap-3">
+                                <DashboardPrimaryLink to={driverOnboardingPath}>Become a driver</DashboardPrimaryLink>
+                                <DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>
+                            </div>
+                        }
                         className="mb-8"
                     >
                         {loading ? (
@@ -85,14 +92,24 @@ export default function DriversListing() {
                                 icon={<CarFront className="h-6 w-6" />}
                                 title="Could not load drivers"
                                 description={error}
-                                action={<DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>}
+                                action={
+                                    <div className="flex flex-wrap justify-center gap-3">
+                                        <DashboardPrimaryLink to={driverOnboardingPath}>Become a driver</DashboardPrimaryLink>
+                                        <DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>
+                                    </div>
+                                }
                             />
                         ) : drivers.length === 0 ? (
                             <DashboardEmptyState
                                 icon={<CarFront className="h-6 w-6" />}
                                 title="No drivers available yet"
                                 description="There are no active drivers to show right now, but you can still browse the ride listings."
-                                action={<DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>}
+                                action={
+                                    <div className="flex flex-wrap justify-center gap-3">
+                                        <DashboardPrimaryLink to={driverOnboardingPath}>Become a driver</DashboardPrimaryLink>
+                                        <DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>
+                                    </div>
+                                }
                             />
                         ) : (
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">

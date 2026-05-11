@@ -1086,6 +1086,15 @@
                                         ],
                                         "example": "male"
                                     },
+                                    "vehicle_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "car",
+                                            "bike"
+                                        ],
+                                        "example": "car",
+                                        "nullable": true
+                                    },
                                     "stops": {
                                         "type": "array",
                                         "items": {
@@ -1248,6 +1257,15 @@
                                             "female"
                                         ],
                                         "example": "male"
+                                    },
+                                    "vehicle_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "car",
+                                            "bike"
+                                        ],
+                                        "example": "car",
+                                        "nullable": true
                                     },
                                     "stops": {
                                         "type": "array",
@@ -2413,6 +2431,152 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/vehicles": {
+            "get": {
+                "tags": [
+                    "User Vehicles"
+                ],
+                "summary": "List saved user vehicles",
+                "description": "Returns the authenticated user's saved vehicles, with default vehicles first.",
+                "operationId": "listUserVehicles",
+                "responses": {
+                    "200": {
+                        "description": "Saved vehicles fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/UserVehicle"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "User Vehicles"
+                ],
+                "summary": "Save a user vehicle",
+                "description": "Stores a new saved vehicle for the authenticated user. The first saved vehicle becomes default automatically.",
+                "operationId": "storeUserVehicle",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "vehicle_type"
+                                ],
+                                "properties": {
+                                    "vehicle_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "car",
+                                            "bike"
+                                        ],
+                                        "example": "car"
+                                    },
+                                    "brand": {
+                                        "type": "string",
+                                        "example": "Toyota",
+                                        "nullable": true
+                                    },
+                                    "model": {
+                                        "type": "string",
+                                        "example": "Corolla",
+                                        "nullable": true
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "example": "White",
+                                        "nullable": true
+                                    },
+                                    "seats": {
+                                        "type": "integer",
+                                        "example": 4,
+                                        "nullable": true
+                                    },
+                                    "transmission": {
+                                        "type": "string",
+                                        "enum": [
+                                            "manual",
+                                            "automatic"
+                                        ],
+                                        "example": "automatic",
+                                        "nullable": true
+                                    },
+                                    "fuel_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "petrol",
+                                            "diesel",
+                                            "electric",
+                                            "hybrid"
+                                        ],
+                                        "example": "petrol",
+                                        "nullable": true
+                                    },
+                                    "is_default": {
+                                        "type": "boolean",
+                                        "example": true,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Vehicle saved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Vehicle saved successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserVehicle"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -3984,6 +4148,15 @@
                         ],
                         "example": "male"
                     },
+                    "vehicle_type": {
+                        "type": "string",
+                        "enum": [
+                            "car",
+                            "bike"
+                        ],
+                        "example": "car",
+                        "nullable": true
+                    },
                     "car_brand": {
                         "type": "string",
                         "example": "Toyota",
@@ -4304,6 +4477,81 @@
                     }
                 },
                 "type": "object"
+            },
+            "UserVehicle": {
+                "title": "User Vehicle",
+                "description": "Saved vehicle information for a user",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "vehicle_type": {
+                        "type": "string",
+                        "enum": [
+                            "car",
+                            "bike"
+                        ],
+                        "example": "car"
+                    },
+                    "brand": {
+                        "type": "string",
+                        "example": "Toyota",
+                        "nullable": true
+                    },
+                    "model": {
+                        "type": "string",
+                        "example": "Corolla",
+                        "nullable": true
+                    },
+                    "color": {
+                        "type": "string",
+                        "example": "White",
+                        "nullable": true
+                    },
+                    "seats": {
+                        "type": "integer",
+                        "example": 4,
+                        "nullable": true
+                    },
+                    "transmission": {
+                        "type": "string",
+                        "enum": [
+                            "manual",
+                            "automatic"
+                        ],
+                        "example": "automatic",
+                        "nullable": true
+                    },
+                    "fuel_type": {
+                        "type": "string",
+                        "enum": [
+                            "petrol",
+                            "diesel",
+                            "electric",
+                            "hybrid"
+                        ],
+                        "example": "petrol",
+                        "nullable": true
+                    },
+                    "is_default": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -4351,6 +4599,10 @@
         {
             "name": "Users",
             "description": "API Endpoints for user management"
+        },
+        {
+            "name": "User Vehicles",
+            "description": "Saved vehicle endpoints used for driver onboarding and ride creation"
         },
         {
             "name": "Authentication",

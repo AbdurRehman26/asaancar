@@ -113,6 +113,36 @@ it('stores google places data without requiring area selections', function () {
     $response->assertJsonPath('data.stops.0.stop_area', 'Clifton');
 });
 
+it('stores and returns vehicle type for a pick and drop service', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/pick-and-drop', [
+            'start_location' => 'Karachi Airport',
+            'end_location' => 'Clifton Beach',
+            'pickup_city_id' => $this->city->id,
+            'pickup_area_id' => $this->area1->id,
+            'dropoff_city_id' => $this->city->id,
+            'dropoff_area_id' => $this->area2->id,
+            'departure_date' => '2026-04-15',
+            'departure_time' => '14:30',
+            'available_spaces' => 4,
+            'driver_gender' => 'male',
+            'vehicle_type' => 'bike',
+            'car_brand' => 'Honda',
+            'car_model' => 'CB 125',
+        ]);
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.vehicle_type', 'bike')
+        ->assertJsonPath('data.car_brand', 'Honda');
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'user_id' => $this->user->id,
+        'vehicle_type' => 'bike',
+        'car_brand' => 'Honda',
+        'car_model' => 'CB 125',
+    ]);
+});
+
 it('validates departure_time must be in 24hr H:i format', function () {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/pick-and-drop', [

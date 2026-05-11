@@ -261,6 +261,7 @@ class PickAndDropController extends Controller
      *             @OA\Property(property="departure_time", type="string", format="time", example="10:00"),
      *             @OA\Property(property="available_spaces", type="integer", example=4),
      *             @OA\Property(property="driver_gender", type="string", enum={"male", "female"}, example="male"),
+     *             @OA\Property(property="vehicle_type", type="string", enum={"car", "bike"}, nullable=true, example="car"),
      *             @OA\Property(property="stops", type="array", @OA\Items(type="object",
      *                 @OA\Property(property="location", type="string"),
      *                 @OA\Property(property="city_id", type="integer"),
@@ -313,6 +314,7 @@ class PickAndDropController extends Controller
             'departure_time' => 'required|date_format:H:i',
             'available_spaces' => 'required|integer|min:1',
             'driver_gender' => 'required|in:male,female',
+            'vehicle_type' => 'nullable|in:car,bike',
             'schedule_type' => 'nullable|string|in:once,everyday,weekdays,weekends,custom',
             'selected_days' => 'nullable|array',
             'is_roundtrip' => 'boolean',
@@ -433,6 +435,7 @@ class PickAndDropController extends Controller
      *             @OA\Property(property="departure_time", type="string", format="time", example="10:00"),
      *             @OA\Property(property="available_spaces", type="integer", example=4),
      *             @OA\Property(property="driver_gender", type="string", enum={"male", "female"}, example="male"),
+     *             @OA\Property(property="vehicle_type", type="string", enum={"car", "bike"}, nullable=true, example="car"),
      *             @OA\Property(property="stops", type="array", @OA\Items(type="object"))
      *         )
      *     ),
@@ -489,6 +492,7 @@ class PickAndDropController extends Controller
             'description' => 'nullable|string',
             'available_spaces' => 'sometimes|integer|min:1',
             'driver_gender' => 'sometimes|in:male,female',
+            'vehicle_type' => 'sometimes|nullable|in:car,bike',
             'stops' => 'sometimes|array',
             'stops.*.location' => 'required_with:stops|string|max:255',
             'stops.*.stop_area' => 'nullable|string|max:255',

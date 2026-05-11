@@ -69,6 +69,7 @@ class PickAndDropResource extends JsonResource
             }),
             'available_spaces' => $this->available_spaces,
             'driver_gender' => $this->driver_gender,
+            'vehicle_type' => $this->vehicle_type,
             'car_brand' => $this->car_brand,
             'car_model' => $this->car_model,
             'car_color' => $this->car_color,

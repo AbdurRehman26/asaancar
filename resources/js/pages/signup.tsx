@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar';
 
 type SignupStep = 'info' | 'otp' | 'password' | 'complete';
+type SignupIntent = 'driver' | 'rider';
 
 export default function SignupPage() {
     const [step, setStep] = useState<SignupStep>('info');
@@ -20,8 +21,14 @@ export default function SignupPage() {
     const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
     const [identifier, setIdentifier] = useState('');
     const [wantsPassword, setWantsPassword] = useState<boolean | null>(null);
+    const [signupIntent, setSignupIntent] = useState<SignupIntent>('rider');
     const navigate = useNavigate();
     const { setUser, setToken } = useAuth();
+
+    const redirectAfterSignup = () => {
+        navigate(signupIntent === 'driver' ? '/driver-onboarding' : '/pick-and-drop');
+    };
+
     const playStoreBanner = (
         <div className="rounded-[1.75rem] border border-white/60 bg-white/80 px-6 py-7 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.28)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/88 dark:[background-image:linear-gradient(90deg,_rgba(23,20,31,0.94)_0%,_rgba(23,20,31,0.94)_44%,_rgba(255,255,255,0.14)_100%)] dark:shadow-none">
             <div className="flex flex-col items-center gap-4 text-center md:flex-row md:items-center md:justify-between md:text-left">
@@ -105,7 +112,7 @@ export default function SignupPage() {
 
                     // If user already has a password, they're fully set up
                     if (data.user.has_password) {
-                        navigate('/');
+                        redirectAfterSignup();
                     } else {
                         // Proceed to password step for new users
                         setStep('password');
@@ -173,8 +180,7 @@ export default function SignupPage() {
                     localStorage.setItem('token', data.token);
                     setToken(data.token);
                     setUser(data.user);
-                    // Automatically redirect to home after successful signup
-                    navigate('/');
+                    redirectAfterSignup();
                 } else {
                     setStep('complete');
                 }
@@ -194,8 +200,8 @@ export default function SignupPage() {
                     <div className="w-full max-w-md rounded-[1.75rem] border border-white/70 bg-white/90 p-8 text-center shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
                         <h2 className="mb-4 text-2xl font-bold text-[#7e246c] dark:text-white">Account Created!</h2>
                         <p className="mb-4 text-[#6f556c] dark:text-white/65">Your account has been successfully created.</p>
-                        <button className="mt-4 rounded bg-[#7e246c] px-6 py-2 font-semibold text-white" onClick={() => navigate('/')}>
-                            Go to Home
+                        <button className="mt-4 rounded bg-[#7e246c] px-6 py-2 font-semibold text-white" onClick={redirectAfterSignup}>
+                            Continue
                         </button>
                     </div>
                 </div>
@@ -373,6 +379,41 @@ export default function SignupPage() {
                             <div className="mb-6">{backToListingsButton}</div>
                             <h1 className="mb-2 text-2xl font-bold text-[#2b1128] dark:text-white">Create Your Account</h1>
                             <p className="mb-6 text-[#6f556c] dark:text-white/65">Join AsaanCar and get moving faster.</p>
+                            <div className="mb-6">
+                                <div className="mb-3 text-sm font-semibold tracking-[0.18em] text-[#7e246c] uppercase dark:text-white/70">
+                                    I am here to...
+                                </div>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSignupIntent('rider')}
+                                        className={`rounded-2xl border p-4 text-left transition ${
+                                            signupIntent === 'rider'
+                                                ? 'border-[#7e246c] bg-[#fbf4fa] shadow-sm dark:border-[#d88ac8] dark:bg-white/8'
+                                                : 'border-[#7e246c]/12 bg-white hover:bg-[#fbf4fa] dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/6'
+                                        }`}
+                                    >
+                                        <div className="text-base font-semibold text-[#2b1128] dark:text-white">Find a ride</div>
+                                        <p className="mt-1 text-sm text-[#6f556c] dark:text-white/60">
+                                            I&apos;m looking for a driver and want to start browsing rides right away.
+                                        </p>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSignupIntent('driver')}
+                                        className={`rounded-2xl border p-4 text-left transition ${
+                                            signupIntent === 'driver'
+                                                ? 'border-[#7e246c] bg-[#fbf4fa] shadow-sm dark:border-[#d88ac8] dark:bg-white/8'
+                                                : 'border-[#7e246c]/12 bg-white hover:bg-[#fbf4fa] dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/6'
+                                        }`}
+                                    >
+                                        <div className="text-base font-semibold text-[#2b1128] dark:text-white">Become a driver</div>
+                                        <p className="mt-1 text-sm text-[#6f556c] dark:text-white/60">
+                                            I want to add my vehicle first and then publish my first pick and drop route.
+                                        </p>
+                                    </button>
+                                </div>
+                            </div>
                             <div className="mb-4 text-lg font-semibold text-[#2b1128] dark:text-white">Account Information</div>
                             {error && (
                                 <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">

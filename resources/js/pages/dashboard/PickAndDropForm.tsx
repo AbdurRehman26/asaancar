@@ -1,6 +1,7 @@
 import GooglePlacesInput from '@/components/GooglePlacesInput';
 import { DashboardHero, DashboardPage, DashboardPanel } from '@/components/dashboard-shell';
 import { apiFetch } from '@/lib/utils';
+import { UserVehicle } from '@/types';
 import { Calendar, MapPin, Plus, Save, Users, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -40,6 +41,7 @@ export default function PickAndDropForm() {
         return_time: '',
         available_spaces: 1,
         driver_gender: 'male' as 'male' | 'female',
+        vehicle_type: '' as '' | 'car' | 'bike',
         car_brand: '',
         car_model: '',
         car_color: '',
@@ -55,13 +57,60 @@ export default function PickAndDropForm() {
     const [stops, setStops] = useState<Stop[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [savedVehicles, setSavedVehicles] = useState<UserVehicle[]>([]);
+    const [selectedVehicleId, setSelectedVehicleId] = useState<string>('manual');
+    const [vehiclePrefillSummary, setVehiclePrefillSummary] = useState<string | null>(null);
 
     useEffect(() => {
         if (isEditing && id) {
             fetchService();
         }
+
+        if (!isEditing) {
+            fetchSavedVehicles();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, isEditing]);
+
+    const applyVehicleToForm = (vehicle: UserVehicle) => {
+        setFormData((previous) => ({
+            ...previous,
+            vehicle_type: vehicle.vehicle_type,
+            car_brand: vehicle.brand || '',
+            car_model: vehicle.model || '',
+            car_color: vehicle.color || '',
+            car_seats: vehicle.seats ? vehicle.seats.toString() : '',
+            car_transmission: vehicle.transmission || '',
+            car_fuel_type: vehicle.fuel_type || '',
+        }));
+
+        const summary = [vehicle.brand, vehicle.model].filter(Boolean).join(' ').trim();
+        setVehiclePrefillSummary(summary ? `${summary} (${vehicle.vehicle_type})` : vehicle.vehicle_type);
+    };
+
+    const fetchSavedVehicles = async () => {
+        try {
+            const response = await apiFetch('/api/user/vehicles');
+
+            if (!response.ok) {
+                return;
+            }
+
+            const payload = await response.json();
+            const vehicles: UserVehicle[] = payload.data || [];
+            setSavedVehicles(vehicles);
+            const defaultVehicle = vehicles.find((vehicle) => vehicle.is_default) ?? vehicles[0];
+
+            if (!defaultVehicle) {
+                return;
+            }
+
+            setSelectedVehicleId(defaultVehicle.id.toString());
+            applyVehicleToForm(defaultVehicle);
+        } catch {
+            // Keep the form usable even if the saved vehicle lookup fails.
+        }
+    };
 
     const fetchService = async () => {
         try {
@@ -155,6 +204,7 @@ export default function PickAndDropForm() {
                 return_time: parseTimeOnly(service.return_time),
                 available_spaces: service.available_spaces || 1,
                 driver_gender: service.driver_gender || 'male',
+                vehicle_type: service.vehicle_type || '',
                 car_brand: service.car_brand || '',
                 car_model: service.car_model || '',
                 car_color: service.car_color || '',
@@ -219,6 +269,7 @@ export default function PickAndDropForm() {
                 return_time: formData.is_roundtrip && formData.return_time ? formData.return_time : null,
                 is_everyday: formData.schedule_type === 'everyday', // Keep for backward compatibility if needed
                 available_spaces: parseInt(formData.available_spaces.toString()),
+                vehicle_type: formData.vehicle_type || null,
                 car_seats: formData.car_seats ? parseInt(formData.car_seats) : null,
                 price_per_person: formData.price_per_person ? parseInt(formData.price_per_person) : null,
                 stops: stops.map((stop, index) => {
@@ -596,15 +647,71 @@ export default function PickAndDropForm() {
                     </div>
                 </DashboardPanel>
 
-                {/* Car Details */}
+                {/* Vehicle Details */}
                 <DashboardPanel
-                    title="Car details"
-                    description="Optional vehicle information helps riders understand the comfort and capacity they can expect."
+                    title="Vehicle details"
+                    description="Optional vehicle information helps riders understand what you drive, and saved vehicles can prefill this for you."
                 >
-                    <h2 className="mb-4 text-xl font-semibold text-[#7e246c] dark:text-white">Car Details (Optional)</h2>
+                    <div className="mb-4 flex flex-col gap-3">
+                        <h2 className="text-xl font-semibold text-[#7e246c] dark:text-white">Vehicle Details (Optional)</h2>
+                        {!isEditing && savedVehicles.length > 0 && (
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Saved Vehicle</label>
+                                <select
+                                    value={selectedVehicleId}
+                                    onChange={(event) => {
+                                        const nextVehicleId = event.target.value;
+                                        setSelectedVehicleId(nextVehicleId);
+
+                                        if (nextVehicleId === 'manual') {
+                                            setVehiclePrefillSummary(null);
+
+                                            return;
+                                        }
+
+                                        const selectedVehicle = savedVehicles.find((vehicle) => vehicle.id.toString() === nextVehicleId);
+
+                                        if (selectedVehicle) {
+                                            applyVehicleToForm(selectedVehicle);
+                                        }
+                                    }}
+                                    className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                >
+                                    {savedVehicles.map((vehicle) => {
+                                        const labelParts = [vehicle.brand, vehicle.model].filter(Boolean);
+                                        const label = labelParts.length > 0 ? labelParts.join(' ') : vehicle.vehicle_type;
+
+                                        return (
+                                            <option key={vehicle.id} value={vehicle.id.toString()}>
+                                                {label} {vehicle.is_default ? '(Default)' : ''}
+                                            </option>
+                                        );
+                                    })}
+                                    <option value="manual">Manual entry</option>
+                                </select>
+                            </div>
+                        )}
+                        {!isEditing && vehiclePrefillSummary && (
+                            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200">
+                                Prefilled from your saved vehicle: {vehiclePrefillSummary}
+                            </div>
+                        )}
+                    </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Car Brand</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Vehicle Type</label>
+                            <select
+                                value={formData.vehicle_type}
+                                onChange={(e) => setFormData({ ...formData, vehicle_type: e.target.value as '' | 'car' | 'bike' })}
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            >
+                                <option value="">Select vehicle type</option>
+                                <option value="car">Car</option>
+                                <option value="bike">Bike</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Vehicle Brand</label>
                             <input
                                 type="text"
                                 value={formData.car_brand}
@@ -613,7 +720,7 @@ export default function PickAndDropForm() {
                             />
                         </div>
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Car Model</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Vehicle Model</label>
                             <input
                                 type="text"
                                 value={formData.car_model}
@@ -622,7 +729,7 @@ export default function PickAndDropForm() {
                             />
                         </div>
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Car Color</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Vehicle Color</label>
                             <input
                                 type="text"
                                 value={formData.car_color}

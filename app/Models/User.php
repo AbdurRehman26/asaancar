@@ -163,6 +163,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(UserFcmToken::class);
     }
 
+    public function userVehicles(): HasMany
+    {
+        return $this->hasMany(UserVehicle::class)->orderByDesc('is_default')->latest('id');
+    }
+
     public function routeNotificationForFcm(): array
     {
         return $this->fcmTokens()
