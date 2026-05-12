@@ -66,7 +66,7 @@ class RideRequestController extends Controller
         }
 
         $query = RideRequest::query()
-            ->with('user')
+            ->with('user.city')
             ->where('is_active', true);
 
         $this->applyFilters($query, $request);
@@ -141,7 +141,7 @@ class RideRequestController extends Controller
     {
         $rideRequest = RideRequest::create($this->buildPayload($request->validated(), Auth::id()));
 
-        return new RideRequestResource($rideRequest->fresh()->load('user'));
+        return new RideRequestResource($rideRequest->fresh()->load('user.city'));
     }
 
     /**
@@ -166,7 +166,7 @@ class RideRequestController extends Controller
      */
     public function show(string $id): RideRequestResource
     {
-        $rideRequest = RideRequest::with('user')->findOrFail($id);
+        $rideRequest = RideRequest::with('user.city')->findOrFail($id);
 
         return new RideRequestResource($rideRequest);
     }
@@ -228,7 +228,7 @@ class RideRequestController extends Controller
 
         $rideRequest->update($this->buildPayload($request->validated(), $rideRequest->user_id, $rideRequest));
 
-        return new RideRequestResource($rideRequest->fresh()->load('user'));
+        return new RideRequestResource($rideRequest->fresh()->load('user.city'));
     }
 
     /**
@@ -306,7 +306,7 @@ class RideRequestController extends Controller
     public function myRequests(Request $request): AnonymousResourceCollection
     {
         $query = RideRequest::query()
-            ->with('user')
+            ->with('user.city')
             ->where('user_id', Auth::id());
 
         $this->applyFilters($query, $request);

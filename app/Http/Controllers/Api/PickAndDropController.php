@@ -61,7 +61,7 @@ class PickAndDropController extends Controller
     {
         $departureDate = DepartureDateNormalizer::normalize($request->input('departure_date'));
 
-        $query = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
+        $query = PickAndDrop::with(['user.city', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('is_active', true);
 
         $startLatitude = $request->float('start_latitude');
@@ -404,7 +404,7 @@ class PickAndDropController extends Controller
      */
     public function show(string $id)
     {
-        $service = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])->findOrFail($id);
+        $service = PickAndDrop::with(['user.city', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])->findOrFail($id);
 
         return new PickAndDropResource($service);
     }
@@ -637,7 +637,7 @@ class PickAndDropController extends Controller
      */
     public function myServices(Request $request)
     {
-        $query = PickAndDrop::with(['user', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
+        $query = PickAndDrop::with(['user.city', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('user_id', Auth::id());
 
         // Filter by start location (including stops, stop areas, and stop cities)

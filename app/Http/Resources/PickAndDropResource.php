@@ -24,7 +24,9 @@ class PickAndDropResource extends JsonResource
                 'name' => $this->user->name,
                 'email' => $this->user->email,
                 'phone_number' => $this->user->phone_number ?? null,
+                'city_name' => $this->user->relationLoaded('city') && $this->user->city ? $this->user->city->name : null,
             ],
+            'city_name' => $this->user->relationLoaded('city') && $this->user->city ? $this->user->city->name : null,
             'car' => $this->car ? [
                 'id' => $this->car->id,
                 'name' => $this->car->name,

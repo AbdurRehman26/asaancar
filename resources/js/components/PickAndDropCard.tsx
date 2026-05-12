@@ -11,12 +11,14 @@ interface PickAndDropStop {
 
 export interface PickAndDropService {
     id: number;
+    city_name?: string | null;
     user?: {
         // Made optional and flexible to handle both listing and welcome page data structures
         id: number;
         name: string;
         email?: string;
         phone_number?: string;
+        city_name?: string | null;
     };
     name?: string; // listing page sometimes has name directly on service
     contact?: string;
@@ -94,6 +96,7 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
     // Helper to get consistent user name
     const userName = service.name || service.user?.name || 'Driver';
     const userPhone = service.contact || service.user?.phone_number;
+    const cityName = service.city_name || service.user?.city_name;
 
     return (
         <div
@@ -288,6 +291,13 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
                         {service.driver_gender === 'female' ? '👩' : '👨'} {service.driver_gender === 'female' ? 'Female' : 'Male'} Driver
                     </div>
                 )}
+
+                {cityName ? (
+                    <div className="inline-flex items-center gap-1.5 rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20 dark:text-emerald-300">
+                        <MapPin className="h-3 w-3" />
+                        {cityName}
+                    </div>
+                ) : null}
 
                 {/* Round Trip */}
                 {service.is_roundtrip && (

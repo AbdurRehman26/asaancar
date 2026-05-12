@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\City;
 use App\Models\PickAndDrop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,7 +43,10 @@ it('orders services by the closest start and end coordinates when provided', fun
 });
 
 it('shows non-system-generated services before system-generated services', function () {
-    $user = User::factory()->create();
+    $city = City::create(['name' => 'Karachi']);
+    $user = User::factory()->create([
+        'city_id' => $city->id,
+    ]);
 
     $systemGeneratedService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
@@ -65,5 +69,7 @@ it('shows non-system-generated services before system-generated services', funct
     $response->assertSuccessful();
 
     expect($response->json('data.0.id'))->toBe($manualService->id)
+        ->and($response->json('data.0.city_name'))->toBe('Karachi')
+        ->and($response->json('data.0.user.city_name'))->toBe('Karachi')
         ->and($response->json('data.1.id'))->toBe($systemGeneratedService->id);
 });

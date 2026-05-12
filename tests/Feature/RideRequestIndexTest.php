@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\City;
 use App\Models\RideRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,7 +43,10 @@ it('orders ride requests by the closest start and end coordinates when provided'
 });
 
 it('shows latest ride requests first when coordinates are not provided', function () {
-    $user = User::factory()->create();
+    $city = City::create(['name' => 'Karachi']);
+    $user = User::factory()->create([
+        'city_id' => $city->id,
+    ]);
 
     $olderRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
@@ -61,5 +65,7 @@ it('shows latest ride requests first when coordinates are not provided', functio
     $response->assertSuccessful();
 
     expect($response->json('data.0.id'))->toBe($latestRequest->id)
+        ->and($response->json('data.0.city_name'))->toBe('Karachi')
+        ->and($response->json('data.0.user.city_name'))->toBe('Karachi')
         ->and($response->json('data.1.id'))->toBe($olderRequest->id);
 });

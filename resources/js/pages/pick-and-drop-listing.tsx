@@ -19,11 +19,13 @@ interface PickAndDropStop {
 
 interface PickAndDropService {
     id: number;
+    city_name?: string | null;
     user: {
         id: number;
         name: string;
         email: string;
         phone_number?: string;
+        city_name?: string | null;
     };
     car?: {
         id: number;

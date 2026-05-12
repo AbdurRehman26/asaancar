@@ -3,11 +3,13 @@ import React from 'react';
 
 export interface RideRequest {
     id: number;
+    city_name?: string | null;
     user?: {
         id: number;
         name: string;
         email?: string;
         phone_number?: string;
+        city_name?: string | null;
     };
     name?: string;
     contact?: string;
@@ -50,6 +52,7 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
 }) => {
     const requesterName = request.name || request.user?.name || 'Requester';
     const requesterPhone = request.contact || request.user?.phone_number;
+    const cityName = request.city_name || request.user?.city_name;
     const isDashboard = variant === 'dashboard';
 
     return (
@@ -142,6 +145,12 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
                             ? 'Any driver'
                             : `${request.preferred_driver_gender === 'female' ? 'Female' : 'Male'} driver`}
                     </div>
+                    {cityName ? (
+                        <div className="inline-flex items-center gap-1.5 rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20 dark:text-emerald-300">
+                            <MapPin className="h-3 w-3" />
+                            {cityName}
+                        </div>
+                    ) : null}
                 </div>
 
                 {request.description ? (
