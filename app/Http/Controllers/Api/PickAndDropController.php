@@ -30,6 +30,7 @@ class PickAndDropController extends Controller
      *
      *     @OA\Parameter(name="start_location", in="query", description="Filter by start location", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="end_location", in="query", description="Filter by end location", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="city_id", in="query", description="Filter by driver city", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="driver_gender", in="query", description="Filter by driver gender", required=false, @OA\Schema(type="string", enum={"male", "female"})),
      *     @OA\Parameter(name="user_id", in="query", description="Filter by driver user ID", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="min_spaces", in="query", description="Minimum available spaces", required=false, @OA\Schema(type="integer")),
@@ -146,6 +147,12 @@ class PickAndDropController extends Controller
 
         if ($request->filled('user_id')) {
             $query->where('user_id', (int) $request->user_id);
+        }
+
+        if ($request->filled('city_id')) {
+            $query->whereHas('user', function ($userQuery) use ($request): void {
+                $userQuery->where('city_id', (int) $request->input('city_id'));
+            });
         }
 
         // Filter by available spaces

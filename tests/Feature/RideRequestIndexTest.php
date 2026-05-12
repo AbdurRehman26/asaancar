@@ -69,3 +69,34 @@ it('shows latest ride requests first when coordinates are not provided', functio
         ->and($response->json('data.0.user.city_name'))->toBe('Karachi')
         ->and($response->json('data.1.id'))->toBe($olderRequest->id);
 });
+
+it('filters ride requests by requester city id', function () {
+    $karachi = City::create(['name' => 'Karachi']);
+    $lahore = City::create(['name' => 'Lahore']);
+
+    $karachiUser = User::factory()->create([
+        'city_id' => $karachi->id,
+    ]);
+
+    $lahoreUser = User::factory()->create([
+        'city_id' => $lahore->id,
+    ]);
+
+    $karachiRequest = RideRequest::factory()->create([
+        'user_id' => $karachiUser->id,
+        'is_active' => true,
+    ]);
+
+    RideRequest::factory()->create([
+        'user_id' => $lahoreUser->id,
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/ride-requests?city_id='.$karachi->id);
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($karachiRequest->id)
+        ->and($response->json('data.0.city_name'))->toBe('Karachi');
+});

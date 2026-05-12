@@ -34,6 +34,7 @@ class RideRequestController extends Controller
      *     @OA\Parameter(name="end_location", in="query", description="Filter by end location", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="end_latitude", in="query", description="End latitude for nearest match search", required=false, @OA\Schema(type="number", format="float")),
      *     @OA\Parameter(name="end_longitude", in="query", description="End longitude for nearest match search", required=false, @OA\Schema(type="number", format="float")),
+     *     @OA\Parameter(name="city_id", in="query", description="Filter by requester city", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="preferred_driver_gender", in="query", description="Filter by preferred driver gender", required=false, @OA\Schema(type="string", enum={"male", "female", "any"})),
      *     @OA\Parameter(name="required_seats", in="query", description="Minimum seats needed", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="departure_date", in="query", description="Filter by departure date (YYYY-MM-DD)", required=false, @OA\Schema(type="string", format="date")),
@@ -343,6 +344,12 @@ class RideRequestController extends Controller
 
         if ($request->filled('end_location') && ! $hasEndCoordinates) {
             $query->where('end_location', 'like', '%'.$request->string('end_location')->toString().'%');
+        }
+
+        if ($request->filled('city_id')) {
+            $query->whereHas('user', function ($userQuery) use ($request): void {
+                $userQuery->where('city_id', (int) $request->input('city_id'));
+            });
         }
 
         $query->select('ride_requests.*');
