@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *     @OA\Property(property="id", type="integer", example=1),
  *     @OA\Property(property="user_id", type="integer", example=1),
  *     @OA\Property(property="start_location", type="string", example="Karachi Airport"),
- *     @OA\Property(property="end_location", type="string", example="Clifton Beach"),
+ *     @OA\Property(property="end_location", type="string", nullable=true, example="Clifton Beach"),
  *     @OA\Property(property="pickup_city_id", type="integer", example=1),
  *     @OA\Property(property="dropoff_city_id", type="integer", example=1),
  *     @OA\Property(property="pickup_area_id", type="integer", example=1),

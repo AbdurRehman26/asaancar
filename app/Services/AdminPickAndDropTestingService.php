@@ -27,7 +27,7 @@ class AdminPickAndDropTestingService
             'user.city_id' => 'nullable|integer|exists:cities,id',
             'car_id' => 'nullable',
             'start_location' => 'required|string|max:255',
-            'end_location' => 'required|string|max:255',
+            'end_location' => 'nullable|string|max:255',
             'start_place_id' => 'nullable|string|max:255',
             'end_place_id' => 'nullable|string|max:255',
             'pickup_city_id' => 'nullable|integer|exists:cities,id',
@@ -48,8 +48,8 @@ class AdminPickAndDropTestingService
         $userId = $this->resolveUserId($payload);
         $payload = $this->enrichPayloadFromGoogle($payload, $lookupService);
 
-        if (! isset($payload['pickup_city_id']) || ! isset($payload['dropoff_city_id'])) {
-            throw new RuntimeException('Unable to resolve pickup or dropoff city from the provided locations.');
+        if (! isset($payload['pickup_city_id'])) {
+            throw new RuntimeException('Unable to resolve pickup city from the provided location.');
         }
 
         $pickAndDrop = PickAndDrop::create([
@@ -59,12 +59,12 @@ class AdminPickAndDropTestingService
             'start_place_id' => $payload['start_place_id'] ?? null,
             'start_latitude' => $payload['start_latitude'] ?? null,
             'start_longitude' => $payload['start_longitude'] ?? null,
-            'end_location' => $payload['end_location'],
+            'end_location' => $payload['end_location'] ?? null,
             'end_place_id' => $payload['end_place_id'] ?? null,
             'end_latitude' => $payload['end_latitude'] ?? null,
             'end_longitude' => $payload['end_longitude'] ?? null,
             'pickup_city_id' => $payload['pickup_city_id'],
-            'dropoff_city_id' => $payload['dropoff_city_id'],
+            'dropoff_city_id' => $payload['dropoff_city_id'] ?? null,
             'pickup_area_id' => $payload['pickup_area_id'] ?? null,
             'dropoff_area_id' => $payload['dropoff_area_id'] ?? null,
             'available_spaces' => $payload['available_spaces'],
@@ -180,22 +180,24 @@ class AdminPickAndDropTestingService
             label: 'start',
         );
 
-        $endResult = $this->lookupLocation(
-            lookupService: $lookupService,
-            location: (string) $payload['end_location'],
-            placeId: $payload['end_place_id'] ?? null,
-            label: 'end',
-        );
-
         $payload['start_place_id'] = $startResult['place_id'];
         $payload['start_latitude'] = $startResult['latitude'];
         $payload['start_longitude'] = $startResult['longitude'];
         $payload['pickup_city_id'] = $payload['pickup_city_id'] ?? $this->resolveCityId(cityName: $startResult['components']['city'] ?? null);
 
-        $payload['end_place_id'] = $endResult['place_id'];
-        $payload['end_latitude'] = $endResult['latitude'];
-        $payload['end_longitude'] = $endResult['longitude'];
-        $payload['dropoff_city_id'] = $payload['dropoff_city_id'] ?? $this->resolveCityId(cityName: $endResult['components']['city'] ?? null);
+        if (filled($payload['end_location'] ?? null) || filled($payload['end_place_id'] ?? null)) {
+            $endResult = $this->lookupLocation(
+                lookupService: $lookupService,
+                location: (string) ($payload['end_location'] ?? ''),
+                placeId: $payload['end_place_id'] ?? null,
+                label: 'end',
+            );
+
+            $payload['end_place_id'] = $endResult['place_id'];
+            $payload['end_latitude'] = $endResult['latitude'];
+            $payload['end_longitude'] = $endResult['longitude'];
+            $payload['dropoff_city_id'] = $payload['dropoff_city_id'] ?? $this->resolveCityId(cityName: $endResult['components']['city'] ?? null);
+        }
 
         return $payload;
     }

@@ -113,6 +113,37 @@ it('stores google places data without requiring area selections', function () {
     $response->assertJsonPath('data.stops.0.stop_area', 'Clifton');
 });
 
+it('creates a pick and drop service with only a pickup location', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/pick-and-drop', [
+            'start_location' => 'Karachi Airport, Karachi, Pakistan',
+            'start_place_id' => 'place_start_123',
+            'start_latitude' => 24.906547,
+            'start_longitude' => 67.160797,
+            'pickup_city_id' => $this->city->id,
+            'pickup_area_id' => $this->area1->id,
+            'departure_date' => '2026-04-15',
+            'departure_time' => '14:30',
+            'available_spaces' => 4,
+            'driver_gender' => 'male',
+        ]);
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.start_location', 'Karachi Airport, Karachi, Pakistan')
+        ->assertJsonPath('data.end_location', null)
+        ->assertJsonPath('data.dropoff_city_id', null)
+        ->assertJsonPath('data.dropoff_area_id', null);
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'user_id' => $this->user->id,
+        'start_location' => 'Karachi Airport, Karachi, Pakistan',
+        'end_location' => null,
+        'pickup_city_id' => $this->city->id,
+        'dropoff_city_id' => null,
+        'dropoff_area_id' => null,
+    ]);
+});
+
 it('stores and returns vehicle type for a pick and drop service', function () {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/pick-and-drop', [
@@ -242,6 +273,46 @@ it('requires departure_date when updating a pick and drop service to once', func
 
     $response->assertUnprocessable()
         ->assertJsonValidationErrors(['departure_date']);
+});
+
+it('allows clearing the dropoff details when updating a pick and drop service', function () {
+    $service = PickAndDrop::factory()->create([
+        'user_id' => $this->user->id,
+        'start_location' => 'Karachi Airport',
+        'end_location' => 'Clifton Beach',
+        'pickup_city_id' => $this->city->id,
+        'pickup_area_id' => $this->area1->id,
+        'dropoff_city_id' => $this->city->id,
+        'dropoff_area_id' => $this->area2->id,
+        'end_place_id' => 'place_end_456',
+        'end_latitude' => 24.813829,
+        'end_longitude' => 67.029373,
+    ]);
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->putJson("/api/customer/pick-and-drop/{$service->id}", [
+            'end_location' => null,
+            'end_place_id' => null,
+            'end_latitude' => null,
+            'end_longitude' => null,
+            'dropoff_city_id' => null,
+            'dropoff_area_id' => null,
+        ]);
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.end_location', null)
+        ->assertJsonPath('data.dropoff_city_id', null)
+        ->assertJsonPath('data.dropoff_area_id', null);
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'id' => $service->id,
+        'end_location' => null,
+        'end_place_id' => null,
+        'end_latitude' => null,
+        'end_longitude' => null,
+        'dropoff_city_id' => null,
+        'dropoff_area_id' => null,
+    ]);
 });
 
 it('defaults is_system_generated to false when creating a service', function () {

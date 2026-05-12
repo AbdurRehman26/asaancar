@@ -256,10 +256,10 @@ class PickAndDropController extends Controller
      *         required=true,
      *
      *         @OA\JsonContent(
-     *             required={"start_location", "end_location", "pickup_city_id", "pickup_area_id", "dropoff_city_id", "dropoff_area_id", "departure_date", "departure_time", "available_spaces", "driver_gender"},
+     *             required={"start_location", "departure_date", "departure_time", "available_spaces", "driver_gender"},
      *
      *             @OA\Property(property="start_location", type="string", example="Karachi Airport"),
-     *             @OA\Property(property="end_location", type="string", example="Clifton Beach"),
+     *             @OA\Property(property="end_location", type="string", nullable=true, example="Clifton Beach"),
      *             @OA\Property(property="pickup_city_id", type="integer", example=1),
      *             @OA\Property(property="pickup_area_id", type="integer", example=1),
      *             @OA\Property(property="dropoff_city_id", type="integer", example=1),
@@ -303,7 +303,7 @@ class PickAndDropController extends Controller
             'name' => 'nullable|string|max:255',
             'contact' => 'nullable|string|max:255',
             'start_location' => 'required|string|max:255',
-            'end_location' => 'required|string|max:255',
+            'end_location' => 'nullable|string|max:255',
             'start_place_id' => 'nullable|string|max:255',
             'start_latitude' => 'nullable|numeric',
             'start_longitude' => 'nullable|numeric',
@@ -479,7 +479,7 @@ class PickAndDropController extends Controller
             'name' => 'nullable|string|max:255',
             'contact' => 'nullable|string|max:255',
             'start_location' => 'sometimes|string|max:255',
-            'end_location' => 'sometimes|string|max:255',
+            'end_location' => 'sometimes|nullable|string|max:255',
             'start_place_id' => 'sometimes|nullable|string|max:255',
             'start_latitude' => 'sometimes|nullable|numeric',
             'start_longitude' => 'sometimes|nullable|numeric',

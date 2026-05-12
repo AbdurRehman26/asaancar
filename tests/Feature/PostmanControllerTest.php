@@ -106,3 +106,72 @@ it('creates a pick and drop service from the admin postman tool using a nested u
         'dropoff_city_id' => $lahore->id,
     ]);
 });
+
+it('creates a pickup only pick and drop service from the admin postman tool', function () {
+    Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $karachi = City::create(['name' => 'Karachi']);
+
+    $this->mock(GoogleAddressComponentLookupService::class, function ($mock): void {
+        $mock->shouldReceive('lookup')->once()->andReturn([
+            'query' => 'Karachi Airport',
+            'place_id' => 'karachi-airport-place-id',
+            'formatted_address' => 'Karachi Airport, Karachi, Pakistan',
+            'latitude' => 24.9065,
+            'longitude' => 67.1608,
+            'components' => [
+                'street_number' => null,
+                'route' => null,
+                'neighborhood' => null,
+                'sublocality' => 'Airport',
+                'city' => 'Karachi',
+                'state' => 'Sindh',
+                'country' => 'Pakistan',
+                'postal_code' => null,
+            ],
+            'address_components' => [],
+        ]);
+    });
+
+    $response = $this->actingAs($admin)->postJson('/api/admin/postman/execute', [
+        'api_type' => 'pick_and_drop',
+        'payload' => [
+            'user' => [
+                'name' => 'Test Driver',
+                'phone_number' => '03001234567',
+                'gender' => 'male',
+                'city' => 'Karachi',
+            ],
+            'start_location' => 'Karachi Airport',
+            'available_spaces' => 4,
+            'driver_gender' => 'male',
+            'departure_time' => '2026-05-12 10:00:00',
+            'price_per_person' => 500,
+            'currency' => 'PKR',
+            'is_active' => true,
+            'schedule_type' => 'once',
+        ],
+    ]);
+
+    $response->assertStatus(201)
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.start_place_id', 'karachi-airport-place-id')
+        ->assertJsonPath('data.end_location', null)
+        ->assertJsonPath('data.end_place_id', null)
+        ->assertJsonPath('data.pickup_city_id', $karachi->id)
+        ->assertJsonPath('data.dropoff_city_id', null);
+
+    $createdUser = User::query()->where('phone_number', '+923001234567')->firstOrFail();
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'user_id' => $createdUser->id,
+        'start_place_id' => 'karachi-airport-place-id',
+        'end_location' => null,
+        'end_place_id' => null,
+        'pickup_city_id' => $karachi->id,
+        'dropoff_city_id' => null,
+    ]);
+});
