@@ -18,6 +18,8 @@ class DriverController extends Controller
      *     description="Returns users who currently have at least one active pick and drop service.",
      *
      *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=12)),
+     *     @OA\Parameter(name="city_id", in="query", description="Filter by user city", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="gender", in="query", description="Filter by driver gender", required=false, @OA\Schema(type="string", enum={"male", "female"})),
      *
      *     @OA\Response(
      *         response=200,
@@ -43,6 +45,23 @@ class DriverController extends Controller
         $drivers = User::query()
             ->whereHas('pickAndDropServices', function ($query) {
                 $query->where('is_active', true);
+            })
+            ->when($request->filled('city_id'), function ($query) use ($request): void {
+                $query->where('city_id', (int) $request->input('city_id'));
+            })
+            ->when($request->filled('gender'), function ($query) use ($request): void {
+                $gender = $request->string('gender')->toString();
+
+                $query->where(function ($genderQuery) use ($gender): void {
+                    $genderQuery->where('gender', $gender)
+                        ->orWhere(function ($fallbackQuery) use ($gender): void {
+                            $fallbackQuery->whereNull('gender')
+                                ->whereHas('pickAndDropServices', function ($serviceQuery) use ($gender): void {
+                                    $serviceQuery->where('is_active', true)
+                                        ->where('driver_gender', $gender);
+                                });
+                        });
+                });
             })
             ->withCount([
                 'pickAndDropServices as active_pick_and_drop_services_count' => function ($query) {

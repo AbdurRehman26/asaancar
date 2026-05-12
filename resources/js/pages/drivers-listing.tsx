@@ -8,9 +8,15 @@ import { ArrowRight, CarFront, MapPin, Phone, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+interface CityOption {
+    id: number;
+    name: string;
+}
+
 interface DriverListingItem {
     id: number;
     name: string;
+    gender?: 'male' | 'female' | null;
     phone_number?: string | null;
     city_name?: string | null;
     profile_image?: string | null;
@@ -30,13 +36,52 @@ export default function DriversListing() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [drivers, setDrivers] = useState<DriverListingItem[]>([]);
+    const [cities, setCities] = useState<CityOption[]>([]);
+    const [filters, setFilters] = useState({
+        city_id: '',
+        gender: '',
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchDrivers = async () => {
+        const fetchCities = async () => {
             try {
-                const response = await apiFetch('/api/drivers?per_page=12');
+                const response = await apiFetch('/api/cities');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch cities');
+                }
+
+                const result = await response.json();
+                setCities(Array.isArray(result.data) ? result.data : []);
+            } catch {
+                setCities([]);
+            }
+        };
+
+        void fetchCities();
+    }, []);
+
+    useEffect(() => {
+        const fetchDrivers = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const params = new URLSearchParams({
+                    per_page: '12',
+                });
+
+                if (filters.city_id) {
+                    params.append('city_id', filters.city_id);
+                }
+
+                if (filters.gender) {
+                    params.append('gender', filters.gender);
+                }
+
+                const response = await apiFetch(`/api/drivers?${params.toString()}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch drivers');
@@ -52,7 +97,7 @@ export default function DriversListing() {
         };
 
         void fetchDrivers();
-    }, []);
+    }, [filters.city_id, filters.gender]);
 
     const driverOnboardingPath = user ? '/driver-onboarding' : '/signup';
 
@@ -95,6 +140,53 @@ export default function DriversListing() {
                             >
                                 <img src="/google-play-icon.png" alt="Get it on Google Play" className="h-10 w-auto sm:h-12 md:h-14" />
                             </a>
+                        </div>
+
+                        <div className="mb-8 grid grid-cols-1 gap-4 rounded-[1.5rem] border border-white/60 bg-white/85 p-5 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.2)] backdrop-blur md:grid-cols-3 dark:border-white/10 dark:bg-[#17141f]/82 dark:shadow-none">
+                            <div className="space-y-2">
+                                <label htmlFor="driver-city-filter" className="text-sm font-medium text-[#4f2b48] dark:text-white/75">
+                                    City
+                                </label>
+                                <select
+                                    id="driver-city-filter"
+                                    value={filters.city_id}
+                                    onChange={(event) => setFilters((current) => ({ ...current, city_id: event.target.value }))}
+                                    className="h-11 w-full rounded-xl border border-[#7e246c]/12 bg-white px-4 text-sm text-[#2b1128] transition outline-none focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c]/15 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                >
+                                    <option value="">All cities</option>
+                                    {cities.map((city) => (
+                                        <option key={city.id} value={city.id}>
+                                            {city.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="driver-gender-filter" className="text-sm font-medium text-[#4f2b48] dark:text-white/75">
+                                    Gender
+                                </label>
+                                <select
+                                    id="driver-gender-filter"
+                                    value={filters.gender}
+                                    onChange={(event) => setFilters((current) => ({ ...current, gender: event.target.value }))}
+                                    className="h-11 w-full rounded-xl border border-[#7e246c]/12 bg-white px-4 text-sm text-[#2b1128] transition outline-none focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c]/15 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                                >
+                                    <option value="">All genders</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+
+                            <div className="flex items-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setFilters({ city_id: '', gender: '' })}
+                                    className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-[#7e246c]/15 bg-[#fcf7fb] px-4 text-sm font-semibold text-[#7e246c] transition hover:bg-[#f7e9f4] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                                >
+                                    Clear filters
+                                </button>
+                            </div>
                         </div>
 
                         {loading ? (
@@ -154,16 +246,16 @@ export default function DriversListing() {
                                                         <Users className="h-3 w-3" />
                                                         {driver.active_services_count} active ride{driver.active_services_count !== 1 ? 's' : ''}
                                                     </span>
-                                                    {driver.latest_service?.driver_gender ? (
+                                                    {driver.gender ? (
                                                         <span
                                                             className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${
-                                                                driver.latest_service.driver_gender === 'female'
+                                                                driver.gender === 'female'
                                                                     ? 'border-pink-100 bg-pink-50 text-pink-700 dark:border-pink-800/30 dark:bg-pink-900/20 dark:text-pink-300'
                                                                     : 'border-indigo-100 bg-indigo-50 text-indigo-700 dark:border-indigo-800/30 dark:bg-indigo-900/20 dark:text-indigo-300'
                                                             }`}
                                                         >
-                                                            {driver.latest_service.driver_gender === 'female' ? '👩' : '👨'}{' '}
-                                                            {driver.latest_service.driver_gender === 'female' ? 'Female' : 'Male'}
+                                                            {driver.gender === 'female' ? '👩' : '👨'}{' '}
+                                                            {driver.gender === 'female' ? 'Female' : 'Male'}
                                                         </span>
                                                     ) : null}
                                                     {driver.city_name ? (
