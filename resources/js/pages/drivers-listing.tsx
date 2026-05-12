@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import Navbar from '@/components/navbar';
 import SEO from '@/components/SEO';
 import { apiFetch } from '@/lib/utils';
-import { ArrowRight, CarFront, Phone, Users } from 'lucide-react';
+import { ArrowRight, CarFront, MapPin, Phone, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,6 +12,7 @@ interface DriverListingItem {
     id: number;
     name: string;
     phone_number?: string | null;
+    city_name?: string | null;
     profile_image?: string | null;
     active_services_count: number;
     latest_service?: {
@@ -78,6 +79,24 @@ export default function DriversListing() {
                         }
                         className="mb-8"
                     >
+                        <div className="mb-8 flex flex-col gap-4 rounded-[1.75rem] border border-white/60 bg-white/80 px-6 py-7 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.28)] backdrop-blur md:flex-row md:items-center md:justify-between dark:border-white/10 dark:bg-[#17141f]/88 dark:[background-image:linear-gradient(90deg,_rgba(23,20,31,0.94)_0%,_rgba(23,20,31,0.94)_44%,_rgba(255,255,255,0.14)_100%)] dark:shadow-none">
+                            <div className="text-center md:text-left">
+                                <p className="text-sm font-semibold text-[#7e246c] dark:text-white/70">Take AsaanCar with you</p>
+                                <h2 className="mt-2 text-3xl font-bold text-[#2b1128] dark:text-white">Find drivers on the go</h2>
+                                <p className="mt-2 text-sm text-[#6f556c] dark:text-white/65">
+                                    Open the Android app to browse drivers, message quickly, and publish your own ride in fewer steps.
+                                </p>
+                            </div>
+                            <a
+                                href="https://play.google.com/store/apps/details?id=com.asaancar.app"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="shrink-0 self-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7e246c] md:self-auto"
+                            >
+                                <img src="/google-play-icon.png" alt="Get it on Google Play" className="h-10 w-auto sm:h-12 md:h-14" />
+                            </a>
+                        </div>
+
                         {loading ? (
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                                 {Array.from({ length: 6 }).map((_, index) => (
@@ -145,6 +164,12 @@ export default function DriversListing() {
                                                         >
                                                             {driver.latest_service.driver_gender === 'female' ? '👩' : '👨'}{' '}
                                                             {driver.latest_service.driver_gender === 'female' ? 'Female' : 'Male'}
+                                                        </span>
+                                                    ) : null}
+                                                    {driver.city_name ? (
+                                                        <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20 dark:text-emerald-300">
+                                                            <MapPin className="h-3 w-3" />
+                                                            {driver.city_name}
                                                         </span>
                                                     ) : null}
                                                     {driver.phone_number ? (

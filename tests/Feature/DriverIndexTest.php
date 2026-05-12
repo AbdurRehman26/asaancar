@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\City;
 use App\Models\PickAndDrop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -7,9 +8,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('lists users who have at least one active pick and drop service', function () {
+    $city = City::create(['name' => 'Karachi']);
+
     $visibleDriver = User::factory()->create([
         'name' => 'Visible Driver',
         'phone_number' => '03001234567',
+        'city_id' => $city->id,
     ]);
 
     $hiddenDriver = User::factory()->create([
@@ -38,6 +42,7 @@ it('lists users who have at least one active pick and drop service', function ()
 
     expect($response->json('data'))->toHaveCount(1)
         ->and($response->json('data.0.name'))->toBe('Visible Driver')
+        ->and($response->json('data.0.city_name'))->toBe('Karachi')
         ->and($response->json('data.0.active_services_count'))->toBe(1)
         ->and($response->json('data.0.latest_service.start_location'))->toBe('Lyari')
         ->and($response->json('data.0.phone_number'))->toBeNull();
@@ -62,9 +67,12 @@ it('shows phone numbers in the drivers api for authenticated users', function ()
 });
 
 it('shows a single driver profile when the user has active rides', function () {
+    $city = City::create(['name' => 'Lahore']);
+
     $driver = User::factory()->create([
         'name' => 'Driver Profile',
         'phone_number' => '03001234567',
+        'city_id' => $city->id,
     ]);
 
     PickAndDrop::factory()->create([
@@ -80,6 +88,7 @@ it('shows a single driver profile when the user has active rides', function () {
     $response->assertSuccessful();
 
     expect($response->json('data.name'))->toBe('Driver Profile')
+        ->and($response->json('data.city_name'))->toBe('Lahore')
         ->and($response->json('data.active_services_count'))->toBe(1)
         ->and($response->json('data.latest_service.start_location'))->toBe('North Nazimabad')
         ->and($response->json('data.phone_number'))->toBeNull();

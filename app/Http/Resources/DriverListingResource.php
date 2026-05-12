@@ -29,6 +29,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     @OA\Property(property="id", type="integer", example=12),
  *     @OA\Property(property="name", type="string", example="Dr. Sami"),
  *     @OA\Property(property="phone_number", type="string", nullable=true, example="03001234567"),
+ *     @OA\Property(property="city_name", type="string", nullable=true, example="Karachi"),
  *     @OA\Property(property="profile_image", type="string", nullable=true, example="https://example.com/profile.jpg"),
  *     @OA\Property(property="active_services_count", type="integer", example=3),
  *     @OA\Property(property="latest_service", ref="#/components/schemas/DriverLatestService", nullable=true)
@@ -47,6 +48,7 @@ class DriverListingResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'phone_number' => $request->user('sanctum') ? $this->phone_number : null,
+            'city_name' => $this->relationLoaded('city') && $this->city ? $this->city->name : null,
             'profile_image' => $this->profile_image,
             'active_services_count' => $this->active_pick_and_drop_services_count ?? 0,
             'latest_service' => $latestService ? [

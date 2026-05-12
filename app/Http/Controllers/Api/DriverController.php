@@ -50,6 +50,7 @@ class DriverController extends Controller
                 },
             ])
             ->with([
+                'city',
                 'pickAndDropServices' => function ($query) {
                     $query->where('is_active', true)
                         ->latest('departure_time')
@@ -105,6 +106,7 @@ class DriverController extends Controller
                 },
             ])
             ->with([
+                'city',
                 'pickAndDropServices' => function ($query) {
                     $query->where('is_active', true)
                         ->latest('departure_time')
