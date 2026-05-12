@@ -145,12 +145,6 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
                             ? 'Any driver'
                             : `${request.preferred_driver_gender === 'female' ? 'Female' : 'Male'} driver`}
                     </div>
-                    {cityName ? (
-                        <div className="inline-flex items-center gap-1.5 rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20 dark:text-emerald-300">
-                            <MapPin className="h-3 w-3" />
-                            {cityName}
-                        </div>
-                    ) : null}
                 </div>
 
                 {request.description ? (
@@ -195,34 +189,54 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
                     )}
                 </div>
 
-                {(onEdit || onDelete) && (
-                    <div className="flex items-center gap-2">
-                        {onEdit ? (
-                            <button
-                                type="button"
-                                onClick={(event) => {
-                                    event.stopPropagation();
-                                    onEdit();
-                                }}
-                                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                            >
-                                Edit
-                            </button>
-                        ) : null}
-                        {onDelete ? (
-                            <button
-                                type="button"
-                                onClick={(event) => {
-                                    event.stopPropagation();
-                                    onDelete();
-                                }}
-                                className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
-                            >
-                                Delete
-                            </button>
-                        ) : null}
-                    </div>
-                )}
+                <div className="flex flex-col items-end gap-2">
+                    {cityName ? (
+                        <div className="inline-flex items-center gap-1.5 rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20 dark:text-emerald-300">
+                            <MapPin className="h-3 w-3" />
+                            {cityName}
+                        </div>
+                    ) : null}
+
+                    {onEdit || onDelete ? (
+                        <div className="flex items-center gap-2">
+                            {onEdit ? (
+                                <button
+                                    type="button"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        onEdit();
+                                    }}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                >
+                                    Edit
+                                </button>
+                            ) : null}
+                            {onDelete ? (
+                                <button
+                                    type="button"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        onDelete();
+                                    }}
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
+                                >
+                                    Delete
+                                </button>
+                            ) : null}
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                                isDashboard
+                                    ? 'bg-gradient-to-r from-[#7e246c] to-[#9d3d88] shadow-[0_16px_35px_-20px_rgba(126,36,108,0.8)] hover:from-[#6f205e] hover:to-[#8b3578]'
+                                    : 'bg-[#7e246c] shadow-sm hover:bg-[#6a1f5c] dark:shadow-none'
+                            }`}
+                        >
+                            View Details
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

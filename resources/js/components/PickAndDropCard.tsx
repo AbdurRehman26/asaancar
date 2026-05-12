@@ -292,13 +292,6 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
                     </div>
                 )}
 
-                {cityName ? (
-                    <div className="inline-flex items-center gap-1.5 rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20 dark:text-emerald-300">
-                        <MapPin className="h-3 w-3" />
-                        {cityName}
-                    </div>
-                ) : null}
-
                 {/* Round Trip */}
                 {service.is_roundtrip && (
                     <div className="inline-flex items-center gap-1.5 rounded-md border border-green-100 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 dark:border-green-800/30 dark:bg-green-900/20 dark:text-green-300">
@@ -370,58 +363,67 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        {(onEdit || onDelete) && (
-                            <div className="mr-2 flex gap-1">
-                                {onEdit && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEdit();
-                                        }}
-                                        className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                        title="Edit"
-                                    >
-                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                            />
-                                        </svg>
-                                    </button>
-                                )}
-                                {onDelete && (
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onDelete();
-                                        }}
-                                        className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
-                                        title="Delete"
-                                    >
-                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                            />
-                                        </svg>
-                                    </button>
-                                )}
+                    <div className="flex flex-col items-end gap-2">
+                        {cityName ? (
+                            <div className="inline-flex items-center gap-1.5 rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/20 dark:text-emerald-300">
+                                <MapPin className="h-3 w-3" />
+                                {cityName}
                             </div>
-                        )}
-                        <button
-                            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-colors ${
-                                isDashboard
-                                    ? 'bg-gradient-to-r from-[#7e246c] to-[#9d3d88] shadow-[0_16px_35px_-20px_rgba(126,36,108,0.8)] hover:from-[#6f205e] hover:to-[#8b3578]'
-                                    : 'bg-[#7e246c] shadow-sm hover:bg-[#6a1f5c] dark:shadow-none'
-                            }`}
-                        >
-                            View Details
-                        </button>
+                        ) : null}
+
+                        <div className="flex items-center gap-2">
+                            {(onEdit || onDelete) && (
+                                <div className="mr-2 flex gap-1">
+                                    {onEdit && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEdit();
+                                            }}
+                                            className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                            title="Edit"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                />
+                                            </svg>
+                                        </button>
+                                    )}
+                                    {onDelete && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDelete();
+                                            }}
+                                            className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            title="Delete"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            <button
+                                className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                                    isDashboard
+                                        ? 'bg-gradient-to-r from-[#7e246c] to-[#9d3d88] shadow-[0_16px_35px_-20px_rgba(126,36,108,0.8)] hover:from-[#6f205e] hover:to-[#8b3578]'
+                                        : 'bg-[#7e246c] shadow-sm hover:bg-[#6a1f5c] dark:shadow-none'
+                                }`}
+                            >
+                                View Details
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
