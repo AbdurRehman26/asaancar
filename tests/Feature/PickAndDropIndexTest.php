@@ -223,3 +223,32 @@ it('searches end route fields when only start location is provided for pick and 
     expect($response->json('data'))->toHaveCount(1)
         ->and($response->json('data.0.id'))->toBe($matchingService->id);
 });
+
+it('prioritizes opposite side exact area matches over intended side token matches for pick and drop services', function () {
+    $user = User::factory()->create();
+    $weakStartArea = Area::factory()->create(['name' => 'DHA Phase 1']);
+    $exactEndArea = Area::factory()->create(['name' => 'DHA Phase 6']);
+
+    PickAndDrop::factory()->create([
+        'user_id' => $user->id,
+        'pickup_area_id' => $weakStartArea->id,
+        'start_location' => 'DHA Phase 1, Karachi',
+        'end_location' => 'Gulshan-e-Iqbal, Karachi',
+        'is_active' => true,
+    ]);
+
+    $matchingService = PickAndDrop::factory()->create([
+        'user_id' => $user->id,
+        'start_location' => 'University Road, Karachi',
+        'dropoff_area_id' => $exactEndArea->id,
+        'end_location' => 'DHA Phase 6, Karachi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/pick-and-drop?start_location=DHA+PHASE+6');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($matchingService->id);
+});

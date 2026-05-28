@@ -460,11 +460,15 @@ class RideRequestController extends Controller
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
                 $stepQuery->whereRaw("LOWER({$field['location']}) = ?", [mb_strtolower($searchTerm)]);
             };
+        }
 
+        foreach ($fields as $field) {
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
                 $stepQuery->where($field['location'], 'like', '%'.$searchTerm.'%');
             };
+        }
 
+        foreach ($fields as $field) {
             foreach ($this->routeSearchTerms($searchTerm) as $term) {
                 $steps[] = function ($stepQuery) use ($field, $term): void {
                     $stepQuery->where($field['location'], 'like', '%'.$term.'%');

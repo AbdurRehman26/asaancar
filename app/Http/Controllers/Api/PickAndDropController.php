@@ -259,13 +259,17 @@ class PickAndDropController extends Controller
                     $relatedAreaQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($searchTerm)]);
                 });
             };
+        }
 
+        foreach ($fields as $field) {
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
                 $stepQuery->whereHas($field['areaRelation'], function ($relatedAreaQuery) use ($searchTerm): void {
                     $relatedAreaQuery->where('name', 'like', '%'.$searchTerm.'%');
                 });
             };
+        }
 
+        foreach ($fields as $field) {
             foreach ($this->routeSearchTerms($searchTerm) as $term) {
                 $steps[] = function ($stepQuery) use ($field, $term): void {
                     $stepQuery->whereHas($field['areaRelation'], function ($relatedAreaQuery) use ($term): void {
@@ -273,15 +277,21 @@ class PickAndDropController extends Controller
                     });
                 };
             }
+        }
 
+        foreach ($fields as $field) {
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
                 $stepQuery->whereRaw("LOWER({$field['location']}) = ?", [mb_strtolower($searchTerm)]);
             };
+        }
 
+        foreach ($fields as $field) {
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
                 $stepQuery->where($field['location'], 'like', '%'.$searchTerm.'%');
             };
+        }
 
+        foreach ($fields as $field) {
             foreach ($this->routeSearchTerms($searchTerm) as $term) {
                 $steps[] = function ($stepQuery) use ($field, $term): void {
                     $stepQuery->where($field['location'], 'like', '%'.$term.'%');
