@@ -116,17 +116,19 @@ it('filters pick and drop services by user city id', function () {
 
 it('prioritizes exact area matches when searching pick and drop services by area', function () {
     $user = User::factory()->create();
+    $exactArea = Area::factory()->create(['name' => 'DHA']);
+    $partialArea = Area::factory()->create(['name' => 'DHA Phase 8']);
 
     $exactService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'DHA',
+        'pickup_area_id' => $exactArea->id,
         'start_location' => 'DHA Phase 8, Karachi',
         'is_active' => true,
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'DHA Phase 8',
+        'pickup_area_id' => $partialArea->id,
         'start_location' => 'DHA Phase 8, Karachi',
         'is_active' => true,
     ]);
@@ -141,17 +143,19 @@ it('prioritizes exact area matches when searching pick and drop services by area
 
 it('falls back to partial area matches when searching pick and drop services has no exact match', function () {
     $user = User::factory()->create();
+    $matchingArea = Area::factory()->create(['name' => 'Clifton Block 2']);
+    $otherArea = Area::factory()->create(['name' => 'Gulshan-e-Iqbal']);
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
-        'end_area' => 'Clifton Block 2',
+        'dropoff_area_id' => $matchingArea->id,
         'end_location' => 'Clifton Block 2, Karachi',
         'is_active' => true,
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
-        'end_area' => 'Gulshan-e-Iqbal',
+        'dropoff_area_id' => $otherArea->id,
         'end_location' => 'Gulshan-e-Iqbal, Karachi',
         'is_active' => true,
     ]);
@@ -166,17 +170,19 @@ it('falls back to partial area matches when searching pick and drop services has
 
 it('searches split route text across area and location fields for pick and drop services', function () {
     $user = User::factory()->create();
+    $matchingArea = Area::factory()->create(['name' => 'DHA Phase 8']);
+    $otherArea = Area::factory()->create(['name' => 'Gulshan-e-Iqbal']);
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'DHA Phase 8',
+        'pickup_area_id' => $matchingArea->id,
         'start_location' => 'Khayaban-e-Ittehad, Karachi',
         'is_active' => true,
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'Gulshan-e-Iqbal',
+        'pickup_area_id' => $otherArea->id,
         'start_location' => 'University Road, Karachi',
         'is_active' => true,
     ]);
@@ -191,21 +197,21 @@ it('searches split route text across area and location fields for pick and drop 
 
 it('searches end route fields when only start location is provided for pick and drop services', function () {
     $user = User::factory()->create();
+    $matchingArea = Area::factory()->create(['name' => 'Clifton Block 5']);
+    $otherArea = Area::factory()->create(['name' => 'North Nazimabad']);
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'Gulshan-e-Iqbal',
         'start_location' => 'University Road, Karachi',
-        'end_area' => 'Clifton Block 5',
+        'dropoff_area_id' => $matchingArea->id,
         'end_location' => 'Sea View Road, Karachi',
         'is_active' => true,
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'DHA Phase 8',
         'start_location' => 'Khayaban-e-Ittehad, Karachi',
-        'end_area' => 'North Nazimabad',
+        'dropoff_area_id' => $otherArea->id,
         'end_location' => 'Five Star Chowrangi, Karachi',
         'is_active' => true,
     ]);

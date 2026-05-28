@@ -117,19 +117,17 @@ it('filters ride requests by ride request city id with requester city fallback',
         ->and($response->json('data.0.city_name'))->toBe('Karachi');
 });
 
-it('prioritizes exact area matches when searching ride requests by area', function () {
+it('prioritizes exact location matches when searching ride requests', function () {
     $user = User::factory()->create();
 
     $exactRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'DHA',
-        'start_location' => 'DHA Phase 8, Karachi',
+        'start_location' => 'DHA',
         'is_active' => true,
     ]);
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'DHA Phase 8',
         'start_location' => 'DHA Phase 8, Karachi',
         'is_active' => true,
     ]);
@@ -142,19 +140,17 @@ it('prioritizes exact area matches when searching ride requests by area', functi
         ->and($response->json('data.0.id'))->toBe($exactRequest->id);
 });
 
-it('falls back to partial area matches when searching ride requests has no exact match', function () {
+it('falls back to partial location matches when searching ride requests has no exact match', function () {
     $user = User::factory()->create();
 
     $matchingRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
-        'end_area' => 'Clifton Block 2',
         'end_location' => 'Clifton Block 2, Karachi',
         'is_active' => true,
     ]);
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
-        'end_area' => 'Gulshan-e-Iqbal',
         'end_location' => 'Gulshan-e-Iqbal, Karachi',
         'is_active' => true,
     ]);
@@ -167,19 +163,17 @@ it('falls back to partial area matches when searching ride requests has no exact
         ->and($response->json('data.0.id'))->toBe($matchingRequest->id);
 });
 
-it('searches split route text across area and location fields for ride requests', function () {
+it('searches split route text across location fields for ride requests', function () {
     $user = User::factory()->create();
 
     $matchingRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'DHA Phase 8',
         'start_location' => 'Khayaban-e-Ittehad, Karachi',
         'is_active' => true,
     ]);
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'Gulshan-e-Iqbal',
         'start_location' => 'University Road, Karachi',
         'is_active' => true,
     ]);
@@ -197,23 +191,19 @@ it('searches end route fields when only start location is provided for ride requ
 
     $matchingRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'Gulshan-e-Iqbal',
         'start_location' => 'University Road, Karachi',
-        'end_area' => 'Clifton Block 5',
         'end_location' => 'Sea View Road, Karachi',
         'is_active' => true,
     ]);
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
-        'start_area' => 'DHA Phase 8',
         'start_location' => 'Khayaban-e-Ittehad, Karachi',
-        'end_area' => 'North Nazimabad',
         'end_location' => 'Five Star Chowrangi, Karachi',
         'is_active' => true,
     ]);
 
-    $response = $this->getJson('/api/ride-requests?start_location=Clifton');
+    $response = $this->getJson('/api/ride-requests?start_location=Sea+View');
 
     $response->assertSuccessful();
 
