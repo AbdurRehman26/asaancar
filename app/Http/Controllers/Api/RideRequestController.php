@@ -339,15 +339,15 @@ class RideRequestController extends Controller
 
         if ($request->filled('start_location') && ! $hasStartCoordinates) {
             $this->applyRouteSearch($query, $request->string('start_location')->toString(), [
-                ['location' => 'start_location'],
-                ['location' => 'end_location'],
+                ['area' => 'start_area', 'location' => 'start_location'],
+                ['area' => 'end_area', 'location' => 'end_location'],
             ]);
         }
 
         if ($request->filled('end_location') && ! $hasEndCoordinates) {
             $this->applyRouteSearch($query, $request->string('end_location')->toString(), [
-                ['location' => 'end_location'],
-                ['location' => 'start_location'],
+                ['area' => 'end_area', 'location' => 'end_location'],
+                ['area' => 'start_area', 'location' => 'start_location'],
             ]);
         }
 
@@ -427,7 +427,7 @@ class RideRequestController extends Controller
     }
 
     /**
-     * @param  array<int, array{location: string}>  $fields
+     * @param  array<int, array{area: string, location: string}>  $fields
      */
     private function applyRouteSearch($query, string $searchTerm, array $fields): void
     {
@@ -449,7 +449,7 @@ class RideRequestController extends Controller
     }
 
     /**
-     * @param  array<int, array{location: string}>  $fields
+     * @param  array<int, array{area: string, location: string}>  $fields
      * @return array<int, \Closure>
      */
     private function routeSearchSteps(array $fields, string $searchTerm): array
@@ -458,20 +458,26 @@ class RideRequestController extends Controller
 
         foreach ($fields as $field) {
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
-                $stepQuery->whereRaw("LOWER({$field['location']}) = ?", [mb_strtolower($searchTerm)]);
+                $stepQuery
+                    ->whereRaw("LOWER({$field['area']}) = ?", [mb_strtolower($searchTerm)])
+                    ->orWhereRaw("LOWER({$field['location']}) = ?", [mb_strtolower($searchTerm)]);
             };
         }
 
         foreach ($fields as $field) {
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
-                $stepQuery->where($field['location'], 'like', '%'.$searchTerm.'%');
+                $stepQuery
+                    ->where($field['area'], 'like', '%'.$searchTerm.'%')
+                    ->orWhere($field['location'], 'like', '%'.$searchTerm.'%');
             };
         }
 
         foreach ($fields as $field) {
             foreach ($this->routeSearchTerms($searchTerm) as $term) {
                 $steps[] = function ($stepQuery) use ($field, $term): void {
-                    $stepQuery->where($field['location'], 'like', '%'.$term.'%');
+                    $stepQuery
+                        ->where($field['area'], 'like', '%'.$term.'%')
+                        ->orWhere($field['location'], 'like', '%'.$term.'%');
                 };
             }
         }

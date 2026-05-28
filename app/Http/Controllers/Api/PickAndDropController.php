@@ -74,15 +74,15 @@ class PickAndDropController extends Controller
 
         if ($request->has('start_location') && ! $hasStartCoordinates) {
             $this->applyRouteSearch($query, (string) $request->start_location, [
-                ['location' => 'start_location', 'areaRelation' => 'pickupArea'],
-                ['location' => 'end_location', 'areaRelation' => 'dropoffArea'],
+                ['area' => 'start_area', 'location' => 'start_location', 'areaRelation' => 'pickupArea'],
+                ['area' => 'end_area', 'location' => 'end_location', 'areaRelation' => 'dropoffArea'],
             ]);
         }
 
         if ($request->has('end_location') && ! $hasEndCoordinates) {
             $this->applyRouteSearch($query, (string) $request->end_location, [
-                ['location' => 'end_location', 'areaRelation' => 'dropoffArea'],
-                ['location' => 'start_location', 'areaRelation' => 'pickupArea'],
+                ['area' => 'end_area', 'location' => 'end_location', 'areaRelation' => 'dropoffArea'],
+                ['area' => 'start_area', 'location' => 'start_location', 'areaRelation' => 'pickupArea'],
             ]);
         }
 
@@ -224,7 +224,7 @@ class PickAndDropController extends Controller
     }
 
     /**
-     * @param  array<int, array{location: string, areaRelation: string}>  $fields
+     * @param  array<int, array{area: string, location: string, areaRelation: string}>  $fields
      */
     private function applyRouteSearch($query, string $searchTerm, array $fields): void
     {
@@ -246,7 +246,7 @@ class PickAndDropController extends Controller
     }
 
     /**
-     * @param  array<int, array{location: string, areaRelation: string}>  $fields
+     * @param  array<int, array{area: string, location: string, areaRelation: string}>  $fields
      * @return array<int, \Closure>
      */
     private function routeSearchSteps(array $fields, string $searchTerm): array
@@ -255,26 +255,32 @@ class PickAndDropController extends Controller
 
         foreach ($fields as $field) {
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
-                $stepQuery->whereHas($field['areaRelation'], function ($relatedAreaQuery) use ($searchTerm): void {
-                    $relatedAreaQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($searchTerm)]);
-                });
+                $stepQuery
+                    ->whereRaw("LOWER({$field['area']}) = ?", [mb_strtolower($searchTerm)])
+                    ->orWhereHas($field['areaRelation'], function ($relatedAreaQuery) use ($searchTerm): void {
+                        $relatedAreaQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($searchTerm)]);
+                    });
             };
         }
 
         foreach ($fields as $field) {
             $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
-                $stepQuery->whereHas($field['areaRelation'], function ($relatedAreaQuery) use ($searchTerm): void {
-                    $relatedAreaQuery->where('name', 'like', '%'.$searchTerm.'%');
-                });
+                $stepQuery
+                    ->where($field['area'], 'like', '%'.$searchTerm.'%')
+                    ->orWhereHas($field['areaRelation'], function ($relatedAreaQuery) use ($searchTerm): void {
+                        $relatedAreaQuery->where('name', 'like', '%'.$searchTerm.'%');
+                    });
             };
         }
 
         foreach ($fields as $field) {
             foreach ($this->routeSearchTerms($searchTerm) as $term) {
                 $steps[] = function ($stepQuery) use ($field, $term): void {
-                    $stepQuery->whereHas($field['areaRelation'], function ($relatedAreaQuery) use ($term): void {
-                        $relatedAreaQuery->where('name', 'like', '%'.$term.'%');
-                    });
+                    $stepQuery
+                        ->where($field['area'], 'like', '%'.$term.'%')
+                        ->orWhereHas($field['areaRelation'], function ($relatedAreaQuery) use ($term): void {
+                            $relatedAreaQuery->where('name', 'like', '%'.$term.'%');
+                        });
                 };
             }
         }

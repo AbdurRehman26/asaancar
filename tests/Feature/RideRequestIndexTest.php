@@ -210,3 +210,30 @@ it('searches end route fields when only start location is provided for ride requ
     expect($response->json('data'))->toHaveCount(1)
         ->and($response->json('data.0.id'))->toBe($matchingRequest->id);
 });
+
+it('searches saved start and end area text columns for ride requests', function () {
+    $user = User::factory()->create();
+
+    RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'DHA Phase 1',
+        'start_location' => 'DHA Phase 1, Karachi',
+        'end_location' => 'Gulshan-e-Iqbal, Karachi',
+        'is_active' => true,
+    ]);
+
+    $matchingRequest = RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'start_location' => 'University Road, Karachi',
+        'end_area' => 'DHA Phase 6',
+        'end_location' => 'DHA Phase 6, Karachi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/ride-requests?start_location=DHA+PHASE+6');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($matchingRequest->id);
+});
