@@ -7,11 +7,15 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+const PUBLIC_RIDE_REQUEST_CITY_ID = 197;
+
 it('orders ride requests by the closest start and end coordinates when provided', function () {
-    $user = User::factory()->create();
+    $city = City::query()->forceCreate(['id' => PUBLIC_RIDE_REQUEST_CITY_ID, 'name' => 'Karachi']);
+    $user = User::factory()->create(['city_id' => $city->id]);
 
     $closestRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'Lahore, Pakistan',
         'start_latitude' => 31.5204,
         'start_longitude' => 74.3587,
@@ -24,6 +28,7 @@ it('orders ride requests by the closest start and end coordinates when provided'
 
     $fartherRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'Islamabad, Pakistan',
         'start_latitude' => 33.6844,
         'start_longitude' => 73.0479,
@@ -43,19 +48,21 @@ it('orders ride requests by the closest start and end coordinates when provided'
 });
 
 it('shows latest ride requests first when coordinates are not provided', function () {
-    $city = City::create(['name' => 'Karachi']);
+    $city = City::query()->forceCreate(['id' => PUBLIC_RIDE_REQUEST_CITY_ID, 'name' => 'Karachi']);
     $user = User::factory()->create([
         'city_id' => $city->id,
     ]);
 
     $olderRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'created_at' => now()->subDay(),
         'updated_at' => now()->subDay(),
     ]);
 
     $latestRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'created_at' => now(),
         'updated_at' => now(),
     ]);
@@ -70,8 +77,8 @@ it('shows latest ride requests first when coordinates are not provided', functio
         ->and($response->json('data.1.id'))->toBe($olderRequest->id);
 });
 
-it('filters ride requests by ride request city id with requester city fallback', function () {
-    $karachi = City::create(['name' => 'Karachi']);
+it('only lists public city ride requests for city id 197', function () {
+    $karachi = City::query()->forceCreate(['id' => PUBLIC_RIDE_REQUEST_CITY_ID, 'name' => 'Karachi']);
     $lahore = City::create(['name' => 'Lahore']);
 
     $karachiUser = User::factory()->create([
@@ -100,34 +107,36 @@ it('filters ride requests by ride request city id with requester city fallback',
         'is_active' => true,
     ]);
 
-    $fallbackRequest = RideRequest::factory()->create([
+    RideRequest::factory()->create([
         'user_id' => $karachiUser->id,
         'city_id' => null,
         'is_active' => true,
     ]);
 
-    $response = $this->getJson('/api/ride-requests?city_id='.$karachi->id);
+    $response = $this->getJson('/api/ride-requests?city_id='.$lahore->id);
 
     $response->assertSuccessful();
 
     expect(collect($response->json('data'))->pluck('id')->all())->toEqualCanonicalizing([
         $karachiRequest->id,
-        $fallbackRequest->id,
     ])
         ->and($response->json('data.0.city_name'))->toBe('Karachi');
 });
 
 it('prioritizes exact location matches when searching ride requests', function () {
-    $user = User::factory()->create();
+    $city = City::query()->forceCreate(['id' => PUBLIC_RIDE_REQUEST_CITY_ID, 'name' => 'Karachi']);
+    $user = User::factory()->create(['city_id' => $city->id]);
 
     $exactRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'DHA',
         'is_active' => true,
     ]);
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'DHA Phase 8, Karachi',
         'is_active' => true,
     ]);
@@ -141,16 +150,19 @@ it('prioritizes exact location matches when searching ride requests', function (
 });
 
 it('falls back to partial location matches when searching ride requests has no exact match', function () {
-    $user = User::factory()->create();
+    $city = City::query()->forceCreate(['id' => PUBLIC_RIDE_REQUEST_CITY_ID, 'name' => 'Karachi']);
+    $user = User::factory()->create(['city_id' => $city->id]);
 
     $matchingRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'end_location' => 'Clifton Block 2, Karachi',
         'is_active' => true,
     ]);
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'end_location' => 'Gulshan-e-Iqbal, Karachi',
         'is_active' => true,
     ]);
@@ -164,16 +176,19 @@ it('falls back to partial location matches when searching ride requests has no e
 });
 
 it('searches split route text across location fields for ride requests', function () {
-    $user = User::factory()->create();
+    $city = City::query()->forceCreate(['id' => PUBLIC_RIDE_REQUEST_CITY_ID, 'name' => 'Karachi']);
+    $user = User::factory()->create(['city_id' => $city->id]);
 
     $matchingRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'Khayaban-e-Ittehad, Karachi',
         'is_active' => true,
     ]);
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'University Road, Karachi',
         'is_active' => true,
     ]);
@@ -187,10 +202,12 @@ it('searches split route text across location fields for ride requests', functio
 });
 
 it('searches end route fields when only start location is provided for ride requests', function () {
-    $user = User::factory()->create();
+    $city = City::query()->forceCreate(['id' => PUBLIC_RIDE_REQUEST_CITY_ID, 'name' => 'Karachi']);
+    $user = User::factory()->create(['city_id' => $city->id]);
 
     $matchingRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'University Road, Karachi',
         'end_location' => 'Sea View Road, Karachi',
         'is_active' => true,
@@ -198,6 +215,7 @@ it('searches end route fields when only start location is provided for ride requ
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'Khayaban-e-Ittehad, Karachi',
         'end_location' => 'Five Star Chowrangi, Karachi',
         'is_active' => true,
@@ -212,10 +230,12 @@ it('searches end route fields when only start location is provided for ride requ
 });
 
 it('searches saved start and end area text columns for ride requests', function () {
-    $user = User::factory()->create();
+    $city = City::query()->forceCreate(['id' => PUBLIC_RIDE_REQUEST_CITY_ID, 'name' => 'Karachi']);
+    $user = User::factory()->create(['city_id' => $city->id]);
 
     RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_area' => 'DHA Phase 1',
         'start_location' => 'DHA Phase 1, Karachi',
         'end_location' => 'Gulshan-e-Iqbal, Karachi',
@@ -224,6 +244,7 @@ it('searches saved start and end area text columns for ride requests', function 
 
     $matchingRequest = RideRequest::factory()->create([
         'user_id' => $user->id,
+        'city_id' => $city->id,
         'start_location' => 'University Road, Karachi',
         'end_area' => 'DHA Phase 6',
         'end_location' => 'DHA Phase 6, Karachi',

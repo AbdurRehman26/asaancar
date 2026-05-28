@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Auth;
  */
 class RideRequestController extends Controller
 {
+    private const PUBLIC_LISTING_CITY_ID = 197;
+
     /**
      * @OA\Get(
      *     path="/api/ride-requests",
@@ -68,9 +70,10 @@ class RideRequestController extends Controller
 
         $query = RideRequest::query()
             ->with(['user.city', 'city'])
+            ->where('ride_requests.city_id', self::PUBLIC_LISTING_CITY_ID)
             ->where('is_active', true);
 
-        $this->applyFilters($query, $request);
+        $this->applyFilters($query, $request, false);
 
         $query->orderBy('created_at', 'desc')->orderBy('departure_time', 'asc');
 
@@ -328,7 +331,7 @@ class RideRequestController extends Controller
         ]);
     }
 
-    protected function applyFilters($query, Request $request): void
+    protected function applyFilters($query, Request $request, bool $applyCityFilter = true): void
     {
         $startLatitude = $request->float('start_latitude');
         $startLongitude = $request->float('start_longitude');
@@ -351,7 +354,7 @@ class RideRequestController extends Controller
             ]);
         }
 
-        if ($request->filled('city_id')) {
+        if ($applyCityFilter && $request->filled('city_id')) {
             $cityId = (int) $request->input('city_id');
 
             $query->where(function ($cityQuery) use ($cityId): void {
