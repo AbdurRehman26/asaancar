@@ -24,7 +24,9 @@ interface DriverListingItem {
     latest_service?: {
         id: number;
         start_location: string;
+        start_area?: string | null;
         end_location: string;
+        end_area?: string | null;
         formatted_departure_time: string;
         driver_gender?: 'male' | 'female';
         price_per_person?: number | null;
@@ -281,13 +283,13 @@ export default function DriversListing() {
                                                 </div>
                                                 <div className="mt-3 space-y-2">
                                                     <div className="text-base font-semibold text-[#2b1128] dark:text-white">
-                                                        {driver.latest_service.start_location}
+                                                        {driver.latest_service.start_area || driver.latest_service.start_location}
                                                     </div>
                                                     <div className="flex items-center gap-2 text-[#8a7187] dark:text-white/45">
                                                         <ArrowRight className="h-4 w-4" />
                                                     </div>
                                                     <div className="text-base font-semibold text-[#5f4860] dark:text-white/78">
-                                                        {driver.latest_service.end_location}
+                                                        {driver.latest_service.end_area || driver.latest_service.end_location}
                                                     </div>
                                                     <div className="pt-2 text-sm text-[#7d6678] dark:text-white/65">
                                                         {driver.latest_service.formatted_departure_time}

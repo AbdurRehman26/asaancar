@@ -72,6 +72,7 @@ class DriverController extends Controller
                 'city',
                 'pickAndDropServices' => function ($query) {
                     $query->where('is_active', true)
+                        ->with(['pickupArea', 'dropoffArea'])
                         ->latest('departure_time')
                         ->limit(1);
                 },
@@ -128,6 +129,7 @@ class DriverController extends Controller
                 'city',
                 'pickAndDropServices' => function ($query) {
                     $query->where('is_active', true)
+                        ->with(['pickupArea', 'dropoffArea'])
                         ->latest('departure_time')
                         ->limit(1);
                 },

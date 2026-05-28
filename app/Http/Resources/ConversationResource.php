@@ -64,7 +64,9 @@ class ConversationResource extends JsonResource
         return [
             'id' => $this->pickAndDropService->id,
             'start_location' => $this->pickAndDropService->start_location,
+            'start_area' => $this->pickAndDropService->start_area ?: $this->pickAndDropService->pickupArea?->name,
             'end_location' => $this->pickAndDropService->end_location,
+            'end_area' => $this->pickAndDropService->end_area ?: $this->pickAndDropService->dropoffArea?->name,
             'departure_date' => $this->pickAndDropService->departure_date,
             'departure_time' => $this->pickAndDropService->departure_time,
             'schedule_type' => $this->pickAndDropService->schedule_type,
@@ -84,7 +86,9 @@ class ConversationResource extends JsonResource
         return [
             'id' => $this->rideRequest->id,
             'start_location' => $this->rideRequest->start_location,
+            'start_area' => $this->rideRequest->start_area,
             'end_location' => $this->rideRequest->end_location,
+            'end_area' => $this->rideRequest->end_area,
             'departure_date' => $this->rideRequest->departure_date,
             'departure_time' => $this->rideRequest->departure_time,
             'schedule_type' => $this->rideRequest->schedule_type,

@@ -56,7 +56,9 @@ class DriverListingResource extends JsonResource
             'latest_service' => $latestService ? [
                 'id' => $latestService->id,
                 'start_location' => $latestService->start_location,
+                'start_area' => $latestService->start_area ?: $latestService->pickupArea?->name,
                 'end_location' => $latestService->end_location,
+                'end_area' => $latestService->end_area ?: $latestService->dropoffArea?->name,
                 'formatted_departure_time' => $latestService->schedule_type !== 'once'
                     ? Carbon::parse($latestService->departure_time)->format('g:i A')
                     : Carbon::parse($latestService->departure_time)->format('jS F, g:i A'),

@@ -27,7 +27,9 @@ export interface PickAndDropService {
         name: string;
     };
     start_location: string;
+    start_area?: string | null;
     end_location: string;
+    end_area?: string | null;
     available_spaces: number;
     driver_gender?: 'male' | 'female'; // Optional as welcome page might not have it
     car_brand?: string;
@@ -97,6 +99,8 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
     const userName = service.name || service.user?.name || 'Driver';
     const userPhone = service.contact || service.user?.phone_number;
     const cityName = service.city_name || service.user?.city_name;
+    const startLabel = service.start_area || service.start_location;
+    const endLabel = service.end_area || service.end_location;
 
     return (
         <div
@@ -128,7 +132,7 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
                                 <h3
                                     className={`w-60 text-base leading-tight font-bold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
                                 >
-                                    {service.start_location}
+                                    {startLabel}
                                 </h3>
                                 <p
                                     className={`mt-0.5 text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
@@ -169,7 +173,7 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
                                 <h3
                                     className={`text-base leading-tight font-bold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}
                                 >
-                                    {service.end_location}
+                                    {endLabel}
                                 </h3>
                                 <p
                                     className={`mt-0.5 text-xs ${isDashboard ? 'text-[#8a7286] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}

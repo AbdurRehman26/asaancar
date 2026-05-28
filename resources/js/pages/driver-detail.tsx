@@ -21,7 +21,9 @@ interface DriverProfile {
     latest_service?: {
         id: number;
         start_location: string;
+        start_area?: string | null;
         end_location: string;
+        end_area?: string | null;
         formatted_departure_time: string;
         driver_gender: 'male' | 'female';
         price_per_person: number;
@@ -120,7 +122,7 @@ export default function DriverDetail() {
         const cleanPhoneNumber = driver.phone_number.replace(/[^\d+]/g, '');
         const senderName = user?.name || 'a AsaanCar user';
         const rideContext = latestRide
-            ? ` and I saw your ride on AsaanCar from ${latestRide.start_location} to ${latestRide.end_location}`
+            ? ` and I saw your ride on AsaanCar from ${latestRide.start_area || latestRide.start_location} to ${latestRide.end_area || latestRide.end_location}`
             : ' and I saw your driver profile on AsaanCar';
         const departureContext = latestRide?.formatted_departure_time ? ` for ${latestRide.formatted_departure_time}` : '';
         const message = `Hi ${driver.name}, I'm ${senderName}${rideContext}${departureContext}. Is it still available?`;

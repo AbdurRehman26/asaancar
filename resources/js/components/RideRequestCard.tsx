@@ -14,7 +14,9 @@ export interface RideRequest {
     name?: string;
     contact?: string;
     start_location: string;
+    start_area?: string | null;
     end_location: string;
+    end_area?: string | null;
     departure_time: string;
     formatted_departure_time?: string;
     schedule_type: 'once' | 'everyday' | 'weekdays' | 'weekends' | 'custom';
@@ -54,6 +56,8 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
     const requesterPhone = request.contact || request.user?.phone_number;
     const cityName = request.city_name || request.user?.city_name;
     const isDashboard = variant === 'dashboard';
+    const startLabel = request.start_area || request.start_location;
+    const endLabel = request.end_area || request.end_location;
 
     return (
         <div
@@ -75,7 +79,7 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
                         </div>
                         <div className="space-y-1">
                             <h3 className={`text-lg font-bold ${isDashboard ? 'text-[#2b1128] dark:text-white' : 'text-gray-900 dark:text-white'}`}>
-                                {request.start_location}
+                                {startLabel}
                             </h3>
                             <div className="flex items-center gap-2 text-gray-400">
                                 <ArrowRight className="h-4 w-4" />
@@ -83,7 +87,7 @@ const RideRequestCard: React.FC<RideRequestCardProps> = ({
                             <h4
                                 className={`text-base font-semibold ${isDashboard ? 'text-[#5f4860] dark:text-white/78' : 'text-gray-800 dark:text-gray-200'}`}
                             >
-                                {request.end_location}
+                                {endLabel}
                             </h4>
                         </div>
                     </div>

@@ -14,8 +14,8 @@ interface RawConversation {
         name?: string;
     };
     pick_and_drop_service_id?: string | number;
-    pickAndDropService?: { id: number; start_location?: string; end_location?: string };
-    rideRequest?: { id: number; start_location?: string; end_location?: string };
+    pickAndDropService?: { id: number; start_location?: string; start_area?: string | null; end_location?: string; end_area?: string | null };
+    rideRequest?: { id: number; start_location?: string; start_area?: string | null; end_location?: string; end_area?: string | null };
     ride_request_id?: string | number;
     unread_count?: number;
     last_message?: string | object;
@@ -85,16 +85,30 @@ export default function PickAndDropChat() {
                                     {conversations.map((conv: Conversation) => {
                                         const isActive = selectedConv && selectedConv.id === conv.id;
                                         const service = (
-                                            conv as Conversation & { pickAndDropService?: { start_location?: string; end_location?: string } }
+                                            conv as Conversation & {
+                                                pickAndDropService?: {
+                                                    start_location?: string;
+                                                    start_area?: string | null;
+                                                    end_location?: string;
+                                                    end_area?: string | null;
+                                                };
+                                            }
                                         ).pickAndDropService;
                                         const rideRequest = (
-                                            conv as Conversation & { rideRequest?: { start_location?: string; end_location?: string } }
+                                            conv as Conversation & {
+                                                rideRequest?: {
+                                                    start_location?: string;
+                                                    start_area?: string | null;
+                                                    end_location?: string;
+                                                    end_area?: string | null;
+                                                };
+                                            }
                                         ).rideRequest;
                                         const conversationName = conv.recipientUser?.name || 'Chat';
                                         const routeLabel = service
-                                            ? `${service.start_location || 'Start'} → ${service.end_location || 'End'}`
+                                            ? `${service.start_area || service.start_location || 'Start'} → ${service.end_area || service.end_location || 'End'}`
                                             : rideRequest
-                                              ? `${rideRequest.start_location || 'Start'} → ${rideRequest.end_location || 'End'}`
+                                              ? `${rideRequest.start_area || rideRequest.start_location || 'Start'} → ${rideRequest.end_area || rideRequest.end_location || 'End'}`
                                               : '';
 
                                         return (

@@ -22,10 +22,12 @@ interface RideRequestDetailData {
     name?: string;
     contact?: string;
     start_location: string;
+    start_area?: string | null;
     start_place_id?: string | null;
     start_latitude?: number | null;
     start_longitude?: number | null;
     end_location: string;
+    end_area?: string | null;
     end_place_id?: string | null;
     end_latitude?: number | null;
     end_longitude?: number | null;
@@ -116,11 +118,14 @@ export default function RideRequestDetail() {
         );
     }
 
+    const startLabel = request.start_area || request.start_location;
+    const endLabel = request.end_area || request.end_location;
+
     const routeMarkerCandidates = [
         {
             id: 'start',
             label: 'S',
-            title: request.start_location,
+            title: startLabel,
             position:
                 request.start_latitude != null && request.start_longitude != null
                     ? { lat: Number(request.start_latitude), lng: Number(request.start_longitude) }
@@ -131,7 +136,7 @@ export default function RideRequestDetail() {
         {
             id: 'end',
             label: 'E',
-            title: request.end_location,
+            title: endLabel,
             position:
                 request.end_latitude != null && request.end_longitude != null
                     ? { lat: Number(request.end_latitude), lng: Number(request.end_longitude) }
@@ -212,7 +217,7 @@ export default function RideRequestDetail() {
         const contactName = request.name || request.user?.name || 'there';
         const senderName = user?.name || 'a AsaanCar user';
         const departureLabel = formatWhatsAppDeparture(request.departure_time, request.schedule_type);
-        const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride request on AsaanCar from ${request.start_location} to ${request.end_location} ${departureLabel}. Is it still available?`;
+        const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride request on AsaanCar from ${startLabel} to ${endLabel} ${departureLabel}. Is it still available?`;
 
         window.open(`https://wa.me/${cleanPhoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     };
@@ -276,8 +281,8 @@ export default function RideRequestDetail() {
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.12),_transparent_30%),linear-gradient(180deg,_#f8f2fa_0%,_#f3f0f9_52%,_#eef1f8_100%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(216,138,200,0.12),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(126,36,108,0.16),_transparent_24%),linear-gradient(180deg,_#130f18_0%,_#18141e_50%,_#11131b_100%)]">
             <SEO
-                title={`${request.start_location} to ${request.end_location} Ride Request | Asaancar`}
-                description={`Passenger needs ${request.required_seats} seat${request.required_seats !== 1 ? 's' : ''} from ${request.start_location} to ${request.end_location}.`}
+                title={`${startLabel} to ${endLabel} Ride Request | Asaancar`}
+                description={`Passenger needs ${request.required_seats} seat${request.required_seats !== 1 ? 's' : ''} from ${startLabel} to ${endLabel}.`}
                 image={`${typeof window !== 'undefined' ? window.location.origin : ''}/icon.png`}
                 url={typeof window !== 'undefined' ? window.location.href : ''}
                 type="article"
@@ -292,11 +297,11 @@ export default function RideRequestDetail() {
                             <div className="inline-flex items-center gap-2 rounded-full bg-[#7e246c]/10 px-4 py-2 text-sm font-semibold text-[#7e246c] dark:bg-white/8 dark:text-white/80">
                                 Ride Request
                             </div>
-                            <h1 className="mt-4 text-4xl font-bold text-[#2b1128] dark:text-white">{request.start_location}</h1>
+                            <h1 className="mt-4 text-4xl font-bold text-[#2b1128] dark:text-white">{startLabel}</h1>
                             <div className="my-2 flex justify-center md:justify-start">
                                 <ArrowRight className="h-5 w-5 text-[#9e889a] dark:text-white/40" />
                             </div>
-                            <p className="text-2xl font-semibold text-[#5f4860] dark:text-white/78">{request.end_location}</p>
+                            <p className="text-2xl font-semibold text-[#5f4860] dark:text-white/78">{endLabel}</p>
                         </div>
                         <div className="flex flex-col items-center gap-4 md:items-end">
                             <a
@@ -322,12 +327,12 @@ export default function RideRequestDetail() {
                                 <div className="space-y-3">
                                     <div>
                                         <div className="text-sm text-[#8a7286] dark:text-white/45">From</div>
-                                        <div className="text-2xl font-bold text-[#2b1128] dark:text-white">{request.start_location}</div>
+                                        <div className="text-2xl font-bold text-[#2b1128] dark:text-white">{startLabel}</div>
                                     </div>
                                     <ArrowRight className="h-5 w-5 text-[#9e889a] dark:text-white/40" />
                                     <div>
                                         <div className="text-sm text-[#8a7286] dark:text-white/45">To</div>
-                                        <div className="text-2xl font-bold text-[#2b1128] dark:text-white">{request.end_location}</div>
+                                        <div className="text-2xl font-bold text-[#2b1128] dark:text-white">{endLabel}</div>
                                     </div>
                                 </div>
                             </div>

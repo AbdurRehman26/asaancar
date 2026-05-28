@@ -50,7 +50,7 @@ class ChatController extends Controller
         $type = $request->get('type');
 
         $conversations = $this->visibleConversationsQuery($user->id, $type)
-            ->with(['user', 'lastMessage', 'recipientUser', 'pickAndDropService', 'rideRequest'])
+            ->with(['user', 'lastMessage', 'recipientUser', 'pickAndDropService.pickupArea', 'pickAndDropService.dropoffArea', 'rideRequest'])
             ->latest('updated_at')
             ->get();
 
@@ -317,7 +317,7 @@ class ChatController extends Controller
                 ->update(['deleted_at' => now()]);
         }
 
-        $conversation->loadMissing(['user', 'recipientUser', 'pickAndDropService', 'rideRequest', 'lastMessage']);
+        $conversation->loadMissing(['user', 'recipientUser', 'pickAndDropService.pickupArea', 'pickAndDropService.dropoffArea', 'rideRequest', 'lastMessage']);
 
         return response()->json(new ConversationResource($conversation));
     }

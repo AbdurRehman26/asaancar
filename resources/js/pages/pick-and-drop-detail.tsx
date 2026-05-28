@@ -41,10 +41,12 @@ interface PickAndDropService {
         name: string;
     };
     start_location: string;
+    start_area?: string | null;
     start_place_id?: string | null;
     start_latitude?: number | null;
     start_longitude?: number | null;
     end_location: string;
+    end_area?: string | null;
     end_place_id?: string | null;
     end_latitude?: number | null;
     end_longitude?: number | null;
@@ -222,7 +224,7 @@ export default function PickAndDropDetail() {
             const contactName = service?.name || service?.user?.name || 'there';
             const senderName = user?.name || 'a AsaanCar user';
             const departureLabel = formatWhatsAppDeparture(service.departure_time, service.schedule_type);
-            const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride on AsaanCar from ${service.start_location} to ${service.end_location} ${departureLabel}. Is it still available?`;
+            const message = `Hi ${contactName}, I'm ${senderName} and I saw your ride on AsaanCar from ${service.start_area || service.start_location} to ${service.end_area || service.end_location} ${departureLabel}. Is it still available?`;
 
             window.open(`https://wa.me/${cleanPhoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
         } else {
@@ -266,14 +268,16 @@ export default function PickAndDropDetail() {
     // Get the base URL for Open Graph image
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const ogImage = `${baseUrl}/icon.png`;
+    const startLabel = service.start_area || service.start_location;
+    const endLabel = service.end_area || service.end_location;
 
     // Generate SEO content based on service data
     const seoTitle = service
-        ? `${service.start_location} → ${service.end_location} - Pick & Drop Service | Asaancar`
+        ? `${startLabel} → ${endLabel} - Pick & Drop Service | Asaancar`
         : 'Pick & Drop Service Details | Asaancar';
 
     const seoDescription = service
-        ? `Book a ${service.driver_gender === 'female' ? 'female' : 'male'} driver pick & drop service from ${service.start_location} to ${service.end_location}. ${service.is_everyday ? 'Available everyday' : 'Scheduled service'} at ${service.formatted_departure_time || service.departure_time}. ${service.available_spaces} space${service.available_spaces !== 1 ? 's' : ''} available.${service.price_per_person ? ` Price: ${service.currency} ${Math.round(service.price_per_person).toLocaleString()} per person.` : ''}${service.stops && service.stops.length > 0 ? ` Includes ${service.stops.length} stop${service.stops.length !== 1 ? 's' : ''}.` : ''} Book your ride on Asaancar.`
+        ? `Book a ${service.driver_gender === 'female' ? 'female' : 'male'} driver pick & drop service from ${startLabel} to ${endLabel}. ${service.is_everyday ? 'Available everyday' : 'Scheduled service'} at ${service.formatted_departure_time || service.departure_time}. ${service.available_spaces} space${service.available_spaces !== 1 ? 's' : ''} available.${service.price_per_person ? ` Price: ${service.currency} ${Math.round(service.price_per_person).toLocaleString()} per person.` : ''}${service.stops && service.stops.length > 0 ? ` Includes ${service.stops.length} stop${service.stops.length !== 1 ? 's' : ''}.` : ''} Book your ride on Asaancar.`
         : 'View pick & drop service details on Asaancar. Find convenient rides with multiple stops.';
 
     const routeMarkers = [
@@ -281,7 +285,7 @@ export default function PickAndDropDetail() {
             ? {
                   id: 'start',
                   label: 'S',
-                  title: service.start_location,
+                  title: startLabel,
                   position: {
                       lat: Number(service.start_latitude),
                       lng: Number(service.start_longitude),
@@ -307,7 +311,7 @@ export default function PickAndDropDetail() {
             ? {
                   id: 'end',
                   label: 'E',
-                  title: service.end_location,
+                  title: endLabel,
                   position: {
                       lat: Number(service.end_latitude),
                       lng: Number(service.end_longitude),
@@ -320,7 +324,7 @@ export default function PickAndDropDetail() {
         {
             id: 'start',
             label: 'S',
-            title: service.start_location,
+            title: startLabel,
             position:
                 service.start_latitude != null && service.start_longitude != null
                     ? {
@@ -348,7 +352,7 @@ export default function PickAndDropDetail() {
         {
             id: 'end',
             label: 'E',
-            title: service.end_location,
+            title: endLabel,
             position:
                 service.end_latitude != null && service.end_longitude != null
                     ? {
@@ -382,11 +386,11 @@ export default function PickAndDropDetail() {
                             <div className="inline-flex items-center gap-2 rounded-full bg-[#7e246c]/10 px-4 py-2 text-sm font-semibold text-[#7e246c] dark:bg-white/8 dark:text-white/80">
                                 Route Details
                             </div>
-                            <h1 className="mt-4 text-4xl font-bold text-[#2b1128] dark:text-white">{service.start_location}</h1>
+                            <h1 className="mt-4 text-4xl font-bold text-[#2b1128] dark:text-white">{startLabel}</h1>
                             <div className="my-2 flex justify-center md:justify-start">
                                 <ArrowRight className="h-5 w-5 text-[#9e889a] dark:text-white/40" />
                             </div>
-                            <p className="text-2xl font-semibold text-[#5f4860] dark:text-white/78">{service.end_location}</p>
+                            <p className="text-2xl font-semibold text-[#5f4860] dark:text-white/78">{endLabel}</p>
                         </div>
                         <div className="flex flex-col items-center gap-4 md:items-end">
                             <a
@@ -424,7 +428,7 @@ export default function PickAndDropDetail() {
                                             </div>
                                             <div className="pb-6">
                                                 <h3 className="text-xl leading-tight font-bold text-gray-900 dark:text-white">
-                                                    {service.start_location}
+                                                    {startLabel}
                                                 </h3>
                                                 <p className="mt-1 text-sm text-[#8a7286] dark:text-white/45">Start Point</p>
                                             </div>
@@ -483,7 +487,7 @@ export default function PickAndDropDetail() {
                                             </div>
                                             <div>
                                                 <h3 className="text-xl leading-tight font-bold text-[#2b1128] dark:text-white">
-                                                    {service.end_location}
+                                                    {endLabel}
                                                 </h3>
                                                 <p className="mt-1 text-sm text-[#8a7286] dark:text-white/45">Destination</p>
                                             </div>
