@@ -51,13 +51,16 @@ class RideRequest extends Model
         'user_id',
         'name',
         'contact',
+        'city_id',
         'start_location',
         'start_area',
+        'start_area_google_id',
         'start_place_id',
         'start_latitude',
         'start_longitude',
         'end_location',
         'end_area',
+        'end_area_google_id',
         'end_place_id',
         'end_latitude',
         'end_longitude',
@@ -83,6 +86,7 @@ class RideRequest extends Model
         'budget_per_seat' => 'integer',
         'is_active' => 'boolean',
         'is_system_generated' => 'boolean',
+        'city_id' => 'integer',
         'start_latitude' => 'decimal:8',
         'start_longitude' => 'decimal:8',
         'end_latitude' => 'decimal:8',
@@ -92,5 +96,10 @@ class RideRequest extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
     }
 }

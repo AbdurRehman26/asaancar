@@ -40,4 +40,9 @@ class City extends Model
     {
         return $this->hasMany(PickAndDrop::class, 'dropoff_city_id');
     }
+
+    public function rideRequests(): HasMany
+    {
+        return $this->hasMany(RideRequest::class);
+    }
 } 

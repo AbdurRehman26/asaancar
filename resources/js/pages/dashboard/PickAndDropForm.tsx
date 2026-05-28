@@ -1,5 +1,7 @@
-import GooglePlacesInput from '@/components/GooglePlacesInput';
+import AreaLocationSelector from '@/components/AreaLocationSelector';
 import { DashboardHero, DashboardPage, DashboardPanel } from '@/components/dashboard-shell';
+import KarachiOnlyNotice from '@/components/KarachiOnlyNotice';
+import { buildAreaLocationLabel, inferAreaSelection, useLocationOptions } from '@/hooks/use-location-options';
 import { apiFetch } from '@/lib/utils';
 import { UserVehicle } from '@/types';
 import { Calendar, MapPin, Plus, Save, Users, X } from 'lucide-react';
@@ -21,18 +23,17 @@ export default function PickAndDropForm() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const isEditing = !!id;
+    const { cities, areas } = useLocationOptions();
 
     const [formData, setFormData] = useState({
         name: '',
         contact: '',
         start_location: '',
-        start_place_id: null as string | null,
-        start_latitude: null as number | null,
-        start_longitude: null as number | null,
+        pickup_city_id: '',
+        pickup_area_id: '',
         end_location: '',
-        end_place_id: null as string | null,
-        end_latitude: null as number | null,
-        end_longitude: null as number | null,
+        dropoff_city_id: '',
+        dropoff_area_id: '',
         departure_date: '',
         departure_time: '',
         schedule_type: 'once', // once, everyday, weekdays, weekends, custom
@@ -189,13 +190,11 @@ export default function PickAndDropForm() {
                 name: service.name || '',
                 contact: service.contact || '',
                 start_location: service.start_location || '',
-                start_place_id: service.start_place_id || null,
-                start_latitude: service.start_latitude ? Number(service.start_latitude) : null,
-                start_longitude: service.start_longitude ? Number(service.start_longitude) : null,
+                pickup_city_id: service.pickup_city_id ? service.pickup_city_id.toString() : '',
+                pickup_area_id: service.pickup_area_id ? service.pickup_area_id.toString() : '',
                 end_location: service.end_location || '',
-                end_place_id: service.end_place_id || null,
-                end_latitude: service.end_latitude ? Number(service.end_latitude) : null,
-                end_longitude: service.end_longitude ? Number(service.end_longitude) : null,
+                dropoff_city_id: service.dropoff_city_id ? service.dropoff_city_id.toString() : '',
+                dropoff_area_id: service.dropoff_area_id ? service.dropoff_area_id.toString() : '',
                 departure_date: departureParsed.date,
                 departure_time: departureParsed.time,
                 schedule_type: service.schedule_type || (service.is_everyday ? 'everyday' : 'once'),
@@ -255,12 +254,16 @@ export default function PickAndDropForm() {
         setError(null);
 
         try {
-            const { departure_date, ...restFormData } = formData;
+            const { departure_date, pickup_city_id, pickup_area_id, dropoff_city_id, dropoff_area_id, ...restFormData } = formData;
 
             const payload = {
                 ...restFormData,
                 start_location: formData.start_location,
                 end_location: formData.end_location,
+                pickup_city_id: pickup_city_id ? Number(pickup_city_id) : null,
+                pickup_area_id: pickup_area_id ? Number(pickup_area_id) : null,
+                dropoff_city_id: dropoff_city_id ? Number(dropoff_city_id) : null,
+                dropoff_area_id: dropoff_area_id ? Number(dropoff_area_id) : null,
                 ...(formData.schedule_type === 'once' ? { departure_date } : {}),
                 departure_time: formData.departure_time,
                 schedule_type: formData.schedule_type,
@@ -311,6 +314,38 @@ export default function PickAndDropForm() {
         }
     };
 
+    useEffect(() => {
+        if (isEditing || !cities.length || !areas.length) {
+            return;
+        }
+
+        setFormData((current) => {
+            const nextState = { ...current };
+
+            if (current.start_location && (!current.pickup_city_id || !current.pickup_area_id)) {
+                const inferredStart = inferAreaSelection(current.start_location, cities, areas);
+
+                if (inferredStart.cityId && inferredStart.areaId) {
+                    nextState.pickup_city_id = inferredStart.cityId;
+                    nextState.pickup_area_id = inferredStart.areaId;
+                    nextState.start_location = buildAreaLocationLabel(inferredStart.areaId, inferredStart.cityId, cities, areas);
+                }
+            }
+
+            if (current.end_location && (!current.dropoff_city_id || !current.dropoff_area_id)) {
+                const inferredEnd = inferAreaSelection(current.end_location, cities, areas);
+
+                if (inferredEnd.cityId && inferredEnd.areaId) {
+                    nextState.dropoff_city_id = inferredEnd.cityId;
+                    nextState.dropoff_area_id = inferredEnd.areaId;
+                    nextState.end_location = buildAreaLocationLabel(inferredEnd.areaId, inferredEnd.cityId, cities, areas);
+                }
+            }
+
+            return nextState;
+        });
+    }, [areas, cities, isEditing]);
+
     const addStop = () => {
         setStops([
             ...stops,
@@ -351,6 +386,8 @@ export default function PickAndDropForm() {
                 </div>
             )}
 
+            <KarachiOnlyNotice />
+
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Route Information */}
                 <DashboardPanel title="Route information" description="Set the start, destination, schedule, and optional stop details for the ride.">
@@ -359,60 +396,39 @@ export default function PickAndDropForm() {
                         Route Information
                     </h2>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Start Location *</label>
-                            <GooglePlacesInput
-                                value={formData.start_location}
-                                required
-                                placeholder="Search start location"
-                                onChange={(value) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        start_location: value,
-                                        start_place_id: null,
-                                        start_latitude: null,
-                                        start_longitude: null,
-                                    }))
-                                }
-                                onPlaceSelected={(place) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        start_location: place.address,
-                                        start_place_id: place.placeId,
-                                        start_latitude: place.latitude,
-                                        start_longitude: place.longitude,
-                                    }))
-                                }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">End Location *</label>
-                            <GooglePlacesInput
-                                value={formData.end_location}
-                                required
-                                placeholder="Search end location"
-                                onChange={(value) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        end_location: value,
-                                        end_place_id: null,
-                                        end_latitude: null,
-                                        end_longitude: null,
-                                    }))
-                                }
-                                onPlaceSelected={(place) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        end_location: place.address,
-                                        end_place_id: place.placeId,
-                                        end_latitude: place.latitude,
-                                        end_longitude: place.longitude,
-                                    }))
-                                }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
+                        <AreaLocationSelector
+                            label="Start Location"
+                            cities={cities}
+                            areas={areas}
+                            cityId={formData.pickup_city_id}
+                            areaId={formData.pickup_area_id}
+                            required
+                            onChange={({ cityId, areaId, location }) =>
+                                setFormData((current) => ({
+                                    ...current,
+                                    pickup_city_id: cityId,
+                                    pickup_area_id: areaId,
+                                    start_location: location,
+                                }))
+                            }
+                            fieldClassName="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                        <AreaLocationSelector
+                            label="End Location"
+                            cities={cities}
+                            areas={areas}
+                            cityId={formData.dropoff_city_id}
+                            areaId={formData.dropoff_area_id}
+                            onChange={({ cityId, areaId, location }) =>
+                                setFormData((current) => ({
+                                    ...current,
+                                    dropoff_city_id: cityId,
+                                    dropoff_area_id: areaId,
+                                    end_location: location,
+                                }))
+                            }
+                            fieldClassName="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
                         <div className="space-y-4 md:col-span-2">
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Schedule Type</label>
@@ -808,29 +824,19 @@ export default function PickAndDropForm() {
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Stop Location *</label>
-                                    <GooglePlacesInput
+                                    <input
+                                        type="text"
                                         value={stop.location || ''}
                                         required
-                                        placeholder="Search stop location"
-                                        onChange={(location) => {
+                                        placeholder="Enter stop location"
+                                        onChange={(event) => {
                                             const newStops = [...stops];
                                             newStops[index] = {
                                                 ...newStops[index],
-                                                location,
+                                                location: event.target.value,
                                                 place_id: null,
                                                 latitude: null,
                                                 longitude: null,
-                                            };
-                                            setStops(newStops);
-                                        }}
-                                        onPlaceSelected={(place) => {
-                                            const newStops = [...stops];
-                                            newStops[index] = {
-                                                ...newStops[index],
-                                                location: place.address,
-                                                place_id: place.placeId,
-                                                latitude: place.latitude,
-                                                longitude: place.longitude,
                                             };
                                             setStops(newStops);
                                         }}

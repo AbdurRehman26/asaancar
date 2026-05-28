@@ -22,6 +22,7 @@ class RideRequestFactory extends Factory
             'user_id' => User::factory(),
             'name' => fake()->name(),
             'contact' => fake()->phoneNumber(),
+            'city_id' => null,
             'start_location' => fake()->address(),
             'end_location' => fake()->address(),
             'departure_time' => fake()->dateTimeBetween('+1 day', '+2 weeks'),

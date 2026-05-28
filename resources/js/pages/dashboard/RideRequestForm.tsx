@@ -1,6 +1,8 @@
+import AreaLocationSelector from '@/components/AreaLocationSelector';
 import { useAuth } from '@/components/AuthContext';
 import { DashboardHero, DashboardPage, DashboardPanel } from '@/components/dashboard-shell';
-import GooglePlacesInput from '@/components/GooglePlacesInput';
+import KarachiOnlyNotice from '@/components/KarachiOnlyNotice';
+import { buildAreaLocationLabel, inferAreaSelection, useLocationOptions } from '@/hooks/use-location-options';
 import { apiFetch } from '@/lib/utils';
 import { Calendar, MapPin, Save, Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -10,6 +12,7 @@ export default function RideRequestForm() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { cities, areas } = useLocationOptions();
     const isEditing = Boolean(id);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -17,13 +20,11 @@ export default function RideRequestForm() {
         name: '',
         contact: '',
         start_location: '',
-        start_place_id: null as string | null,
-        start_latitude: null as number | null,
-        start_longitude: null as number | null,
+        start_city_id: '',
+        start_area_id: '',
         end_location: '',
-        end_place_id: null as string | null,
-        end_latitude: null as number | null,
-        end_longitude: null as number | null,
+        end_city_id: '',
+        end_area_id: '',
         departure_date: '',
         departure_time: '',
         schedule_type: 'once',
@@ -80,13 +81,11 @@ export default function RideRequestForm() {
                 name: request.name || '',
                 contact: request.contact || '',
                 start_location: request.start_location || '',
-                start_place_id: request.start_place_id || null,
-                start_latitude: request.start_latitude ? Number(request.start_latitude) : null,
-                start_longitude: request.start_longitude ? Number(request.start_longitude) : null,
+                start_city_id: '',
+                start_area_id: '',
                 end_location: request.end_location || '',
-                end_place_id: request.end_place_id || null,
-                end_latitude: request.end_latitude ? Number(request.end_latitude) : null,
-                end_longitude: request.end_longitude ? Number(request.end_longitude) : null,
+                end_city_id: '',
+                end_area_id: '',
                 departure_date: departure.date,
                 departure_time: departure.time,
                 schedule_type: request.schedule_type || 'once',
@@ -112,6 +111,38 @@ export default function RideRequestForm() {
     }, [fetchRequest, id, isEditing]);
 
     useEffect(() => {
+        if (!cities.length || !areas.length) {
+            return;
+        }
+
+        setFormData((current) => {
+            const nextState = { ...current };
+
+            if (current.start_location && (!current.start_city_id || !current.start_area_id)) {
+                const inferredStart = inferAreaSelection(current.start_location, cities, areas);
+
+                if (inferredStart.cityId && inferredStart.areaId) {
+                    nextState.start_city_id = inferredStart.cityId;
+                    nextState.start_area_id = inferredStart.areaId;
+                    nextState.start_location = buildAreaLocationLabel(inferredStart.areaId, inferredStart.cityId, cities, areas);
+                }
+            }
+
+            if (current.end_location && (!current.end_city_id || !current.end_area_id)) {
+                const inferredEnd = inferAreaSelection(current.end_location, cities, areas);
+
+                if (inferredEnd.cityId && inferredEnd.areaId) {
+                    nextState.end_city_id = inferredEnd.cityId;
+                    nextState.end_area_id = inferredEnd.areaId;
+                    nextState.end_location = buildAreaLocationLabel(inferredEnd.areaId, inferredEnd.cityId, cities, areas);
+                }
+            }
+
+            return nextState;
+        });
+    }, [areas, cities]);
+
+    useEffect(() => {
         if (!isEditing && user?.phone_number && !formData.contact) {
             setFormData((current) => ({
                 ...current,
@@ -135,7 +166,12 @@ export default function RideRequestForm() {
         setError(null);
 
         try {
-            const { departure_date, ...restFormData } = formData;
+            const payloadSource = { ...formData };
+            delete payloadSource.start_city_id;
+            delete payloadSource.start_area_id;
+            delete payloadSource.end_city_id;
+            delete payloadSource.end_area_id;
+            const { departure_date, ...restFormData } = payloadSource;
 
             const payload = {
                 ...restFormData,
@@ -180,6 +216,8 @@ export default function RideRequestForm() {
                 </div>
             ) : null}
 
+            <KarachiOnlyNotice />
+
             <form onSubmit={handleSubmit} className="space-y-6">
                 <DashboardPanel
                     title="Route information"
@@ -190,60 +228,40 @@ export default function RideRequestForm() {
                         Route Information
                     </h2>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Start Location *</label>
-                            <GooglePlacesInput
-                                value={formData.start_location}
-                                required
-                                placeholder="Search start location"
-                                onChange={(value) =>
-                                    setFormData((current) => ({
-                                        ...current,
-                                        start_location: value,
-                                        start_place_id: null,
-                                        start_latitude: null,
-                                        start_longitude: null,
-                                    }))
-                                }
-                                onPlaceSelected={(place) =>
-                                    setFormData((current) => ({
-                                        ...current,
-                                        start_location: place.address,
-                                        start_place_id: place.placeId,
-                                        start_latitude: place.latitude,
-                                        start_longitude: place.longitude,
-                                    }))
-                                }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">End Location *</label>
-                            <GooglePlacesInput
-                                value={formData.end_location}
-                                required
-                                placeholder="Search end location"
-                                onChange={(value) =>
-                                    setFormData((current) => ({
-                                        ...current,
-                                        end_location: value,
-                                        end_place_id: null,
-                                        end_latitude: null,
-                                        end_longitude: null,
-                                    }))
-                                }
-                                onPlaceSelected={(place) =>
-                                    setFormData((current) => ({
-                                        ...current,
-                                        end_location: place.address,
-                                        end_place_id: place.placeId,
-                                        end_latitude: place.latitude,
-                                        end_longitude: place.longitude,
-                                    }))
-                                }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            />
-                        </div>
+                        <AreaLocationSelector
+                            label="Start Location"
+                            cities={cities}
+                            areas={areas}
+                            cityId={formData.start_city_id}
+                            areaId={formData.start_area_id}
+                            required
+                            onChange={({ cityId, areaId, location }) =>
+                                setFormData((current) => ({
+                                    ...current,
+                                    start_city_id: cityId,
+                                    start_area_id: areaId,
+                                    start_location: location,
+                                }))
+                            }
+                            fieldClassName="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                        <AreaLocationSelector
+                            label="End Location"
+                            cities={cities}
+                            areas={areas}
+                            cityId={formData.end_city_id}
+                            areaId={formData.end_area_id}
+                            required
+                            onChange={({ cityId, areaId, location }) =>
+                                setFormData((current) => ({
+                                    ...current,
+                                    end_city_id: cityId,
+                                    end_area_id: areaId,
+                                    end_location: location,
+                                }))
+                            }
+                            fieldClassName="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#7e246c] dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
                     </div>
                 </DashboardPanel>
 

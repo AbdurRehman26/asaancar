@@ -1,63 +1,37 @@
+import AreaLocationSelector from '@/components/AreaLocationSelector';
 import { useAuth } from '@/components/AuthContext';
 import Footer from '@/components/Footer';
-import GooglePlacesInput from '@/components/GooglePlacesInput';
+import KarachiOnlyNotice from '@/components/KarachiOnlyNotice';
 import Navbar from '@/components/navbar';
 import RideRequestCard, { RideRequest } from '@/components/RideRequestCard';
 import SEO from '@/components/SEO';
+import { KARACHI_CITY_ID, useLocationOptions } from '@/hooks/use-location-options';
 import { apiFetch } from '@/lib/utils';
 import { ChevronDown, Filter, Plus, Users, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-interface CityOption {
-    id: number;
-    name: string;
-}
-
 export default function RideRequestListing() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
+    const { cities, areas } = useLocationOptions();
     const [requests, setRequests] = useState<RideRequest[]>([]);
-    const [cities, setCities] = useState<CityOption[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isFilterOpen, setIsFilterOpen] = useState(true);
     const [filters, setFilters] = useState({
         start_location: searchParams.get('start_location') || '',
-        start_latitude: searchParams.get('start_latitude') || '',
-        start_longitude: searchParams.get('start_longitude') || '',
+        start_city_id: searchParams.get('start_city_id') || '',
+        start_area_id: searchParams.get('start_area_id') || '',
         end_location: searchParams.get('end_location') || '',
-        end_latitude: searchParams.get('end_latitude') || '',
-        end_longitude: searchParams.get('end_longitude') || '',
-        city_id: searchParams.get('city_id') || '',
+        end_city_id: searchParams.get('end_city_id') || '',
+        end_area_id: searchParams.get('end_area_id') || '',
+        city_id: searchParams.get('city_id') || KARACHI_CITY_ID.toString(),
         preferred_driver_gender: searchParams.get('preferred_driver_gender') || '',
         departure_date: searchParams.get('departure_date') || '',
         departure_time: searchParams.get('departure_time') || '',
     });
-    const [locationInputs, setLocationInputs] = useState({
-        start_location: searchParams.get('start_location') || '',
-        end_location: searchParams.get('end_location') || '',
-    });
-
-    useEffect(() => {
-        const fetchCities = async () => {
-            try {
-                const response = await apiFetch('/api/cities');
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch cities');
-                }
-
-                const data = await response.json();
-                setCities(Array.isArray(data.data) ? data.data : []);
-            } catch {
-                setCities([]);
-            }
-        };
-
-        void fetchCities();
-    }, []);
 
     useEffect(() => {
         const params = new URLSearchParams();
@@ -108,19 +82,15 @@ export default function RideRequestListing() {
     const clearFilters = () => {
         setFilters({
             start_location: '',
-            start_latitude: '',
-            start_longitude: '',
+            start_city_id: '',
+            start_area_id: '',
             end_location: '',
-            end_latitude: '',
-            end_longitude: '',
-            city_id: '',
+            end_city_id: '',
+            end_area_id: '',
+            city_id: KARACHI_CITY_ID.toString(),
             preferred_driver_gender: '',
             departure_date: '',
             departure_time: '',
-        });
-        setLocationInputs({
-            start_location: '',
-            end_location: '',
         });
     };
 
@@ -164,7 +134,8 @@ export default function RideRequestListing() {
                         </div>
                     </div>
 
-                    <div className="mb-8 rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
+                    <div className="relative z-20 mb-8 overflow-visible rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.35)] backdrop-blur dark:border-white/10 dark:bg-[#17141f]/92 dark:shadow-none">
+                        <KarachiOnlyNotice className="mb-4" />
                         <div className="mb-4 flex items-center justify-between">
                             <button
                                 type="button"
@@ -176,7 +147,13 @@ export default function RideRequestListing() {
                                 <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`} />
                             </button>
 
-                            {Object.values(filters).some(Boolean) ? (
+                            {filters.start_location ||
+                            filters.end_location ||
+                            filters.start_city_id ||
+                            filters.end_city_id ||
+                            filters.preferred_driver_gender ||
+                            filters.departure_date ||
+                            filters.departure_time ? (
                                 <button
                                     type="button"
                                     onClick={clearFilters}
@@ -190,93 +167,40 @@ export default function RideRequestListing() {
 
                         {isFilterOpen ? (
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
-                                <div>
-                                    <label className="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75">Start Location</label>
-                                    <GooglePlacesInput
-                                        value={locationInputs.start_location}
-                                        placeholder="From..."
-                                        onChange={(value) => {
-                                            setLocationInputs((current) => ({
-                                                ...current,
-                                                start_location: value,
-                                            }));
-
-                                            if (value === '') {
-                                                setFilters((current) => ({
-                                                    ...current,
-                                                    start_location: '',
-                                                    start_latitude: '',
-                                                    start_longitude: '',
-                                                }));
-                                            }
-                                        }}
-                                        onPlaceSelected={(place) => {
-                                            setLocationInputs((current) => ({
-                                                ...current,
-                                                start_location: place.address,
-                                            }));
-
-                                            setFilters((current) => ({
-                                                ...current,
-                                                start_location: place.address,
-                                                start_latitude: place.latitude?.toString() ?? '',
-                                                start_longitude: place.longitude?.toString() ?? '',
-                                            }));
-                                        }}
-                                        className="h-10 w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75">End Location</label>
-                                    <GooglePlacesInput
-                                        value={locationInputs.end_location}
-                                        placeholder="To..."
-                                        onChange={(value) => {
-                                            setLocationInputs((current) => ({
-                                                ...current,
-                                                end_location: value,
-                                            }));
-
-                                            if (value === '') {
-                                                setFilters((current) => ({
-                                                    ...current,
-                                                    end_location: '',
-                                                    end_latitude: '',
-                                                    end_longitude: '',
-                                                }));
-                                            }
-                                        }}
-                                        onPlaceSelected={(place) => {
-                                            setLocationInputs((current) => ({
-                                                ...current,
-                                                end_location: place.address,
-                                            }));
-
-                                            setFilters((current) => ({
-                                                ...current,
-                                                end_location: place.address,
-                                                end_latitude: place.latitude?.toString() ?? '',
-                                                end_longitude: place.longitude?.toString() ?? '',
-                                            }));
-                                        }}
-                                        className="h-10 w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75">City</label>
-                                    <select
-                                        value={filters.city_id}
-                                        onChange={(event) => setFilters((current) => ({ ...current, city_id: event.target.value }))}
-                                        className="h-10 w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
-                                    >
-                                        <option value="">All cities</option>
-                                        {cities.map((city) => (
-                                            <option key={city.id} value={city.id}>
-                                                {city.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                <AreaLocationSelector
+                                    label="Start Location"
+                                    cities={cities}
+                                    areas={areas}
+                                    cityId={filters.start_city_id}
+                                    areaId={filters.start_area_id}
+                                    onChange={({ cityId, areaId, location }) =>
+                                        setFilters((current) => ({
+                                            ...current,
+                                            start_city_id: cityId,
+                                            start_area_id: areaId,
+                                            start_location: location,
+                                        }))
+                                    }
+                                    fieldClassName="h-10 w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
+                                    labelClassName="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75"
+                                />
+                                <AreaLocationSelector
+                                    label="End Location"
+                                    cities={cities}
+                                    areas={areas}
+                                    cityId={filters.end_city_id}
+                                    areaId={filters.end_area_id}
+                                    onChange={({ cityId, areaId, location }) =>
+                                        setFilters((current) => ({
+                                            ...current,
+                                            end_city_id: cityId,
+                                            end_area_id: areaId,
+                                            end_location: location,
+                                        }))
+                                    }
+                                    fieldClassName="h-10 w-full rounded-xl border border-[#7e246c]/12 bg-[#fcf7fb] px-4 py-2 text-[#2b1128] focus:border-[#7e246c]/30 focus:bg-white focus:ring-2 focus:ring-[#7e246c]/10 focus:outline-none dark:border-white/10 dark:bg-white/6 dark:text-white dark:focus:bg-white/8"
+                                    labelClassName="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75"
+                                />
                                 <div>
                                     <label className="mb-1.5 block text-sm font-semibold text-[#6b5368] dark:text-white/75">Driver Preference</label>
                                     <select

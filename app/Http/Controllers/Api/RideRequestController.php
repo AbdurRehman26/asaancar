@@ -67,7 +67,7 @@ class RideRequestController extends Controller
         }
 
         $query = RideRequest::query()
-            ->with('user.city')
+            ->with(['user.city', 'city'])
             ->where('is_active', true);
 
         $this->applyFilters($query, $request);
@@ -142,7 +142,7 @@ class RideRequestController extends Controller
     {
         $rideRequest = RideRequest::create($this->buildPayload($request->validated(), Auth::id()));
 
-        return new RideRequestResource($rideRequest->fresh()->load('user.city'));
+        return new RideRequestResource($rideRequest->fresh()->load(['user.city', 'city']));
     }
 
     /**
@@ -167,7 +167,7 @@ class RideRequestController extends Controller
      */
     public function show(string $id): RideRequestResource
     {
-        $rideRequest = RideRequest::with('user.city')->findOrFail($id);
+        $rideRequest = RideRequest::with(['user.city', 'city'])->findOrFail($id);
 
         return new RideRequestResource($rideRequest);
     }
@@ -229,7 +229,7 @@ class RideRequestController extends Controller
 
         $rideRequest->update($this->buildPayload($request->validated(), $rideRequest->user_id, $rideRequest));
 
-        return new RideRequestResource($rideRequest->fresh()->load('user.city'));
+        return new RideRequestResource($rideRequest->fresh()->load(['user.city', 'city']));
     }
 
     /**
@@ -307,7 +307,7 @@ class RideRequestController extends Controller
     public function myRequests(Request $request): AnonymousResourceCollection
     {
         $query = RideRequest::query()
-            ->with('user.city')
+            ->with(['user.city', 'city'])
             ->where('user_id', Auth::id());
 
         $this->applyFilters($query, $request);
@@ -348,7 +348,15 @@ class RideRequestController extends Controller
 
         if ($request->filled('city_id')) {
             $query->whereHas('user', function ($userQuery) use ($request): void {
-                $userQuery->where('city_id', (int) $request->input('city_id'));
+                $cityId = (int) $request->input('city_id');
+
+                $userQuery->where('city_id', $cityId);
+            })->orWhere(function ($cityQuery) use ($request): void {
+                $cityId = (int) $request->input('city_id');
+
+                $cityQuery
+                    ->where('ride_requests.city_id', $cityId)
+                    ->where('is_active', true);
             });
         }
 

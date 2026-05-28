@@ -1,14 +1,17 @@
-import GooglePlacesInput from '@/components/GooglePlacesInput';
+import AreaLocationSelector from '@/components/AreaLocationSelector';
+import KarachiOnlyNotice from '@/components/KarachiOnlyNotice';
+import { KARACHI_CITY_ID, useLocationOptions } from '@/hooks/use-location-options';
 import { Calendar, Clock, Search, User } from 'lucide-react';
 import React, { useState } from 'react';
 
 export type PickAndDropFiltersType = {
+    city_id: string;
     start_location: string;
-    start_latitude: string;
-    start_longitude: string;
+    start_city_id: string;
+    start_area_id: string;
     end_location: string;
-    end_latitude: string;
-    end_longitude: string;
+    end_city_id: string;
+    end_area_id: string;
     driver_gender: string;
     departure_date: string;
     departure_time: string;
@@ -20,13 +23,15 @@ interface PickAndDropFilterProps {
     fullWidth?: boolean;
 }
 const PickAndDropFilter: React.FC<PickAndDropFilterProps> = ({ onSearch, className = '', fullWidth = false }) => {
+    const { cities, areas } = useLocationOptions();
     const [filters, setFilters] = useState<PickAndDropFiltersType>({
+        city_id: KARACHI_CITY_ID.toString(),
         start_location: '',
-        start_latitude: '',
-        start_longitude: '',
+        start_city_id: '',
+        start_area_id: '',
         end_location: '',
-        end_latitude: '',
-        end_longitude: '',
+        end_city_id: '',
+        end_area_id: '',
         driver_gender: '',
         departure_date: '',
         departure_time: '',
@@ -45,55 +50,42 @@ const PickAndDropFilter: React.FC<PickAndDropFilterProps> = ({ onSearch, classNa
         <div
             className={`${filterClass} relative mx-0 rounded-[1.5rem] border border-[#7e246c]/10 bg-[#fffafc] p-5 shadow-[0_16px_38px_-30px_rgba(126,36,108,0.2)] md:p-6 dark:border-white/10 dark:bg-white/4`}
         >
+            <KarachiOnlyNotice className="mb-4" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-                <div>
-                    <label className={labelClassName}>Start Location</label>
-                    <GooglePlacesInput
-                        value={filters.start_location}
-                        placeholder="Search start location"
-                        onChange={(value) =>
-                            setFilters({
-                                ...filters,
-                                start_location: value,
-                                start_latitude: '',
-                                start_longitude: '',
-                            })
-                        }
-                        onPlaceSelected={(place) =>
-                            setFilters({
-                                ...filters,
-                                start_location: place.address,
-                                start_latitude: place.latitude?.toString() ?? '',
-                                start_longitude: place.longitude?.toString() ?? '',
-                            })
-                        }
-                        className={fieldClassName}
-                    />
-                </div>
-                <div>
-                    <label className={labelClassName}>End Location</label>
-                    <GooglePlacesInput
-                        value={filters.end_location}
-                        placeholder="Search end location"
-                        onChange={(value) =>
-                            setFilters({
-                                ...filters,
-                                end_location: value,
-                                end_latitude: '',
-                                end_longitude: '',
-                            })
-                        }
-                        onPlaceSelected={(place) =>
-                            setFilters({
-                                ...filters,
-                                end_location: place.address,
-                                end_latitude: place.latitude?.toString() ?? '',
-                                end_longitude: place.longitude?.toString() ?? '',
-                            })
-                        }
-                        className={fieldClassName}
-                    />
-                </div>
+                <AreaLocationSelector
+                    label="Start Location"
+                    cities={cities}
+                    areas={areas}
+                    cityId={filters.start_city_id}
+                    areaId={filters.start_area_id}
+                    onChange={({ cityId, areaId, location }) =>
+                        setFilters((current) => ({
+                            ...current,
+                            start_city_id: cityId,
+                            start_area_id: areaId,
+                            start_location: location,
+                        }))
+                    }
+                    fieldClassName={fieldClassName}
+                    labelClassName={labelClassName}
+                />
+                <AreaLocationSelector
+                    label="End Location"
+                    cities={cities}
+                    areas={areas}
+                    cityId={filters.end_city_id}
+                    areaId={filters.end_area_id}
+                    onChange={({ cityId, areaId, location }) =>
+                        setFilters((current) => ({
+                            ...current,
+                            end_city_id: cityId,
+                            end_area_id: areaId,
+                            end_location: location,
+                        }))
+                    }
+                    fieldClassName={fieldClassName}
+                    labelClassName={labelClassName}
+                />
                 <div>
                     <label className={labelClassName}>Driver Gender</label>
                     <div className="relative">
