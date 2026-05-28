@@ -39,6 +39,12 @@ class RideRequestResource extends Resource
                             ->tel()
                             ->maxLength(255)
                             ->nullable(),
+                        Forms\Components\Select::make('city_id')
+                            ->label('City')
+                            ->relationship('city', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->nullable(),
                     ])
                     ->columns(3),
 
@@ -147,6 +153,10 @@ class RideRequestResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('User')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('city.name')
+                    ->label('City')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_location')

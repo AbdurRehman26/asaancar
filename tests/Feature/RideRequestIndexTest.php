@@ -70,7 +70,7 @@ it('shows latest ride requests first when coordinates are not provided', functio
         ->and($response->json('data.1.id'))->toBe($olderRequest->id);
 });
 
-it('filters ride requests by requester city id', function () {
+it('filters ride requests by ride request city id with requester city fallback', function () {
     $karachi = City::create(['name' => 'Karachi']);
     $lahore = City::create(['name' => 'Lahore']);
 
@@ -84,11 +84,25 @@ it('filters ride requests by requester city id', function () {
 
     $karachiRequest = RideRequest::factory()->create([
         'user_id' => $karachiUser->id,
+        'city_id' => $karachi->id,
         'is_active' => true,
     ]);
 
     RideRequest::factory()->create([
         'user_id' => $lahoreUser->id,
+        'city_id' => $lahore->id,
+        'is_active' => true,
+    ]);
+
+    RideRequest::factory()->create([
+        'user_id' => $karachiUser->id,
+        'city_id' => $lahore->id,
+        'is_active' => true,
+    ]);
+
+    $fallbackRequest = RideRequest::factory()->create([
+        'user_id' => $karachiUser->id,
+        'city_id' => null,
         'is_active' => true,
     ]);
 
@@ -96,7 +110,9 @@ it('filters ride requests by requester city id', function () {
 
     $response->assertSuccessful();
 
-    expect($response->json('data'))->toHaveCount(1)
-        ->and($response->json('data.0.id'))->toBe($karachiRequest->id)
+    expect(collect($response->json('data'))->pluck('id')->all())->toEqualCanonicalizing([
+        $karachiRequest->id,
+        $fallbackRequest->id,
+    ])
         ->and($response->json('data.0.city_name'))->toBe('Karachi');
 });

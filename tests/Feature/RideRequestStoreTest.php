@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\City;
 use App\Models\RideRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,10 +12,13 @@ beforeEach(function () {
 });
 
 it('creates a ride request with separate departure date and time', function () {
+    $city = City::factory()->create();
+
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/ride-requests', [
             'name' => 'Sarah',
             'contact' => '+923001112233',
+            'city_id' => $city->id,
             'start_location' => 'Lahore, Pakistan',
             'start_place_id' => 'place_start_123',
             'start_latitude' => 31.5204,
@@ -34,10 +38,12 @@ it('creates a ride request with separate departure date and time', function () {
     $response->assertSuccessful()
         ->assertJsonPath('data.required_seats', 2)
         ->assertJsonPath('data.preferred_driver_gender', 'female')
+        ->assertJsonPath('data.city_id', $city->id)
         ->assertJsonPath('data.is_system_generated', false);
 
     $this->assertDatabaseHas('ride_requests', [
         'user_id' => $this->user->id,
+        'city_id' => $city->id,
         'start_place_id' => 'place_start_123',
         'end_place_id' => 'place_end_456',
         'departure_time' => '2026-04-25 08:30:00',
@@ -195,4 +201,20 @@ it('defaults is_system_generated to false when creating a ride request', functio
         'user_id' => $this->user->id,
         'is_system_generated' => false,
     ]);
+});
+
+it('validates city id when creating a ride request', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/ride-requests', [
+            'city_id' => 999999,
+            'start_location' => 'Lahore, Pakistan',
+            'end_location' => 'Karachi, Pakistan',
+            'departure_date' => '2026-04-25',
+            'departure_time' => '08:30',
+            'required_seats' => 2,
+            'preferred_driver_gender' => 'female',
+        ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['city_id']);
 });

@@ -347,16 +347,18 @@ class RideRequestController extends Controller
         }
 
         if ($request->filled('city_id')) {
-            $query->whereHas('user', function ($userQuery) use ($request): void {
-                $cityId = (int) $request->input('city_id');
+            $cityId = (int) $request->input('city_id');
 
-                $userQuery->where('city_id', $cityId);
-            })->orWhere(function ($cityQuery) use ($request): void {
-                $cityId = (int) $request->input('city_id');
-
+            $query->where(function ($cityQuery) use ($cityId): void {
                 $cityQuery
                     ->where('ride_requests.city_id', $cityId)
-                    ->where('is_active', true);
+                    ->orWhere(function ($fallbackQuery) use ($cityId): void {
+                        $fallbackQuery
+                            ->whereNull('ride_requests.city_id')
+                            ->whereHas('user', function ($userQuery) use ($cityId): void {
+                                $userQuery->where('city_id', $cityId);
+                            });
+                    });
             });
         }
 

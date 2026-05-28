@@ -97,6 +97,7 @@ class SyncGoogleAddressComponentsCommand extends Command
                         'end_place_id' => $endResult['place_id'],
                         'end_latitude' => $endResult['latitude'],
                         'end_longitude' => $endResult['longitude'],
+                        'city_id' => $this->resolveCityId($startResult['components']['city'] ?? null, $request->city_id),
                     ]);
                 },
                 totals: $totals,
