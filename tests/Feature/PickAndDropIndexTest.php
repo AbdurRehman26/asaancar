@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Area;
 use App\Models\City;
 use App\Models\PickAndDrop;
 use App\Models\User;
@@ -44,6 +45,8 @@ it('orders services by the closest start and end coordinates when provided', fun
 
 it('shows non-system-generated services before system-generated services', function () {
     $city = City::create(['name' => 'Karachi']);
+    $startArea = Area::factory()->create(['city_id' => $city->id, 'name' => 'DHA Phase 8']);
+    $endArea = Area::factory()->create(['city_id' => $city->id, 'name' => 'Clifton']);
     $user = User::factory()->create([
         'city_id' => $city->id,
     ]);
@@ -59,6 +62,10 @@ it('shows non-system-generated services before system-generated services', funct
     $manualService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
         'start_location' => 'Manual Route',
+        'start_area' => null,
+        'pickup_area_id' => $startArea->id,
+        'end_area' => null,
+        'dropoff_area_id' => $endArea->id,
         'departure_time' => '2026-04-15 09:00:00',
         'is_active' => true,
         'is_system_generated' => false,
@@ -69,6 +76,8 @@ it('shows non-system-generated services before system-generated services', funct
     $response->assertSuccessful();
 
     expect($response->json('data.0.id'))->toBe($manualService->id)
+        ->and($response->json('data.0.start_area'))->toBe('DHA Phase 8')
+        ->and($response->json('data.0.end_area'))->toBe('Clifton')
         ->and($response->json('data.0.city_name'))->toBe('Karachi')
         ->and($response->json('data.0.user.city_name'))->toBe('Karachi')
         ->and($response->json('data.1.id'))->toBe($systemGeneratedService->id);
@@ -103,4 +112,54 @@ it('filters pick and drop services by user city id', function () {
     expect($response->json('data'))->toHaveCount(1)
         ->and($response->json('data.0.id'))->toBe($karachiService->id)
         ->and($response->json('data.0.city_name'))->toBe('Karachi');
+});
+
+it('prioritizes exact area matches when searching pick and drop services by area', function () {
+    $user = User::factory()->create();
+
+    $exactService = PickAndDrop::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'DHA',
+        'start_location' => 'DHA Phase 8, Karachi',
+        'is_active' => true,
+    ]);
+
+    PickAndDrop::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'DHA Phase 8',
+        'start_location' => 'DHA Phase 8, Karachi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/pick-and-drop?start_location=DHA');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($exactService->id);
+});
+
+it('falls back to partial area matches when searching pick and drop services has no exact match', function () {
+    $user = User::factory()->create();
+
+    $matchingService = PickAndDrop::factory()->create([
+        'user_id' => $user->id,
+        'end_area' => 'Clifton Block 2',
+        'end_location' => 'Clifton Block 2, Karachi',
+        'is_active' => true,
+    ]);
+
+    PickAndDrop::factory()->create([
+        'user_id' => $user->id,
+        'end_area' => 'Gulshan-e-Iqbal',
+        'end_location' => 'Gulshan-e-Iqbal, Karachi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/pick-and-drop?end_location=Block');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($matchingService->id);
 });

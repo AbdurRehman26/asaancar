@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Area;
 use App\Models\City;
 use App\Models\PickAndDrop;
 use App\Models\User;
@@ -9,6 +10,8 @@ uses(RefreshDatabase::class);
 
 it('lists users who have at least one active pick and drop service', function () {
     $city = City::create(['name' => 'Karachi']);
+    $startArea = Area::factory()->create(['city_id' => $city->id, 'name' => 'Lyari']);
+    $endArea = Area::factory()->create(['city_id' => $city->id, 'name' => 'Surjani Town']);
 
     $visibleDriver = User::factory()->create([
         'name' => 'Visible Driver',
@@ -24,7 +27,11 @@ it('lists users who have at least one active pick and drop service', function ()
     PickAndDrop::factory()->create([
         'user_id' => $visibleDriver->id,
         'start_location' => 'Lyari',
+        'start_area' => null,
+        'pickup_area_id' => $startArea->id,
         'end_location' => 'Surjani Town',
+        'end_area' => null,
+        'dropoff_area_id' => $endArea->id,
         'departure_time' => '2026-05-02 10:00:00',
         'is_active' => true,
     ]);
@@ -47,6 +54,8 @@ it('lists users who have at least one active pick and drop service', function ()
         ->and($response->json('data.0.city_name'))->toBe('Karachi')
         ->and($response->json('data.0.active_services_count'))->toBe(1)
         ->and($response->json('data.0.latest_service.start_location'))->toBe('Lyari')
+        ->and($response->json('data.0.latest_service.start_area'))->toBe('Lyari')
+        ->and($response->json('data.0.latest_service.end_area'))->toBe('Surjani Town')
         ->and($response->json('data.0.phone_number'))->toBeNull();
 });
 

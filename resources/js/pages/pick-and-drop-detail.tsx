@@ -272,9 +272,7 @@ export default function PickAndDropDetail() {
     const endLabel = service.end_area || service.end_location;
 
     // Generate SEO content based on service data
-    const seoTitle = service
-        ? `${startLabel} → ${endLabel} - Pick & Drop Service | Asaancar`
-        : 'Pick & Drop Service Details | Asaancar';
+    const seoTitle = service ? `${startLabel} → ${endLabel} - Pick & Drop Service | Asaancar` : 'Pick & Drop Service Details | Asaancar';
 
     const seoDescription = service
         ? `Book a ${service.driver_gender === 'female' ? 'female' : 'male'} driver pick & drop service from ${startLabel} to ${endLabel}. ${service.is_everyday ? 'Available everyday' : 'Scheduled service'} at ${service.formatted_departure_time || service.departure_time}. ${service.available_spaces} space${service.available_spaces !== 1 ? 's' : ''} available.${service.price_per_person ? ` Price: ${service.currency} ${Math.round(service.price_per_person).toLocaleString()} per person.` : ''}${service.stops && service.stops.length > 0 ? ` Includes ${service.stops.length} stop${service.stops.length !== 1 ? 's' : ''}.` : ''} Book your ride on Asaancar.`
@@ -427,9 +425,7 @@ export default function PickAndDropDetail() {
                                                 <div className="absolute top-5 left-[7px] -z-10 h-full min-h-[40px] w-0.5 bg-gradient-to-b from-green-500/50 to-gray-200 dark:to-gray-700"></div>
                                             </div>
                                             <div className="pb-6">
-                                                <h3 className="text-xl leading-tight font-bold text-gray-900 dark:text-white">
-                                                    {startLabel}
-                                                </h3>
+                                                <h3 className="text-xl leading-tight font-bold text-gray-900 dark:text-white">{startLabel}</h3>
                                                 <p className="mt-1 text-sm text-[#8a7286] dark:text-white/45">Start Point</p>
                                             </div>
                                         </div>
@@ -486,9 +482,7 @@ export default function PickAndDropDetail() {
                                                 <MapPin className="h-5 w-5 fill-[#7e246c]/10 text-[#7e246c]" />
                                             </div>
                                             <div>
-                                                <h3 className="text-xl leading-tight font-bold text-[#2b1128] dark:text-white">
-                                                    {endLabel}
-                                                </h3>
+                                                <h3 className="text-xl leading-tight font-bold text-[#2b1128] dark:text-white">{endLabel}</h3>
                                                 <p className="mt-1 text-sm text-[#8a7286] dark:text-white/45">Destination</p>
                                             </div>
                                         </div>

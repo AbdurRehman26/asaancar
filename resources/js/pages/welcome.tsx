@@ -1,6 +1,7 @@
 import { useAuth } from '@/components/AuthContext';
 import { DashboardEmptyState, DashboardHero, DashboardPanel, DashboardPrimaryLink, DashboardSecondaryButton } from '@/components/dashboard-shell';
 import PickAndDropCard, { PickAndDropService } from '@/components/PickAndDropCard';
+import { KARACHI_CITY_ID } from '@/hooks/use-location-options';
 import { CheckCircle, Headphones, MapPin, Network, ShieldCheck, ThumbsUp, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -34,12 +35,18 @@ export default function Welcome() {
     const [pickAndDropServices, setPickAndDropServices] = useState<PickAndDropService[]>([]);
     const [pickAndDropLoading, setPickAndDropLoading] = useState(true);
     const navigate = useNavigate();
+    const pickAndDropPath = `/pick-and-drop?city_id=${KARACHI_CITY_ID}`;
+    const rideRequestsPath = `/ride-requests?city_id=${KARACHI_CITY_ID}`;
 
     // Fetch pick and drop services
     useEffect(() => {
         const fetchPickAndDrop = async () => {
             try {
-                const response = await fetch('/api/pick-and-drop?per_page=6');
+                const params = new URLSearchParams({
+                    city_id: KARACHI_CITY_ID.toString(),
+                    per_page: '6',
+                });
+                const response = await fetch(`/api/pick-and-drop?${params.toString()}`);
                 if (response.ok) {
                     const result = await response.json();
                     // Handle paginated response - Laravel returns { data: [...], links: {...}, meta: {...} }
@@ -114,8 +121,8 @@ export default function Welcome() {
                             description="Find reliable rides for daily commutes and one-off travel with the same calm, organized experience we’ve brought into the dashboard."
                             actions={
                                 <>
-                                    <DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>
-                                    <DashboardSecondaryButton onClick={() => navigate('/ride-requests')}>View ride requests</DashboardSecondaryButton>
+                                    <DashboardPrimaryLink to={pickAndDropPath}>Browse all rides</DashboardPrimaryLink>
+                                    <DashboardSecondaryButton onClick={() => navigate(rideRequestsPath)}>View ride requests</DashboardSecondaryButton>
                                 </>
                             }
                         />
@@ -178,7 +185,7 @@ export default function Welcome() {
                         <DashboardPanel
                             title="Featured rides"
                             description="A quick look at the latest rides available right now."
-                            actions={<DashboardPrimaryLink to="/pick-and-drop">View all rides</DashboardPrimaryLink>}
+                            actions={<DashboardPrimaryLink to={pickAndDropPath}>View all rides</DashboardPrimaryLink>}
                         >
                             {pickAndDropLoading ? (
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -203,8 +210,8 @@ export default function Welcome() {
                                         ))}
                                     </div>
                                     <div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
-                                        <DashboardPrimaryLink to="/pick-and-drop">View all rides</DashboardPrimaryLink>
-                                        <DashboardSecondaryButton onClick={() => navigate('/ride-requests')}>
+                                        <DashboardPrimaryLink to={pickAndDropPath}>View all rides</DashboardPrimaryLink>
+                                        <DashboardSecondaryButton onClick={() => navigate(rideRequestsPath)}>
                                             View ride requests
                                         </DashboardSecondaryButton>
                                     </div>
@@ -216,8 +223,8 @@ export default function Welcome() {
                                     description="There aren’t any rides to show at the moment, but you can still browse the listings page or check ride requests."
                                     action={
                                         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                                            <DashboardPrimaryLink to="/pick-and-drop">Browse all rides</DashboardPrimaryLink>
-                                            <DashboardSecondaryButton onClick={() => navigate('/ride-requests')}>
+                                            <DashboardPrimaryLink to={pickAndDropPath}>Browse all rides</DashboardPrimaryLink>
+                                            <DashboardSecondaryButton onClick={() => navigate(rideRequestsPath)}>
                                                 Browse ride requests
                                             </DashboardSecondaryButton>
                                         </div>

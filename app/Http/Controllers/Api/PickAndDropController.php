@@ -72,38 +72,12 @@ class PickAndDropController extends Controller
         $hasStartCoordinates = $request->filled(['start_latitude', 'start_longitude']);
         $hasEndCoordinates = $request->filled(['end_latitude', 'end_longitude']);
 
-        // Filter by start location (including stops, stop areas, and stop cities)
         if ($request->has('start_location') && ! $hasStartCoordinates) {
-            $searchTerm = $request->start_location;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('start_location', 'like', '%'.$searchTerm.'%')
-                    ->orWhereHas('stops', function ($stopQuery) use ($searchTerm) {
-                        $stopQuery->where('location', 'like', '%'.$searchTerm.'%')
-                            ->orWhereHas('area', function ($areaQuery) use ($searchTerm) {
-                                $areaQuery->where('name', 'like', '%'.$searchTerm.'%');
-                            })
-                            ->orWhereHas('city', function ($cityQuery) use ($searchTerm) {
-                                $cityQuery->where('name', 'like', '%'.$searchTerm.'%');
-                            });
-                    });
-            });
+            $this->applyAreaSearch($query, 'start_area', 'pickupArea', (string) $request->start_location);
         }
 
-        // Filter by end location (including stops, stop areas, and stop cities)
         if ($request->has('end_location') && ! $hasEndCoordinates) {
-            $searchTerm = $request->end_location;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('end_location', 'like', '%'.$searchTerm.'%')
-                    ->orWhereHas('stops', function ($stopQuery) use ($searchTerm) {
-                        $stopQuery->where('location', 'like', '%'.$searchTerm.'%')
-                            ->orWhereHas('area', function ($areaQuery) use ($searchTerm) {
-                                $areaQuery->where('name', 'like', '%'.$searchTerm.'%');
-                            })
-                            ->orWhereHas('city', function ($cityQuery) use ($searchTerm) {
-                                $cityQuery->where('name', 'like', '%'.$searchTerm.'%');
-                            });
-                    });
-            });
+            $this->applyAreaSearch($query, 'end_area', 'dropoffArea', (string) $request->end_location);
         }
 
         $query->select('pick_and_drop_services.*');
@@ -241,6 +215,43 @@ class PickAndDropController extends Controller
                 'to' => $services->lastItem(),
             ],
         ]);
+    }
+
+    private function applyAreaSearch($query, string $areaColumn, string $areaRelation, string $searchTerm): void
+    {
+        $searchTerm = trim($searchTerm);
+
+        if ($searchTerm === '') {
+            return;
+        }
+
+        $hasExactMatch = (clone $query)
+            ->where(function ($areaQuery) use ($areaColumn, $areaRelation, $searchTerm): void {
+                $areaQuery
+                    ->whereRaw("LOWER({$areaColumn}) = ?", [mb_strtolower($searchTerm)])
+                    ->orWhereHas($areaRelation, function ($relatedAreaQuery) use ($searchTerm): void {
+                        $relatedAreaQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($searchTerm)]);
+                    });
+            })
+            ->exists();
+
+        $query->where(function ($areaQuery) use ($areaColumn, $areaRelation, $searchTerm, $hasExactMatch): void {
+            if ($hasExactMatch) {
+                $areaQuery
+                    ->whereRaw("LOWER({$areaColumn}) = ?", [mb_strtolower($searchTerm)])
+                    ->orWhereHas($areaRelation, function ($relatedAreaQuery) use ($searchTerm): void {
+                        $relatedAreaQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($searchTerm)]);
+                    });
+
+                return;
+            }
+
+            $areaQuery
+                ->where($areaColumn, 'like', '%'.$searchTerm.'%')
+                ->orWhereHas($areaRelation, function ($relatedAreaQuery) use ($searchTerm): void {
+                    $relatedAreaQuery->where('name', 'like', '%'.$searchTerm.'%');
+                });
+        });
     }
 
     /**

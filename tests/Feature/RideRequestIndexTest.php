@@ -116,3 +116,53 @@ it('filters ride requests by ride request city id with requester city fallback',
     ])
         ->and($response->json('data.0.city_name'))->toBe('Karachi');
 });
+
+it('prioritizes exact area matches when searching ride requests by area', function () {
+    $user = User::factory()->create();
+
+    $exactRequest = RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'DHA',
+        'start_location' => 'DHA Phase 8, Karachi',
+        'is_active' => true,
+    ]);
+
+    RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'DHA Phase 8',
+        'start_location' => 'DHA Phase 8, Karachi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/ride-requests?start_location=DHA');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($exactRequest->id);
+});
+
+it('falls back to partial area matches when searching ride requests has no exact match', function () {
+    $user = User::factory()->create();
+
+    $matchingRequest = RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'end_area' => 'Clifton Block 2',
+        'end_location' => 'Clifton Block 2, Karachi',
+        'is_active' => true,
+    ]);
+
+    RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'end_area' => 'Gulshan-e-Iqbal',
+        'end_location' => 'Gulshan-e-Iqbal, Karachi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/ride-requests?end_location=Block');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($matchingRequest->id);
+});

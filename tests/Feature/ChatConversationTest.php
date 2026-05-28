@@ -11,6 +11,8 @@ it('creates a ride request conversation when provided a ride_request type and us
     $recipient = User::factory()->create();
     $rideRequest = RideRequest::factory()->create([
         'user_id' => $recipient->id,
+        'start_area' => 'DHA Phase 8',
+        'end_area' => 'Clifton',
     ]);
 
     $response = $this
@@ -27,6 +29,8 @@ it('creates a ride request conversation when provided a ride_request type and us
         ->assertJsonPath('recipient_user_id', $recipient->id)
         ->assertJsonPath('ride_request_id', $rideRequest->id)
         ->assertJsonPath('typeObject.id', $rideRequest->id)
+        ->assertJsonPath('typeObject.start_area', 'DHA Phase 8')
+        ->assertJsonPath('typeObject.end_area', 'Clifton')
         ->assertJsonPath('typeObject.start_location', $rideRequest->start_location)
         ->assertJsonPath('typeObject.end_location', $rideRequest->end_location);
 

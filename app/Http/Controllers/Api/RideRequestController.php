@@ -338,12 +338,11 @@ class RideRequestController extends Controller
         $hasEndCoordinates = $request->filled(['end_latitude', 'end_longitude']);
 
         if ($request->filled('start_location') && ! $hasStartCoordinates) {
-            $searchTerm = $request->string('start_location')->toString();
-            $query->where('start_location', 'like', '%'.$searchTerm.'%');
+            $this->applyAreaSearch($query, 'start_area', $request->string('start_location')->toString());
         }
 
         if ($request->filled('end_location') && ! $hasEndCoordinates) {
-            $query->where('end_location', 'like', '%'.$request->string('end_location')->toString().'%');
+            $this->applyAreaSearch($query, 'end_area', $request->string('end_location')->toString());
         }
 
         if ($request->filled('city_id')) {
@@ -419,6 +418,27 @@ class RideRequestController extends Controller
         } elseif ($hasEndCoordinates) {
             $query->orderBy('end_distance_km');
         }
+    }
+
+    private function applyAreaSearch($query, string $areaColumn, string $searchTerm): void
+    {
+        $searchTerm = trim($searchTerm);
+
+        if ($searchTerm === '') {
+            return;
+        }
+
+        $hasExactMatch = (clone $query)
+            ->whereRaw("LOWER({$areaColumn}) = ?", [mb_strtolower($searchTerm)])
+            ->exists();
+
+        if ($hasExactMatch) {
+            $query->whereRaw("LOWER({$areaColumn}) = ?", [mb_strtolower($searchTerm)]);
+
+            return;
+        }
+
+        $query->where($areaColumn, 'like', '%'.$searchTerm.'%');
     }
 
     /**
