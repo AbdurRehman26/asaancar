@@ -166,3 +166,57 @@ it('falls back to partial area matches when searching ride requests has no exact
     expect($response->json('data'))->toHaveCount(1)
         ->and($response->json('data.0.id'))->toBe($matchingRequest->id);
 });
+
+it('searches split route text across area and location fields for ride requests', function () {
+    $user = User::factory()->create();
+
+    $matchingRequest = RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'DHA Phase 8',
+        'start_location' => 'Khayaban-e-Ittehad, Karachi',
+        'is_active' => true,
+    ]);
+
+    RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'Gulshan-e-Iqbal',
+        'start_location' => 'University Road, Karachi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/ride-requests?start_location=Ittehad Karachi');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($matchingRequest->id);
+});
+
+it('searches end route fields when only start location is provided for ride requests', function () {
+    $user = User::factory()->create();
+
+    $matchingRequest = RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'Gulshan-e-Iqbal',
+        'start_location' => 'University Road, Karachi',
+        'end_area' => 'Clifton Block 5',
+        'end_location' => 'Sea View Road, Karachi',
+        'is_active' => true,
+    ]);
+
+    RideRequest::factory()->create([
+        'user_id' => $user->id,
+        'start_area' => 'DHA Phase 8',
+        'start_location' => 'Khayaban-e-Ittehad, Karachi',
+        'end_area' => 'North Nazimabad',
+        'end_location' => 'Five Star Chowrangi, Karachi',
+        'is_active' => true,
+    ]);
+
+    $response = $this->getJson('/api/ride-requests?start_location=Clifton');
+
+    $response->assertSuccessful();
+
+    expect($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.id'))->toBe($matchingRequest->id);
+});

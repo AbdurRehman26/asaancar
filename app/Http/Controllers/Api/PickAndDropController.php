@@ -73,11 +73,17 @@ class PickAndDropController extends Controller
         $hasEndCoordinates = $request->filled(['end_latitude', 'end_longitude']);
 
         if ($request->has('start_location') && ! $hasStartCoordinates) {
-            $this->applyAreaSearch($query, 'start_area', 'pickupArea', (string) $request->start_location);
+            $this->applyRouteSearch($query, (string) $request->start_location, [
+                ['area' => 'start_area', 'location' => 'start_location', 'relation' => 'pickupArea'],
+                ['area' => 'end_area', 'location' => 'end_location', 'relation' => 'dropoffArea'],
+            ]);
         }
 
         if ($request->has('end_location') && ! $hasEndCoordinates) {
-            $this->applyAreaSearch($query, 'end_area', 'dropoffArea', (string) $request->end_location);
+            $this->applyRouteSearch($query, (string) $request->end_location, [
+                ['area' => 'end_area', 'location' => 'end_location', 'relation' => 'dropoffArea'],
+                ['area' => 'start_area', 'location' => 'start_location', 'relation' => 'pickupArea'],
+            ]);
         }
 
         $query->select('pick_and_drop_services.*');
@@ -217,7 +223,10 @@ class PickAndDropController extends Controller
         ]);
     }
 
-    private function applyAreaSearch($query, string $areaColumn, string $areaRelation, string $searchTerm): void
+    /**
+     * @param  array<int, array{area: string, location: string, relation: string}>  $fields
+     */
+    private function applyRouteSearch($query, string $searchTerm, array $fields): void
     {
         $searchTerm = trim($searchTerm);
 
@@ -225,33 +234,81 @@ class PickAndDropController extends Controller
             return;
         }
 
-        $hasExactMatch = (clone $query)
-            ->where(function ($areaQuery) use ($areaColumn, $areaRelation, $searchTerm): void {
-                $areaQuery
-                    ->whereRaw("LOWER({$areaColumn}) = ?", [mb_strtolower($searchTerm)])
-                    ->orWhereHas($areaRelation, function ($relatedAreaQuery) use ($searchTerm): void {
-                        $relatedAreaQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($searchTerm)]);
-                    });
-            })
-            ->exists();
-
-        $query->where(function ($areaQuery) use ($areaColumn, $areaRelation, $searchTerm, $hasExactMatch): void {
-            if ($hasExactMatch) {
-                $areaQuery
-                    ->whereRaw("LOWER({$areaColumn}) = ?", [mb_strtolower($searchTerm)])
-                    ->orWhereHas($areaRelation, function ($relatedAreaQuery) use ($searchTerm): void {
-                        $relatedAreaQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($searchTerm)]);
-                    });
+        foreach ($this->routeSearchSteps($fields, $searchTerm) as $step) {
+            if ((clone $query)->where($step)->exists()) {
+                $query->where($step);
 
                 return;
             }
+        }
+    }
 
-            $areaQuery
-                ->where($areaColumn, 'like', '%'.$searchTerm.'%')
-                ->orWhereHas($areaRelation, function ($relatedAreaQuery) use ($searchTerm): void {
-                    $relatedAreaQuery->where('name', 'like', '%'.$searchTerm.'%');
-                });
-        });
+    /**
+     * @param  array<int, array{area: string, location: string, relation: string}>  $fields
+     * @return array<int, \Closure>
+     */
+    private function routeSearchSteps(array $fields, string $searchTerm): array
+    {
+        $steps = [];
+
+        foreach ($fields as $field) {
+            $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
+                $stepQuery
+                    ->whereRaw("LOWER({$field['area']}) = ?", [mb_strtolower($searchTerm)])
+                    ->orWhereHas($field['relation'], function ($relatedAreaQuery) use ($searchTerm): void {
+                        $relatedAreaQuery->whereRaw('LOWER(name) = ?', [mb_strtolower($searchTerm)]);
+                    });
+            };
+
+            $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
+                $stepQuery
+                    ->where($field['area'], 'like', '%'.$searchTerm.'%')
+                    ->orWhereHas($field['relation'], function ($relatedAreaQuery) use ($searchTerm): void {
+                        $relatedAreaQuery->where('name', 'like', '%'.$searchTerm.'%');
+                    });
+            };
+
+            foreach ($this->routeSearchTerms($searchTerm) as $term) {
+                $steps[] = function ($stepQuery) use ($field, $term): void {
+                    $stepQuery
+                        ->where($field['area'], 'like', '%'.$term.'%')
+                        ->orWhereHas($field['relation'], function ($relatedAreaQuery) use ($term): void {
+                            $relatedAreaQuery->where('name', 'like', '%'.$term.'%');
+                        });
+                };
+            }
+
+            $steps[] = function ($stepQuery) use ($field, $searchTerm): void {
+                $stepQuery->where($field['location'], 'like', '%'.$searchTerm.'%');
+            };
+
+            foreach ($this->routeSearchTerms($searchTerm) as $term) {
+                $steps[] = function ($stepQuery) use ($field, $term): void {
+                    $stepQuery->where($field['location'], 'like', '%'.$term.'%');
+                };
+            }
+        }
+
+        return $steps;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function routeSearchTerms(string $searchTerm): array
+    {
+        $terms = [$searchTerm];
+        $words = preg_split('/\s+/', $searchTerm) ?: [];
+
+        foreach ($words as $word) {
+            $word = trim($word);
+
+            if ($word !== '') {
+                $terms[] = $word;
+            }
+        }
+
+        return array_values(array_unique($terms));
     }
 
     /**
