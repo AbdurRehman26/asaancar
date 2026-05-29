@@ -9,8 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Seed cities and areas needed for validation
-    $city = City::create(['name' => 'Karachi']);
+    $city = City::query()->forceCreate(['id' => 197, 'name' => 'Karachi']);
     $area1 = Area::create(['name' => 'Airport', 'city_id' => $city->id]);
     $area2 = Area::create(['name' => 'Clifton', 'city_id' => $city->id]);
 
@@ -18,6 +17,46 @@ beforeEach(function () {
     $this->area1 = $area1;
     $this->area2 = $area2;
     $this->user = User::factory()->create();
+});
+
+it('forces city id 197 when creating a pick and drop service', function () {
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->postJson('/api/customer/pick-and-drop', [
+            'start_location' => 'Karachi Airport',
+            'end_location' => 'Clifton Beach',
+            'pickup_city_id' => 999999,
+            'pickup_area_id' => $this->area1->id,
+            'dropoff_city_id' => 999999,
+            'dropoff_area_id' => $this->area2->id,
+            'departure_date' => '2026-04-15',
+            'departure_time' => '14:30',
+            'available_spaces' => 4,
+            'driver_gender' => 'male',
+            'stops' => [
+                [
+                    'location' => 'Teen Talwar, Karachi, Pakistan',
+                    'city_id' => 999999,
+                    'stop_time' => '2026-04-15 15:00:00',
+                    'order' => 0,
+                ],
+            ],
+        ]);
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.pickup_city_id', 197)
+        ->assertJsonPath('data.dropoff_city_id', 197)
+        ->assertJsonPath('data.stops.0.city_id', 197);
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'user_id' => $this->user->id,
+        'pickup_city_id' => 197,
+        'dropoff_city_id' => 197,
+    ]);
+
+    $this->assertDatabaseHas('pick_and_drop_stops', [
+        'location' => 'Teen Talwar, Karachi, Pakistan',
+        'city_id' => 197,
+    ]);
 });
 
 it('creates a pick and drop service with separate departure_date and departure_time', function () {
@@ -312,6 +351,49 @@ it('allows clearing the dropoff details when updating a pick and drop service', 
         'end_longitude' => null,
         'dropoff_city_id' => null,
         'dropoff_area_id' => null,
+    ]);
+});
+
+it('forces city id 197 when updating a pick and drop service', function () {
+    $service = PickAndDrop::factory()->create([
+        'user_id' => $this->user->id,
+        'start_location' => 'Karachi Airport',
+        'end_location' => 'Clifton Beach',
+        'pickup_city_id' => $this->city->id,
+        'pickup_area_id' => $this->area1->id,
+        'dropoff_city_id' => $this->city->id,
+        'dropoff_area_id' => $this->area2->id,
+    ]);
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->putJson("/api/customer/pick-and-drop/{$service->id}", [
+            'pickup_city_id' => 999999,
+            'dropoff_city_id' => 999999,
+            'end_location' => 'Clifton Beach',
+            'stops' => [
+                [
+                    'location' => 'Teen Talwar, Karachi, Pakistan',
+                    'city_id' => 999999,
+                    'stop_time' => '2026-04-15 15:00:00',
+                    'order' => 0,
+                ],
+            ],
+        ]);
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.pickup_city_id', 197)
+        ->assertJsonPath('data.dropoff_city_id', 197)
+        ->assertJsonPath('data.stops.0.city_id', 197);
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'id' => $service->id,
+        'pickup_city_id' => 197,
+        'dropoff_city_id' => 197,
+    ]);
+
+    $this->assertDatabaseHas('pick_and_drop_stops', [
+        'pick_and_drop_service_id' => $service->id,
+        'city_id' => 197,
     ]);
 });
 

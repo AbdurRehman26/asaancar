@@ -20,6 +20,8 @@ use Illuminate\Validation\Rule;
  */
 class PickAndDropController extends Controller
 {
+    private const APP_CITY_ID = 197;
+
     /**
      * @OA\Get(
      *     path="/api/pick-and-drop",
@@ -64,6 +66,8 @@ class PickAndDropController extends Controller
 
         $query = PickAndDrop::with(['user.city', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('is_active', true);
+
+        $this->applyAppCityConstraint($query);
 
         $startLatitude = $request->float('start_latitude');
         $startLongitude = $request->float('start_longitude');
@@ -127,12 +131,6 @@ class PickAndDropController extends Controller
 
         if ($request->filled('user_id')) {
             $query->where('user_id', (int) $request->user_id);
-        }
-
-        if ($request->filled('city_id')) {
-            $query->whereHas('user', function ($userQuery) use ($request): void {
-                $userQuery->where('city_id', (int) $request->input('city_id'));
-            });
         }
 
         // Filter by available spaces
@@ -327,6 +325,34 @@ class PickAndDropController extends Controller
         return array_values(array_unique($terms));
     }
 
+    private function applyAppCityConstraint($query): void
+    {
+        $query
+            ->where('pick_and_drop_services.pickup_city_id', self::APP_CITY_ID)
+            ->where(function ($cityQuery): void {
+                $cityQuery
+                    ->whereNull('pick_and_drop_services.dropoff_city_id')
+                    ->orWhere('pick_and_drop_services.dropoff_city_id', self::APP_CITY_ID);
+            });
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function forceAppCityIds(array $data, ?PickAndDrop $service = null): array
+    {
+        $data['pickup_city_id'] = self::APP_CITY_ID;
+
+        $endLocation = array_key_exists('end_location', $data)
+            ? $data['end_location']
+            : $service?->end_location;
+
+        $data['dropoff_city_id'] = blank($endLocation) ? null : self::APP_CITY_ID;
+
+        return $data;
+    }
+
     /**
      * @OA\Post(
      *     path="/api/customer/pick-and-drop",
@@ -396,9 +422,9 @@ class PickAndDropController extends Controller
             'end_place_id' => 'nullable|string|max:255',
             'end_latitude' => 'nullable|numeric',
             'end_longitude' => 'nullable|numeric',
-            'pickup_city_id' => 'nullable|integer|exists:cities,id',
+            'pickup_city_id' => 'nullable|integer',
             'pickup_area_id' => 'nullable|integer|exists:areas,id',
-            'dropoff_city_id' => 'nullable|integer|exists:cities,id',
+            'dropoff_city_id' => 'nullable|integer',
             'dropoff_area_id' => 'nullable|integer|exists:areas,id',
             'departure_date' => [
                 Rule::requiredIf(fn (): bool => $request->input('schedule_type', 'once') === 'once'),
@@ -418,7 +444,7 @@ class PickAndDropController extends Controller
             'stops.*.place_id' => 'nullable|string|max:255',
             'stops.*.latitude' => 'nullable|numeric',
             'stops.*.longitude' => 'nullable|numeric',
-            'stops.*.city_id' => 'nullable|integer|exists:cities,id',
+            'stops.*.city_id' => 'nullable|integer',
             'stops.*.area_id' => 'nullable|integer|exists:areas,id',
             'stops.*.stop_time' => 'required_with:stops|date',
             'stops.*.order' => 'required_with:stops|integer|min:0',
@@ -442,6 +468,7 @@ class PickAndDropController extends Controller
 
         $data = $request->except(['departure_date', 'departure_time']);
         $data['user_id'] = Auth::id();
+        $data = $this->forceAppCityIds($data);
         $departureDate = $request->input('departure_date');
 
         if ($departureDate === null && $request->input('schedule_type', 'once') !== 'once') {
@@ -462,7 +489,7 @@ class PickAndDropController extends Controller
                     'place_id' => $stop['place_id'] ?? null,
                     'latitude' => $stop['latitude'] ?? null,
                     'longitude' => $stop['longitude'] ?? null,
-                    'city_id' => $stop['city_id'] ?? null,
+                    'city_id' => self::APP_CITY_ID,
                     'area_id' => $stop['area_id'] ?? null,
                     'stop_time' => $stop['stop_time'],
                     'order' => $stop['order'] ?? 0,
@@ -497,7 +524,11 @@ class PickAndDropController extends Controller
      */
     public function show(string $id)
     {
-        $service = PickAndDrop::with(['user.city', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])->findOrFail($id);
+        $query = PickAndDrop::with(['user.city', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea']);
+
+        $this->applyAppCityConstraint($query);
+
+        $service = $query->findOrFail($id);
 
         return new PickAndDropResource($service);
     }
@@ -574,9 +605,9 @@ class PickAndDropController extends Controller
             'end_place_id' => 'sometimes|nullable|string|max:255',
             'end_latitude' => 'sometimes|nullable|numeric',
             'end_longitude' => 'sometimes|nullable|numeric',
-            'pickup_city_id' => 'sometimes|nullable|integer|exists:cities,id',
+            'pickup_city_id' => 'sometimes|nullable|integer',
             'pickup_area_id' => 'sometimes|nullable|integer|exists:areas,id',
-            'dropoff_city_id' => 'sometimes|nullable|integer|exists:cities,id',
+            'dropoff_city_id' => 'sometimes|nullable|integer',
             'dropoff_area_id' => 'sometimes|nullable|integer|exists:areas,id',
             'departure_date' => 'sometimes|date_format:Y-m-d',
             'departure_time' => 'sometimes|date_format:H:i',
@@ -594,7 +625,7 @@ class PickAndDropController extends Controller
             'stops.*.place_id' => 'nullable|string|max:255',
             'stops.*.latitude' => 'nullable|numeric',
             'stops.*.longitude' => 'nullable|numeric',
-            'stops.*.city_id' => 'nullable|integer|exists:cities,id',
+            'stops.*.city_id' => 'nullable|integer',
             'stops.*.area_id' => 'nullable|integer|exists:areas,id',
             'stops.*.stop_time' => 'required_with:stops|date',
             'stops.*.order' => 'required_with:stops|integer|min:0',
@@ -617,6 +648,7 @@ class PickAndDropController extends Controller
         }
 
         $updateData = $request->except(['stops', 'departure_date', 'departure_time']);
+        $updateData = $this->forceAppCityIds($updateData, $service);
 
         if ($request->has('departure_date') && $request->has('departure_time')) {
             $updateData['departure_time'] = $request->input('departure_date').' '.$request->input('departure_time').':00';
@@ -643,7 +675,7 @@ class PickAndDropController extends Controller
                         'place_id' => $stop['place_id'] ?? null,
                         'latitude' => $stop['latitude'] ?? null,
                         'longitude' => $stop['longitude'] ?? null,
-                        'city_id' => $stop['city_id'] ?? null,
+                        'city_id' => self::APP_CITY_ID,
                         'area_id' => $stop['area_id'] ?? null,
                         'stop_time' => $stop['stop_time'],
                         'order' => $stop['order'] ?? 0,
@@ -734,6 +766,8 @@ class PickAndDropController extends Controller
     {
         $query = PickAndDrop::with(['user.city', 'stops.city', 'stops.area', 'pickupCity', 'dropoffCity', 'pickupArea', 'dropoffArea'])
             ->where('user_id', Auth::id());
+
+        $this->applyAppCityConstraint($query);
 
         // Filter by start location (including stops, stop areas, and stop cities)
         if ($request->has('start_location')) {

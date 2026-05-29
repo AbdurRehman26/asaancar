@@ -8,11 +8,19 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+const PUBLIC_PICK_AND_DROP_CITY_ID = 197;
+
+beforeEach(function () {
+    $this->publicCity = City::query()->forceCreate(['id' => PUBLIC_PICK_AND_DROP_CITY_ID, 'name' => 'Karachi']);
+});
+
 it('orders services by the closest start and end coordinates when provided', function () {
     $user = User::factory()->create();
 
     $closestService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'Lahore, Pakistan',
         'start_latitude' => 31.5204,
         'start_longitude' => 74.3587,
@@ -25,6 +33,8 @@ it('orders services by the closest start and end coordinates when provided', fun
 
     $fartherService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'Islamabad, Pakistan',
         'start_latitude' => 33.6844,
         'start_longitude' => 73.0479,
@@ -44,15 +54,16 @@ it('orders services by the closest start and end coordinates when provided', fun
 });
 
 it('shows non-system-generated services before system-generated services', function () {
-    $city = City::create(['name' => 'Karachi']);
-    $startArea = Area::factory()->create(['city_id' => $city->id, 'name' => 'DHA Phase 8']);
-    $endArea = Area::factory()->create(['city_id' => $city->id, 'name' => 'Clifton']);
+    $startArea = Area::factory()->create(['city_id' => $this->publicCity->id, 'name' => 'DHA Phase 8']);
+    $endArea = Area::factory()->create(['city_id' => $this->publicCity->id, 'name' => 'Clifton']);
     $user = User::factory()->create([
-        'city_id' => $city->id,
+        'city_id' => $this->publicCity->id,
     ]);
 
     $systemGeneratedService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'System Generated Route',
         'departure_time' => '2026-04-15 08:00:00',
         'is_active' => true,
@@ -61,6 +72,8 @@ it('shows non-system-generated services before system-generated services', funct
 
     $manualService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'Manual Route',
         'start_area' => null,
         'pickup_area_id' => $startArea->id,
@@ -83,8 +96,8 @@ it('shows non-system-generated services before system-generated services', funct
         ->and($response->json('data.1.id'))->toBe($systemGeneratedService->id);
 });
 
-it('filters pick and drop services by user city id', function () {
-    $karachi = City::create(['name' => 'Karachi']);
+it('only lists pick and drop services for city id 197', function () {
+    $karachi = $this->publicCity;
     $lahore = City::create(['name' => 'Lahore']);
 
     $karachiUser = User::factory()->create([
@@ -97,15 +110,19 @@ it('filters pick and drop services by user city id', function () {
 
     $karachiService = PickAndDrop::factory()->create([
         'user_id' => $karachiUser->id,
+        'pickup_city_id' => $karachi->id,
+        'dropoff_city_id' => $karachi->id,
         'is_active' => true,
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $lahoreUser->id,
+        'pickup_city_id' => $lahore->id,
+        'dropoff_city_id' => $lahore->id,
         'is_active' => true,
     ]);
 
-    $response = $this->getJson('/api/pick-and-drop?city_id='.$karachi->id);
+    $response = $this->getJson('/api/pick-and-drop?city_id='.$lahore->id);
 
     $response->assertSuccessful();
 
@@ -121,6 +138,8 @@ it('prioritizes exact area matches when searching pick and drop services by area
 
     $exactService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'pickup_area_id' => $exactArea->id,
         'start_location' => 'DHA Phase 8, Karachi',
         'is_active' => true,
@@ -128,6 +147,8 @@ it('prioritizes exact area matches when searching pick and drop services by area
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'pickup_area_id' => $partialArea->id,
         'start_location' => 'DHA Phase 8, Karachi',
         'is_active' => true,
@@ -148,6 +169,8 @@ it('falls back to partial area matches when searching pick and drop services has
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'dropoff_area_id' => $matchingArea->id,
         'end_location' => 'Clifton Block 2, Karachi',
         'is_active' => true,
@@ -155,6 +178,8 @@ it('falls back to partial area matches when searching pick and drop services has
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'dropoff_area_id' => $otherArea->id,
         'end_location' => 'Gulshan-e-Iqbal, Karachi',
         'is_active' => true,
@@ -175,6 +200,8 @@ it('searches split route text across area and location fields for pick and drop 
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'pickup_area_id' => $matchingArea->id,
         'start_location' => 'Khayaban-e-Ittehad, Karachi',
         'is_active' => true,
@@ -182,6 +209,8 @@ it('searches split route text across area and location fields for pick and drop 
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'pickup_area_id' => $otherArea->id,
         'start_location' => 'University Road, Karachi',
         'is_active' => true,
@@ -202,6 +231,8 @@ it('searches end route fields when only start location is provided for pick and 
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'University Road, Karachi',
         'dropoff_area_id' => $matchingArea->id,
         'end_location' => 'Sea View Road, Karachi',
@@ -210,6 +241,8 @@ it('searches end route fields when only start location is provided for pick and 
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'Khayaban-e-Ittehad, Karachi',
         'dropoff_area_id' => $otherArea->id,
         'end_location' => 'Five Star Chowrangi, Karachi',
@@ -231,6 +264,8 @@ it('prioritizes opposite side exact area matches over intended side token matche
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'pickup_area_id' => $weakStartArea->id,
         'start_location' => 'DHA Phase 1, Karachi',
         'end_location' => 'Gulshan-e-Iqbal, Karachi',
@@ -239,6 +274,8 @@ it('prioritizes opposite side exact area matches over intended side token matche
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'University Road, Karachi',
         'dropoff_area_id' => $exactEndArea->id,
         'end_location' => 'DHA Phase 6, Karachi',
@@ -258,6 +295,8 @@ it('searches saved start and end area text columns for pick and drop services', 
 
     PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_area' => 'DHA Phase 1',
         'start_location' => 'DHA Phase 1, Karachi',
         'end_location' => 'Gulshan-e-Iqbal, Karachi',
@@ -266,6 +305,8 @@ it('searches saved start and end area text columns for pick and drop services', 
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $user->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'University Road, Karachi',
         'end_area' => 'DHA Phase 6',
         'end_location' => 'DHA Phase 6, Karachi',

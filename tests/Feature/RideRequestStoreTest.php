@@ -8,17 +8,16 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->city = City::query()->forceCreate(['id' => 197, 'name' => 'Karachi']);
     $this->user = User::factory()->create();
 });
 
 it('creates a ride request with separate departure date and time', function () {
-    $city = City::factory()->create();
-
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/ride-requests', [
             'name' => 'Sarah',
             'contact' => '+923001112233',
-            'city_id' => $city->id,
+            'city_id' => 999999,
             'start_location' => 'Lahore, Pakistan',
             'start_place_id' => 'place_start_123',
             'start_latitude' => 31.5204,
@@ -38,12 +37,12 @@ it('creates a ride request with separate departure date and time', function () {
     $response->assertSuccessful()
         ->assertJsonPath('data.required_seats', 2)
         ->assertJsonPath('data.preferred_driver_gender', 'female')
-        ->assertJsonPath('data.city_id', $city->id)
+        ->assertJsonPath('data.city_id', 197)
         ->assertJsonPath('data.is_system_generated', false);
 
     $this->assertDatabaseHas('ride_requests', [
         'user_id' => $this->user->id,
-        'city_id' => $city->id,
+        'city_id' => 197,
         'start_place_id' => 'place_start_123',
         'end_place_id' => 'place_end_456',
         'departure_time' => '2026-04-25 08:30:00',
@@ -168,6 +167,30 @@ it('allows a null departure date when updating a ride request to a non-once sche
     ]);
 });
 
+it('forces city id 197 when updating a ride request', function () {
+    $rideRequest = RideRequest::factory()->create([
+        'user_id' => $this->user->id,
+        'city_id' => $this->city->id,
+        'departure_time' => '2026-04-25 09:15:00',
+    ]);
+
+    $response = $this->actingAs($this->user, 'sanctum')
+        ->putJson("/api/customer/ride-requests/{$rideRequest->id}", [
+            'city_id' => 999999,
+            'departure_date' => '2026-04-25',
+            'departure_time' => '09:30',
+        ]);
+
+    $response->assertSuccessful()
+        ->assertJsonPath('data.city_id', 197);
+
+    $this->assertDatabaseHas('ride_requests', [
+        'id' => $rideRequest->id,
+        'city_id' => 197,
+        'departure_time' => '2026-04-25 09:30:00',
+    ]);
+});
+
 it('caps seats needed at four', function () {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/ride-requests', [
@@ -203,7 +226,7 @@ it('defaults is_system_generated to false when creating a ride request', functio
     ]);
 });
 
-it('validates city id when creating a ride request', function () {
+it('forces city id 197 when creating a ride request', function () {
     $response = $this->actingAs($this->user, 'sanctum')
         ->postJson('/api/customer/ride-requests', [
             'city_id' => 999999,
@@ -215,6 +238,11 @@ it('validates city id when creating a ride request', function () {
             'preferred_driver_gender' => 'female',
         ]);
 
-    $response->assertUnprocessable()
-        ->assertJsonValidationErrors(['city_id']);
+    $response->assertSuccessful()
+        ->assertJsonPath('data.city_id', 197);
+
+    $this->assertDatabaseHas('ride_requests', [
+        'user_id' => $this->user->id,
+        'city_id' => 197,
+    ]);
 });

@@ -182,11 +182,14 @@ it('returns not found for a driver profile when there are no active rides', func
 });
 
 it('filters the pick and drop listing by user id', function () {
+    $city = City::query()->forceCreate(['id' => 197, 'name' => 'Karachi']);
     $firstDriver = User::factory()->create();
     $secondDriver = User::factory()->create();
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $firstDriver->id,
+        'pickup_city_id' => $city->id,
+        'dropoff_city_id' => $city->id,
         'start_location' => 'Malir',
         'departure_time' => '2026-05-02 09:00:00',
         'is_active' => true,
@@ -194,6 +197,8 @@ it('filters the pick and drop listing by user id', function () {
 
     PickAndDrop::factory()->create([
         'user_id' => $secondDriver->id,
+        'pickup_city_id' => $city->id,
+        'dropoff_city_id' => $city->id,
         'start_location' => 'Nazimabad',
         'departure_time' => '2026-05-02 08:00:00',
         'is_active' => true,

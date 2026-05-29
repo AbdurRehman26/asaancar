@@ -32,7 +32,7 @@ class StoreRideRequest extends FormRequest
         return [
             'name' => ['nullable', 'string', 'max:255'],
             'contact' => ['nullable', 'string', 'max:255'],
-            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            'city_id' => ['nullable', 'integer'],
             'start_location' => ['required', 'string', 'max:255'],
             'start_area_google_id' => ['nullable', 'string', 'max:255'],
             'start_place_id' => ['nullable', 'string', 'max:255'],

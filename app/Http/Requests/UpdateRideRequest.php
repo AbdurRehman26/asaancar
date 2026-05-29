@@ -33,7 +33,7 @@ class UpdateRideRequest extends FormRequest
         return [
             'name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'contact' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'city_id' => ['sometimes', 'nullable', 'integer', 'exists:cities,id'],
+            'city_id' => ['sometimes', 'nullable', 'integer'],
             'start_location' => ['sometimes', 'string', 'max:255'],
             'start_area_google_id' => ['sometimes', 'nullable', 'string', 'max:255'],
             'start_place_id' => ['sometimes', 'nullable', 'string', 'max:255'],

@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Auth;
  */
 class RideRequestController extends Controller
 {
-    private const PUBLIC_LISTING_CITY_ID = 197;
+    private const APP_CITY_ID = 197;
 
     /**
      * @OA\Get(
@@ -70,7 +70,7 @@ class RideRequestController extends Controller
 
         $query = RideRequest::query()
             ->with(['user.city', 'city'])
-            ->where('ride_requests.city_id', self::PUBLIC_LISTING_CITY_ID)
+            ->where('ride_requests.city_id', self::APP_CITY_ID)
             ->where('is_active', true);
 
         $this->applyFilters($query, $request, false);
@@ -170,7 +170,9 @@ class RideRequestController extends Controller
      */
     public function show(string $id): RideRequestResource
     {
-        $rideRequest = RideRequest::with(['user.city', 'city'])->findOrFail($id);
+        $rideRequest = RideRequest::with(['user.city', 'city'])
+            ->where('city_id', self::APP_CITY_ID)
+            ->findOrFail($id);
 
         return new RideRequestResource($rideRequest);
     }
@@ -311,9 +313,10 @@ class RideRequestController extends Controller
     {
         $query = RideRequest::query()
             ->with(['user.city', 'city'])
+            ->where('city_id', self::APP_CITY_ID)
             ->where('user_id', Auth::id());
 
-        $this->applyFilters($query, $request);
+        $this->applyFilters($query, $request, false);
 
         $query->orderBy('created_at', 'desc')->orderBy('departure_time', 'asc');
 
@@ -523,6 +526,7 @@ class RideRequestController extends Controller
         $departureTime = $validated['departure_time'] ?? $existing?->departure_time?->format('H:i');
 
         $validated['user_id'] = $userId;
+        $validated['city_id'] = self::APP_CITY_ID;
         $validated['schedule_type'] = $scheduleType;
         $validated['selected_days'] = $scheduleType === 'custom' ? ($validated['selected_days'] ?? $existing?->selected_days) : null;
         $validated['departure_time'] = $departureDate.' '.$departureTime.':00';
