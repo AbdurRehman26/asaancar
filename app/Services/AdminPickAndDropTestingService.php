@@ -48,10 +48,6 @@ class AdminPickAndDropTestingService
         $userId = $this->resolveUserId($payload);
         $payload = $this->enrichPayloadFromGoogle($payload, $lookupService);
 
-        if (! isset($payload['pickup_city_id'])) {
-            throw new RuntimeException('Unable to resolve pickup city from the provided location.');
-        }
-
         $pickAndDrop = PickAndDrop::create([
             'user_id' => $userId,
             'car_id' => null,
@@ -222,7 +218,15 @@ class AdminPickAndDropTestingService
                 'place_id' => filled($placeId) ? (string) $placeId : null,
             ]);
         } catch (RuntimeException $exception) {
-            throw new RuntimeException("Unable to resolve {$label} location: ".$exception->getMessage());
+            return [
+                'query' => $location,
+                'place_id' => filled($placeId) ? (string) $placeId : null,
+                'formatted_address' => $location !== '' ? $location : null,
+                'latitude' => null,
+                'longitude' => null,
+                'components' => [],
+                'address_components' => [],
+            ];
         }
     }
 

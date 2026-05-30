@@ -110,3 +110,50 @@ it('executes the pick and drop api test inside filament', function () {
         'end_place_id' => 'clifton-beach-place-id',
     ]);
 });
+
+it('saves the pick and drop api test when google does not return a response', function () {
+    Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+
+    $this->mock(GoogleAddressComponentLookupService::class, function ($mock): void {
+        $mock->shouldReceive('lookup')->twice()->andThrow(new RuntimeException('Google did not return a matching address result.'));
+    });
+
+    $payload = [
+        'user' => [
+            'name' => 'Fallback Driver',
+            'phone_number' => '03007654321',
+            'gender' => 'male',
+            'city' => 'Karachi',
+        ],
+        'start_location' => 'Unresolved Start Address',
+        'end_location' => 'Unresolved End Address',
+        'available_spaces' => 4,
+        'driver_gender' => 'male',
+        'departure_time' => '2026-05-12 10:00:00',
+        'price_per_person' => 500,
+        'currency' => 'PKR',
+        'is_active' => true,
+        'schedule_type' => 'once',
+    ];
+
+    Livewire::actingAs($admin)
+        ->test(ApiTesting::class)
+        ->set('payloadJson', json_encode($payload, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR))
+        ->call('executeRequest')
+        ->assertSet('responseStatus', 'success')
+        ->assertSet('responseMessage', 'Pick & Drop service created successfully');
+
+    $this->assertDatabaseHas('pick_and_drop_services', [
+        'start_location' => 'Unresolved Start Address',
+        'end_location' => 'Unresolved End Address',
+        'start_place_id' => null,
+        'end_place_id' => null,
+        'start_latitude' => null,
+        'start_longitude' => null,
+        'end_latitude' => null,
+        'end_longitude' => null,
+    ]);
+});
