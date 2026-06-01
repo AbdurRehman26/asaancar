@@ -8,15 +8,18 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    $this->publicCity = City::query()->forceCreate(['id' => 197, 'name' => 'Karachi']);
+});
+
 it('lists users who have at least one active pick and drop service', function () {
-    $city = City::create(['name' => 'Karachi']);
-    $startArea = Area::factory()->create(['city_id' => $city->id, 'name' => 'Lyari']);
-    $endArea = Area::factory()->create(['city_id' => $city->id, 'name' => 'Surjani Town']);
+    $startArea = Area::factory()->create(['city_id' => $this->publicCity->id, 'name' => 'Lyari']);
+    $endArea = Area::factory()->create(['city_id' => $this->publicCity->id, 'name' => 'Surjani Town']);
 
     $visibleDriver = User::factory()->create([
         'name' => 'Visible Driver',
         'phone_number' => '03001234567',
-        'city_id' => $city->id,
+        'city_id' => $this->publicCity->id,
         'gender' => 'female',
     ]);
 
@@ -26,6 +29,8 @@ it('lists users who have at least one active pick and drop service', function ()
 
     PickAndDrop::factory()->create([
         'user_id' => $visibleDriver->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'Lyari',
         'start_area' => null,
         'pickup_area_id' => $startArea->id,
@@ -38,6 +43,8 @@ it('lists users who have at least one active pick and drop service', function ()
 
     PickAndDrop::factory()->create([
         'user_id' => $hiddenDriver->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'DHA',
         'end_location' => 'Clifton',
         'departure_time' => '2026-05-02 11:00:00',
@@ -59,8 +66,8 @@ it('lists users who have at least one active pick and drop service', function ()
         ->and($response->json('data.0.phone_number'))->toBeNull();
 });
 
-it('filters drivers by city and gender', function () {
-    $karachi = City::create(['name' => 'Karachi']);
+it('only lists city 197 drivers and filters them by gender', function () {
+    $karachi = $this->publicCity;
     $lahore = City::create(['name' => 'Lahore']);
 
     $matchingDriver = User::factory()->create([
@@ -83,23 +90,29 @@ it('filters drivers by city and gender', function () {
 
     PickAndDrop::factory()->create([
         'user_id' => $matchingDriver->id,
+        'pickup_city_id' => $karachi->id,
+        'dropoff_city_id' => $karachi->id,
         'driver_gender' => 'female',
         'is_active' => true,
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $wrongCityDriver->id,
+        'pickup_city_id' => $karachi->id,
+        'dropoff_city_id' => $karachi->id,
         'driver_gender' => 'female',
         'is_active' => true,
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $fallbackGenderDriver->id,
+        'pickup_city_id' => $karachi->id,
+        'dropoff_city_id' => $karachi->id,
         'driver_gender' => 'male',
         'is_active' => true,
     ]);
 
-    $cityResponse = $this->getJson('/api/drivers?city_id='.$karachi->id);
+    $cityResponse = $this->getJson('/api/drivers?city_id='.$lahore->id);
 
     $cityResponse->assertSuccessful();
 
@@ -111,9 +124,9 @@ it('filters drivers by city and gender', function () {
     $genderResponse->assertSuccessful();
 
     expect(collect($genderResponse->json('data'))->pluck('name')->all())
-        ->toEqualCanonicalizing(['Lahore Female Driver', 'Karachi Female Driver']);
+        ->toEqualCanonicalizing(['Karachi Female Driver']);
 
-    $fallbackGenderResponse = $this->getJson('/api/drivers?city_id='.$karachi->id.'&gender=male');
+    $fallbackGenderResponse = $this->getJson('/api/drivers?city_id='.$lahore->id.'&gender=male');
 
     $fallbackGenderResponse->assertSuccessful();
 
@@ -126,10 +139,13 @@ it('shows phone numbers in the drivers api for authenticated users', function ()
     $viewer = User::factory()->create();
     $driver = User::factory()->create([
         'phone_number' => '03001234567',
+        'city_id' => $this->publicCity->id,
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $driver->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'is_active' => true,
     ]);
 
@@ -141,17 +157,17 @@ it('shows phone numbers in the drivers api for authenticated users', function ()
 });
 
 it('shows a single driver profile when the user has active rides', function () {
-    $city = City::create(['name' => 'Lahore']);
-
     $driver = User::factory()->create([
         'name' => 'Driver Profile',
         'phone_number' => '03001234567',
-        'city_id' => $city->id,
+        'city_id' => $this->publicCity->id,
         'gender' => 'female',
     ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $driver->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'North Nazimabad',
         'end_location' => 'Gulshan',
         'departure_time' => '2026-05-02 07:30:00',
@@ -164,17 +180,21 @@ it('shows a single driver profile when the user has active rides', function () {
 
     expect($response->json('data.name'))->toBe('Driver Profile')
         ->and($response->json('data.gender'))->toBe($driver->gender)
-        ->and($response->json('data.city_name'))->toBe('Lahore')
+        ->and($response->json('data.city_name'))->toBe('Karachi')
         ->and($response->json('data.active_services_count'))->toBe(1)
         ->and($response->json('data.latest_service.start_location'))->toBe('North Nazimabad')
         ->and($response->json('data.phone_number'))->toBeNull();
 });
 
 it('returns not found for a driver profile when there are no active rides', function () {
-    $driver = User::factory()->create();
+    $driver = User::factory()->create([
+        'city_id' => $this->publicCity->id,
+    ]);
 
     PickAndDrop::factory()->create([
         'user_id' => $driver->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'is_active' => false,
     ]);
 
@@ -182,14 +202,13 @@ it('returns not found for a driver profile when there are no active rides', func
 });
 
 it('filters the pick and drop listing by user id', function () {
-    $city = City::query()->forceCreate(['id' => 197, 'name' => 'Karachi']);
     $firstDriver = User::factory()->create();
     $secondDriver = User::factory()->create();
 
     $matchingService = PickAndDrop::factory()->create([
         'user_id' => $firstDriver->id,
-        'pickup_city_id' => $city->id,
-        'dropoff_city_id' => $city->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'Malir',
         'departure_time' => '2026-05-02 09:00:00',
         'is_active' => true,
@@ -197,8 +216,8 @@ it('filters the pick and drop listing by user id', function () {
 
     PickAndDrop::factory()->create([
         'user_id' => $secondDriver->id,
-        'pickup_city_id' => $city->id,
-        'dropoff_city_id' => $city->id,
+        'pickup_city_id' => $this->publicCity->id,
+        'dropoff_city_id' => $this->publicCity->id,
         'start_location' => 'Nazimabad',
         'departure_time' => '2026-05-02 08:00:00',
         'is_active' => true,

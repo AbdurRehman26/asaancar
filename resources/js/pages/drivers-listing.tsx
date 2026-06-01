@@ -8,11 +8,6 @@ import { ArrowRight, CarFront, MapPin, Phone, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-interface CityOption {
-    id: number;
-    name: string;
-}
-
 interface DriverListingItem {
     id: number;
     name: string;
@@ -38,32 +33,11 @@ export default function DriversListing() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [drivers, setDrivers] = useState<DriverListingItem[]>([]);
-    const [cities, setCities] = useState<CityOption[]>([]);
     const [filters, setFilters] = useState({
-        city_id: '',
         gender: '',
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchCities = async () => {
-            try {
-                const response = await apiFetch('/api/cities');
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch cities');
-                }
-
-                const result = await response.json();
-                setCities(Array.isArray(result.data) ? result.data : []);
-            } catch {
-                setCities([]);
-            }
-        };
-
-        void fetchCities();
-    }, []);
 
     useEffect(() => {
         const fetchDrivers = async () => {
@@ -74,10 +48,6 @@ export default function DriversListing() {
                 const params = new URLSearchParams({
                     per_page: '12',
                 });
-
-                if (filters.city_id) {
-                    params.append('city_id', filters.city_id);
-                }
 
                 if (filters.gender) {
                     params.append('gender', filters.gender);
@@ -99,7 +69,7 @@ export default function DriversListing() {
         };
 
         void fetchDrivers();
-    }, [filters.city_id, filters.gender]);
+    }, [filters.gender]);
 
     const driverOnboardingPath = user ? '/driver-onboarding' : '/signup';
 
@@ -144,26 +114,7 @@ export default function DriversListing() {
                             </a>
                         </div>
 
-                        <div className="mb-8 grid grid-cols-1 gap-4 rounded-[1.5rem] border border-white/60 bg-white/85 p-5 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.2)] backdrop-blur md:grid-cols-3 dark:border-white/10 dark:bg-[#17141f]/82 dark:shadow-none">
-                            <div className="space-y-2">
-                                <label htmlFor="driver-city-filter" className="text-sm font-medium text-[#4f2b48] dark:text-white/75">
-                                    City
-                                </label>
-                                <select
-                                    id="driver-city-filter"
-                                    value={filters.city_id}
-                                    onChange={(event) => setFilters((current) => ({ ...current, city_id: event.target.value }))}
-                                    className="h-11 w-full rounded-xl border border-[#7e246c]/12 bg-white px-4 text-sm text-[#2b1128] transition outline-none focus:border-[#7e246c] focus:ring-2 focus:ring-[#7e246c]/15 dark:border-white/10 dark:bg-white/5 dark:text-white"
-                                >
-                                    <option value="">All cities</option>
-                                    {cities.map((city) => (
-                                        <option key={city.id} value={city.id}>
-                                            {city.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
+                        <div className="mb-8 grid grid-cols-1 gap-4 rounded-[1.5rem] border border-white/60 bg-white/85 p-5 shadow-[0_18px_45px_-32px_rgba(126,36,108,0.2)] backdrop-blur md:grid-cols-2 dark:border-white/10 dark:bg-[#17141f]/82 dark:shadow-none">
                             <div className="space-y-2">
                                 <label htmlFor="driver-gender-filter" className="text-sm font-medium text-[#4f2b48] dark:text-white/75">
                                     Gender
@@ -183,7 +134,7 @@ export default function DriversListing() {
                             <div className="flex items-end">
                                 <button
                                     type="button"
-                                    onClick={() => setFilters({ city_id: '', gender: '' })}
+                                    onClick={() => setFilters({ gender: '' })}
                                     className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-[#7e246c]/15 bg-[#fcf7fb] px-4 text-sm font-semibold text-[#7e246c] transition hover:bg-[#f7e9f4] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
                                 >
                                     Clear filters

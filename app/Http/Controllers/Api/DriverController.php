@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
+    private const APP_CITY_ID = 197;
+
     /**
      * @OA\Get(
      *     path="/api/drivers",
@@ -18,7 +20,6 @@ class DriverController extends Controller
      *     description="Returns users who currently have at least one active pick and drop service.",
      *
      *     @OA\Parameter(name="per_page", in="query", description="Items per page", required=false, @OA\Schema(type="integer", default=12)),
-     *     @OA\Parameter(name="city_id", in="query", description="Filter by user city", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="gender", in="query", description="Filter by driver gender", required=false, @OA\Schema(type="string", enum={"male", "female"})),
      *
      *     @OA\Response(
@@ -43,11 +44,9 @@ class DriverController extends Controller
     public function index(Request $request)
     {
         $drivers = User::query()
-            ->whereHas('pickAndDropServices', function ($query) {
-                $query->where('is_active', true);
-            })
-            ->when($request->filled('city_id'), function ($query) use ($request): void {
-                $query->where('city_id', (int) $request->input('city_id'));
+            ->where('city_id', self::APP_CITY_ID)
+            ->whereHas('pickAndDropServices', function ($query): void {
+                $this->applyActiveAppCityRideConstraint($query);
             })
             ->when($request->filled('gender'), function ($query) use ($request): void {
                 $gender = $request->string('gender')->toString();
@@ -57,22 +56,25 @@ class DriverController extends Controller
                         ->orWhere(function ($fallbackQuery) use ($gender): void {
                             $fallbackQuery->whereNull('gender')
                                 ->whereHas('pickAndDropServices', function ($serviceQuery) use ($gender): void {
-                                    $serviceQuery->where('is_active', true)
+                                    $this->applyActiveAppCityRideConstraint($serviceQuery);
+
+                                    $serviceQuery
                                         ->where('driver_gender', $gender);
                                 });
                         });
                 });
             })
             ->withCount([
-                'pickAndDropServices as active_pick_and_drop_services_count' => function ($query) {
-                    $query->where('is_active', true);
+                'pickAndDropServices as active_pick_and_drop_services_count' => function ($query): void {
+                    $this->applyActiveAppCityRideConstraint($query);
                 },
             ])
             ->with([
                 'city',
-                'pickAndDropServices' => function ($query) {
-                    $query->where('is_active', true)
-                        ->with(['pickupArea', 'dropoffArea'])
+                'pickAndDropServices' => function ($query): void {
+                    $this->applyActiveAppCityRideConstraint($query);
+
+                    $query->with(['pickupArea', 'dropoffArea'])
                         ->latest('departure_time')
                         ->limit(1);
                 },
@@ -117,19 +119,21 @@ class DriverController extends Controller
     {
         $driver = User::query()
             ->whereKey($id)
-            ->whereHas('pickAndDropServices', function ($query) {
-                $query->where('is_active', true);
+            ->where('city_id', self::APP_CITY_ID)
+            ->whereHas('pickAndDropServices', function ($query): void {
+                $this->applyActiveAppCityRideConstraint($query);
             })
             ->withCount([
-                'pickAndDropServices as active_pick_and_drop_services_count' => function ($query) {
-                    $query->where('is_active', true);
+                'pickAndDropServices as active_pick_and_drop_services_count' => function ($query): void {
+                    $this->applyActiveAppCityRideConstraint($query);
                 },
             ])
             ->with([
                 'city',
-                'pickAndDropServices' => function ($query) {
-                    $query->where('is_active', true)
-                        ->with(['pickupArea', 'dropoffArea'])
+                'pickAndDropServices' => function ($query): void {
+                    $this->applyActiveAppCityRideConstraint($query);
+
+                    $query->with(['pickupArea', 'dropoffArea'])
                         ->latest('departure_time')
                         ->limit(1);
                 },
@@ -140,5 +144,17 @@ class DriverController extends Controller
         $driver->unsetRelation('pickAndDropServices');
 
         return new DriverListingResource($driver);
+    }
+
+    private function applyActiveAppCityRideConstraint($query): void
+    {
+        $query
+            ->where('is_active', true)
+            ->where('pickup_city_id', self::APP_CITY_ID)
+            ->where(function ($cityQuery): void {
+                $cityQuery
+                    ->whereNull('dropoff_city_id')
+                    ->orWhere('dropoff_city_id', self::APP_CITY_ID);
+            });
     }
 }
