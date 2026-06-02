@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\City;
 use App\Models\PickAndDrop;
+use App\Models\PickAndDropStop;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -39,6 +40,17 @@ class AdminPickAndDropTestingService
             'currency' => 'required|string|max:3',
             'is_active' => 'required|boolean',
             'schedule_type' => 'required|in:once,everyday,weekdays,weekends,custom',
+            'stops' => 'sometimes|array',
+            'stops.*.location' => 'required_with:stops|string|max:255',
+            'stops.*.stop_area' => 'nullable|string|max:255',
+            'stops.*.place_id' => 'nullable|string|max:255',
+            'stops.*.latitude' => 'nullable|numeric',
+            'stops.*.longitude' => 'nullable|numeric',
+            'stops.*.city_id' => 'nullable|integer|exists:cities,id',
+            'stops.*.area_id' => 'nullable|integer|exists:areas,id',
+            'stops.*.stop_time' => 'required_with:stops|date',
+            'stops.*.order' => 'required_with:stops|integer|min:0',
+            'stops.*.notes' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -82,9 +94,25 @@ class AdminPickAndDropTestingService
             'selected_days' => isset($payload['selected_days']) ? json_encode($payload['selected_days']) : null,
         ]);
 
+        foreach ($payload['stops'] ?? [] as $stop) {
+            PickAndDropStop::create([
+                'pick_and_drop_service_id' => $pickAndDrop->id,
+                'location' => $stop['location'] ?? null,
+                'stop_area' => $stop['stop_area'] ?? null,
+                'place_id' => $stop['place_id'] ?? null,
+                'latitude' => $stop['latitude'] ?? null,
+                'longitude' => $stop['longitude'] ?? null,
+                'city_id' => $stop['city_id'] ?? null,
+                'area_id' => $stop['area_id'] ?? null,
+                'stop_time' => $stop['stop_time'],
+                'order' => $stop['order'] ?? 0,
+                'notes' => $stop['notes'] ?? null,
+            ]);
+        }
+
         return [
             'message' => 'Pick & Drop service created successfully',
-            'data' => $pickAndDrop->fresh()->load(['user.city', 'pickupCity', 'dropoffCity']),
+            'data' => $pickAndDrop->fresh()->load(['user.city', 'pickupCity', 'dropoffCity', 'stops.city', 'stops.area']),
         ];
     }
 
@@ -127,6 +155,20 @@ class AdminPickAndDropTestingService
             'is_roundtrip' => false,
             'schedule_type' => 'once',
             'selected_days' => [],
+            'stops' => [
+                [
+                    'location' => 'Shahrah-e-Faisal',
+                    'stop_area' => 'PECHS',
+                    'place_id' => null,
+                    'latitude' => null,
+                    'longitude' => null,
+                    'city_id' => null,
+                    'area_id' => null,
+                    'stop_time' => '2024-12-20 10:20:00',
+                    'order' => 0,
+                    'notes' => 'Optional pickup stop',
+                ],
+            ],
         ];
     }
 

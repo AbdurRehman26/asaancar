@@ -83,7 +83,8 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
     };
 
     const currency = service.currency || 'PKR';
-    const price = service.price_per_person ? Math.round(service.price_per_person).toLocaleString() : null;
+    const price = Number(service.price_per_person ?? 0);
+    const priceLabel = price > 0 ? `${currency} ${Math.round(price).toLocaleString()}` : 'N/A';
     const isDashboard = variant === 'dashboard';
     const hasVehicleInfo = Boolean(
         service.car_brand ||
@@ -184,7 +185,7 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
                         </div>
                     </div>
 
-                    {price && pricePlacement === 'top-right' && (
+                    {pricePlacement === 'top-right' && (
                         <div
                             className={`absolute top-0 right-0 hidden rounded-xl border px-3 py-1.5 md:block ${
                                 isDashboard
@@ -200,35 +201,29 @@ const PickAndDropCard: React.FC<PickAndDropCardProps> = ({
                             <div
                                 className={`text-lg font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#9d4edd]'}`}
                             >
-                                {currency} {price}
+                                {priceLabel}
                             </div>
                         </div>
                     )}
                 </div>
             </div>
 
-            {price && (
-                <div className={`px-5 pt-4 ${pricePlacement === 'top-right' ? 'md:hidden' : ''}`}>
-                    <div
-                        className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${
-                            isDashboard
-                                ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
-                                : 'border-gray-100 bg-gray-50 dark:border-gray-600 dark:bg-gray-700/50'
-                        }`}
-                    >
-                        <span
-                            className={`text-xs font-medium ${isDashboard ? 'text-[#887086] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}
-                        >
-                            Per Person
-                        </span>
-                        <span
-                            className={`text-sm font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#9d4edd]'}`}
-                        >
-                            {currency} {price}
-                        </span>
-                    </div>
+            <div className={`px-5 pt-4 ${pricePlacement === 'top-right' ? 'md:hidden' : ''}`}>
+                <div
+                    className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 ${
+                        isDashboard
+                            ? 'border-[#7e246c]/10 bg-[#fbf4fa] dark:border-white/10 dark:bg-white/6'
+                            : 'border-gray-100 bg-gray-50 dark:border-gray-600 dark:bg-gray-700/50'
+                    }`}
+                >
+                    <span className={`text-xs font-medium ${isDashboard ? 'text-[#887086] dark:text-white/45' : 'text-gray-500 dark:text-gray-400'}`}>
+                        Per Person
+                    </span>
+                    <span className={`text-sm font-bold ${isDashboard ? 'text-[#7e246c] dark:text-white' : 'text-[#7e246c] dark:text-[#9d4edd]'}`}>
+                        {priceLabel}
+                    </span>
                 </div>
-            )}
+            </div>
 
             {/* Expansible Stops List */}
             <div

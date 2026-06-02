@@ -3,6 +3,7 @@
 use App\Filament\Pages\ApiTesting;
 use App\Models\City;
 use App\Models\User;
+use App\Services\AdminPickAndDropTestingService;
 use App\Services\GoogleAddressComponentLookupService;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -20,6 +21,15 @@ it('loads the filament api testing page for admins', function () {
         ->assertSee('JSON Payload')
         ->assertSee('Load Template')
         ->assertSee('Execute Request');
+});
+
+it('includes stops in the filament api testing json template', function () {
+    $template = app(AdminPickAndDropTestingService::class)->template();
+
+    expect($template)->toHaveKey('stops')
+        ->and($template['stops'])->toHaveCount(1)
+        ->and($template['stops'][0]['location'])->toBe('Shahrah-e-Faisal')
+        ->and($template['stops'][0]['stop_time'])->toBe('2024-12-20 10:20:00');
 });
 
 it('executes the pick and drop api test inside filament', function () {
@@ -91,6 +101,15 @@ it('executes the pick and drop api test inside filament', function () {
         'currency' => 'PKR',
         'is_active' => true,
         'schedule_type' => 'once',
+        'stops' => [
+            [
+                'location' => 'Shahrah-e-Faisal',
+                'stop_area' => 'PECHS',
+                'stop_time' => '2026-05-12 10:20:00',
+                'order' => 0,
+                'notes' => 'Optional pickup stop',
+            ],
+        ],
     ];
 
     Livewire::actingAs($admin)
@@ -108,6 +127,14 @@ it('executes the pick and drop api test inside filament', function () {
     $this->assertDatabaseHas('pick_and_drop_services', [
         'start_place_id' => 'karachi-airport-place-id',
         'end_place_id' => 'clifton-beach-place-id',
+    ]);
+
+    $this->assertDatabaseHas('pick_and_drop_stops', [
+        'location' => 'Shahrah-e-Faisal',
+        'stop_area' => 'PECHS',
+        'stop_time' => '2026-05-12 10:20:00',
+        'order' => 0,
+        'notes' => 'Optional pickup stop',
     ]);
 });
 

@@ -270,12 +270,14 @@ export default function PickAndDropDetail() {
     const ogImage = `${baseUrl}/icon.png`;
     const startLabel = service.start_area || service.start_location;
     const endLabel = service.end_area || service.end_location;
+    const price = Number(service.price_per_person ?? 0);
+    const priceLabel = price > 0 ? `${service.currency || 'PKR'} ${Math.round(price).toLocaleString()}` : 'N/A';
 
     // Generate SEO content based on service data
     const seoTitle = service ? `${startLabel} → ${endLabel} - Pick & Drop Service | Asaancar` : 'Pick & Drop Service Details | Asaancar';
 
     const seoDescription = service
-        ? `Book a ${service.driver_gender === 'female' ? 'female' : 'male'} driver pick & drop service from ${startLabel} to ${endLabel}. ${service.is_everyday ? 'Available everyday' : 'Scheduled service'} at ${service.formatted_departure_time || service.departure_time}. ${service.available_spaces} space${service.available_spaces !== 1 ? 's' : ''} available.${service.price_per_person ? ` Price: ${service.currency} ${Math.round(service.price_per_person).toLocaleString()} per person.` : ''}${service.stops && service.stops.length > 0 ? ` Includes ${service.stops.length} stop${service.stops.length !== 1 ? 's' : ''}.` : ''} Book your ride on Asaancar.`
+        ? `Book a ${service.driver_gender === 'female' ? 'female' : 'male'} driver pick & drop service from ${startLabel} to ${endLabel}. ${service.is_everyday ? 'Available everyday' : 'Scheduled service'} at ${service.formatted_departure_time || service.departure_time}. ${service.available_spaces} space${service.available_spaces !== 1 ? 's' : ''} available. Price: ${priceLabel} per person.${service.stops && service.stops.length > 0 ? ` Includes ${service.stops.length} stop${service.stops.length !== 1 ? 's' : ''}.` : ''} Book your ride on Asaancar.`
         : 'View pick & drop service details on Asaancar. Find convenient rides with multiple stops.';
 
     const routeMarkers = [
@@ -491,14 +493,10 @@ export default function PickAndDropDetail() {
 
                                 {/* Price & Quick Stats */}
                                 <div className="flex min-w-[200px] shrink-0 flex-col gap-4">
-                                    {service.price_per_person && (
-                                        <div className="rounded-xl border border-[#7e246c]/10 bg-[#fbf4fa] p-4 text-center dark:border-white/10 dark:bg-white/6">
-                                            <p className="text-sm font-medium text-[#8a7286] dark:text-white/45">Per Person</p>
-                                            <div className="mt-1 text-3xl font-bold text-[#7e246c] dark:text-white">
-                                                {service.currency} {Math.round(service.price_per_person).toLocaleString()}
-                                            </div>
-                                        </div>
-                                    )}
+                                    <div className="rounded-xl border border-[#7e246c]/10 bg-[#fbf4fa] p-4 text-center dark:border-white/10 dark:bg-white/6">
+                                        <p className="text-sm font-medium text-[#8a7286] dark:text-white/45">Per Person</p>
+                                        <div className="mt-1 text-3xl font-bold text-[#7e246c] dark:text-white">{priceLabel}</div>
+                                    </div>
 
                                     {/* Key Info Chips */}
                                     <div className="flex flex-wrap gap-2">
